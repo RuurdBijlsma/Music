@@ -23,7 +23,7 @@ html, body {
 }
 
 .blur-bg {
-    background-image: linear-gradient(rgba(255, 255, 255, .7), rgba(255, 255, 255, 0.1)), url('assets/cover2.jpg');
+    background-image: linear-gradient(rgba(255, 255, 255, 0), rgba(255, 255, 255, 1)), url('assets/cover2.jpg');
     background-position: center;
     background-size: cover;
     width: calc(100% + 150px);
@@ -67,8 +67,8 @@ html, body {
     position: fixed;
     right: 20px;
     width: 500px;
-    top: 100px;
-    height: calc(100% - 120px);
+    top: 20px;
+    height: calc(100% - 40px);
 }
 
 .music-player {

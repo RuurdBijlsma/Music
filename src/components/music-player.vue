@@ -67,11 +67,11 @@ let volume = ref(0.7);
 }
 
 .sheet {
-    background-color: rgba(255, 255, 255, 0.5);
-    backdrop-filter: blur(100px) saturate(250%);
+    /*background-color: rgba(255, 255, 255, 0.5);*/
+    /*backdrop-filter: blur(100px) saturate(250%);*/
 
-    border-radius: 5px;
-    box-shadow: 0 3px 4px 0 rgba(0, 0, 0, 0.2);
+    /*border-radius: 5px;*/
+    /*box-shadow: 0 3px 4px 0 rgba(0, 0, 0, 0.2);*/
 
     padding: 20px;
     display: flex;
