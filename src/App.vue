@@ -1,15 +1,16 @@
 <template>
     <div class="blur-bg"></div>
+    <div class="menu-gradient"></div>
     <div class="main">
-        <top-menu></top-menu>
-        <router-view></router-view>
-        <bottom-bar class="bottom-bar"></bottom-bar>
+        <top-menu class="top-menu"></top-menu>
+        <router-view class="router-view"></router-view>
+        <music-player class="music-player"></music-player>
     </div>
 </template>
 
 <script setup lang="ts">
 import TopMenu from "./components/top-menu.vue";
-import BottomBar from "./components/bottom-bar.vue";
+import MusicPlayer from "./components/music-player.vue";
 
 console.log("[App.vue]", `Hello world from Electron ${process.versions.electron}!`)
 </script>
@@ -18,21 +19,40 @@ console.log("[App.vue]", `Hello world from Electron ${process.versions.electron}
 html, body {
     overflow-y: hidden !important;
     height: 100%;
+    background-color: white;
 }
 
 .blur-bg {
-    background-image: linear-gradient(rgba(255, 255, 255, 1), rgba(255, 255, 255, 0.5)), url('assets/cover.jpg');
+    background-image: linear-gradient(rgba(255, 255, 255, .7), rgba(255, 255, 255, 0.1)), url('assets/cover2.jpg');
     background-position: center;
-    background-size: 200%;
-    width: 100%;
-    height: 100%;
+    background-size: cover;
+    width: calc(100% + 150px);
+    height: calc(100% + 150px);
+    left:-75px;
+    top:-75px;
     position: fixed;
     z-index: 1;
-    filter: blur(50px);
+    filter: blur(60px);
+}
+
+.menu-gradient {
+    position: fixed;
+    width: 100%;
+    top: 0;
+    left: 0;
+    height: 300px;
+    /*background-image: linear-gradient(rgba(255, 255, 255, .5) 0%, rgba(0, 0, 0, 0) 100%);*/
+}
+
+.top-menu {
+    position: fixed;
+    width: calc(100% - 520px);
+    top: 0;
+    left: 0;
+    height: 100px;
 }
 
 .main {
-    font-weight: 300;
     position: fixed;
     z-index: 2;
     display: flex;
@@ -43,9 +63,19 @@ html, body {
     font-family: Roboto, Helvetica Neue, Helvetica, Arial, sans-serif;
 }
 
-.bottom-bar {
+.router-view {
     position: fixed;
-    bottom: 10px;
-    left: 10px;
+    right: 20px;
+    width: 500px;
+    top: 100px;
+    height: calc(100% - 120px);
+}
+
+.music-player {
+    position: fixed;
+    height: calc(100% - 100px);
+    top: 100px;
+    left: 0;
+    width: calc(100% - 520px);
 }
 </style>
