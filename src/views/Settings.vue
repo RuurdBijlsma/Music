@@ -2,19 +2,40 @@
     <div class="settings">
         <h1>Settings</h1>
         <v-divider class="mt-2 mb-2"></v-divider>
-        <h2>API Keys</h2>
-        <v-text-field v-model="spotify.secret" label="Spotify secret"></v-text-field>
-        <v-text-field v-model="spotify.clientId" label="Spotify client ID"></v-text-field>
+        <h3>Spotify</h3>
+        <v-text-field
+            class="mt-5"
+            variant="filled"
+            density="compact"
+            hide-details
+            v-model="spotify.clientId"
+            label="Spotify client ID"/>
+        <v-text-field
+            class="mt-5"
+            variant="filled"
+            hide-details
+            density="compact"
+            :type="showPassword ? 'text' : 'password'"
+            v-model="spotify.secret"
+            :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
+            @click:append="showPassword = !showPassword"
+            label="Spotify secret"/>
+        <v-btn class="mt-4" v-if="spotify.hasCredentials && !spotify.isLoggedIn" variant="tonal" color="green" @click="spotify.login()">
+            <v-icon class="mr-2" size="25" color="green">mdi-spotify</v-icon>
+            Log in
+        </v-btn>
+        <div v-if="spotify.isLoggedIn">
+            hi you are logged in {{spotify.userInfo.name}}
+        </div>
     </div>
 </template>
 
 <script setup>
 import {useSpotifyStore} from '../scripts/store/spotify'
+import {ref} from "vue";
 
 const spotify = useSpotifyStore();
-console.log(spotify);
-spotify.secret = 'asdf';
-spotify.clientId = 'ggaa';
+const showPassword = ref(false);
 </script>
 
 <style scoped>

@@ -94,6 +94,11 @@ app.on('activate', () => {
     }
 })
 
+ipcMain.on('focus-window', () => {
+    if (win)
+        win.focus();
+})
+
 // New window example arg: new windows url
 ipcMain.handle('open-win', (_, arg) => {
     const childWindow = new BrowserWindow({
