@@ -3,7 +3,9 @@
     <div class="menu-gradient"></div>
     <div class="main">
         <top-menu class="top-menu"></top-menu>
-        <router-view class="router-view"></router-view>
+        <div class="router-view">
+            <router-view></router-view>
+        </div>
         <music-player class="music-player"></music-player>
     </div>
 </template>
@@ -69,6 +71,10 @@ html, body {
     width: 500px;
     top: 20px;
     height: calc(100% - 40px);
+    background-color: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(100px) saturate(300%);
+    border-radius: 5px;
+    box-shadow: 0 3px 4px 0 rgba(0, 0, 0, 0.2);
 }
 
 .music-player {
