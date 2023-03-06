@@ -5,6 +5,11 @@ import SpotifyWebApi from "spotify-web-api-js";
 import EventEmitter from 'events';
 import {usePlatformStore} from "./electron";
 
+//todo:
+//  Add library tracks to indexeddb
+//  change localstorage dings to idb
+//  change dispatch('cacheState') calls to cache with indexeddb
+
 export interface AuthToken {
     code: null | string,
     access: null | string,
@@ -63,11 +68,16 @@ export const useSpotifyStore = defineStore('spotify', () => {
         console.log('Refresh using refreshToken', refreshToken);
         let result = await (await fetch('https://accounts.spotify.com/api/token', {
             method: 'post',
-            body: `grant_type=refresh_token&refresh_token=${refreshToken}&client_id=${clientId}&client_secret=${secret}`,
+            body: `grant_type=refresh_token&refresh_token=${refreshToken}&client_id=${clientId.value}&client_secret=${secret.value}`,
             headers: {'Content-Type': 'application/x-www-form-urlencoded',}
         })).text();
         try {
-            return JSON.parse(result) as AuthToken
+            let parsed = JSON.parse(result);
+            console.log(parsed);
+            return {
+                access: parsed.access_token,
+                expiryDate: (+new Date) + parsed.expires_in * 1000,
+            } as AuthToken;
         } catch (e: any) {
             console.log("Error", e.message, "result = ", result);
         }
@@ -84,16 +94,16 @@ export const useSpotifyStore = defineStore('spotify', () => {
         })).text();
         try {
             console.log(result);
-            let t = JSON.parse(result);
-            if (t.error) {
+            let parsed = JSON.parse(result);
+            if (parsed.error) {
                 console.warn("Get auth by code error", t);
                 return {} as AuthToken;
             }
             return {
                 code: code,
-                access: t.access_token,
-                refresh: t.refresh_token,
-                expiryDate: (+new Date) + t.expires_in * 1000,
+                access: parsed.access_token,
+                refresh: parsed.refresh_token,
+                expiryDate: (+new Date) + parsed.expires_in * 1000,
             }
         } catch (e: any) {
             console.log("Error", e.message, "t = ", result);
@@ -144,6 +154,7 @@ export const useSpotifyStore = defineStore('spotify', () => {
 
     async function checkAuth() {
         let now = Date.now()
+        console.log('yea', tokens.value.expiryDate, now);
         if (tokens.value.expiryDate !== null && tokens.value.expiryDate > now) {
             console.log("WE HAVE AN EXPIRY DATE");
             api.setAccessToken(tokens.value.access)
@@ -169,12 +180,57 @@ export const useSpotifyStore = defineStore('spotify', () => {
         events.on(event, resolve)
     })
     const awaitAuth = async () => {
-        if (api.getAccessToken() !== null) return
+        console.log("Await auth, access token = ");
+        if (isLoggedIn && api.getAccessToken() !== null) return
         return await waitFor('accessToken')
     }
 
+    let library = ref({
+        playlists: [] as any[],
+        artists: [] as any[],
+        albums: [] as any[],
+        tracks: [] as any[],
+    })
+    let isRefreshing = ref({
+        playlist: false,
+        album: false,
+        artist: false,
+        track: false,
+    })
+    let view = ref({
+        homePage: {
+            featured: {
+                title: '' as string | undefined,
+                playlists: [] as any[]
+            },
+            newReleases: [] as any[],
+            personalized: [] as any[],
+            recent: [] as any,
+        },
+        playlist: {},
+        album: {},
+        artist: {},
+        category: {},
+        user: {},
+    })
+
     async function loadLibraries() {
-        refreshUserInfo();
+        await refreshUserInfo();
+        let doneCount = 0;
+        let libLoaded = library.value.tracks.length !== 0;
+        let checkDone = async () => {
+            doneCount++;
+            if (doneCount === (libLoaded ? 3 : 4)) {
+                // await dispatch('cacheState');
+            }
+        }
+
+        refreshUserData('playlist').then(checkDone);
+        refreshUserData('artist').then(checkDone);
+        refreshUserData('album').then(checkDone);
+        if (!libLoaded) {
+            refreshUserData('track').then(checkDone);
+        }
     }
 
     async function refreshUserInfo() {
@@ -187,6 +243,163 @@ export const useSpotifyStore = defineStore('spotify', () => {
             followers: me.followers?.total ?? 0,
             avatar: me.images?.[0]?.url ?? 'img/user/1.png',
         }
+    }
+
+    function findPagination(object: any): Function | false {
+        if (object === null)
+            return false;
+
+        let getKeyPath: Function;
+        getKeyPath = ({keys: keyPath = [], o}: { keys: any, o: any }) => {
+            if (o !== null && o.hasOwnProperty('next') && o.hasOwnProperty('items'))
+                return [true, keyPath];
+            if (typeof o !== 'object' || o === null)
+                return [false, keyPath.slice(0, -1)];
+
+            for (let key in o) {
+                if (!o.hasOwnProperty(key))
+                    continue;
+                let result;
+                [result, keyPath] = getKeyPath({keys: keyPath.concat(key), o: o[key]});
+                if (result)
+                    return [true, keyPath];
+            }
+            return [false, keyPath.slice(0, -1)];
+        }
+
+        let [success, keyPath] = getKeyPath({o: object});
+
+        if (!success)
+            return false;
+        return (r: any) => {
+            for (let key of keyPath)
+                r = r[key];
+            return r;
+        }
+    }
+
+    async function* retrieveSpotifyArray(apiFunction: Function) {
+        let getData = () => apiFunction()
+
+        while (true) {
+            let result = await getData();
+            console.log('result', result);
+            let pageObject = findPagination(result)
+            console.log('pageObject', pageObject);
+
+            if (result !== null)
+                yield result;
+
+            if (result === null || pageObject === false || pageObject(result).next === null)
+                break;
+
+            let nextUrl = pageObject(result).next;
+            if (nextUrl === undefined)
+                console.warn("next url is undefined");
+
+            getData = () => api.getGeneric(nextUrl);
+        }
+    }
+
+    async function refreshUserData(type: 'playlist' | 'artist' | 'track' | 'album' = 'playlist') {
+        if (!['playlist', 'album', 'track', 'artist'].includes(type))
+            console.warn("Wrong type set for refreshUserData!");
+
+        if (isRefreshing.value[type]) {
+            console.info("This library type is already refreshing, waiting for that to finish");
+            await waitFor('refreshed' + type);
+            return;
+        }
+        await awaitAuth();
+        isRefreshing.value[type] = true;
+
+        console.log({type});
+        let isInitial = library.value[type + 's'].length === 0;
+
+        if (userInfo.value.id === '')
+            await refreshUserInfo;
+
+        let retrieval: Function, page = (r: any) => r;
+        switch (type) {
+            case 'playlist':
+                retrieval = () => api.getUserPlaylists(userInfo.value.id, {limit: 50});
+                break;
+            case 'album':
+                retrieval = () => api.getMySavedAlbums();
+                break;
+            case 'artist':
+                retrieval = () => api.getFollowedArtists();
+                page = r => r.artists;
+                break;
+            case 'track':
+                retrieval = () => api.getMySavedTracks({limit: 50});
+                break;
+        }
+
+        let items: any[] = [];
+        let addToLib = (item: any) => {
+            if (isInitial) {
+                library.value[type + 's'].push(item)
+            }
+            else items.push(item);
+        }
+
+        for await(let batch of await retrieveSpotifyArray(retrieval)) {
+            for (let item of page(batch).items) {
+                if (type === 'track')
+                    addToLib(item.track);
+                else if (type === 'album')
+                    addToLib(item.album);
+                else
+                    addToLib(item);
+            }
+        }
+        if (!isInitial) {
+            library.value[type + 's'] = items;
+        }
+
+        events.emit('refreshed' + type);
+        isRefreshing.value[type] = false;
+    }
+
+    async function refreshHomePage() {
+        await awaitAuth();
+
+        //Featured playlists
+        let featured = await api.getFeaturedPlaylists({limit: 50});
+        view.value.homePage.featured = {
+            title: featured.message,
+            playlists: featured.playlists.items,
+        }
+
+        //Personalized playlists
+        let personalized;
+        if (library.value.playlists.length === 0) {
+            await refreshUserData('playlist')
+        }
+        const discoverNames = ['Discover Weekly', 'Release Radar', ...[...Array(10)].map((_, i) => 'Daily Mix ' + (i + 1))];
+
+        personalized = library.value.playlists.filter(playlist => discoverNames
+                .findIndex(name => playlist.name.includes(name)) !== -1 &&
+            playlist.owner.display_name === 'Spotify'
+        );
+        personalized.sort((a, b) => {
+            let aI = discoverNames.findIndex(name => a.name.includes(name));
+            let bI = discoverNames.findIndex(name => b.name.includes(name));
+            return aI - bI;
+        });
+        if (personalized.length > 0) {
+            view.value.homePage.personalized = personalized;
+        }
+
+        //New releases
+        let newReleases = await api.getNewReleases({limit: 50});
+        view.value.homePage.newReleases = newReleases.albums.items;
+
+        //Recently played playlists or albums
+        if (localStorage.getItem('recentlyPlayed') !== null)
+            //todo change to indexeddb
+            view.value.homePage.recent = JSON.parse(localStorage.recentlyPlayed)
     }
 
     watch(secret, async () => {
@@ -208,5 +421,15 @@ export const useSpotifyStore = defineStore('spotify', () => {
 
     loadValues().then(() => console.log("Loaded idb values into store"));
 
-    return {getAuthByCode, isLoggedIn, requestedScopes, secret, clientId, hasCredentials, userInfo, login}
+    return {
+        refreshUserData,
+        getAuthByCode,
+        isLoggedIn,
+        requestedScopes,
+        secret,
+        clientId,
+        hasCredentials,
+        userInfo,
+        login
+    }
 })

@@ -48,8 +48,12 @@
 
 <script setup>
 import {ref} from "vue";
+import {useSpotifyStore} from "../scripts/store/spotify";
 
 let volume = ref(0.7);
+
+// const spotify = useSpotifyStore();
+// spotify.refreshUserData('track');
 </script>
 
 <style scoped>
