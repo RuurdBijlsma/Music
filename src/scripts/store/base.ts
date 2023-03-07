@@ -3,7 +3,7 @@ import {openDB} from "idb";
 
 export const baseDb = await openDB("base", 1, {
     upgrade(db, oldVersion, newVersion, transaction, event) {
-        db.createObjectStore('keyval');
+        db.createObjectStore('spotify');
         console.log('db upgrade', {oldVersion, newVersion, transaction, event});
     },
     blocked(currentVersion, blockedVersion, event) {

@@ -1,5 +1,5 @@
 import {defineStore} from 'pinia'
-import {computed, Ref, ref, watch} from "vue";
+import {computed, Ref, ref, toRaw, watch} from "vue";
 import {baseDb} from './base'
 import SpotifyWebApi from "spotify-web-api-js";
 import EventEmitter from 'events';
@@ -19,16 +19,16 @@ export interface AuthToken {
 
 export const useSpotifyStore = defineStore('spotify', () => {
     const platform = usePlatformStore()
-    const requestedScopes = "ugc-image-upload user-read-email user-read-private playlist-read-collaborative playlist-modify-public playlist-read-private playlist-modify-private user-library-modify user-library-read user-top-read user-read-recently-played user-follow-read user-follow-modify"
-    const events = new EventEmitter()
+
+    // Spotify UI variables
+    const secret = ref('')
+    const clientId = ref('')
     let tokens: Ref<AuthToken> = ref({
         code: null,
         access: null,
         refresh: null,
         expiryDate: null,
     })
-    const api = new SpotifyWebApi()
-    ////////////////////////////
     const userInfo = ref({
         id: '',
         name: '',
@@ -37,9 +37,6 @@ export const useSpotifyStore = defineStore('spotify', () => {
         followers: 0,
         avatar: 'img/no-user.jpg',
     })
-    const secret = ref('')
-    const clientId = ref('')
-
     const hasCredentials = computed(() =>
         secret.value.length === 32 && clientId.value.length === 32
     )
@@ -49,20 +46,72 @@ export const useSpotifyStore = defineStore('spotify', () => {
         tokens.value.refresh !== null &&
         tokens.value.expiryDate !== null
     )
+    let library = ref({
+        playlists: [] as any[],
+        artists: [] as any[],
+        albums: [] as any[],
+        tracks: [] as any[],
+    })
+    let isRefreshing = ref({
+        playlist: false,
+        album: false,
+        artist: false,
+        track: false,
+    })
+    let view = ref({
+        homePage: {
+            featured: {
+                title: '' as string | undefined,
+                playlists: [] as any[]
+            },
+            newReleases: [] as any[],
+            personalized: [] as any[],
+            recent: [] as any,
+        },
+        playlist: {},
+        album: {},
+        artist: {},
+        category: {},
+        user: {},
+    })
 
+    // IndexedDB persistent storage
     async function loadValues() {
-        let dbSecret = await baseDb.get('keyval', 'secret');
-        let dbClientId = await baseDb.get('keyval', 'clientId');
-        let dbTokens = await baseDb.get('keyval', 'tokens');
+        let dbSecret = await baseDb.get('spotify', 'secret');
+        let dbClientId = await baseDb.get('spotify', 'clientId');
+        let dbTokens = await baseDb.get('spotify', 'tokens');
+        let dbLibrary = await baseDb.get('spotify', 'library');
+        let dbView = await baseDb.get('spotify', 'view');
         if (dbSecret)
             secret.value = dbSecret;
         if (dbClientId)
             clientId.value = dbClientId;
+        if (dbLibrary)
+            library.value = dbLibrary;
+        if (dbView)
+            view.value = dbView;
         if (dbTokens) {
             tokens.value = dbTokens;
             await checkAuth();
         }
     }
+    watch(secret, async () => {
+        let dbSecret = await baseDb.get('spotify', 'secret');
+        if (dbSecret !== secret.value)
+            await baseDb.put('spotify', secret.value, 'secret')
+    })
+    watch(clientId, async () => {
+        let dbClientId = await baseDb.get('spotify', 'clientId');
+        if (dbClientId !== clientId.value)
+            await baseDb.put('spotify', clientId.value, 'clientId')
+    })
+    loadValues().then(() => console.log("Loaded idb values into store"));
+
+    // Spotify API Stuff
+
+    const api = new SpotifyWebApi()
+    const requestedScopes = "ugc-image-upload user-read-email user-read-private playlist-read-collaborative playlist-modify-public playlist-read-private playlist-modify-private user-library-modify user-library-read user-top-read user-read-recently-played user-follow-read user-follow-modify"
+    const events = new EventEmitter()
 
     async function getAuthByRefreshToken(refreshToken: string): Promise<AuthToken> {
         console.log('Refresh using refreshToken', refreshToken);
@@ -96,7 +145,7 @@ export const useSpotifyStore = defineStore('spotify', () => {
             console.log(result);
             let parsed = JSON.parse(result);
             if (parsed.error) {
-                console.warn("Get auth by code error", t);
+                console.warn("Get auth by code error", parsed);
                 return {} as AuthToken;
             }
             return {
@@ -167,7 +216,8 @@ export const useSpotifyStore = defineStore('spotify', () => {
                 await loginByRefreshToken()
             }, msUntilExpire - 1000 * 60 * 5)
 
-            await baseDb.put('keyval', JSON.parse(JSON.stringify(tokens.value)), 'tokens')
+            console.log("Tokens ref object: ", tokens, 'toraw', toRaw);
+            await baseDb.put('spotify', toRaw(tokens.value), 'tokens')
             await loadLibraries()
         } else {
             console.warn("Auth has expired, getting new token")
@@ -185,35 +235,6 @@ export const useSpotifyStore = defineStore('spotify', () => {
         return await waitFor('accessToken')
     }
 
-    let library = ref({
-        playlists: [] as any[],
-        artists: [] as any[],
-        albums: [] as any[],
-        tracks: [] as any[],
-    })
-    let isRefreshing = ref({
-        playlist: false,
-        album: false,
-        artist: false,
-        track: false,
-    })
-    let view = ref({
-        homePage: {
-            featured: {
-                title: '' as string | undefined,
-                playlists: [] as any[]
-            },
-            newReleases: [] as any[],
-            personalized: [] as any[],
-            recent: [] as any,
-        },
-        playlist: {},
-        album: {},
-        artist: {},
-        category: {},
-        user: {},
-    })
-
     async function loadLibraries() {
         await refreshUserInfo();
         let doneCount = 0;
@@ -221,7 +242,7 @@ export const useSpotifyStore = defineStore('spotify', () => {
         let checkDone = async () => {
             doneCount++;
             if (doneCount === (libLoaded ? 3 : 4)) {
-                // await dispatch('cacheState');
+                await baseDb.put('spotify', toRaw(library.value), 'library')
             }
         }
 
@@ -314,6 +335,9 @@ export const useSpotifyStore = defineStore('spotify', () => {
         isRefreshing.value[type] = true;
 
         console.log({type});
+        // is isInitial, the library in question doesn't have any loaded data yet,
+        // so we load data by pushing items as they come in
+        // else we replace the array only after all new data is loaded
         let isInitial = library.value[type + 's'].length === 0;
 
         if (userInfo.value.id === '')
@@ -395,31 +419,7 @@ export const useSpotifyStore = defineStore('spotify', () => {
         //New releases
         let newReleases = await api.getNewReleases({limit: 50});
         view.value.homePage.newReleases = newReleases.albums.items;
-
-        //Recently played playlists or albums
-        if (localStorage.getItem('recentlyPlayed') !== null)
-            //todo change to indexeddb
-            view.value.homePage.recent = JSON.parse(localStorage.recentlyPlayed)
     }
-
-    watch(secret, async () => {
-        let dbSecret = await baseDb.get('keyval', 'secret');
-        if (dbSecret !== undefined) {
-            if (dbSecret !== secret.value)
-                await baseDb.put('keyval', secret.value, 'secret')
-        } else
-            await baseDb.add('keyval', secret.value, 'secret')
-    })
-    watch(clientId, async () => {
-        let dbClientId = await baseDb.get('keyval', 'clientId');
-        if (dbClientId !== undefined) {
-            if (dbClientId !== clientId.value)
-                await baseDb.put('keyval', clientId.value, 'clientId')
-        } else
-            await baseDb.add('keyval', clientId.value, 'clientId')
-    })
-
-    loadValues().then(() => console.log("Loaded idb values into store"));
 
     return {
         refreshUserData,
