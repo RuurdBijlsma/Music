@@ -95,6 +95,7 @@ export const useSpotifyStore = defineStore('spotify', () => {
             await checkAuth();
         }
     }
+
     watch(secret, async () => {
         let dbSecret = await baseDb.get('spotify', 'secret');
         if (dbSecret !== secret.value)
@@ -174,7 +175,7 @@ export const useSpotifyStore = defineStore('spotify', () => {
         }
         let {access, expiryDate} = await getAuthByRefreshToken(tokens.value.refresh)
         tokens.value.access = access;
-        tokens.value.expiryDate = (Date.now()) + expiryDate! * 1000;
+        tokens.value.expiryDate = expiryDate;
 
         // await dispatch('cacheState');
         await checkAuth()
@@ -216,7 +217,6 @@ export const useSpotifyStore = defineStore('spotify', () => {
                 await loginByRefreshToken()
             }, msUntilExpire - 1000 * 60 * 5)
 
-            console.log("Tokens ref object: ", tokens, 'toraw', toRaw);
             await baseDb.put('spotify', toRaw(tokens.value), 'tokens')
             await loadLibraries()
         } else {
@@ -230,7 +230,7 @@ export const useSpotifyStore = defineStore('spotify', () => {
         events.on(event, resolve)
     })
     const awaitAuth = async () => {
-        console.log("Await auth, access token = ");
+        console.log("Await auth");
         if (isLoggedIn && api.getAccessToken() !== null) return
         return await waitFor('accessToken')
     }
@@ -303,10 +303,8 @@ export const useSpotifyStore = defineStore('spotify', () => {
         let getData = () => apiFunction()
 
         while (true) {
-            let result = await getData();
-            console.log('result', result);
+            let result = await getData()
             let pageObject = findPagination(result)
-            console.log('pageObject', pageObject);
 
             if (result !== null)
                 yield result;
@@ -364,8 +362,7 @@ export const useSpotifyStore = defineStore('spotify', () => {
         let addToLib = (item: any) => {
             if (isInitial) {
                 library.value[type + 's'].push(item)
-            }
-            else items.push(item);
+            } else items.push(item);
         }
 
         for await(let batch of await retrieveSpotifyArray(retrieval)) {
@@ -403,7 +400,7 @@ export const useSpotifyStore = defineStore('spotify', () => {
         }
         const discoverNames = ['Discover Weekly', 'Release Radar', ...[...Array(10)].map((_, i) => 'Daily Mix ' + (i + 1))];
 
-        personalized = library.value.playlists.filter(playlist => discoverNames
+        personalized = toRaw(library.value).playlists.filter(playlist => discoverNames
                 .findIndex(name => playlist.name.includes(name)) !== -1 &&
             playlist.owner.display_name === 'Spotify'
         );
@@ -417,12 +414,16 @@ export const useSpotifyStore = defineStore('spotify', () => {
         }
 
         //New releases
-        let newReleases = await api.getNewReleases({limit: 50});
-        view.value.homePage.newReleases = newReleases.albums.items;
+        let newReleases = await api.getNewReleases({limit: 50})
+        view.value.homePage.newReleases = newReleases.albums.items
+        const rawView = toRaw(view.value);
+        console.log("Putting in DB", rawView);
+        await baseDb.put('spotify', rawView, 'view')
     }
 
     return {
         refreshUserData,
+        refreshHomePage,
         getAuthByCode,
         isLoggedIn,
         requestedScopes,

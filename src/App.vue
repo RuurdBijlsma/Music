@@ -67,10 +67,11 @@ html, body {
 
 .router-view {
     position: fixed;
-    right: 20px;
-    width: 500px;
-    top: 20px;
-    height: calc(100% - 40px);
+    height: calc(100% - 120px);
+    top: 100px;
+    left: 20px;
+    width: calc(100% - 60vh - 40px);
+
     background-color: rgba(255, 255, 255, 0.4);
     backdrop-filter: blur(100px) saturate(300%);
     border-radius: 5px;
@@ -78,10 +79,9 @@ html, body {
 }
 
 .music-player {
+    width: 60vh;
     position: fixed;
-    height: calc(100% - 100px);
-    top: 100px;
-    left: 0;
-    width: calc(100% - 520px);
+    right: 0;
+    height: calc(100% - 40px);
 }
 </style>
