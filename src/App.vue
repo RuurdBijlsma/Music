@@ -3,17 +3,18 @@
     <div class="menu-gradient"></div>
     <div class="main">
         <top-menu class="top-menu"></top-menu>
-        <div class="router-view">
+        <div class="router-view" v-if="spotify.dbLoaded">
             <router-view></router-view>
         </div>
-        <music-player class="music-player"></music-player>
+        <music-player class="music-player" v-if="spotify.dbLoaded"/>
     </div>
 </template>
 
 <script setup lang="ts">
-import TopMenu from "./components/top-menu.vue";
-import MusicPlayer from "./components/music-player.vue";
-
+import TopMenu from "./components/TopMenu.vue";
+import MusicPlayer from "./components/MusicPlayer.vue";
+import {useSpotifyStore} from "./scripts/store/spotify";
+const spotify = useSpotifyStore();
 console.log("[App.vue]", `Hello world from Electron ${process.versions.electron}!`)
 </script>
 
@@ -70,7 +71,9 @@ html, body {
     height: calc(100% - 120px);
     top: 100px;
     left: 20px;
-    width: calc(100% - 60vh - 20px);
+    width: calc(100% - 60vh);
+    overflow-y: auto;
+    z-index: 2;
 }
 
 .music-player {
@@ -79,6 +82,7 @@ html, body {
     right: 0;
     height: calc(100% - 100px);
     top: 100px;
+    z-index: 1;
 }
 
 
@@ -88,16 +92,16 @@ html, body {
 }
 
 ::-webkit-scrollbar-track {
-    background: rgba(0, 0, 0, 0.2);
+    background: rgba(0, 0, 0, 0);
     border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb {
-    background: rgba(0, 0, 0, 0.4);
+    background: rgba(0, 0, 0, 0.00);
     border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: rgba(0, 0, 0, 0.7);
+    background: rgba(0, 0, 0, 0.4);
 }
 </style>

@@ -21,6 +21,7 @@ export const useSpotifyStore = defineStore('spotify', () => {
     const platform = usePlatformStore()
 
     // Spotify UI variables
+    const dbLoaded = ref(false);
     const secret = ref('')
     const clientId = ref('')
     let tokens: Ref<AuthToken> = ref({
@@ -77,11 +78,14 @@ export const useSpotifyStore = defineStore('spotify', () => {
 
     // IndexedDB persistent storage
     async function loadValues() {
-        let dbSecret = await baseDb.get('spotify', 'secret');
-        let dbClientId = await baseDb.get('spotify', 'clientId');
-        let dbTokens = await baseDb.get('spotify', 'tokens');
-        let dbLibrary = await baseDb.get('spotify', 'library');
-        let dbView = await baseDb.get('spotify', 'view');
+        console.log("Loading db value start", performance.now())
+        let [dbSecret, dbClientId, dbTokens, dbLibrary, dbView] = await Promise.all([
+            baseDb.get('spotify', 'clientId'),
+            baseDb.get('spotify', 'secret'),
+            baseDb.get('spotify', 'tokens'),
+            baseDb.get('spotify', 'library'),
+            baseDb.get('spotify', 'view'),
+        ])
         if (dbSecret)
             secret.value = dbSecret;
         if (dbClientId)
@@ -92,8 +96,10 @@ export const useSpotifyStore = defineStore('spotify', () => {
             view.value = dbView;
         if (dbTokens) {
             tokens.value = dbTokens;
-            await checkAuth();
+            checkAuth().then()
         }
+        dbLoaded.value = true;
+        console.log("Loading db value end", performance.now())
     }
 
     watch(secret, async () => {
@@ -106,7 +112,9 @@ export const useSpotifyStore = defineStore('spotify', () => {
         if (dbClientId !== clientId.value)
             await baseDb.put('spotify', clientId.value, 'clientId')
     })
-    loadValues().then(() => console.log("Loaded idb values into store"));
+    loadValues().then(() => {
+        console.log("Loaded idb values into store", performance.now())
+    });
 
     // Spotify API Stuff
 
@@ -417,12 +425,12 @@ export const useSpotifyStore = defineStore('spotify', () => {
         let newReleases = await api.getNewReleases({limit: 50})
         view.value.homePage.newReleases = newReleases.albums.items
         const rawView = toRaw(view.value);
-        console.log("Putting in DB", rawView);
+        console.log("Putting in DB", rawView, performance.now());
         await baseDb.put('spotify', rawView, 'view')
     }
 
     return {
-        refreshUserData,
+        dbLoaded,
         refreshHomePage,
         getAuthByCode,
         isLoggedIn,
