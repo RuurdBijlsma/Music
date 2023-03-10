@@ -1,12 +1,12 @@
 <template>
     <div class="menu">
-        <router-link active-class="active-link" exact to="/">Listen Now</router-link>
-        <router-link active-class="active-link" exact to="/playlists">Playlists</router-link>
-        <router-link active-class="active-link" exact to="/tracks">Tracks</router-link>
+        <v-btn class="menu-button ml-4 mr-4" variant="text" exact to="/">Listen Now</v-btn>
+        <v-btn class="menu-button ml-4 mr-4" variant="text" exact to="/playlists">Playlists</v-btn>
+        <v-btn class="menu-button ml-4 mr-4" variant="text" exact to="/tracks">Tracks</v-btn>
 
         <v-menu>
             <template v-slot:activator="{ props }">
-                <v-btn variant="text" icon="mdi-chevron-down" v-bind="props"></v-btn>
+                <v-btn class="ml-4 mr-4" variant="text" icon="mdi-chevron-down" v-bind="props"></v-btn>
             </template>
 
             <v-list density="compact">
@@ -56,25 +56,14 @@
     font-size: 16px;
 }
 
-.menu > * {
-    margin-left: 20px;
-    margin-right: 20px;
+.menu-button {
+    text-transform: capitalize;
+    font-size: 15px;
 }
 
 .menu > a {
-    color: rgba(0, 0, 0, 0.9);
-    text-decoration: none;
-    opacity: 0.7;
-    font-weight: 300;
-}
-
-.menu > a:hover {
-    text-decoration: underline;
-}
-
-.active-link {
-    opacity: 1 !important;
-    font-weight: 400 !important;
+    color: rgba(0, 0, 0, 0.8);
+    /*opacity: 0.7;*/
 }
 
 .small-item {

@@ -30,8 +30,8 @@ html, body {
     background-size: cover;
     width: calc(100% + 150px);
     height: calc(100% + 150px);
-    left:-75px;
-    top:-75px;
+    left: -75px;
+    top: -75px;
     position: fixed;
     z-index: 1;
     filter: blur(60px);
@@ -48,7 +48,7 @@ html, body {
 
 .top-menu {
     position: fixed;
-    width: calc(100% - 520px);
+    width: 100%;
     top: 0;
     left: 0;
     height: 100px;
@@ -62,7 +62,7 @@ html, body {
     width: 100%;
     height: 100%;
     user-select: none;
-    font-family: Roboto, Helvetica Neue, Helvetica, Arial, sans-serif;
+    font-family: "Segoe UI", Roboto, Helvetica Neue, Helvetica, Arial, sans-serif;
 }
 
 .router-view {
@@ -70,18 +70,34 @@ html, body {
     height: calc(100% - 120px);
     top: 100px;
     left: 20px;
-    width: calc(100% - 60vh - 40px);
-
-    background-color: rgba(255, 255, 255, 0.4);
-    backdrop-filter: blur(100px) saturate(300%);
-    border-radius: 5px;
-    box-shadow: 0 3px 4px 0 rgba(0, 0, 0, 0.2);
+    width: calc(100% - 60vh - 20px);
 }
 
 .music-player {
     width: 60vh;
     position: fixed;
     right: 0;
-    height: calc(100% - 40px);
+    height: calc(100% - 100px);
+    top: 100px;
+}
+
+
+::-webkit-scrollbar {
+    width: 5px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.7);
 }
 </style>

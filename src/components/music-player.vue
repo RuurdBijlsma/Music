@@ -1,6 +1,5 @@
 <template>
     <div class="mp">
-        <v-spacer></v-spacer>
         <v-img class="album-art" src="img/cover2.jpg" width="500" height="500"></v-img>
         <div class="sheet">
             <div class="music-info-text">
@@ -61,6 +60,7 @@ let volume = ref(0.7);
     display: flex;
     flex-direction: column;
     padding: 10px;
+    padding-top: 0;
     align-items: center;
 }
 
