@@ -1,13 +1,17 @@
 <template>
     <div class="container">
         <v-btn @click="scroll(-1)"
+               @dblclick="scroll(-10)"
                v-show="canGoLeft"
                density="compact" class="arrow left" variant="flat"
                icon="mdi-chevron-left"/>
-        <div class="horizontal-scroller" ref="scrollContainer">
+        <div class="horizontal-scroller"
+             ref="scrollContainer"
+            :style="{'-webkit-mask-image': canGoLeft ? 'linear-gradient(to right, transparent 0%, white 5%)' : 'none'}">
             <slot></slot>
         </div>
         <v-btn @click="scroll(1)"
+               @dblclick="scroll(10)"
                v-show="canGoRight"
                density="compact" class="arrow right" variant="flat"
                icon="mdi-chevron-right"/>
@@ -73,6 +77,5 @@ onMounted(() => {
     overflow-x: auto;
     display: flex;
     padding-bottom: 5px;
-    -webkit-mask-image: linear-gradient(to left, transparent 0%, white 5%);
 }
 </style>

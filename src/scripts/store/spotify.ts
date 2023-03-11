@@ -79,12 +79,13 @@ export const useSpotifyStore = defineStore('spotify', () => {
     // IndexedDB persistent storage
     async function loadValues() {
         console.log("Loading db value start", performance.now())
-        let [dbSecret, dbClientId, dbTokens, dbLibrary, dbView] = await Promise.all([
+        let [dbSecret, dbClientId, dbTokens, dbLibrary, dbView, dbUserInfo] = await Promise.all([
             baseDb.get('spotify', 'clientId'),
             baseDb.get('spotify', 'secret'),
             baseDb.get('spotify', 'tokens'),
             baseDb.get('spotify', 'library'),
             baseDb.get('spotify', 'view'),
+            baseDb.get('spotify', 'userInfo'),
         ])
         if (dbSecret)
             secret.value = dbSecret;
@@ -94,6 +95,8 @@ export const useSpotifyStore = defineStore('spotify', () => {
             library.value = dbLibrary;
         if (dbView)
             view.value = dbView;
+        if (dbUserInfo)
+            userInfo.value = dbUserInfo;
         if (dbTokens) {
             tokens.value = dbTokens;
             checkAuth().then()
@@ -206,6 +209,7 @@ export const useSpotifyStore = defineStore('spotify', () => {
             followers: 0,
             avatar: 'img/no-user.jpg',
         }
+        await baseDb.put('spotify', toRaw(userInfo.value), 'userInfo')
         // await dispatch('cacheState');
         clearTimeout(tokenTimeout);
     }
@@ -270,8 +274,9 @@ export const useSpotifyStore = defineStore('spotify', () => {
             mail: me.email,
             country: me.country,
             followers: me.followers?.total ?? 0,
-            avatar: me.images?.[0]?.url ?? 'img/user/1.png',
+            avatar: me.images?.[0]?.url ?? '',
         }
+        await baseDb.put('spotify', toRaw(userInfo.value), 'userInfo')
     }
 
     function findPagination(object: any): Function | false {

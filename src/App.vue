@@ -1,8 +1,8 @@
 <template>
     <div class="blur-bg"></div>
-    <div class="menu-gradient"></div>
     <div class="main">
         <top-menu class="top-menu"></top-menu>
+        <div class="menu-gradient"></div>
         <div class="router-view" v-if="spotify.dbLoaded">
             <router-view></router-view>
         </div>
@@ -14,6 +14,7 @@
 import TopMenu from "./components/TopMenu.vue";
 import MusicPlayer from "./components/MusicPlayer.vue";
 import {useSpotifyStore} from "./scripts/store/spotify";
+
 const spotify = useSpotifyStore();
 console.log("[App.vue]", `Hello world from Electron ${process.versions.electron}!`)
 </script>
@@ -43,8 +44,10 @@ html, body {
     width: 100%;
     top: 0;
     left: 0;
-    height: 300px;
-    /*background-image: linear-gradient(rgba(255, 255, 255, .5) 0%, rgba(0, 0, 0, 0) 100%);*/
+    height: 150px;
+    z-index: 4;
+    /*background-image: linear-gradient(rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, .7) 50%, rgba(0, 0, 0, 0) 100%);*/
+    pointer-events: none;
 }
 
 .top-menu {
@@ -52,7 +55,11 @@ html, body {
     width: 100%;
     top: 0;
     left: 0;
-    height: 100px;
+    height: 70px;
+    z-index: 5;
+    backdrop-filter: blur(40px) saturate(150%);
+    box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.15);
+    background-color: rgba(255, 255, 255, 0.5);
 }
 
 .main {
@@ -68,21 +75,29 @@ html, body {
 
 .router-view {
     position: fixed;
-    height: calc(100% - 120px);
-    top: 100px;
-    left: 20px;
+    height: 100%;
+    padding-top: 100px;
+    right: 0;
     width: calc(100% - 60vh);
     overflow-y: auto;
     z-index: 2;
 }
 
+.router-view::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.router-view::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.3);
+}
+
 .music-player {
     width: 60vh;
     position: fixed;
-    right: 0;
+    left: 0;
     height: calc(100% - 100px);
     top: 100px;
-    z-index: 1;
+    z-index: 6;
 }
 
 
