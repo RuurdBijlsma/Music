@@ -30,7 +30,7 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import {useSpotifyStore} from '../scripts/store/spotify'
 import {ref} from "vue";
 

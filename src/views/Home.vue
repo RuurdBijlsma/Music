@@ -5,14 +5,15 @@
         </div>
         <horizontal-scroller>
             <highlight-card
+                class="mr-4"
+                :size="250"
                 v-if="highlight"
-                :title="highlight.name"
-                :img="highlight.images[0].url"
-                :description="highlight.description"/>
-            <item-card class="ml-2 mr-2"
-                       v-for="playlist in otherPlaylists"
-                       :img="playlist.images[0].url"
-                       :description="playlist.description"/>
+                :item="highlight"/>
+            <item-card class="mr-4"
+                       :item="playlist"
+                       :size="250"
+                       hide-name
+                       v-for="playlist in otherPlaylists"/>
         </horizontal-scroller>
 
         <template v-if="spotify.view.homePage.recent.length > 0">
@@ -21,10 +22,9 @@
             </div>
 
             <horizontal-scroller class="mt-1">
-                <item-card class="ml-2 mr-2"
+                <item-card class="mr-4"
                            v-for="item in spotify.view.homePage.recent"
-                           :img="item.images[0].url"
-                           :description="item.description"/>
+                           :item="item"/>
             </horizontal-scroller>
         </template>
 
@@ -34,10 +34,10 @@
             </div>
 
             <horizontal-scroller class="mt-1">
-                <item-card class="ml-2 mr-2"
+                <item-card class="mr-4"
                            v-for="item in spotify.view.homePage.personalized"
-                           :img="item.images[0].url"
-                           :description="item.description"/>
+                           hide-name
+                           :item="item"/>
             </horizontal-scroller>
         </template>
 
@@ -47,17 +47,16 @@
             </div>
 
             <horizontal-scroller class="mt-1 mb-5">
-                <item-card class="ml-2 mr-2"
+                <item-card class="mr-4"
                            v-for="item in spotify.view.homePage.newReleases"
                            :title="item.name"
-                           :img="item.images[0].url"
-                           :description="`${caps(item.album_type)} • ${item.artists.map(a => a.name).join(', ')}`"/>
+                           :item="item"/>
             </horizontal-scroller>
         </template>
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import {useSpotifyStore} from "../scripts/store/spotify";
 import {computed} from "vue";
 import HighlightCard from "../components/HighlightCard.vue";
@@ -69,10 +68,6 @@ spotify.refreshHomePage();
 
 const highlight = computed(() => spotify.view.homePage.featured.playlists[0])
 const otherPlaylists = computed(() => spotify.view.homePage.featured.playlists.slice(1))
-
-const caps = (str) => {
-    return str[0].toUpperCase() + str.slice(1);
-}
 </script>
 
 <style scoped>

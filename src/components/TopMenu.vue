@@ -120,7 +120,7 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import {useSpotifyStore} from "../scripts/store/spotify";
 import {ref, watch} from "vue";
 import {useRoute} from "vue-router";

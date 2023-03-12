@@ -1,27 +1,33 @@
 <template>
-    <div>
-        <div class="image" :style="{backgroundImage: `url(${props.img})`}"/>
-        <div class="info mt-2">
-            <p class="title" v-if="props.title">{{ props.title }}</p>
-            <p class="description" v-html="props.description"></p>
+    <router-link no-style :to="base.itemUrl(props.item)">
+        <div class="image"
+             :style="{backgroundImage: `url(${base.itemImage(props.item)})`, minHeight: (props.size - 37) + 'px'}"/>
+        <div class="info mt-2" :style="{minWidth: (props.size - 37) + 'px'}">
+            <p class="title" v-if="!hideName">{{ props.item.name }}</p>
+            <p class="description" v-html="base.itemDescription(props.item)"></p>
         </div>
-    </div>
+    </router-link>
 </template>
 
-<script setup>
+<script setup lang="ts">
+import {PropType} from "vue";
+import {Item, useBaseStore} from "../scripts/store/base";
+
+const base = useBaseStore();
 const props = defineProps({
-    title: {
-        type: String,
+    item: {
+        type: Object as PropType<Item>,
+        required: true
+    },
+    size: {
+        type: Number,
         required: false,
-        default: () => "",
+        default: () => 200,
     },
-    description: {
-        type: String,
-        required: true
-    },
-    img: {
-        type: String,
-        required: true
+    hideName: {
+        type: Boolean,
+        required: false,
+        default: () => false,
     },
 })
 </script>
@@ -39,7 +45,6 @@ const props = defineProps({
 .info {
     width: calc((100vw - 500px) / 4 - 39px);
     font-size: 13px;
-    min-width: 163px;
     overflow: hidden;
 }
 

@@ -7,7 +7,7 @@
                icon="mdi-chevron-left"/>
         <div class="horizontal-scroller"
              ref="scrollContainer"
-            :style="{'-webkit-mask-image': canGoLeft ? 'linear-gradient(to right, transparent 0%, white 5%)' : 'none'}">
+             :style="{'-webkit-mask-image': canGoLeft ? 'linear-gradient(to right, transparent 0%, white 5%)' : 'none'}">
             <slot></slot>
         </div>
         <v-btn @click="scroll(1)"
@@ -18,7 +18,7 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import {onMounted, ref} from "vue";
 
 const canGoLeft = ref(false);
@@ -26,8 +26,9 @@ const canGoRight = ref(false);
 
 const scrollContainer = ref(null);
 
-function scroll(direction) {
-    let el = scrollContainer.value;
+function scroll(direction: number) {
+    let el = scrollContainer.value as HTMLElement | null;
+    if (el === null) return;
     el.scrollTo({
         left: el.scrollLeft + el.clientWidth * .85 * direction,
         behavior: 'smooth',
@@ -35,14 +36,17 @@ function scroll(direction) {
 }
 
 function checkCanScroll() {
-    let el = scrollContainer.value;
+    let el = scrollContainer.value as HTMLElement | null;
+    if (el === null) return;
     canGoLeft.value = el.scrollLeft > 0;
     canGoRight.value = el.scrollWidth - (el.scrollLeft + el.clientWidth) > 0;
 }
 
 onMounted(() => {
     checkCanScroll();
-    scrollContainer.value.addEventListener('scroll', () => checkCanScroll());
+    let el = scrollContainer.value as HTMLElement | null;
+    if (el === null) return;
+    el.addEventListener('scroll', () => checkCanScroll());
 })
 
 </script>

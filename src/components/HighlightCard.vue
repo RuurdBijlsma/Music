@@ -1,9 +1,9 @@
 <template>
-    <div class="highlight-featured mr-2">
+    <div class="highlight-featured mr-2" :style="{ minHeight: (props.size + 2) + 'px' }">
         <div class="card-info">
-            <h2>{{ props.title }}</h2>
+            <h2>{{ props.item.name ?? "" }}</h2>
             <p class="card-description mt-3">
-                {{ props.description }}
+                {{ props.item.description }}
             </p>
             <v-spacer/>
             <div class="buttons mt-3">
@@ -12,24 +12,23 @@
             </div>
         </div>
         <v-spacer></v-spacer>
-        <div class="card-image" :style="{backgroundImage: `url(${props.img})`}"/>
+        <div class="card-image" :style="{backgroundImage: `url(${base.itemImage(props.item)})`, minHeight: (props.size + 2) + 'px'}"/>
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
+import {Item, useBaseStore} from "../scripts/store/base";
+import {PropType} from "vue";
+const base = useBaseStore();
 const props = defineProps({
-    title: {
-        type: String,
+    item: {
+        type: Object as PropType<Item>,
         required: true
     },
-    description: {
-        type: String,
+    size: {
+        type: Number,
         required: false,
-        default: () => "",
-    },
-    img: {
-        type: String,
-        required: true
+        default: () => 200,
     },
 })
 
@@ -37,8 +36,6 @@ const props = defineProps({
 
 <style scoped>
 .highlight-featured {
-    min-height: 202px;
-    /*min-width: 485px;*/
     max-width: 800px;
     height: calc((100vw - 500px) / 4);
     display: flex;
@@ -56,11 +53,10 @@ const props = defineProps({
     background-size: cover;
     aspect-ratio: 1;
     height: calc((100vw - 500px) / 4);
-    min-height: 202px;
 }
 
 .card-info {
-    min-width:200px;
+    min-width: 210px;
     padding: 20px;
     display: flex;
     flex-direction: column;

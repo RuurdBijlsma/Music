@@ -79,7 +79,7 @@ export const useSpotifyStore = defineStore('spotify', () => {
     // IndexedDB persistent storage
     async function loadValues() {
         console.log("Loading db value start", performance.now())
-        let [dbSecret, dbClientId, dbTokens, dbLibrary, dbView, dbUserInfo] = await Promise.all([
+        let [dbClientId, dbSecret, dbTokens, dbLibrary, dbView, dbUserInfo] = await Promise.all([
             baseDb.get('spotify', 'clientId'),
             baseDb.get('spotify', 'secret'),
             baseDb.get('spotify', 'tokens'),

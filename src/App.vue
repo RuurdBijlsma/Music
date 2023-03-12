@@ -100,6 +100,14 @@ html, body {
     z-index: 6;
 }
 
+a[no-style] {
+    text-decoration: none;
+    color: inherit !important;
+}
+
+a[no-style]:hover {
+    text-decoration: underline;
+}
 
 ::-webkit-scrollbar {
     width: 5px;
