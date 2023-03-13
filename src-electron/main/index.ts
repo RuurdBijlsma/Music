@@ -39,7 +39,7 @@ const indexHtml = join(process.env.DIST, 'index.html')
 async function createWindow() {
     win = new BrowserWindow({
         title: 'Main window',
-        icon: join(process.env.PUBLIC ?? './public', 'icon/new7.png'),
+        icon: join(process.env.PUBLIC ?? './public', 'icon/new-light-192.png'),
         width: 1480,
         height: 1000,
         autoHideMenuBar: true,
