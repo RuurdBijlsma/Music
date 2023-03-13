@@ -5,41 +5,24 @@
             <v-btn class="menu-button" variant="text" exact to="/">Listen Now</v-btn>
             <v-btn class="menu-button" variant="text" exact to="/browse">Browse</v-btn>
             <v-btn class="menu-button" variant="text" exact to="/library">Library</v-btn>
-            <v-menu>
-                <template v-slot:activator="{ props }">
-                    <v-btn variant="text" icon="mdi-playlist-play" v-bind="props"></v-btn>
-                </template>
-
-                <v-list density="compact">
-                    <v-list-item to="/settings">
-                        <v-list-item-title class="small-item">Lijst</v-list-item-title>
-                    </v-list-item>
-                    <v-list-item to="/settings">
-                        <v-list-item-title class="small-item">Van</v-list-item-title>
-                    </v-list-item>
-                    <v-list-item to="/settings">
-                        <v-list-item-title class="small-item">Playlists</v-list-item-title>
-                    </v-list-item>
-                    <v-list-item to="/settings">
-                        <v-list-item-title class="small-item">Hier</v-list-item-title>
-                    </v-list-item>
-                </v-list>
-            </v-menu>
         </div>
 
         <v-spacer/>
         <v-text-field
             class="search-field"
             hide-details density="compact"
-            prepend-inner-icon="mdi-magnify"
+            append-inner-icon="mdi-magnify"
             placeholder="Search tracks, artists, playlists, and more"
             variant="solo"/>
         <v-spacer/>
         <v-menu location="bottom" :close-on-content-click="false" v-model="hello" close-on-back>
             <template v-slot:activator="{ props }">
-                <v-avatar :image="spotify.userInfo.avatar" icon="mdi-account" variant="tonal" v-bind="props"
-                          v-ripple
-                          class="account-button"/>
+                <v-btn size="30" variant="tonal" v-bind="props"
+                       density="compact" rounded
+                       class="account-button">
+                    <v-img :image="spotify.userInfo.avatar"></v-img>
+                    <v-icon size="20">mdi-account</v-icon>
+                </v-btn>
             </template>
 
             <v-list density="compact">
@@ -135,18 +118,21 @@ watch(route, () => {
     align-items: center;
     padding: 15px;
     font-size: 16px;
+    -webkit-app-region: drag;
 }
 
 .nav-buttons {
     display: flex;
     align-items: center;
     flex-grow: 2;
-    justify-content: space-between;
+    justify-content: center;
+    gap:10px;
 }
 
 .menu-button {
     text-transform: capitalize;
     font-size: 15px;
+    -webkit-app-region: no-drag;
 }
 
 .menu > a {
@@ -161,6 +147,8 @@ watch(route, () => {
 }
 
 .search-field {
+    -webkit-app-region: no-drag;
+    height: 40px;
     width: 280px;
     flex-grow: 2;
     background-color: rgba(255, 255, 255, 0.4);
@@ -172,7 +160,7 @@ watch(route, () => {
 }
 
 .account-button {
-    cursor: pointer;
+    -webkit-app-region: no-drag;
 }
 
 .list-link {
@@ -193,8 +181,9 @@ watch(route, () => {
 
 .app-buttons {
     display: flex;
-    margin-top: -35px;
-    margin-right: -20px;
+    margin-top: -15px;
+    margin-right: -15px;
+    -webkit-app-region: no-drag;
 }
 
 .app-buttons > div {
@@ -204,6 +193,7 @@ watch(route, () => {
     font-size: 13px;
     padding: 6px;
     color: rgba(0, 0, 0, 0.8);
+    transition: 0.1s;
 }
 
 .app-buttons > div:hover {

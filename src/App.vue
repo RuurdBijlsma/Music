@@ -2,7 +2,6 @@
     <div class="blur-bg"></div>
     <div class="main">
         <top-menu class="top-menu"></top-menu>
-        <div class="menu-gradient"></div>
         <div class="router-view" v-if="spotify.dbLoaded">
             <router-view v-slot="{ Component }">
                 <transition name="slide-fade" mode="out-in">
@@ -62,23 +61,12 @@ html, body {
     filter: blur(60px);
 }
 
-.menu-gradient {
-    position: fixed;
-    width: 100%;
-    top: 0;
-    left: 0;
-    height: 150px;
-    z-index: 4;
-    /*background-image: linear-gradient(rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, .7) 50%, rgba(0, 0, 0, 0) 100%);*/
-    pointer-events: none;
-}
-
 .top-menu {
     position: fixed;
     width: 100%;
     top: 0;
     left: 0;
-    height: 70px;
+    height: 50px;
     z-index: 5;
     backdrop-filter: blur(40px) saturate(150%);
     box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.15);

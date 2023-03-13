@@ -12,6 +12,11 @@ const routes = [
         name: 'Playlist',
         component: () => import('../views/Playlist.vue')
     },
+    {
+        path: '/album/:name/:id',
+        name: 'Album',
+        component: () => import('../views/Album.vue')
+    },
 ]
 
 export default createRouter({
