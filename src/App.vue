@@ -15,6 +15,12 @@
 </template>
 
 <script setup lang="ts">
+// todo:
+//  maybe cache visited playlists for faster load times per session (no idb) (is dat t wel waard?)
+//  album page, artist page, library page met tabs voor saved tracks/albums/artists, browse page
+//  lijst van playlists in de overflow menu ding in de menubalk? ergens anders dit stoppen? library misschien en dan de overflow van de top menu weghalen
+//  apply icon / rounded borders on window / remove windows appbar / make maximize/minimize/close functional
+//  make music player
 import TopMenu from "./components/TopMenu.vue";
 import MusicPlayer from "./components/MusicPlayer.vue";
 import {useSpotifyStore} from "./scripts/store/spotify";
