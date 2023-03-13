@@ -445,6 +445,7 @@ export const useSpotifyStore = defineStore('spotify', () => {
         hasCredentials,
         userInfo,
         login,
-        view
+        view,
+        api
     }
 })

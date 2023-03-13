@@ -4,7 +4,11 @@
         <top-menu class="top-menu"></top-menu>
         <div class="menu-gradient"></div>
         <div class="router-view" v-if="spotify.dbLoaded">
-            <router-view></router-view>
+            <router-view v-slot="{ Component }">
+                <transition name="slide-fade" mode="out-in">
+                    <component :is="Component"/>
+                </transition>
+            </router-view>
         </div>
         <music-player class="music-player" v-if="spotify.dbLoaded"/>
     </div>
@@ -16,10 +20,23 @@ import MusicPlayer from "./components/MusicPlayer.vue";
 import {useSpotifyStore} from "./scripts/store/spotify";
 
 const spotify = useSpotifyStore();
-console.log("[App.vue]", `Hello world from Electron ${process.versions.electron}!`)
 </script>
 
 <style>
+.slide-fade-enter-active {
+    transition: all 0.08s ease-out;
+}
+
+.slide-fade-leave-active {
+    transition: all 0.10s cubic-bezier(1, 0.5, 0.8, 1);
+}
+
+.slide-fade-enter-from,
+.slide-fade-leave-to {
+    transform: translateX(20px);
+    opacity: 0;
+}
+
 html, body {
     overflow-y: hidden !important;
     height: 100%;

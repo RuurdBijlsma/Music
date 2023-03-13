@@ -1,5 +1,6 @@
 import {defineStore} from 'pinia'
 import {openDB} from "idb";
+import {computed, ref} from "vue";
 
 export interface Item {
     type: string,
@@ -30,6 +31,34 @@ export const baseDb = await openDB("base", 1, {
 });
 
 export const useBaseStore = defineStore('base', () => {
+
+    function msToReadable(millis: number) {
+        if (isNaN(millis) || millis === undefined)
+            return '0:00';
+
+        let seconds = Math.round(millis / 1000);
+        let h = Math.floor(seconds / 3600);
+        let m = Math.floor((seconds % 3600) / 60);
+        let s = seconds % 60;
+        let hString = h.toString();
+        let mString = m.toString();
+        let sString = s.toString();
+        if (hString !== '0') {
+            mString = mString.padStart(2, '0');
+            sString = sString.padStart(2, '0');
+        }
+        sString = sString.padStart(2, '0');
+
+        if (hString === '0')
+            return `${mString}:${sString}`;
+        else return `${hString}:${mString}:${sString}`;
+    }
+
+    const pageHeight = ref(1080);
+    window.addEventListener('resize', () => {
+        pageHeight.value = window.innerHeight;
+    })
+
     function itemDescription(item: Item) {
         if (item.type === 'album') {
             return `${caps(item.album_type)} • ${item.artists.map(a => a.name).join(', ')}`
@@ -45,7 +74,6 @@ export const useBaseStore = defineStore('base', () => {
     }
 
     function itemImage(item: Item) {
-        console.log('itemimage', item);
         let image = item.images?.[0]?.url;
         if (image === null) {
             return 'img/notfound/' + (1 + Math.floor(Math.random() * 7)) + '.png'
@@ -53,7 +81,7 @@ export const useBaseStore = defineStore('base', () => {
         return image;
     }
 
-    function encodeUrlName(name: string) {
+    const encodeUrlName = (name: string) => {
         let toEncode = name.toLowerCase().replace(/ /gi, '-').slice(0, 36);
         let encoded: string;
         try {
@@ -62,11 +90,10 @@ export const useBaseStore = defineStore('base', () => {
             encoded = toEncode.replace(/[^a-z0-9]/gi, '');
             console.warn(`Couldn't uri encode ${toEncode}, changed to ${encoded}`);
         }
-        console.log({name, toEncode, encoded});
         return encoded;
     }
 
-    function itemUrl(item: Item) {
+    const itemUrl = (item: Item) => {
         let type = item.type || 'category';
         let name = type === 'user' ? item.display_name : item.name;
         if (type === 'category')
@@ -80,5 +107,5 @@ export const useBaseStore = defineStore('base', () => {
         return `/${type}/${encodeUrlName(name)}/${item.id}`;
     }
 
-    return {itemUrl, itemImage, itemDescription}
+    return {itemUrl, itemImage, itemDescription, pageHeight, msToReadable}
 })

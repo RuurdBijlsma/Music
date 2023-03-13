@@ -1,6 +1,6 @@
 <template>
     <div class="mp">
-        <v-img class="album-art" src="img/cover2.jpg" width="500" height="500"></v-img>
+        <glow-image class="album-art" src="img/cover2.jpg" :width="500" :height="500" rounding="10px"/>
         <div class="sheet">
             <div class="music-info-text">
                 <h2 class="music-title">Capricorn</h2>
@@ -47,6 +47,7 @@
 
 <script setup lang="ts">
 import {ref} from "vue";
+import GlowImage from "./GlowImage.vue";
 
 let volume = ref(0.7);
 </script>
@@ -62,7 +63,6 @@ let volume = ref(0.7);
 
 .album-art {
     flex-grow: 0;
-    border-radius: 10px;
     box-shadow: 0 8px 20px -3px rgba(0, 0, 0, 0.3);
 }
 

@@ -3,38 +3,25 @@
         <v-spacer></v-spacer>
         <div class="nav-buttons">
             <v-btn class="menu-button" variant="text" exact to="/">Listen Now</v-btn>
-            <v-btn class="menu-button" variant="text" exact to="/playlists">Playlists</v-btn>
-            <v-btn class="menu-button" variant="text" exact to="/tracks">Tracks</v-btn>
+            <v-btn class="menu-button" variant="text" exact to="/browse">Browse</v-btn>
+            <v-btn class="menu-button" variant="text" exact to="/library">Library</v-btn>
             <v-menu>
                 <template v-slot:activator="{ props }">
-                    <v-btn variant="text" icon="mdi-chevron-down" v-bind="props"></v-btn>
+                    <v-btn variant="text" icon="mdi-playlist-play" v-bind="props"></v-btn>
                 </template>
 
                 <v-list density="compact">
-                    <v-list-item to="/browse">
-                        <template v-slot:prepend>
-                            <v-icon>mdi-playlist-plus</v-icon>
-                        </template>
-                        <v-list-item-title>Browse</v-list-item-title>
-                    </v-list-item>
-                    <v-list-item to="/artists">
-                        <template v-slot:prepend>
-                            <v-icon>mdi-microphone</v-icon>
-                        </template>
-                        <v-list-item-title>Artists</v-list-item-title>
-                    </v-list-item>
-                    <v-list-item to="/albums">
-                        <template v-slot:prepend>
-                            <v-icon>mdi-album</v-icon>
-                        </template>
-                        <v-list-item-title>Albums</v-list-item-title>
-                    </v-list-item>
-                    <v-divider class="mt-2 mb-2"></v-divider>
-                    <v-list-item to="/downloads">
-                        <v-list-item-title class="small-item">Downloads</v-list-item-title>
+                    <v-list-item to="/settings">
+                        <v-list-item-title class="small-item">Lijst</v-list-item-title>
                     </v-list-item>
                     <v-list-item to="/settings">
-                        <v-list-item-title class="small-item">Settings</v-list-item-title>
+                        <v-list-item-title class="small-item">Van</v-list-item-title>
+                    </v-list-item>
+                    <v-list-item to="/settings">
+                        <v-list-item-title class="small-item">Playlists</v-list-item-title>
+                    </v-list-item>
+                    <v-list-item to="/settings">
+                        <v-list-item-title class="small-item">Hier</v-list-item-title>
                     </v-list-item>
                 </v-list>
             </v-menu>

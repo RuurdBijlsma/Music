@@ -1,7 +1,10 @@
 <template>
     <div class="highlight-featured mr-2" :style="{ minHeight: (props.size + 2) + 'px' }">
         <div class="card-info">
-            <h2>{{ props.item.name ?? "" }}</h2>
+
+            <router-link no-style :to="base.itemUrl(props.item)">
+                <h2 class="card-title">{{ props.item.name }}</h2>
+            </router-link>
             <p class="card-description mt-3">
                 {{ props.item.description }}
             </p>
@@ -12,13 +15,17 @@
             </div>
         </div>
         <v-spacer></v-spacer>
-        <div class="card-image" :style="{backgroundImage: `url(${base.itemImage(props.item)})`, minHeight: (props.size + 2) + 'px'}"/>
+        <router-link :to="base.itemUrl(props.item)">
+            <div class="card-image"
+                 :style="{backgroundImage: `url(${base.itemImage(props.item)})`, minHeight: (props.size + 2) + 'px'}"/>
+        </router-link>
     </div>
 </template>
 
 <script setup lang="ts">
 import {Item, useBaseStore} from "../scripts/store/base";
 import {PropType} from "vue";
+
 const base = useBaseStore();
 const props = defineProps({
     item: {
@@ -62,7 +69,7 @@ const props = defineProps({
     flex-direction: column;
 }
 
-.card-info > h2 {
+.card-title {
     white-space: nowrap;
     height: 40px;
     text-overflow: ellipsis;
