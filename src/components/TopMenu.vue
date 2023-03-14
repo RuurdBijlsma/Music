@@ -2,22 +2,23 @@
     <div class="menu">
         <v-spacer></v-spacer>
         <div class="nav-buttons">
-            <v-btn class="menu-button" variant="text" exact to="/">Listen Now</v-btn>
-            <v-btn class="menu-button" variant="text" exact to="/browse">Browse</v-btn>
-            <v-btn class="menu-button" variant="text" exact to="/library">Library</v-btn>
+            <v-btn no-drag class="menu-button" variant="text" exact to="/">Listen Now</v-btn>
+            <v-btn no-drag class="menu-button" variant="text" exact to="/browse">Browse</v-btn>
+            <v-btn no-drag class="menu-button" variant="text" exact to="/library">Library</v-btn>
         </div>
 
         <v-spacer/>
         <v-text-field
+            no-drag
             class="search-field"
             hide-details density="compact"
             append-inner-icon="mdi-magnify"
             placeholder="Search tracks, artists, playlists, and more"
             variant="solo"/>
         <v-spacer/>
-        <v-menu location="bottom" :close-on-content-click="false" v-model="hello" close-on-back>
+        <v-menu location="bottom" :close-on-content-click="false" v-model="dropdownOpen" close-on-back>
             <template v-slot:activator="{ props }">
-                <v-btn size="30" variant="tonal" v-bind="props"
+                <v-btn no-drag size="30" variant="tonal" v-bind="props"
                        density="compact" rounded
                        class="account-button">
                     <v-img :image="spotify.userInfo.avatar"></v-img>
@@ -37,19 +38,22 @@
                     </div>
                 </v-list-item>
                 <v-divider class="mt-2"></v-divider>
-                <v-sheet :theme="swit ? 'light' : 'dark'" class="pt-2 pb-2">
+                <v-sheet class="pt-2 pb-2">
                     <v-list-item>
                         <div class="theme-list-item">
                             <v-list-item-title class="small-item">
-                                <v-icon icon="mdi-brightness-7" class="mr-2"/>
                                 Dark theme
                             </v-list-item-title>
                             <v-list-item-action>
-                                <v-switch
-                                    color="red"
-                                    v-model="swit"
-                                    hide-details
-                                    density="compact"/>
+<!--                                <v-switch-->
+<!--                                    color="red"-->
+<!--                                    v-model="theme.global.name"-->
+<!--                                    true-value="dark"-->
+<!--                                    true-icon="mdi-brightness-6"-->
+<!--                                    false-icon="mdi-brightness-7"-->
+<!--                                    false-value="light"-->
+<!--                                    hide-details-->
+<!--                                    density="compact"/>-->
                             </v-list-item-action>
                         </div>
                     </v-list-item>
@@ -75,8 +79,10 @@
                 </v-list-item>
             </v-list>
         </v-menu>
+        <v-btn no-drag @click="setDark()">set dark</v-btn>
+        <v-btn no-drag @click="setLight()">set light</v-btn>
         <v-spacer/>
-        <div class="app-buttons">
+        <div class="app-buttons" no-drag>
             <div class="minimize">
                 <v-icon icon="mdi-window-minimize"/>
             </div>
@@ -94,18 +100,25 @@
 import {useSpotifyStore} from "../scripts/store/spotify";
 import {ref, watch} from "vue";
 import {useRoute} from "vue-router";
+import {useTheme} from "vuetify";
 
 const route = useRoute();
-
+const theme = useTheme();
 const spotify = useSpotifyStore();
-const swit = ref(false);
-const hello = ref(false);
-watch(hello, () => {
-    console.log(hello, 'changed');
-})
+const dropdownOpen = ref(false);
 watch(route, () => {
-    hello.value = false;
+    dropdownOpen.value = false;
 })
+
+function setDark(){
+    theme.global.name.value = 'dark';
+    console.log(`Current theme is  ${theme.global.current.value.dark}`);
+}
+
+function setLight(){
+    theme.global.name.value = 'light';
+    console.log(`Current theme is  ${theme.global.current.value.dark}`);
+}
 
 </script>
 
@@ -120,6 +133,9 @@ watch(route, () => {
     font-size: 16px;
     -webkit-app-region: drag;
 }
+.menu *[no-drag]{
+    -webkit-app-region: no-drag;
+}
 
 .nav-buttons {
     display: flex;
@@ -132,7 +148,6 @@ watch(route, () => {
 .menu-button {
     text-transform: capitalize;
     font-size: 15px;
-    -webkit-app-region: no-drag;
 }
 
 .menu > a {
@@ -147,7 +162,6 @@ watch(route, () => {
 }
 
 .search-field {
-    -webkit-app-region: no-drag;
     height: 40px;
     width: 280px;
     flex-grow: 2;
@@ -157,10 +171,6 @@ watch(route, () => {
 .search-field:deep(.v-field--variant-solo) {
     background-color: rgba(255, 255, 255, 0.9);
     box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.15);
-}
-
-.account-button {
-    -webkit-app-region: no-drag;
 }
 
 .list-link {
@@ -183,7 +193,6 @@ watch(route, () => {
     display: flex;
     margin-top: -15px;
     margin-right: -15px;
-    -webkit-app-region: no-drag;
 }
 
 .app-buttons > div {

@@ -1,15 +1,26 @@
 <template>
-    <div class="blur-bg"></div>
-    <div class="main">
-        <top-menu class="top-menu"></top-menu>
-        <div class="router-view" v-if="spotify.dbLoaded">
-            <router-view v-slot="{ Component }">
-                <transition name="slide-fade" mode="out-in">
-                    <component :is="Component"/>
-                </transition>
-            </router-view>
+    <div class="root" :style="{
+    '--primary': theme.current.value.colors.primary,
+    '--secondary': theme.current.value.colors.secondary,
+    '--background': theme.current.value.colors.background,
+    '--surface': theme.current.value.colors.surface,
+    '--on-surface': theme.current.value.colors['on-surface'],
+    '--on-background': theme.current.value.colors['on-background'],
+    '--on-primary': theme.current.value.colors['on-primary'],
+    '--on-secondary': theme.current.value.colors['on-secondary'],
+    }">
+        <div class="blur-bg v-theme--dark"></div>
+        <div class="main">
+            <top-menu class="top-menu"></top-menu>
+            <div class="router-view" v-if="spotify.dbLoaded">
+                <router-view v-slot="{ Component }">
+                    <transition name="slide-fade" mode="out-in">
+                        <component :is="Component"/>
+                    </transition>
+                </router-view>
+            </div>
+            <music-player class="music-player" v-if="spotify.dbLoaded"/>
         </div>
-        <music-player class="music-player" v-if="spotify.dbLoaded"/>
     </div>
 </template>
 
@@ -23,8 +34,11 @@
 import TopMenu from "./components/TopMenu.vue";
 import MusicPlayer from "./components/MusicPlayer.vue";
 import {useSpotifyStore} from "./scripts/store/spotify";
+import {useTheme} from "vuetify";
 
+const theme = useTheme();
 const spotify = useSpotifyStore();
+console.log('theme', theme);
 </script>
 
 <style>
@@ -48,8 +62,12 @@ html, body {
     background-color: white;
 }
 
+.root{
+    --background: '#ffffff';
+}
+
 .blur-bg {
-    background-image: linear-gradient(rgba(255, 255, 255, 0), rgba(255, 255, 255, 1)), url('assets/cover2.jpg');
+    background-image: linear-gradient(transparent, var(--background)), url('assets/cover2.jpg');
     background-position: center;
     background-size: cover;
     width: calc(100% + 150px);
