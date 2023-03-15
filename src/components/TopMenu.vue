@@ -38,25 +38,17 @@
                     </div>
                 </v-list-item>
                 <v-divider class="mt-2"></v-divider>
-                <v-sheet class="pt-2 pb-2">
-                    <v-list-item>
-                        <div class="theme-list-item">
-                            <v-list-item-title class="small-item mr-2">
-                                Dark theme
-                            </v-list-item-title>
-                            <v-list-item-action>
-                                <v-switch
-                                    v-model="theme.global.name"
-                                    true-value="dark"
-                                    true-icon="mdi-brightness-6"
-                                    false-icon="mdi-brightness-7"
-                                    false-value="light"
-                                    hide-details
-                                    density="compact"/>
-                            </v-list-item-action>
-                        </div>
-                    </v-list-item>
-                </v-sheet>
+                <v-list-item>
+                    <div class="theme-flex">
+                        <v-list-item-title class="theme-title">Theme</v-list-item-title>
+                        <v-select v-model="chosenTheme"
+                                  density="compact"
+                                  variant="plain"
+                                  class="mb-3"
+                                  hide-details
+                                  :items="themeOptions"/>
+                    </div>
+                </v-list-item>
                 <v-divider class="mb-2"></v-divider>
                 <v-list-item to="/downloads">
                     <v-list-item-title class="small-item">
@@ -78,8 +70,6 @@
                 </v-list-item>
             </v-list>
         </v-menu>
-<!--        <v-btn no-drag @click="setDark()">set dark</v-btn>-->
-<!--        <v-btn no-drag @click="setLight()">set light</v-btn>-->
         <v-spacer/>
         <div class="app-buttons" no-drag>
             <div class="minimize">
@@ -105,19 +95,53 @@ const route = useRoute();
 const theme = useTheme();
 const spotify = useSpotifyStore();
 const dropdownOpen = ref(false);
+const themeOptions = ['Dark', 'Light', 'System'];
+const chosenTheme = ref('System');
 watch(route, () => {
     dropdownOpen.value = false;
 })
+watch(chosenTheme, () => {
+    console.log('chosen theme changed', chosenTheme.value);
+    localStorage.theme = chosenTheme.value.toLowerCase();
+    applyTheme();
+})
 
-function setDark(){
-    theme.global.name.value = 'dark';
-    console.log(`Current theme is  ${theme.global.current.value.dark}`);
+function applyTheme() {
+    if (localStorage.theme === 'dark') {
+        chosenTheme.value = 'Dark';
+    } else if (localStorage.theme === 'light') {
+        chosenTheme.value = 'Light';
+    } else {
+        chosenTheme.value = 'System'
+    }
+    if (localStorage.getItem('theme') !== null && localStorage.theme !== 'system') {
+        theme.global.name.value = localStorage.theme;
+        console.log(`Changing theme to ${theme.global.name.value} from localStorage`);
+    } else {
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            // dark mode
+            theme.global.name.value = 'dark';
+        } else {
+            theme.global.name.value = 'light';
+        }
+        console.log(`Setting theme to ${theme.global.name.value} from system preferences`);
+    }
 }
 
-function setLight(){
-    theme.global.name.value = 'light';
-    console.log(`Current theme is  ${theme.global.current.value.dark}`);
-}
+applyTheme();
+
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+    if (localStorage.theme === 'system') {
+        if (e.matches) {
+            // dark mode
+            theme.global.name.value = 'dark';
+        } else {
+            // light mode
+            theme.global.name.value = 'light';
+        }
+        console.log(`Changing theme to ${theme.global.name.value} from watching system preference`);
+    }
+});
 
 </script>
 
@@ -132,7 +156,8 @@ function setLight(){
     font-size: 16px;
     -webkit-app-region: drag;
 }
-.menu *[no-drag]{
+
+.menu *[no-drag] {
     -webkit-app-region: no-drag;
 }
 
@@ -141,7 +166,7 @@ function setLight(){
     align-items: center;
     flex-grow: 2;
     justify-content: center;
-    gap:10px;
+    gap: 10px;
 }
 
 .menu-button {
@@ -181,11 +206,13 @@ function setLight(){
     text-decoration: none !important;
 }
 
-.theme-list-item {
+.theme-flex {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    padding-right: 5px;
+    gap:15px;
+}
+.theme-title{
+    font-weight: 300;
 }
 
 .app-buttons {
