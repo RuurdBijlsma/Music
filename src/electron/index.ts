@@ -27,19 +27,14 @@ if (!app.requestSingleInstanceLock()) {
     process.exit(0)
 }
 
-// Remove electron security warnings
-// This warning only shows in development mode
-// Read more on https://www.electronjs.org/docs/latest/tutorial/security
-// process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = 'true'
-
 let win: BrowserWindow | null = null
 const url = process.env.VITE_DEV_SERVER_URL
 const indexHtml = join(process.env.DIST, 'index.html')
 
 async function createWindow() {
     win = new BrowserWindow({
-        title: 'Main window',
-        icon: join(process.env.PUBLIC ?? './public', 'icon/new-light-192.png'),
+        title: 'Vue Music',
+        icon: join(process.env.PUBLIC ?? './public', 'icon/new-dark-192.png'),
         width: 1500,
         height: 1000,
         autoHideMenuBar: true,
@@ -103,10 +98,16 @@ ipcMain.on('focus-window', () => {
 // New window example arg: new windows url
 ipcMain.handle('open-win', (_, arg) => {
     const childWindow = new BrowserWindow({
+        title: 'Vue Music',
+        icon: join(process.env.PUBLIC ?? './public', 'icon/new-dark-192.png'),
+        width: 1500,
+        height: 1000,
+        autoHideMenuBar: true,
         webPreferences: {
             nodeIntegration: true,
             contextIsolation: false,
         },
+        titleBarStyle: "hidden",
     })
 
     if (process.env.VITE_DEV_SERVER_URL) {

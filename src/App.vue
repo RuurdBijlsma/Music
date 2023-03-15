@@ -89,7 +89,7 @@ html, body {
     width: 100%;
     height: 100%;
     user-select: none;
-    font-family: "Segoe UI", Roboto, Helvetica Neue, Helvetica, Arial, sans-serif;
+    font-family: "Segoe UI", Helvetica Neue, Helvetica, Arial, sans-serif;
 }
 
 .router-view {
