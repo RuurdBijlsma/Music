@@ -10,8 +10,9 @@
 </template>
 
 <script setup lang="ts">
-import {PropType} from "vue";
-import {Item, useBaseStore} from "../scripts/store/base";
+import type {PropType} from "vue";
+import {useBaseStore} from "../scripts/store/base";
+import type {Item} from '../scripts/store/base'
 
 const base = useBaseStore();
 const props = defineProps({

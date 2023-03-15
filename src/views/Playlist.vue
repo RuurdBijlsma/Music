@@ -20,7 +20,7 @@
                     </v-lazy>
                     <div class="track-info">
                         <div class="track-name">{{ item.track.name }}</div>
-                        <div class="track-artist">{{ item.track.artists.map(a => a.name).join(', ') }}</div>
+                        <div class="track-artist">{{ item.track.artists.map((a: any) => a.name).join(', ') }}</div>
                     </div>
                     <v-spacer/>
                     <div class="track-duration ml-2">
@@ -38,7 +38,6 @@
 import {useSpotifyStore} from "../scripts/store/spotify";
 import {computed, ref, watch} from "vue";
 import {useRoute} from "vue-router";
-import SinglePlaylistResponse = SpotifyApi.SinglePlaylistResponse;
 import {useBaseStore} from "../scripts/store/base";
 import GlowImage from "../components/GlowImage.vue";
 
@@ -46,20 +45,21 @@ const route = useRoute()
 const base = useBaseStore();
 
 const spotify = useSpotifyStore();
-const playlist = ref(null as null | SinglePlaylistResponse);
+const playlist = ref(null as null | SpotifyApi.SinglePlaylistResponse);
 let loadedId = route.params.id as string;
 watch(route, async () => {
     if (route.params.id !== loadedId)
         playlist.value = await spotify.api.getPlaylist(loadedId);
     console.log("route params change");
 })
-spotify.api.getPlaylist(loadedId).then(r => {
+spotify.api.getPlaylist(loadedId).then((r: any) => {
     playlist.value = r;
     console.log("Playlist", r);
 });
 
 const scrollItems = computed(() => {
     if (playlist.value === null) return [null]
+    console.log("scrollitems", playlist.value.tracks.items);
     return [null, ...playlist.value.tracks.items]
 })
 </script>

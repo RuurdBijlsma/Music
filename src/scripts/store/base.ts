@@ -1,6 +1,7 @@
 import {defineStore} from 'pinia'
 import {openDB} from "idb";
-import {computed, ref} from "vue";
+import type {IDBPDatabase} from 'idb'
+import {ref} from "vue";
 
 export interface Item {
     type: string,
@@ -14,7 +15,7 @@ export interface Item {
     artists: { name: string }[]
 }
 
-export const baseDb = await openDB("base", 1, {
+export const baseDb = openDB("base", 1, {
     upgrade(db, oldVersion, newVersion, transaction, event) {
         db.createObjectStore('spotify');
         console.log('db upgrade', {oldVersion, newVersion, transaction, event});
@@ -99,7 +100,7 @@ export const useBaseStore = defineStore('base', () => {
         if (type === 'category')
             return `${type}/${item.id}`;
         if (type === 'radio')
-            return null;
+            return '';
         if (type === 'search')
             return item.to;
         if (type === 'liked')

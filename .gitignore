@@ -27,3 +27,4 @@ release
 # lockfile
 pnpm-lock.yaml
 yarn.lock
+.vscode

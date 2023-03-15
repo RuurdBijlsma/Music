@@ -23,8 +23,9 @@
 </template>
 
 <script setup lang="ts">
-import {Item, useBaseStore} from "../scripts/store/base";
-import {PropType} from "vue";
+import {useBaseStore} from "../scripts/store/base"
+import type {Item} from '../scripts/store/base'
+import type {PropType} from "vue"
 
 const base = useBaseStore();
 const props = defineProps({

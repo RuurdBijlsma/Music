@@ -6,7 +6,7 @@
         <div class="album-art album-background"
              :style="{
                     backgroundImage: `url(${src})`,
-                    opacity: $vuetify.theme.dark ? 0.4 : 0.7,
+                    opacity: theme.current.value.dark ? 0.4 : 0.7,
                     minWidth: width + 'px',
                     height: height + 'px',
                     right: (-width / 2) + 'px',
@@ -25,6 +25,8 @@
 </template>
 
 <script setup lang="ts">
+import {useTheme} from "vuetify";
+
 const props = defineProps({
     src: {
         type: String,
@@ -43,6 +45,7 @@ const props = defineProps({
         default: '0',
     },
 })
+const theme = useTheme()
 </script>
 
 <style scoped>

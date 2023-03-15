@@ -1,15 +1,6 @@
 <template>
-    <div class="root" :style="{
-    '--primary': theme.current.value.colors.primary,
-    '--secondary': theme.current.value.colors.secondary,
-    '--background': theme.current.value.colors.background,
-    '--surface': theme.current.value.colors.surface,
-    '--on-surface': theme.current.value.colors['on-surface'],
-    '--on-background': theme.current.value.colors['on-background'],
-    '--on-primary': theme.current.value.colors['on-primary'],
-    '--on-secondary': theme.current.value.colors['on-secondary'],
-    }">
-        <div class="blur-bg v-theme--dark"></div>
+    <div class="root">
+        <div class="blur-bg"></div>
         <div class="main">
             <top-menu class="top-menu"></top-menu>
             <div class="router-view" v-if="spotify.dbLoaded">
@@ -41,7 +32,7 @@ const spotify = useSpotifyStore();
 console.log('theme', theme);
 </script>
 
-<style>
+<style lang="scss">
 .slide-fade-enter-active {
     transition: all 0.08s ease-out;
 }
@@ -59,15 +50,14 @@ console.log('theme', theme);
 html, body {
     overflow-y: hidden !important;
     height: 100%;
-    background-color: white;
+    background-color: rgb(var(--v-theme-background));
 }
 
 .root{
-    --background: '#ffffff';
 }
 
 .blur-bg {
-    background-image: linear-gradient(transparent, var(--background)), url('assets/cover2.jpg');
+    background-image: linear-gradient(rgb(var(--v-theme-background), 0.5), rgb(var(--v-theme-background))), url('assets/cover2.jpg');
     background-position: center;
     background-size: cover;
     width: calc(100% + 150px);

@@ -41,19 +41,18 @@
                 <v-sheet class="pt-2 pb-2">
                     <v-list-item>
                         <div class="theme-list-item">
-                            <v-list-item-title class="small-item">
+                            <v-list-item-title class="small-item mr-2">
                                 Dark theme
                             </v-list-item-title>
                             <v-list-item-action>
-<!--                                <v-switch-->
-<!--                                    color="red"-->
-<!--                                    v-model="theme.global.name"-->
-<!--                                    true-value="dark"-->
-<!--                                    true-icon="mdi-brightness-6"-->
-<!--                                    false-icon="mdi-brightness-7"-->
-<!--                                    false-value="light"-->
-<!--                                    hide-details-->
-<!--                                    density="compact"/>-->
+                                <v-switch
+                                    v-model="theme.global.name"
+                                    true-value="dark"
+                                    true-icon="mdi-brightness-6"
+                                    false-icon="mdi-brightness-7"
+                                    false-value="light"
+                                    hide-details
+                                    density="compact"/>
                             </v-list-item-action>
                         </div>
                     </v-list-item>
@@ -79,8 +78,8 @@
                 </v-list-item>
             </v-list>
         </v-menu>
-        <v-btn no-drag @click="setDark()">set dark</v-btn>
-        <v-btn no-drag @click="setLight()">set light</v-btn>
+<!--        <v-btn no-drag @click="setDark()">set dark</v-btn>-->
+<!--        <v-btn no-drag @click="setLight()">set light</v-btn>-->
         <v-spacer/>
         <div class="app-buttons" no-drag>
             <div class="minimize">

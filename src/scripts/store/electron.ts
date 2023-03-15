@@ -1,8 +1,10 @@
 import {defineStore} from 'pinia'
 import electron, {ipcRenderer} from "electron";
-import {AuthToken, useSpotifyStore} from "./spotify";
-import http from "http";
+import type {AuthToken} from "./spotify";
 
+import {useSpotifyStore} from "./spotify";
+
+import http from "http";
 const express = window.require('express')
 export const usePlatformStore = defineStore('platform', () => {
     const spotify = useSpotifyStore();

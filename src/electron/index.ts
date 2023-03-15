@@ -40,7 +40,7 @@ async function createWindow() {
     win = new BrowserWindow({
         title: 'Main window',
         icon: join(process.env.PUBLIC ?? './public', 'icon/new-light-192.png'),
-        width: 1480,
+        width: 1500,
         height: 1000,
         autoHideMenuBar: true,
         webPreferences: {

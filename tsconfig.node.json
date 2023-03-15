@@ -1,10 +1,8 @@
 {
+  "extends": "@vue/tsconfig/tsconfig.node.json",
+  "include": ["vite.config.*", "src/electron", "package.json"],
   "compilerOptions": {
     "composite": true,
-    "module": "ESNext",
-    "moduleResolution": "Node",
-    "resolveJsonModule": true,
-    "allowSyntheticDefaultImports": true
-  },
-  "include": ["vite.config.ts", "package.json", "electron"]
+    "types": ["node"]
+  }
 }
