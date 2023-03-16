@@ -100,6 +100,10 @@ const scrollItems = computed(() => {
     background-color: rgba(0, 0, 0, 0.07);
 }
 
+.dark .track-item.odd-item {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
 .track-img {
     width: 40px;
     height: 40px;

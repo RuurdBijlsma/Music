@@ -1,5 +1,5 @@
 <template>
-    <div class="root">
+    <div class="root" :class="{dark: theme.current.value.dark}">
         <div class="blur-bg"></div>
         <div class="main">
             <top-menu class="top-menu"></top-menu>
@@ -78,7 +78,10 @@ html, body {
     z-index: 5;
     backdrop-filter: blur(40px) saturate(150%);
     box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.15);
-    background-color: rgba(255, 255, 255, 0.5);
+    background-color: rgba(var(--v-theme-background), 0.3);
+}
+.dark .top-menu{
+    background-color: rgba(var(--v-theme-background), 0.5);
 }
 
 .main {

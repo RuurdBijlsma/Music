@@ -54,6 +54,9 @@ const props = defineProps({
     border-radius: 10px;
     box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.2);
 }
+.dark .highlight-featured{
+    background-color: rgba(0, 0, 0, 0.4);
+}
 
 .card-image {
     border-top-right-radius: 10px;

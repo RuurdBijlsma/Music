@@ -30,7 +30,8 @@
                 <v-list-item two-line v-if="spotify.isLoggedIn" to="/user">
                     <div class="list-link">
                         <v-avatar variant="tonal" icon="mdi-account"
-                                  :image="spotify.userInfo.avatar" alt="User Avatar" class="mr-3"/>
+                                  :image="spotify.userInfo.avatar"
+                                  alt="User Avatar" class="mr-3"/>
                         <div>
                             <v-list-item-title>{{ spotify.userInfo.name }}</v-list-item-title>
                             <v-list-item-subtitle>{{ spotify.userInfo.mail }}</v-list-item-subtitle>
@@ -41,12 +42,16 @@
                 <v-list-item>
                     <div class="theme-flex">
                         <v-list-item-title class="theme-title">Theme</v-list-item-title>
-                        <v-select v-model="chosenTheme"
-                                  density="compact"
-                                  variant="plain"
-                                  class="mb-3"
-                                  hide-details
-                                  :items="themeOptions"/>
+
+                        <v-chip-group selected-class="text-deep-primary"
+                                      v-model="chosenTheme"
+                                      class="chip-group"
+                                      color="primary"
+                                      mandatory>
+                            <v-chip class="theme-chip">Light</v-chip>
+                            <v-chip class="theme-chip">Dark</v-chip>
+                            <v-chip class="theme-chip">System</v-chip>
+                        </v-chip-group>
                     </div>
                 </v-list-item>
                 <v-divider class="mb-2"></v-divider>
@@ -95,25 +100,20 @@ const route = useRoute();
 const theme = useTheme();
 const spotify = useSpotifyStore();
 const dropdownOpen = ref(false);
-const themeOptions = ['Dark', 'Light', 'System'];
-const chosenTheme = ref('System');
+const themeOptions = ['light', 'dark', 'system'];
+const chosenTheme = ref(2);
 watch(route, () => {
     dropdownOpen.value = false;
 })
 watch(chosenTheme, () => {
     console.log('chosen theme changed', chosenTheme.value);
-    localStorage.theme = chosenTheme.value.toLowerCase();
+    localStorage.theme = themeOptions[chosenTheme.value]
     applyTheme();
 })
 
 function applyTheme() {
-    if (localStorage.theme === 'dark') {
-        chosenTheme.value = 'Dark';
-    } else if (localStorage.theme === 'light') {
-        chosenTheme.value = 'Light';
-    } else {
-        chosenTheme.value = 'System'
-    }
+    if (localStorage.getItem('theme') !== null)
+        chosenTheme.value = themeOptions.indexOf(localStorage.theme)
     if (localStorage.getItem('theme') !== null && localStorage.theme !== 'system') {
         theme.global.name.value = localStorage.theme;
         console.log(`Changing theme to ${theme.global.name.value} from localStorage`);
@@ -145,7 +145,7 @@ window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e =
 
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 
 .menu {
     display: flex;
@@ -174,11 +174,6 @@ window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e =
     font-size: 15px;
 }
 
-.menu > a {
-    color: rgba(0, 0, 0, 0.8);
-    /*opacity: 0.7;*/
-}
-
 .small-item {
     font-size: 13px;
     opacity: .7;
@@ -186,14 +181,18 @@ window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e =
 }
 
 .search-field {
-    height: 40px;
+    -webkit-app-region: no-drag;
     width: 280px;
     flex-grow: 2;
-    background-color: rgba(255, 255, 255, 0.4);
 }
 
 .search-field:deep(.v-field--variant-solo) {
     background-color: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.2);
+}
+
+.dark .search-field:deep(.v-field--variant-solo) {
+    background-color: rgba(0, 0, 0, 0.3);
     box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.15);
 }
 
@@ -201,18 +200,26 @@ window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e =
     display: flex;
 }
 
-.list-link > div > div {
-    color: rgba(0, 0, 0, 0.9);
-    text-decoration: none !important;
+.theme-flex {
+
 }
 
-.theme-flex {
+.chip-group {
     display: flex;
-    align-items: center;
-    gap:15px;
+    justify-content: space-between;
 }
-.theme-title{
+
+.theme-chip {
+    margin-right: 5px !important;
+    margin-left: 5px !important;
+}
+
+.theme-title {
+    font-size: 11px;
+    text-transform: uppercase;
     font-weight: 300;
+    opacity: 0.7;
+    text-align: center;
 }
 
 .app-buttons {
@@ -229,6 +236,14 @@ window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e =
     padding: 6px;
     color: rgba(0, 0, 0, 0.8);
     transition: 0.1s;
+}
+
+.dark .app-buttons > div {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.dark .app-buttons > div:hover {
+    background-color: rgba(255, 255, 255, 0.15);
 }
 
 .app-buttons > div:hover {
