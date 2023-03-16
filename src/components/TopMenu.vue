@@ -1,12 +1,9 @@
 <template>
     <div class="menu">
-        <v-spacer></v-spacer>
-        <div class="nav-buttons">
-            <v-btn no-drag class="menu-button" variant="text" exact to="/">Listen Now</v-btn>
-            <v-btn no-drag class="menu-button" variant="text" exact to="/browse">Browse</v-btn>
-            <v-btn no-drag class="menu-button" variant="text" exact to="/library">Library</v-btn>
+        <div class="logo">
+            <v-img width="30" height="30" src="icon/new-dark-192.png"></v-img>
+            <div>Vue Music</div>
         </div>
-
         <v-spacer/>
         <v-text-field
             no-drag
@@ -161,17 +158,12 @@ window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e =
     -webkit-app-region: no-drag;
 }
 
-.nav-buttons {
+.logo{
     display: flex;
     align-items: center;
-    flex-grow: 2;
-    justify-content: center;
     gap: 10px;
-}
-
-.menu-button {
-    text-transform: capitalize;
-    font-size: 15px;
+    font-size: 14px;
+    font-weight: 300;
 }
 
 .small-item {

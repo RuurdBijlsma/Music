@@ -58,10 +58,10 @@ export const useSpotifyStore = defineStore('spotify', () => {
         tokens.value.expiryDate !== null
     )
     let library = ref({
-        playlists: [] as any[],
+        playlists: [] as SpotifyApi.PlaylistObjectFull[],
         artists: [] as any[],
         albums: [] as any[],
-        tracks: [] as any[],
+        tracks: [] as SpotifyApi.PlaylistTrackObject[],
     })
     let isRefreshing = ref({
         playlist: false,
@@ -447,6 +447,7 @@ export const useSpotifyStore = defineStore('spotify', () => {
     return {
         dbLoaded,
         refreshHomePage,
+        refreshUserData,
         getAuthByCode,
         isLoggedIn,
         requestedScopes,
@@ -456,6 +457,7 @@ export const useSpotifyStore = defineStore('spotify', () => {
         userInfo,
         login,
         view,
-        api
+        api,
+        library,
     }
 })

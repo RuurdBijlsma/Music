@@ -2,7 +2,15 @@
     <div class="root" :class="{dark: theme.current.value.dark}">
         <div class="blur-bg"></div>
         <div class="main">
-            <top-menu class="top-menu"></top-menu>
+            <top-menu class="top-menu"/>
+            <div class="left-nav">
+                <v-btn :icon="route.path === '/' ? 'mdi-play-box' : 'mdi-play-box-outline'" variant="text"
+                       to="/"></v-btn>
+                <v-btn :icon="route.path === '/browse' ? 'mdi-library' : 'mdi-library-outline'" variant="text"
+                       to="/browse"></v-btn>
+                <v-btn :icon="route.path === '/library' ? 'mdi-music-note' : 'mdi-music-note-outline'" variant="text"
+                       to="/library"></v-btn>
+            </div>
             <div class="router-view" v-if="spotify.dbLoaded">
                 <router-view v-slot="{ Component }">
                     <transition name="slide-fade" mode="out-in">
@@ -22,13 +30,18 @@
 //  lijst van playlists in de overflow menu ding in de menubalk? ergens anders dit stoppen? library misschien en dan de overflow van de top menu weghalen
 //  apply icon / rounded borders on window / remove windows appbar / make maximize/minimize/close functional
 //  make music player
+//  try other virtual scroller library for tracks page
 import TopMenu from "./components/TopMenu.vue";
 import MusicPlayer from "./components/MusicPlayer.vue";
 import {useSpotifyStore} from "./scripts/store/spotify";
 import {useTheme} from "vuetify";
+import {useRoute} from "vue-router";
 
 const theme = useTheme();
 const spotify = useSpotifyStore();
+const route = useRoute();
+
+console.log('spotify.library', spotify.library);
 console.log('theme', theme);
 </script>
 
@@ -53,7 +66,7 @@ html, body {
     background-color: rgb(var(--v-theme-background));
 }
 
-.root{
+.root {
 }
 
 .blur-bg {
@@ -77,10 +90,11 @@ html, body {
     height: 50px;
     z-index: 5;
     backdrop-filter: blur(40px) saturate(150%);
-    box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.15);
+    //box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.15);
     background-color: rgba(var(--v-theme-background), 0.3);
 }
-.dark .top-menu{
+
+.dark .top-menu {
     background-color: rgba(var(--v-theme-background), 0.5);
 }
 
@@ -95,10 +109,38 @@ html, body {
     font-family: "Segoe UI", Helvetica Neue, Helvetica, Arial, sans-serif;
 }
 
+.nav-buttons {
+    display: flex;
+    align-items: center;
+    flex-grow: 2;
+    justify-content: center;
+    gap: 25px;
+}
+
+.left-nav {
+    position: fixed;
+    left: 0;
+    top: 50px;
+    width: 70px;
+    height: calc(100% - 50px);
+    backdrop-filter: blur(40px) saturate(150%);
+    box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.15);
+    background-color: rgba(var(--v-theme-background), 0.3);
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding-top: 5px;
+}
+
+.dark .left-nav {
+    background-color: rgba(var(--v-theme-background), 0.5);
+}
+
 .router-view {
     position: fixed;
     height: 100%;
-    padding-top: 100px;
+    padding-top: 60px;
     right: 0;
     width: calc(100% - 60vh);
     overflow-y: auto;
@@ -114,9 +156,9 @@ html, body {
 }
 
 .music-player {
-    width: 60vh;
+    width: calc(60vh - 70px);
     position: fixed;
-    left: 0;
+    left: 70px;
     height: calc(100% - 100px);
     top: 100px;
     z-index: 6;
