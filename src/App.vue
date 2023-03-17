@@ -3,13 +3,27 @@
         <div class="blur-bg"></div>
         <div class="main">
             <top-menu class="top-menu"/>
+            <div class="fake-top-menu"/>
             <div class="left-nav">
-                <v-btn :icon="route.path === '/' ? 'mdi-play-box' : 'mdi-play-box-outline'" variant="text"
+                <v-btn class="nav-1-btn nav-button"
+                       :icon="route.path === '/' ? 'mdi-play-box' : 'mdi-play-box-outline'"
+                       variant="text"
                        to="/"></v-btn>
-                <v-btn :icon="route.path === '/browse' ? 'mdi-library' : 'mdi-library-outline'" variant="text"
+                <span class="button-text nav-1-text"
+                      :class="{active: route.path === '/'}">Listen Now</span>
+                <v-btn class="nav-2-btn nav-button"
+                       :icon="route.path === '/browse' ? 'mdi-library' : 'mdi-library-outline'"
+                       variant="text"
                        to="/browse"></v-btn>
-                <v-btn :icon="route.path === '/library' ? 'mdi-music-note' : 'mdi-music-note-outline'" variant="text"
-                       to="/library"></v-btn>
+                <span class="button-text nav-2-text"
+                      :class="{active: route.path === '/browse'}">Browse</span>
+                <v-btn class="nav-3-btn nav-button"
+                       variant="text"
+                       :icon="route.path === '/library' ? 'mdi-music-note' : 'mdi-music-note-outline'"
+                       rounded
+                       to="/library"/>
+                <span class="button-text nav-3-text"
+                      :class="{active: route.path === '/library'}">Library</span>
             </div>
             <div class="router-view" v-if="spotify.dbLoaded">
                 <router-view v-slot="{ Component }">
@@ -90,12 +104,21 @@ html, body {
     height: 50px;
     z-index: 5;
     backdrop-filter: blur(40px) saturate(150%);
-    //box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.15);
     background-color: rgba(var(--v-theme-background), 0.3);
 }
 
 .dark .top-menu {
     background-color: rgba(var(--v-theme-background), 0.5);
+}
+
+.fake-top-menu {
+    position: fixed;
+    pointer-events: none;
+    top: 0;
+    left: 70px;
+    width: calc(100% - 70px);
+    height: 50px;
+    box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.15);
 }
 
 .main {
@@ -107,14 +130,6 @@ html, body {
     height: 100%;
     user-select: none;
     font-family: "Segoe UI", Helvetica Neue, Helvetica, Arial, sans-serif;
-}
-
-.nav-buttons {
-    display: flex;
-    align-items: center;
-    flex-grow: 2;
-    justify-content: center;
-    gap: 25px;
 }
 
 .left-nav {
@@ -129,18 +144,57 @@ html, body {
     align-items: center;
     display: flex;
     flex-direction: column;
-    gap: 5px;
-    padding-top: 5px;
+    gap: 10px;
+    padding-top: 20px;
 }
 
 .dark .left-nav {
     background-color: rgba(var(--v-theme-background), 0.5);
 }
 
+.nav-button {
+    transform: translateY(0);
+}
+.nav-button:hover{
+    transform: translateY(-5px);
+}
+.nav-button.v-btn--active{
+    transform: translateY(-5px);
+}
+
+.button-text {
+    font-size: 11px;
+    font-weight: 400;
+    margin-top: -10px;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: .3s;
+    pointer-events: none;
+}
+
+.nav-1-btn:hover + .nav-1-text {
+    opacity: .6;
+    transform: translateY(0px);
+}
+
+.nav-2-btn:hover + .nav-2-text {
+    opacity: .6;
+    transform: translateY(0px);
+}
+
+.nav-3-btn:hover + .nav-3-text {
+    opacity: .6;
+    transform: translateY(0px);
+}
+
+.button-text.active {
+    opacity: .8;
+    transform: translateY(0px);
+}
+
 .router-view {
     position: fixed;
     height: 100%;
-    padding-top: 60px;
     right: 0;
     width: calc(100% - 60vh);
     overflow-y: auto;

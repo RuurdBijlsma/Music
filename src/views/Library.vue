@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div class="library">
         <div class="nav-buttons mt-2 mb-2">
             <v-btn :variant="tab === 'tracks' ? 'tonal' : 'text'" @click="tab='tracks'">Tracks</v-btn>
             <v-btn :variant="tab === 'albums' ? 'tonal' : 'text'" @click="tab='albums'">Albums</v-btn>
@@ -43,6 +43,9 @@ checkRoute();
 </script>
 
 <style scoped>
+.library{
+    padding-top:60px;
+}
 .nav-buttons {
     display: flex;
     gap: 20px;

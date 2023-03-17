@@ -61,7 +61,7 @@ export const useSpotifyStore = defineStore('spotify', () => {
         playlists: [] as SpotifyApi.PlaylistObjectFull[],
         artists: [] as any[],
         albums: [] as any[],
-        tracks: [] as SpotifyApi.PlaylistTrackObject[],
+        tracks: [] as SpotifyApi.TrackObjectFull[],
     })
     let isRefreshing = ref({
         playlist: false,

@@ -10,8 +10,22 @@
                     :src="playlist.images[0].url"/>
                 <v-spacer/>
                 <h1>{{ playlist.name }}</h1>
+                <p class="playlist-stats">
+                    Created by
+                    <router-link class="user-url" :to="base.itemUrl(playlist.owner)">{{
+                            playlist.owner.display_name
+                        }}
+                    </router-link>
+                    • {{ tracks.length }} Track{{ tracks.length === 1 ? '' : 's' }} • 3 hours • {{ followerString }}
+                </p>
+                <div class="play-buttons mt-2 mb-2">
+                    <v-divider/>
+                    <v-btn color="primary" icon="mdi-play-outline" variant="text"/>
+                    <v-btn color="primary" icon="mdi-shuffle" variant="text"/>
+                    <v-btn color="primary" icon="mdi-heart-outline" variant="text"/>
+                    <v-divider/>
+                </div>
                 <p class="text-center">{{ playlist.description }}</p>
-                <v-spacer/>
             </div>
         </track-list>
     </div>
@@ -28,7 +42,7 @@ import PlaylistTrackObject = SpotifyApi.PlaylistTrackObject;
 import TrackObjectFull = SpotifyApi.TrackObjectFull;
 
 const route = useRoute()
-
+const base = useBaseStore();
 const spotify = useSpotifyStore();
 const playlist = ref(null as null | SpotifyApi.SinglePlaylistResponse);
 let loadedId = route.params.id as string;
@@ -45,10 +59,17 @@ const tracks = computed(() => {
     if (playlist.value === null) return [];
     return playlist.value.tracks.items.map((t: PlaylistTrackObject) => t.track as TrackObjectFull)
 });
+const followerString = computed(() => {
+    if (playlist.value === null) return '0 followers';
+    if (playlist.value.followers.total > 1000000) {
+        return Math.round(playlist.value.followers.total / 1000000) + 'M followers';
+    }
+    return playlist.value.followers.total.toLocaleString() + ' follower' + (playlist.value.followers.total === 1 ? '' : 's');
+})
 
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .playlist {
 }
 
@@ -58,10 +79,29 @@ const tracks = computed(() => {
     align-items: center;
     padding: 20px;
     font-weight: 300;
-    height: 430px;
+    height: 485px;
 }
 
 .playlist-info > h1 {
     font-weight: 400;
+}
+
+.user-url {
+    color: rgb(var(--v-theme-primary));
+    text-decoration: none;
+}
+
+.playlist-stats {
+    font-size: 13px;
+    font-weight: 400;
+    opacity: .7;
+}
+
+.play-buttons {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    gap: 5px;
 }
 </style>

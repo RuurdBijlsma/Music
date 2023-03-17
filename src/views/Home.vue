@@ -72,7 +72,7 @@ const otherPlaylists = computed(() => spotify.view.homePage.featured.playlists.s
 
 <style scoped>
 .home {
-    /*padding: 10px 20px;*/
+    padding-top:60px;
 }
 
 .home-title {

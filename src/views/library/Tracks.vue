@@ -1,27 +1,60 @@
 <template>
     <div class="playlist">
-        <v-virtual-scroll :items="spotify.library.tracks" height="100%" item-height="50">
-            <template v-slot:default="{ item, index }">
-                <track-list-item :class="{'odd-item': index % 2 === 0}" class="track-list-item" :track="item"/>
-            </template>
-        </v-virtual-scroll>
-<!--        <track-list :tracks="spotify.library.tracks">-->
-<!--            <div class="mb-8 playlist-info">-->
-<!--                hello my tracks-->
-<!--            </div>-->
-<!--        </track-list>-->
+        <p class="tracks-info">
+            {{ spotify.library.tracks.length }} Tracks • {{ totalDuration }}
+        </p>
+        <div class="play-buttons mb-2">
+            <v-divider/>
+            <v-btn color="primary" icon="mdi-play-outline" variant="text"/>
+            <v-btn color="primary" icon="mdi-shuffle" variant="text"/>
+            <v-btn color="primary" icon="mdi-filter-outline" variant="text"/>
+            <v-divider/>
+        </div>
+        <track-list item-height :tracks="spotify.library.tracks" :subtract-height="236" padding-top="0"/>
     </div>
 </template>
 
 <script setup lang="ts">
-import TrackList from "../../components/TrackList.vue";
 import {useSpotifyStore} from "../../scripts/store/spotify";
-import TrackListItem from "../../components/TrackListItem.vue";
+import {useBaseStore} from "../../scripts/store/base";
+import {computed} from "vue";
+import TrackList from "../../components/TrackList.vue";
 
 const spotify = useSpotifyStore();
-// spotify.refreshUserData('track');
+const base = useBaseStore();
+console.log('ph', base.pageHeight)
+const totalDuration = computed(() => {
+    if (totalDurationMs.value > 3600000)
+        return Math.round(totalDurationMs.value / 3600000) + ' hours';
+    return totalDurationMs.value / 60000 + ' minutes';
+})
+const totalDurationMs = computed(() => {
+    if (spotify.library.tracks === null) return 0;
+    return spotify.library.tracks.reduce((a, b) => a + b.duration_ms, 0);
+});
 
 </script>
 
 <style scoped>
+.track-list-item.odd-item {
+    background-color: rgba(0, 0, 0, 0.07);
+}
+
+.dark .track-list-item.odd-item {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.play-buttons {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 5px;
+}
+
+.tracks-info {
+    font-size: 13px;
+    font-weight: 400;
+    opacity: .7;
+    text-align: center;
+}
 </style>

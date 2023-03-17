@@ -48,9 +48,11 @@ const base = useBaseStore();
     border-radius: 5px;
     margin: 0 10px;
 }
-.lazy-img{
+
+.lazy-img {
     flex-grow: 0;
 }
+
 .track-img {
     width: 40px;
     height: 40px;
@@ -66,6 +68,7 @@ const base = useBaseStore();
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow-x: hidden;
+    width: calc(100% - 110px);
 }
 
 .track-name {

@@ -1,5 +1,10 @@
 <template>
-    <v-virtual-scroll :items="scrollItems" height="100%" item-height="50">
+    <v-virtual-scroll
+        :items="scrollItems"
+        class="virtual-scroll"
+        :style="{paddingTop: props.paddingTop}"
+        :height="(base.pageHeight - props.subtractHeight).toString()"
+        v-bind="attrs">
         <template v-slot:default="{ item, index }">
             <slot v-if="item === null"/>
             <track-list-item v-else :class="{'odd-item': index % 2 === 0}" class="track-list-item" :track="item"/>
@@ -8,17 +13,44 @@
 </template>
 
 <script setup lang="ts">
-import {computed} from "vue";
+import {computed, ref, watch} from "vue";
+import type {Ref} from 'vue';
 import type {PropType} from "vue";
 import TrackListItem from "./TrackListItem.vue";
 import TrackObjectFull = SpotifyApi.TrackObjectFull;
+import {useBaseStore} from "../scripts/store/base";
 
+const base = useBaseStore();
 const props = defineProps({
     tracks: {
         type: Object as PropType<TrackObjectFull[]>,
         required: true
-    }
+    },
+    subtractHeight: {
+        type: Number,
+        default: () => 48,
+    },
+    paddingTop: {
+        type: String,
+        default: () => '60px',
+    },
+    itemHeight: {
+        type: Boolean,
+        default: () => false,
+    },
 })
+const attrs: Ref = ref({})
+watch(props, () => checkAttrs())
+checkAttrs()
+
+function checkAttrs() {
+    if (props.itemHeight) {
+        attrs.value['item-height'] = 50;
+    } else {
+        delete attrs.value['item-height'];
+    }
+    console.log("Attrs: ", attrs.value);
+}
 
 const scrollItems = computed(() => [null, ...props.tracks])
 </script>
@@ -30,5 +62,24 @@ const scrollItems = computed(() => [null, ...props.tracks])
 
 .dark .track-list-item.odd-item {
     background-color: rgba(255, 255, 255, 0.05);
+}
+
+.virtual-scroll::-webkit-scrollbar {
+    width: 14px;
+    height: 18px;
+}
+
+.virtual-scroll::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, .1);
+    border-radius: 3px;
+}
+
+.virtual-scroll::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 3px;
+}
+
+.virtual-scroll::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.6);
 }
 </style>
