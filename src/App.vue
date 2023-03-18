@@ -26,7 +26,7 @@
                       :class="{active: route.path === '/library'}">Library</span>
             </div>
             <div class="router-view" v-if="spotify.dbLoaded">
-                <router-view v-slot="{ Component }">
+                <router-view v-slot="{ Component }" :key="route.path">
                     <transition name="slide-fade" mode="out-in">
                         <component :is="Component"/>
                     </transition>
@@ -155,10 +155,12 @@ html, body {
 .nav-button {
     transform: translateY(0);
 }
-.nav-button:hover{
+
+.nav-button:hover {
     transform: translateY(-5px);
 }
-.nav-button.v-btn--active{
+
+.nav-button.v-btn--active {
     transform: translateY(-5px);
 }
 

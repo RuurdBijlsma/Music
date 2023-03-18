@@ -1,7 +1,8 @@
 <template>
     <div class="playlist">
         <p class="tracks-info">
-            {{ spotify.library.tracks.length }} Tracks • {{ totalDuration }}
+            {{ spotify.library.tracks.length.toLocaleString() }} Track{{spotify.library.tracks.length === 1 ? '' : 's'}}
+            • {{ base.approximateDuration((totalDurationMs)) }}
         </p>
         <div class="play-buttons mb-2">
             <v-divider/>
@@ -22,12 +23,6 @@ import TrackList from "../../components/TrackList.vue";
 
 const spotify = useSpotifyStore();
 const base = useBaseStore();
-console.log('ph', base.pageHeight)
-const totalDuration = computed(() => {
-    if (totalDurationMs.value > 3600000)
-        return Math.round(totalDurationMs.value / 3600000) + ' hours';
-    return totalDurationMs.value / 60000 + ' minutes';
-})
 const totalDurationMs = computed(() => {
     if (spotify.library.tracks === null) return 0;
     return spotify.library.tracks.reduce((a, b) => a + b.duration_ms, 0);

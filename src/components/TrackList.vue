@@ -7,7 +7,7 @@
         item-height="50">
         <template v-slot:default="{ item, index }">
             <slot v-if="item === null"/>
-            <track-list-item v-else :class="{'odd-item': index % 2 === 0}" class="track-list-item" :track="item"/>
+            <track-list-item :number="noImages ? index + 1 : undefined" v-else :class="{'odd-item': index % 2 === 0}" class="track-list-item" :track="item"/>
         </template>
     </v-virtual-scroll>
 </template>
@@ -34,6 +34,10 @@ const props = defineProps({
         default: () => '60px',
     },
     itemHeight: {
+        type: Boolean,
+        default: () => false,
+    },
+    noImages: {
         type: Boolean,
         default: () => false,
     },

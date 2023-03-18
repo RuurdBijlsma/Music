@@ -32,6 +32,12 @@ export const baseDb = openDB("base", 1, {
 });
 
 export const useBaseStore = defineStore('base', () => {
+    function approximateDuration(millis: number) {
+        if (millis > 7200000)
+            return Math.round(millis / 3600000) + ' hours';
+        let minutes = Math.round(millis / 60000);
+        return minutes + ' minute' + (minutes === 1 ? '' : 's');
+    }
 
     function msToReadable(millis: number) {
         if (isNaN(millis) || millis === undefined)
@@ -108,5 +114,5 @@ export const useBaseStore = defineStore('base', () => {
         return `/${type}/${encodeUrlName(name)}/${item.id}`;
     }
 
-    return {itemUrl, itemImage, itemDescription, pageHeight, msToReadable}
+    return {itemUrl, itemImage, itemDescription, pageHeight, msToReadable, approximateDuration}
 })

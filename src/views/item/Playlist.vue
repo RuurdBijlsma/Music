@@ -16,7 +16,8 @@
                             playlist.owner.display_name
                         }}
                     </router-link>
-                    • {{ tracks.length }} Track{{ tracks.length === 1 ? '' : 's' }} • 3 hours • {{ followerString }}
+                    • {{ tracks.length }} Track{{ tracks.length === 1 ? '' : 's' }} •
+                    {{ base.approximateDuration(totalDurationMs) }} • {{ followerString }}
                 </p>
                 <div class="play-buttons mt-2 mb-2">
                     <v-divider/>
@@ -25,19 +26,19 @@
                     <v-btn color="primary" icon="mdi-heart-outline" variant="text"/>
                     <v-divider/>
                 </div>
-                <p class="text-center">{{ playlist.description }}</p>
+                <p>{{ playlist.description }}</p>
             </div>
         </track-list>
     </div>
 </template>
 
 <script setup lang="ts">
-import {useSpotifyStore} from "../scripts/store/spotify";
+import {useSpotifyStore} from "../../scripts/store/spotify";
 import {computed, ref, watch} from "vue";
 import {useRoute} from "vue-router";
-import {useBaseStore} from "../scripts/store/base";
-import GlowImage from "../components/GlowImage.vue";
-import TrackList from "../components/TrackList.vue";
+import {useBaseStore} from "../../scripts/store/base";
+import GlowImage from "../../components/GlowImage.vue";
+import TrackList from "../../components/TrackList.vue";
 import PlaylistTrackObject = SpotifyApi.PlaylistTrackObject;
 import TrackObjectFull = SpotifyApi.TrackObjectFull;
 
@@ -66,13 +67,13 @@ const followerString = computed(() => {
     }
     return playlist.value.followers.total.toLocaleString() + ' follower' + (playlist.value.followers.total === 1 ? '' : 's');
 })
+const totalDurationMs = computed(() => {
+    return tracks.value.reduce((a, b) => a + b.duration_ms, 0);
+});
 
 </script>
 
 <style scoped lang="scss">
-.playlist {
-}
-
 .playlist-info {
     display: flex;
     flex-direction: column;
@@ -89,6 +90,10 @@ const followerString = computed(() => {
 .user-url {
     color: rgb(var(--v-theme-primary));
     text-decoration: none;
+}
+
+.user-url:hover {
+    text-decoration: underline;
 }
 
 .playlist-stats {

@@ -1,13 +1,15 @@
 <template>
-    <div class="album" v-if="album">
+    <div class="downloads">
+        downloads
     </div>
 </template>
 
 <script setup lang="ts">
-import {ref} from "vue";
 
-const album = ref(null);
 </script>
 
 <style scoped>
+.downloads {
+    padding-top: 60px;
+}
 </style>

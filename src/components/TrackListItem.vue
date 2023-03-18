@@ -1,11 +1,18 @@
 <template>
     <div class="track-item">
-        <v-lazy class="lazy-img" width="70" transition="fade-transition">
+        <v-lazy v-if="props.number === undefined" class="lazy-img" width="70" transition="fade-transition">
             <v-img class="track-img" :src="props.track.album.images[0].url"/>
         </v-lazy>
+        <div v-else class="track-number">
+            {{ number }}
+        </div>
         <div class="track-info">
             <div class="track-name">{{ props.track.name }}</div>
-            <div class="track-artist">{{ props.track.artists.map((a: any) => a.name).join(', ') }}</div>
+            <div class="track-artist">
+                <span class="mr-2" v-for="(artist, i) in props.track.artists">
+                    <router-link no-style :to="base.itemUrl(artist)">{{ artist.name }}</router-link>{{ i === props.track.artists.length - 1 ? '' : ', ' }}
+                </span>
+            </div>
         </div>
         <v-spacer/>
         <div class="track-duration ml-2">
@@ -27,9 +34,12 @@ const props = defineProps({
     track: {
         type: Object as PropType<TrackObjectFull>,
         required: true
-    }
+    },
+    number: {
+        type: Number,
+        required: false,
+    },
 })
-
 const base = useBaseStore();
 </script>
 
@@ -61,6 +71,16 @@ const base = useBaseStore();
     /*box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.2);*/
 }
 
+.track-number {
+    text-align: left;
+    width: 40px;
+    height: 40px;
+    justify-content: start;
+    align-items: center;
+    display: flex;
+    margin-left: 10px;
+}
+
 .track-info {
     display: flex;
     flex-direction: column;
@@ -79,6 +99,7 @@ const base = useBaseStore();
     font-weight: 400;
     font-size: 13px;
     opacity: .6;
+    display: flex;
 }
 
 .track-duration {
