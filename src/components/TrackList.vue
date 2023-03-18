@@ -2,8 +2,8 @@
     <v-virtual-scroll
         :items="scrollItems"
         class="virtual-scroll"
-        :style="{paddingTop: props.paddingTop}"
-        :height="(base.pageHeight - props.subtractHeight).toString()"
+        :style="{paddingTop: paddingTop}"
+        :height="(pageHeight - subtractHeight).toString()"
         item-height="50">
         <template v-slot:default="{ item, index }">
             <slot v-if="item === null"/>
@@ -13,7 +13,7 @@
 </template>
 
 <script setup lang="ts">
-import {computed} from "vue";
+import {computed, ref} from "vue";
 import type {PropType} from "vue";
 import TrackListItem from "./TrackListItem.vue";
 import TrackObjectFull = SpotifyApi.TrackObjectFull;
@@ -27,7 +27,7 @@ const props = defineProps({
     },
     subtractHeight: {
         type: Number,
-        default: () => 48,
+        default: () => 0,
     },
     paddingTop: {
         type: String,
@@ -41,6 +41,11 @@ const props = defineProps({
         type: Boolean,
         default: () => false,
     },
+})
+
+const pageHeight = ref(window.innerHeight);
+window.addEventListener('resize', () => {
+    pageHeight.value = window.innerHeight;
 })
 const scrollItems = computed(() => [null, ...props.tracks])
 </script>

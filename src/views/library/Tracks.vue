@@ -11,7 +11,7 @@
             <v-btn color="primary" icon="mdi-filter-outline" variant="text"/>
             <v-divider/>
         </div>
-        <track-list item-height :tracks="spotify.library.tracks" :subtract-height="236" padding-top="0"/>
+        <track-list item-height :tracks="spotify.library.tracks" :subtract-height="188" padding-top="0"/>
     </div>
 </template>
 

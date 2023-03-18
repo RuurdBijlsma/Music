@@ -1,6 +1,8 @@
 <template>
-    <div class="mp">
-        <glow-image class="album-art" src="img/cover2.jpg" :width="500" :height="500" rounding="10px"/>
+    <div class="mp" ref="musicContainer">
+        <v-spacer></v-spacer>
+        <glow-image class="album-art" src="img/cover2.jpg" :width="elWidth / 1.6" :height="elWidth / 1.6"
+                    rounding="10px"/>
         <div class="sheet">
             <div class="music-info-text">
                 <h2 class="music-title">Capricorn</h2>
@@ -46,19 +48,36 @@
 </template>
 
 <script setup lang="ts">
-import {ref} from "vue";
+import {onMounted, ref} from "vue";
 import GlowImage from "./GlowImage.vue";
 
-let volume = ref(0.7);
+const volume = ref(0.7);
+const elWidth = ref(0);
+const musicContainer = ref(null);
+
+function checkElWidth() {
+    let el = musicContainer.value as HTMLElement | null;
+    if (el === null) return;
+    elWidth.value = el.getBoundingClientRect().width;
+    // console.log("Width of el = " + elWidth.value);
+}
+
+window.addEventListener('resize', () => checkElWidth());
+let interval = 0;
+onMounted(() => {
+    checkElWidth();
+    interval = window.setInterval(() => {
+        checkElWidth();
+    }, 100);
+})
 </script>
 
 <style scoped>
 .mp {
     display: flex;
     flex-direction: column;
-    padding: 10px;
-    padding-top: 0;
     align-items: center;
+    padding:10px;
 }
 
 .album-art {
@@ -67,12 +86,6 @@ let volume = ref(0.7);
 }
 
 .sheet {
-    /*background-color: rgba(255, 255, 255, 0.5);*/
-    /*backdrop-filter: blur(100px) saturate(250%);*/
-
-    /*border-radius: 5px;*/
-    /*box-shadow: 0 3px 4px 0 rgba(0, 0, 0, 0.2);*/
-
     padding: 20px;
     display: flex;
     flex-direction: column;

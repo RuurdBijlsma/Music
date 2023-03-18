@@ -61,11 +61,6 @@ export const useBaseStore = defineStore('base', () => {
         else return `${hString}:${mString}:${sString}`;
     }
 
-    const pageHeight = ref(1080);
-    window.addEventListener('resize', () => {
-        pageHeight.value = window.innerHeight;
-    })
-
     function itemDescription(item: Item) {
         if (item.type === 'album') {
             return `${caps(item.album_type)} • ${item.artists.map(a => a.name).join(', ')}`
@@ -114,5 +109,5 @@ export const useBaseStore = defineStore('base', () => {
         return `/${type}/${encodeUrlName(name)}/${item.id}`;
     }
 
-    return {itemUrl, itemImage, itemDescription, pageHeight, msToReadable, approximateDuration}
+    return {itemUrl, itemImage, itemDescription, msToReadable, approximateDuration}
 })

@@ -1,10 +1,10 @@
 <template>
-    <router-link no-style :to="base.itemUrl(props.item)">
+    <router-link no-style :to="base.itemUrl(item)">
         <div class="image"
-             :style="{backgroundImage: `url(${base.itemImage(props.item)})`, minHeight: (props.size - 37) + 'px'}"/>
-        <div class="info mt-2" :style="{minWidth: (props.size - 37) + 'px'}">
-            <p class="title" v-if="!hideName">{{ props.item.name }}</p>
-            <p class="description" v-html="base.itemDescription(props.item)"></p>
+             :style="{backgroundImage: `url(${base.itemImage(item)})`}"/>
+        <div class="info mt-2">
+            <p class="title" v-if="!hideName">{{ item.name }}</p>
+            <p class="description" v-html="base.itemDescription(item)"></p>
         </div>
     </router-link>
 </template>
@@ -15,7 +15,7 @@ import {useBaseStore} from "../scripts/store/base";
 import type {Item} from '../scripts/store/base'
 
 const base = useBaseStore();
-const props = defineProps({
+defineProps({
     item: {
         type: Object as PropType<Item>,
         required: true
@@ -37,16 +37,24 @@ const props = defineProps({
 .image {
     border-radius: 10px;
     box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.2);
-    height: calc((100vw - 500px) / 4 - 39px);
+    height: 12vw;
     aspect-ratio: 1;
     background-size: cover;
-    min-height: 163px;
 }
 
 .info {
-    width: calc((100vw - 500px) / 4 - 39px);
+    width: 12vw;
     font-size: 13px;
     overflow: hidden;
+}
+
+@media only screen and (max-width: 1500px) {
+    .info {
+        width: 190px;
+    }
+    .image {
+        height: 190px;
+    }
 }
 
 .title {

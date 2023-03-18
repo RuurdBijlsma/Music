@@ -1,5 +1,5 @@
 <template>
-    <div class="root" :class="{dark: theme.current.value.dark}">
+    <v-app class="root" :class="{dark: theme.current.value.dark}">
         <div class="blur-bg"></div>
         <div class="main">
             <top-menu class="top-menu"/>
@@ -25,6 +25,7 @@
                 <span class="button-text nav-3-text"
                       :class="{active: route.path === '/library'}">Library</span>
             </div>
+            <music-player class="music-player" v-if="spotify.dbLoaded"/>
             <div class="router-view" v-if="spotify.dbLoaded">
                 <router-view v-slot="{ Component }" :key="route.path">
                     <transition name="slide-fade" mode="out-in">
@@ -32,9 +33,8 @@
                     </transition>
                 </router-view>
             </div>
-            <music-player class="music-player" v-if="spotify.dbLoaded"/>
         </div>
-    </div>
+    </v-app>
 </template>
 
 <script setup lang="ts">
@@ -80,9 +80,6 @@ html, body {
     background-color: rgb(var(--v-theme-background));
 }
 
-.root {
-}
-
 .blur-bg {
     background-image: linear-gradient(rgb(var(--v-theme-background), 0.5), rgb(var(--v-theme-background))), url('assets/cover2.jpg');
     background-position: center;
@@ -94,6 +91,17 @@ html, body {
     position: fixed;
     z-index: 1;
     filter: blur(60px);
+}
+
+.main {
+    position: fixed;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    user-select: none;
+    font-family: "Segoe UI", Helvetica Neue, Helvetica, Arial, sans-serif;
 }
 
 .top-menu {
@@ -121,17 +129,6 @@ html, body {
     box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.15);
 }
 
-.main {
-    position: fixed;
-    z-index: 2;
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    height: 100%;
-    user-select: none;
-    font-family: "Segoe UI", Helvetica Neue, Helvetica, Arial, sans-serif;
-}
-
 .left-nav {
     position: fixed;
     left: 0;
@@ -139,13 +136,14 @@ html, body {
     width: 70px;
     height: calc(100% - 50px);
     backdrop-filter: blur(40px) saturate(150%);
-    box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.15);
+    box-shadow: 1px 0 1px 0 rgba(0, 0, 0, 0.1);
     background-color: rgba(var(--v-theme-background), 0.3);
     align-items: center;
     display: flex;
     flex-direction: column;
     gap: 10px;
     padding-top: 20px;
+    z-index: 3;
 }
 
 .dark .left-nav {
@@ -194,15 +192,6 @@ html, body {
     transform: translateY(0px);
 }
 
-.router-view {
-    position: fixed;
-    height: 100%;
-    right: 0;
-    width: calc(100% - 60vh);
-    overflow-y: auto;
-    z-index: 2;
-}
-
 .router-view::-webkit-scrollbar-track {
     background: rgba(0, 0, 0, 0.1);
 }
@@ -211,13 +200,88 @@ html, body {
     background: rgba(0, 0, 0, 0.3);
 }
 
-.music-player {
-    width: calc(60vh - 70px);
+.router-view {
+    overflow-y: auto;
+    //background-color: blue;
     position: fixed;
-    left: 70px;
-    height: calc(100% - 100px);
-    top: 100px;
-    z-index: 6;
+    height: 100%;
+    width: 50%;
+    right: 0;
+}
+
+.music-player {
+    position: fixed;
+    height: 100%;
+    //background-color: red;
+    width: calc(50% - 70px);
+    left:70px;
+}
+
+@media only screen and (max-width: 900px) {
+    .router-view {
+        width: 100%;
+        height: calc(100% - 100px);
+        padding-left: 80px;
+    }
+    .music-player {
+        width: 100%;
+        height: 100px;
+        bottom: 0;
+    }
+}
+
+@media only screen and (min-width: 1000px) {
+    .router-view {
+        width:50%;
+    }
+    .music-player {
+        width:calc(50% - 70px);
+        left:70px;
+    }
+}
+
+@media only screen and (min-width: 1250px) {
+    .router-view {
+        width: 800px;
+    }
+    .music-player {
+        width: calc(100% - 870px);
+        left:70px;
+        padding-left: 10px;
+    }
+}
+
+@media only screen and (min-width: 1550px) {
+    .router-view {
+        width: 1000px;
+    }
+    .music-player {
+        width: calc(100% - 1070px);
+        left:70px;
+        padding-left: 10px;
+    }
+}
+
+@media only screen and (min-width: 1800px) {
+    .router-view {
+        width: 1000px;
+    }
+    .music-player {
+        width: calc(90% - 1070px);
+        left:calc(70px + 5%);
+        padding-left: 10px;
+    }
+}
+
+@media only screen and (min-width: 2200px) {
+    .router-view {
+        width: 1000px;
+    }
+    .music-player {
+        width: calc(75% - 1070px);
+        left:calc(70px + 12.5%);
+        padding-left: 10px;
+    }
 }
 
 a[no-style] {

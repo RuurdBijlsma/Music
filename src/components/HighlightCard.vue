@@ -1,12 +1,11 @@
 <template>
-    <div class="highlight-featured mr-2" :style="{ minHeight: (props.size + 2) + 'px' }">
+    <div class="highlight-featured mr-2">
         <div class="card-info">
-
-            <router-link no-style :to="base.itemUrl(props.item)">
-                <h2 class="card-title">{{ props.item.name }}</h2>
+            <router-link no-style :to="base.itemUrl(item)">
+                <h2 class="card-title">{{ item.name }}</h2>
             </router-link>
             <p class="card-description mt-3">
-                {{ props.item.description }}
+                {{ item.description }}
             </p>
             <v-spacer/>
             <div class="buttons mt-3">
@@ -15,9 +14,9 @@
             </div>
         </div>
         <v-spacer></v-spacer>
-        <router-link :to="base.itemUrl(props.item)">
+        <router-link :to="base.itemUrl(item)">
             <div class="card-image"
-                 :style="{backgroundImage: `url(${base.itemImage(props.item)})`, minHeight: (props.size + 2) + 'px'}"/>
+                 :style="{backgroundImage: `url(${base.itemImage(item)})`}"/>
         </router-link>
     </div>
 </template>
@@ -28,7 +27,7 @@ import type {Item} from '../scripts/store/base'
 import type {PropType} from "vue"
 
 const base = useBaseStore();
-const props = defineProps({
+defineProps({
     item: {
         type: Object as PropType<Item>,
         required: true
@@ -44,17 +43,18 @@ const props = defineProps({
 
 <style scoped>
 .highlight-featured {
-    max-width: 800px;
-    height: calc((100vw - 500px) / 4);
+    width: 30vw;
+    height: calc(12vw + 50px);
+
     display: flex;
     flex-direction: row;
-
     background-color: rgba(255, 255, 255, 0.4);
     backdrop-filter: blur(100px) saturate(300%) brightness(105%);
     border-radius: 10px;
-    box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.2);
+    box-shadow: 0 3px 15px 0 rgba(0, 0, 0, 0.15);
 }
-.dark .highlight-featured{
+
+.dark .highlight-featured {
     background-color: rgba(0, 0, 0, 0.4);
 }
 
@@ -63,7 +63,18 @@ const props = defineProps({
     border-bottom-right-radius: 10px;
     background-size: cover;
     aspect-ratio: 1;
-    height: calc((100vw - 500px) / 4);
+    height: calc(12vw + 50px);
+    background-position: center;
+}
+
+@media only screen and (max-width: 1500px) {
+    .highlight-featured {
+        width: 500px;
+        height: 230px;
+    }
+    .card-image {
+        height: 230px;
+    }
 }
 
 .card-info {

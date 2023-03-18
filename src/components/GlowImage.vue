@@ -27,7 +27,7 @@
 <script setup lang="ts">
 import {useTheme} from "vuetify";
 
-const props = defineProps({
+defineProps({
     src: {
         type: String,
         default: undefined,
@@ -59,6 +59,7 @@ const theme = useTheme()
     background-repeat: no-repeat;
     position: relative;
     z-index: 3;
+    transition: .1s;
 }
 .album-background {
     transform: scale(1);
