@@ -1,5 +1,5 @@
 <template>
-    <router-link no-style :to="base.itemUrl(item)">
+    <router-link no-style :to="base.itemUrl(item)" :class="{round: item.type === 'artist'}">
         <div class="image"
              :style="{backgroundImage: `url(${base.itemImage(item)})`}"/>
         <div class="info mt-2">
@@ -42,16 +42,25 @@ defineProps({
     background-size: cover;
 }
 
+.round .image {
+    border-radius: 50%;
+}
+
 .info {
     width: 12vw;
     font-size: 13px;
     overflow: hidden;
 }
 
+.round .info {
+    text-align: center;
+}
+
 @media only screen and (max-width: 1500px) {
     .info {
         width: 190px;
     }
+
     .image {
         height: 190px;
     }

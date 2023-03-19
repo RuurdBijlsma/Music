@@ -1,22 +1,23 @@
 <template>
     <div class="track-item">
-        <v-lazy v-if="props.number === undefined" class="lazy-img" width="70" transition="fade-transition">
-            <v-img class="track-img" :src="props.track.album.images[0].url"/>
+        <v-lazy v-if="number === undefined" class="lazy-img" width="70" transition="fade-transition">
+            <v-img v-if="track.album.images.length > 0" class="track-img" :src="track.album.images[0].url"/>
+            <v-sheet v-else class="track-img"></v-sheet>
         </v-lazy>
         <div v-else class="track-number">
             {{ number }}
         </div>
         <div class="track-info">
-            <div class="track-name">{{ props.track.name }}</div>
+            <div class="track-name">{{ track.name }}</div>
             <div class="track-artist">
-                <span class="mr-2" v-for="(artist, i) in props.track.artists">
-                    <router-link no-style :to="base.itemUrl(artist)">{{ artist.name }}</router-link>{{ i === props.track.artists.length - 1 ? '' : ', ' }}
+                <span class="mr-2" v-for="(artist, i) in track.artists">
+                    <router-link no-style :to="base.itemUrl(artist)">{{ artist.name }}</router-link>{{ i === track.artists.length - 1 ? '' : ', ' }}
                 </span>
             </div>
         </div>
         <v-spacer/>
         <div class="track-duration ml-2">
-            {{ base.msToReadable(props.track.duration_ms) }}
+            {{ base.msToReadable(track.duration_ms) }}
         </div>
         <v-btn class="track-options ml-2"
                variant="text" size="30"
@@ -30,7 +31,7 @@ import type {PropType} from "vue";
 import TrackObjectFull = SpotifyApi.TrackObjectFull;
 import {useBaseStore} from "../scripts/store/base";
 
-const props = defineProps({
+defineProps({
     track: {
         type: Object as PropType<TrackObjectFull>,
         required: true

@@ -58,12 +58,15 @@ spotify.api.getPlaylist(loadedId).then((r: any) => {
 });
 const tracks = computed(() => {
     if (playlist.value === null) return [];
-    return playlist.value.tracks.items.map((t: PlaylistTrackObject) => t.track as TrackObjectFull)
+    return playlist.value.tracks.items
+        .map((t: PlaylistTrackObject) => t.track as TrackObjectFull)
+        .filter(t => !t.is_local)
 });
 const followerString = computed(() => {
     if (playlist.value === null) return '0 followers';
     if (playlist.value.followers.total > 1000000) {
-        return Math.round(playlist.value.followers.total / 1000000) + 'M followers';
+        let followerMillions = Math.round(playlist.value.followers.total / 1000000);
+        return followerMillions + 'M follower' + (followerMillions === 1 ? '' : 's');
     }
     return playlist.value.followers.total.toLocaleString() + ' follower' + (playlist.value.followers.total === 1 ? '' : 's');
 })

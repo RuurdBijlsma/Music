@@ -27,7 +27,7 @@
             </div>
             <music-player class="music-player" v-if="spotify.dbLoaded"/>
             <div class="router-view" v-if="spotify.dbLoaded">
-                <router-view v-slot="{ Component }" :key="route.path">
+                <router-view v-slot="{ Component }">
                     <transition name="slide-fade" mode="out-in">
                         <component :is="Component"/>
                     </transition>

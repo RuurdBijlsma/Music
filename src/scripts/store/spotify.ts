@@ -59,8 +59,8 @@ export const useSpotifyStore = defineStore('spotify', () => {
     )
     let library = ref({
         playlists: [] as SpotifyApi.PlaylistObjectFull[],
-        artists: [] as any[],
-        albums: [] as any[],
+        artists: [] as SpotifyApi.ArtistObjectFull[],
+        albums: [] as SpotifyApi.AlbumObjectFull[],
         tracks: [] as SpotifyApi.TrackObjectFull[],
     })
     let isRefreshing = ref({
@@ -340,10 +340,7 @@ export const useSpotifyStore = defineStore('spotify', () => {
         }
     }
 
-    async function refreshUserData(type: 'playlist' | 'artist' | 'track' | 'album' = 'playlist') {
-        if (!['playlist', 'album', 'track', 'artist'].includes(type))
-            console.warn("Wrong type set for refreshUserData!");
-
+    async function refreshUserData(type: 'playlist' | 'artist' | 'track' | 'album') {
         if (isRefreshing.value[type]) {
             console.info("This library type is already refreshing, waiting for that to finish");
             await waitFor('refreshed' + type);
@@ -389,9 +386,10 @@ export const useSpotifyStore = defineStore('spotify', () => {
 
         for await(let batch of await retrieveSpotifyArray(retrieval)) {
             for (let item of page(batch).items) {
-                if (type === 'track')
-                    addToLib(item.track);
-                else if (type === 'album')
+                if (type === 'track') {
+                    if (!item.track.is_local)
+                        addToLib(item.track);
+                } else if (type === 'album')
                     addToLib(item.album);
                 else
                     addToLib(item);
@@ -403,6 +401,7 @@ export const useSpotifyStore = defineStore('spotify', () => {
         }
 
         events.emit('refreshed' + type);
+        console.log(toRaw(library.value));
         isRefreshing.value[type] = false;
     }
 
