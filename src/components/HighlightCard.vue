@@ -51,9 +51,10 @@ defineProps({
 
     display: flex;
     flex-direction: row;
+    border-radius: 10px;
+
     background-color: rgba(255, 255, 255, 0.4);
     backdrop-filter: blur(100px) saturate(300%) brightness(105%);
-    border-radius: 10px;
     box-shadow: 0 3px 15px 0 rgba(0, 0, 0, 0.15);
 }
 

@@ -3,6 +3,7 @@
         <div class="blur-bg"></div>
         <div class="main">
             <top-menu class="top-menu"/>
+            <search-suggestions/>
             <div class="fake-top-menu"/>
             <div class="left-nav">
                 <v-btn class="nav-1-btn nav-button"
@@ -49,6 +50,7 @@ import MusicPlayer from "./components/MusicPlayer.vue";
 import {useSpotifyStore} from "./scripts/store/spotify";
 import {useTheme} from "vuetify";
 import {useRoute} from "vue-router";
+import SearchSuggestions from "./components/SearchSuggestions.vue";
 
 const theme = useTheme();
 const spotify = useSpotifyStore();

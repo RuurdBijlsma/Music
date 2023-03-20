@@ -6,12 +6,16 @@
         </div>
         <v-spacer/>
         <v-text-field
+            @focus="base.searchFocused = true"
+            @blur="base.searchFocused = false"
             no-drag
             class="search-field"
             hide-details density="compact"
+            v-model="base.searchValue"
             append-inner-icon="mdi-magnify"
             placeholder="Search tracks, artists, playlists, and more"
-            variant="solo"/>
+            variant="solo">
+        </v-text-field>
         <v-spacer/>
         <v-menu location="bottom" :close-on-content-click="false" v-model="dropdownOpen" close-on-back>
             <template v-slot:activator="{ props }">
@@ -92,9 +96,12 @@ import {useSpotifyStore} from "../scripts/store/spotify";
 import {ref, watch} from "vue";
 import {useRoute} from "vue-router";
 import {useTheme} from "vuetify";
+import Search from "./SearchSuggestions.vue";
+import {useBaseStore} from "../scripts/store/base";
 
 const route = useRoute();
 const theme = useTheme();
+const base = useBaseStore();
 const spotify = useSpotifyStore();
 const dropdownOpen = ref(false);
 const themeOptions = ['light', 'dark', 'system'];
@@ -172,10 +179,15 @@ window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e =
     text-transform: uppercase;
 }
 
+.list-link {
+    display: flex;
+}
+
 .search-field {
     -webkit-app-region: no-drag;
-    width: 280px;
+    width: 300px;
     flex-grow: 2;
+    position: relative;
 }
 
 .search-field:deep(.v-field--variant-solo) {
@@ -186,14 +198,6 @@ window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e =
 .dark .search-field:deep(.v-field--variant-solo) {
     background-color: rgba(0, 0, 0, 0.3);
     box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.15);
-}
-
-.list-link {
-    display: flex;
-}
-
-.theme-flex {
-
 }
 
 .chip-group {

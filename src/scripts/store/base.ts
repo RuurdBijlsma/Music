@@ -1,5 +1,6 @@
 import {defineStore} from 'pinia'
 import {openDB} from "idb";
+import {ref} from "vue";
 
 export interface Item {
     type: string,
@@ -112,5 +113,17 @@ export const useBaseStore = defineStore('base', () => {
         return `/${type}/${encodeUrlName(name)}/${item.id}`;
     }
 
-    return {itemUrl, itemImage, itemDescription, msToReadable, approximateDuration, albumString}
+    const searchValue = ref("");
+    const searchFocused = ref(false);
+
+    return {
+        itemUrl,
+        itemImage,
+        itemDescription,
+        msToReadable,
+        approximateDuration,
+        albumString,
+        searchValue,
+        searchFocused,
+    }
 })
