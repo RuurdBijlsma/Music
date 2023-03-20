@@ -39,12 +39,11 @@
 
 <script setup lang="ts">
 // todo:
-//  maybe cache visited playlists for faster load times per session (no idb) (is dat t wel waard?)
-//      cache ik t nu? Of wacht ie tot het loaded is voordat ie showt?
-//  artist page, browse page
+//  maybe cache visited playlists for faster load times per session (no idb)
+//  browse page
 //  make maximize/minimize/close functional
 //  make music player
-//  fix size of cards on home page when screen is too big
+
 import TopMenu from "./components/TopMenu.vue";
 import MusicPlayer from "./components/MusicPlayer.vue";
 import {useSpotifyStore} from "./scripts/store/spotify";
@@ -214,7 +213,7 @@ html, body {
     height: 100%;
     //background-color: red;
     width: calc(50% - 70px);
-    left:70px;
+    left: 70px;
 }
 
 @media only screen and (max-width: 900px) {
@@ -232,11 +231,11 @@ html, body {
 
 @media only screen and (min-width: 1000px) {
     .router-view {
-        width:50%;
+        width: 50%;
     }
     .music-player {
-        width:calc(50% - 70px);
-        left:70px;
+        width: calc(50% - 70px);
+        left: 70px;
     }
 }
 
@@ -246,7 +245,7 @@ html, body {
     }
     .music-player {
         width: calc(100% - 870px);
-        left:70px;
+        left: 70px;
         padding-left: 10px;
     }
 }
@@ -257,7 +256,7 @@ html, body {
     }
     .music-player {
         width: calc(100% - 1070px);
-        left:70px;
+        left: 70px;
         padding-left: 10px;
     }
 }
@@ -268,7 +267,7 @@ html, body {
     }
     .music-player {
         width: calc(90% - 1070px);
-        left:calc(70px + 5%);
+        left: calc(70px + 5%);
         padding-left: 10px;
     }
 }
@@ -279,7 +278,7 @@ html, body {
     }
     .music-player {
         width: calc(75% - 1070px);
-        left:calc(70px + 12.5%);
+        left: calc(70px + 12.5%);
         padding-left: 10px;
     }
 }

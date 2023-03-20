@@ -38,8 +38,8 @@ export const useBaseStore = defineStore('base', () => {
     }
 
     function albumString(item: SpotifyApi.AlbumObjectFull) {
-        return `${item.total_tracks} track${
-            item.total_tracks === 1 ? '' : 's'} • ${item.artists.map(a => a.name).join(', ')} • ${item.release_date.substring(0, 4)} • ${caps(item.album_type)}`;
+        // @ts-ignore
+        return `${item.total_tracks} track${item.total_tracks === 1 ? '' : 's'} • ${item.artists.map(a => a.name).join(', ')} • ${item.release_date.substring(0, 4)} • ${caps(item.album_type)}`;
     }
 
     function msToReadable(millis: number) {
