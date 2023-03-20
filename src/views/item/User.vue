@@ -15,13 +15,10 @@
             <p class="top-tracks-text ml-4 mr-4">Saved Playlists</p>
             <v-divider/>
         </div>
-        <div>
-            <horizontal-scroller v-if="playlists" class="mt-4 albums-grid">
-                <template v-for="(playlist, i) in playlists">
-                    <highlight-card v-if="i === 0" :item="playlist" class="mr-4"/>
-                    <item-card :item="playlist" class="mr-4" v-else/>
-                </template>
-            </horizontal-scroller>
+        <div class="playlist-grid">
+            <template v-for="playlist in playlists">
+                <item-card :item="playlist"/>
+            </template>
         </div>
     </div>
 </template>
@@ -34,7 +31,6 @@ import {useBaseStore} from "../../scripts/store/base";
 import GlowImage from "../../components/GlowImage.vue";
 import ItemCard from "../../components/ItemCard.vue";
 import HighlightCard from "../../components/HighlightCard.vue";
-import HorizontalScroller from "../../components/HorizontalScroller.vue";
 
 const route = useRoute()
 const base = useBaseStore();
@@ -65,7 +61,7 @@ const userImage = computed(() => {
 
 function reloadUser() {
     let id = loadedId;
-    if(id === '')
+    if (id === '')
         id = spotify.userInfo.id
     spotify.api.getUser(id).then(r => {
         user.value = r;
@@ -76,8 +72,9 @@ function reloadUser() {
         console.log("getUserPlaylists", r);
     });
 }
+
 const followerString = computed(() => {
-    if (user.value === null||user.value.followers===undefined) return '0 followers';
+    if (user.value === null || user.value.followers === undefined) return '0 followers';
     if (user.value.followers.total > 1000000) {
         let followerMillions = Math.round(user.value.followers.total / 1000000);
         return followerMillions + 'M follower' + (followerMillions === 1 ? '' : 's');
@@ -88,6 +85,14 @@ const followerString = computed(() => {
 </script>
 
 <style scoped lang="scss">
+.playlist-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    justify-content: space-evenly;
+    align-items: start;
+}
+
 .user {
     padding-top: 100px;
     padding-bottom: 100px;
