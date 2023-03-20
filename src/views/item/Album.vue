@@ -51,9 +51,10 @@ const spotify = useSpotifyStore();
 const album = ref(null as null | SpotifyApi.SingleAlbumResponse);
 let loadedId = route.params.id as string;
 watch(route, async () => {
-    if (route.params.id !== loadedId)
+    if (route.path.startsWith('/album') && typeof route.params.id === 'string' && route.params.id !== loadedId) {
+        loadedId = route.params.id
         album.value = await spotify.api.getAlbum(loadedId);
-    console.log("route params change");
+    }
 })
 spotify.api.getAlbum(loadedId).then((r: any) => {
     album.value = r;

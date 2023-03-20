@@ -1,7 +1,5 @@
 import {defineStore} from 'pinia'
 import {openDB} from "idb";
-import type {IDBPDatabase} from 'idb'
-import {ref} from "vue";
 
 export interface Item {
     type: string,
@@ -37,6 +35,11 @@ export const useBaseStore = defineStore('base', () => {
             return Math.round(millis / 3600000) + ' hours';
         let minutes = Math.round(millis / 60000);
         return minutes + ' minute' + (minutes === 1 ? '' : 's');
+    }
+
+    function albumString(item: SpotifyApi.AlbumObjectFull) {
+        return `${item.total_tracks} track${
+            item.total_tracks === 1 ? '' : 's'} • ${item.artists.map(a => a.name).join(', ')} • ${item.release_date.substring(0, 4)} • ${caps(item.album_type)}`;
     }
 
     function msToReadable(millis: number) {
@@ -109,5 +112,5 @@ export const useBaseStore = defineStore('base', () => {
         return `/${type}/${encodeUrlName(name)}/${item.id}`;
     }
 
-    return {itemUrl, itemImage, itemDescription, msToReadable, approximateDuration}
+    return {itemUrl, itemImage, itemDescription, msToReadable, approximateDuration, albumString}
 })

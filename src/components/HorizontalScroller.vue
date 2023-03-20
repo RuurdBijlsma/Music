@@ -23,7 +23,6 @@ import {onMounted, ref} from "vue";
 
 const canGoLeft = ref(false);
 const canGoRight = ref(false);
-
 const scrollContainer = ref(null);
 
 function scroll(direction: number) {

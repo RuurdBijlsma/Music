@@ -48,9 +48,10 @@ const spotify = useSpotifyStore();
 const playlist = ref(null as null | SpotifyApi.SinglePlaylistResponse);
 let loadedId = route.params.id as string;
 watch(route, async () => {
-    if (route.params.id !== loadedId)
+    if (route.path.startsWith('/playlist') && typeof route.params.id === 'string' && route.params.id !== loadedId) {
+        loadedId = route.params.id;
         playlist.value = await spotify.api.getPlaylist(loadedId);
-    console.log("route params change");
+    }
 })
 spotify.api.getPlaylist(loadedId).then((r: any) => {
     playlist.value = r;

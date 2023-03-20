@@ -6,13 +6,14 @@
         <div class="album-art album-background"
              :style="{
                     backgroundImage: `url(${src})`,
-                    opacity: theme.current.value.dark ? 0.4 : 0.7,
+                    opacity: theme.current.value.dark ? 0.4 : 0.7 / effectScale,
                     minWidth: width + 'px',
                     height: height + 'px',
                     right: (-width / 2) + 'px',
                     borderRadius: rounding,
                     top: (height / 16) + 'px',
-                    filter: `blur(${width / 16}px)`,
+                    filter: `blur(${(width * effectScale) / 16}px) saturate(150%) brightness(${effectScale})`,
+                    transform: `scale(${effectScale})`,
                  }"></div>
         <div class="album-art album-normal" :style="{
             backgroundImage: `url(${src})`,
@@ -44,6 +45,11 @@ defineProps({
         type: String,
         default: '0',
     },
+    effectScale: {
+        type: Number,
+        default: () => 1,
+        required: false,
+    }
 })
 const theme = useTheme()
 </script>
@@ -53,6 +59,7 @@ const theme = useTheme()
     display: inline-flex;
     justify-content: center;
 }
+
 .album-art {
     background-size: cover;
     background-position: center;
@@ -60,8 +67,6 @@ const theme = useTheme()
     position: relative;
     z-index: 3;
     transition: .1s;
-}
-.album-background {
-    transform: scale(1);
+    box-shadow: 0 10px 30px 0 rgba(0, 0, 0, .2);
 }
 </style>

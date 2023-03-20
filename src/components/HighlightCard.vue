@@ -1,12 +1,15 @@
 <template>
     <div class="highlight-featured mr-2">
         <div class="card-info">
-            <router-link no-style :to="base.itemUrl(item)">
-                <h2 class="card-title">{{ item.name }}</h2>
-            </router-link>
-            <p class="card-description mt-3">
-                {{ item.description }}
-            </p>
+            <div class="card-text">
+                <router-link no-style :to="base.itemUrl(item)">
+                    <h2 class="card-title">{{ item.name }}</h2>
+                </router-link>
+                <p class="card-description mt-3">
+                    <template v-if="item.type !== 'album'">{{ item.description }}</template>
+                    <template v-else>{{ base.albumString(item) }}</template>
+                </p>
+            </div>
             <v-spacer/>
             <div class="buttons mt-3">
                 <v-btn size="40" class="mr-3" icon="mdi-play" variant="tonal"/>
@@ -72,6 +75,7 @@ defineProps({
         width: 500px;
         height: 230px;
     }
+
     .card-image {
         height: 230px;
     }
@@ -84,10 +88,18 @@ defineProps({
     flex-direction: column;
 }
 
-.card-title {
-    white-space: nowrap;
-    height: 40px;
+.card-text {
     text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 4; /* number of lines to show */
+    line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow-y: auto;
+}
+
+.card-title {
+    /*white-space: nowrap;*/
+    /*height: 40px;*/
 }
 
 .card-description {
@@ -95,5 +107,15 @@ defineProps({
     width: 100%;
     word-wrap: anywhere;
     opacity: 0.7;
+}
+
+@media only screen and (max-width: 1500px) {
+    /*.card-description {*/
+    /*    text-overflow: ellipsis;*/
+    /*    display: -webkit-box;*/
+    /*    -webkit-line-clamp: 3; !* number of lines to show *!*/
+    /*    line-clamp: 3;*/
+    /*    -webkit-box-orient: vertical;*/
+    /*}*/
 }
 </style>
