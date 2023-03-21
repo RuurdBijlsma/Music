@@ -40,6 +40,7 @@
 
 <script setup lang="ts">
 // todo:
+//  load title index values into js memory for faster search??? TRIGRAMS???
 //  maybe cache visited playlists for faster load times per session (no idb)
 //  browse page
 //  make maximize/minimize/close functional

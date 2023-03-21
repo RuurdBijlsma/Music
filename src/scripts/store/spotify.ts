@@ -340,6 +340,9 @@ export const useSpotifyStore = defineStore('spotify', () => {
         }
     }
 
+    let likedTracksTotal = ref(1)
+    let likedTracksLoaded = ref(0)
+
     async function refreshUserData(type: 'playlist' | 'artist' | 'track' | 'album') {
         if (isRefreshing.value[type]) {
             console.info("This library type is already refreshing, waiting for that to finish");
@@ -377,6 +380,8 @@ export const useSpotifyStore = defineStore('spotify', () => {
         }
 
         let items: any[] = [];
+        likedTracksLoaded.value = 0;
+        likedTracksTotal.value = 1;
         let addToLib = (item: any) => {
             if (isInitial) {
                 // @ts-ignore
@@ -384,16 +389,34 @@ export const useSpotifyStore = defineStore('spotify', () => {
             } else items.push(item);
         }
 
+        let liked: SpotifyApi.TrackObjectFull[] = [];
         for await(let batch of await retrieveSpotifyArray(retrieval)) {
+            likedTracksTotal.value = batch.total;
             for (let item of page(batch).items) {
+                likedTracksLoaded.value++;
                 if (type === 'track') {
-                    if (!item.track.is_local)
+                    if (!item.track.is_local) {
+                        liked.push(item.track);
                         addToLib(item.track);
+                    }
                 } else if (type === 'album')
                     addToLib(item.album);
                 else
                     addToLib(item);
             }
+        }
+        if (liked.length > 0) {
+            const tx = db.transaction('tracks', 'readwrite')
+            let promises: Promise<any>[] = [db.clear('tracks')]
+            for (let track of liked) {
+                // @ts-ignore
+                track.artistString = track.artists
+                    .map((a: SpotifyApi.ArtistObjectSimplified) => a.name)
+                    .join(', ')
+                    .toLowerCase()
+                promises.push(db.add('tracks', track))
+            }
+            await Promise.all([...promises, tx.done]);
         }
         if (!isInitial) {
             // @ts-ignore
@@ -443,10 +466,32 @@ export const useSpotifyStore = defineStore('spotify', () => {
         await db.put('spotify', rawView, 'view')
     }
 
+    async function searchLikedTracks(query: string) {
+        let tx = await db.transaction('tracks')
+        let store = tx.objectStore('tracks')
+        const titleIndex = store.index('title')
+        const artistIndex = store.index('artist')
+        let cursor = await titleIndex.openCursor()
+        let lowerQuery = query.toLowerCase()
+
+        console.log('search liked tracks, query: ', query);
+        let liked = [] as SpotifyApi.TrackObjectFull[];
+        while (cursor) {
+            let key = cursor.key as string;
+            if (key.toLowerCase().includes(lowerQuery) || cursor.value.artistString.includes(lowerQuery)) {
+                liked.push(cursor.value)
+            }
+
+            cursor = await cursor.continue();
+        }
+        return liked
+    }
+
     return {
         dbLoaded,
         refreshHomePage,
         refreshUserData,
+        searchLikedTracks,
         getAuthByCode,
         isLoggedIn,
         requestedScopes,
@@ -458,5 +503,7 @@ export const useSpotifyStore = defineStore('spotify', () => {
         view,
         api,
         library,
+        likedTracksLoaded,
+        likedTracksTotal,
     }
 })

@@ -17,6 +17,9 @@ export interface Item {
 export const baseDb = openDB("base", 1, {
     upgrade(db, oldVersion, newVersion, transaction, event) {
         db.createObjectStore('spotify');
+        const trackStore = db.createObjectStore('tracks', {keyPath: 'id'})
+        trackStore.createIndex("title", "name", {unique: false})
+        trackStore.createIndex('artist', 'artistString', {unique: false})
         console.log('db upgrade', {oldVersion, newVersion, transaction, event});
     },
     blocked(currentVersion, blockedVersion, event) {

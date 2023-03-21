@@ -7,13 +7,13 @@
             width: width + 'px'}">
         <div v-for="track in searchResults.liked">
             <p>{{ track.name }}</p>
-            <p>{{ track.artists.map(a=>a.name).join(', ') }}</p>
+            <p>{{ track.artists.map(a => a.name).join(', ') }}</p>
         </div>
     </div>
 </template>
 
 <script setup lang="ts">
-import {onBeforeUnmount, onMounted, ref, watch} from "vue";
+import {onBeforeUnmount, onMounted, ref, toRaw, watch} from "vue";
 import {clearInterval} from "timers";
 import {useBaseStore} from "../scripts/store/base";
 import {storeToRefs} from "pinia";
@@ -61,29 +61,11 @@ let searchResults = ref({
     playlists: [] as SpotifyApi.PlaylistObjectSimplified[],
 })
 
-function performSearch() {
+async function performSearch() {
     let query = searchValue.value;
-    let lowerQuery = query.toLowerCase();
     console.log("Perform search for query: " + query);
-    let liked = [];
-    console.log("Searching through:", spotify.library.tracks.length, 'tracks');
-    outer:
-        for (let i = 0; i < spotify.library.tracks.length; i++) {
-            let track = spotify.library.tracks[i];
-            console.log('iterate', track.name);
-            if (track.name.toLowerCase().includes(lowerQuery)) {
-                liked.push(track);
-                continue;
-            }
-            for (let j = 0; j < track.artists.length; j++) {
-                if (track.artists[j].name.toLowerCase().includes(lowerQuery)) {
-                    liked.push(track);
-                    continue outer;
-                }
-            }
-        }
-    searchResults.value.liked = liked;
-    console.log('liked search results', liked);
+    searchResults.value.liked = await spotify.searchLikedTracks(query);
+    console.log(toRaw(searchResults.value.liked))
 }
 
 function updateSearchPos() {
@@ -104,10 +86,12 @@ onBeforeUnmount(() => clearInterval(interval));
     border-bottom-right-radius: 10px;
     z-index: 8;
 
-    height: 500px;
+    //height: 500px;
     background-color: rgba(255, 255, 255, 0.4);
     backdrop-filter: blur(15px) saturate(300%) brightness(105%);
     box-shadow: 0 3px 15px 0 rgba(0, 0, 0, 0.15);
+    overflow-y: auto;
+    max-height:calc(100% - 300px);
 }
 
 .dark .search-suggestions {
