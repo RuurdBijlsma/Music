@@ -52,10 +52,13 @@ import {useSpotifyStore} from "./scripts/store/spotify";
 import {useTheme} from "vuetify";
 import {useRoute} from "vue-router";
 import SearchSuggestions from "./components/SearchSuggestions.vue";
+import {usePlatformStore} from "./scripts/store/electron";
 
-const theme = useTheme();
-const spotify = useSpotifyStore();
-const route = useRoute();
+const theme = useTheme()
+const spotify = useSpotifyStore()
+const route = useRoute()
+const platform = usePlatformStore()
+platform.downloadExes()
 
 console.log('spotify.library', spotify.library);
 console.log('theme', theme);

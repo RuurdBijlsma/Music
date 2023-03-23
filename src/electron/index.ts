@@ -1,6 +1,7 @@
-import {app, BrowserWindow, shell, ipcMain,session} from 'electron'
+import {app, BrowserWindow, ipcMain, shell, session} from 'electron'
 import {release} from 'node:os'
 import {join} from 'node:path'
+import Directories from "./Directories";
 
 // The built directory structure
 //
@@ -31,6 +32,7 @@ let win: BrowserWindow | null = null
 const url = process.env.VITE_DEV_SERVER_URL
 const indexHtml = join(process.env.DIST, 'index.html')
 
+
 async function createWindow() {
     win = new BrowserWindow({
         title: 'Vue Music',
@@ -41,6 +43,7 @@ async function createWindow() {
         webPreferences: {
             nodeIntegration: true,
             contextIsolation: false,
+            webSecurity:false,
         },
         titleBarStyle: "hidden",
     })
@@ -95,24 +98,5 @@ ipcMain.on('focus-window', () => {
         win.focus();
 })
 
-// New window example arg: new windows url
-ipcMain.handle('open-win', (_, arg) => {
-    const childWindow = new BrowserWindow({
-        title: 'Vue Music',
-        icon: join(process.env.PUBLIC ?? './public', 'icon/new-dark-192.png'),
-        width: 1500,
-        height: 1000,
-        autoHideMenuBar: true,
-        webPreferences: {
-            nodeIntegration: true,
-            contextIsolation: false,
-        },
-        titleBarStyle: "hidden",
-    })
-
-    if (process.env.VITE_DEV_SERVER_URL) {
-        childWindow.loadURL(`${url}#${arg}`)
-    } else {
-        childWindow.loadFile(indexHtml, {hash: arg})
-    }
-})
+// Main process
+ipcMain.handle('getFilesPath', () => Directories.files)
