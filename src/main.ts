@@ -10,11 +10,11 @@ import { aliases, mdi } from 'vuetify/iconsets/mdi'
 import '@mdi/font/css/materialdesignicons.css'
 import pinia from "./scripts/store/pinia";
 import router from "./scripts/router";
-import {VVirtualScroll} from "vuetify/labs/components";
+// import {VVirtualScroll} from "vuetify/labs/components";
 
 
 const vuetify = createVuetify({
-    components:{...components, VVirtualScroll},
+    components:{...components},
     directives,
     icons: {
         defaultSet: 'mdi',

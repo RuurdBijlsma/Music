@@ -32,7 +32,6 @@ let win: BrowserWindow | null = null
 const url = process.env.VITE_DEV_SERVER_URL
 const indexHtml = join(process.env.DIST, 'index.html')
 
-
 async function createWindow() {
     win = new BrowserWindow({
         title: 'Vue Music',
