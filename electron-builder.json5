@@ -2,8 +2,8 @@
  * @see https://www.electron.build/configuration/configuration
  */
 {
-    "appId": "dev.ruurd.vuemusic6",
-    "productName": "Vue Music",
+    "appId": "dev.ruurd.music",
+    "productName": "Ruurd Music",
     "asar": true,
     "icon": "public/icon/new-dark-500.ico",
     "directories": {

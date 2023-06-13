@@ -30,7 +30,7 @@
                 <v-divider/>
             </div>
             <track-list-item v-for="track in searchResults.youtube" class="track-list-item"
-                             :track="track"></track-list-item>
+                             :track="track"/>
         </div>
     </div>
 </template>

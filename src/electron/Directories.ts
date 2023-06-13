@@ -26,8 +26,8 @@ class Directories {
     public music: string;
 
     constructor() {
-        this.temp = this.initializeDir('temp', 'vuemusic-6');
-        this.files = this.initializeDir('appData', 'vuemusic-6-files');
+        this.temp = this.initializeDir('temp', 'ruurd-music');
+        this.files = this.initializeDir('appData', 'ruurd-music-files');
         this.music = this.getDir('music', '');
     }
 

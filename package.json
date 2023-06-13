@@ -1,5 +1,5 @@
 {
-    "name": "vuemusic",
+    "name": "Ruurd Music",
     "version": "6.0.0",
     "description": "Streaming music player",
     "keywords": [
@@ -13,7 +13,7 @@
         "name": "Ruurd Bijlsma",
         "url": "ruurd.dev"
     },
-    "repository": "https://github.com/ruurdbijlsma/vuemusic-6",
+    "repository": "https://github.com/ruurdbijlsma/ruurd-music",
     "main": "dist-electron/main/index.js",
     "scripts": {
         "dev": "vite",
