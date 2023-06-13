@@ -45,6 +45,7 @@
 //  browse page
 //  make maximize/minimize/close functional
 //  make music player
+// add spotify en youtube search
 
 import TopMenu from "./components/TopMenu.vue";
 import MusicPlayer from "./components/MusicPlayer.vue";

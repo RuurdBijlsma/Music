@@ -5,9 +5,32 @@
             left: searchX + 'px',
             top: searchY + 'px',
             width: width + 'px'}">
-        <div v-for="track in searchResults.liked">
-            <p>{{ track.name }}</p>
-            <p>{{ track.artists.map(a => a.name).join(', ') }}</p>
+        <div class="liked-list">
+            <div class="sub-header">
+                <v-divider/>
+                <div>Library</div>
+                <v-divider/>
+            </div>
+            <track-list-item v-for="track in searchResults.liked" class="track-list-item"
+                             :track="track"></track-list-item>
+        </div>
+        <div class="spotify-list">
+            <div class="sub-header">
+                <v-divider/>
+                <div><v-icon class="mr-2">mdi-spotify</v-icon> Spotify</div>
+                <v-divider/>
+            </div>
+            <track-list-item v-for="track in searchResults.spotify.tracks" class="track-list-item"
+                             :track="track"></track-list-item>
+        </div>
+        <div class="youtube-list">
+            <div class="sub-header">
+                <v-divider/>
+                <div><v-icon class="mr-2">mdi-youtube</v-icon> YouTube</div>
+                <v-divider/>
+            </div>
+            <track-list-item v-for="track in searchResults.youtube" class="track-list-item"
+                             :track="track"></track-list-item>
         </div>
     </div>
 </template>
@@ -16,8 +39,10 @@
 import {onBeforeUnmount, onMounted, ref, toRaw, watch} from "vue";
 import {clearInterval} from "timers";
 import {useBaseStore} from "../scripts/store/base";
+import type {Item} from "../scripts/store/base";
 import {storeToRefs} from "pinia";
 import {useSpotifyStore} from "../scripts/store/spotify";
+import TrackListItem from "./TrackListItem.vue";
 
 // todo search liked tracks met IDB ipv zoals dit
 
@@ -55,10 +80,13 @@ interval = window.setInterval(() => {
 
 let searchResults = ref({
     liked: [] as SpotifyApi.TrackObjectFull[],
-    artists: [] as SpotifyApi.ArtistObjectSimplified[],
-    tracks: [] as SpotifyApi.TrackObjectSimplified[],
-    albums: [] as SpotifyApi.AlbumObjectSimplified[],
-    playlists: [] as SpotifyApi.PlaylistObjectSimplified[],
+    spotify:{
+        artists: [] as SpotifyApi.ArtistObjectSimplified[],
+        tracks: [] as SpotifyApi.TrackObjectSimplified[],
+        albums: [] as SpotifyApi.AlbumObjectSimplified[],
+        playlists: [] as SpotifyApi.PlaylistObjectSimplified[],
+    },
+    youtube:[] as Item[],
 })
 
 async function performSearch() {
@@ -87,14 +115,65 @@ onBeforeUnmount(() => clearInterval(interval));
     z-index: 8;
 
     //height: 500px;
-    background-color: rgba(255, 255, 255, 0.4);
-    backdrop-filter: blur(15px) saturate(300%) brightness(105%);
+    background-color: rgba(128, 128, 128, 0.5);
+    backdrop-filter: blur(50px) saturate(100%) brightness(100%);
     box-shadow: 0 3px 15px 0 rgba(0, 0, 0, 0.15);
     overflow-y: auto;
-    max-height:calc(100% - 300px);
+    max-height: calc(100% - 300px);
+    padding-bottom: 4px;
+    padding-top: 4px;
+}
+
+.search-suggestions::-webkit-scrollbar {
+    width: 14px;
+    height: 18px;
+}
+
+.search-suggestions::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, .1);
+    border-radius: 3px;
+}
+
+.search-suggestions::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 3px;
+}
+
+.search-suggestions::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.6);
 }
 
 .dark .search-suggestions {
     background-color: rgba(0, 0, 0, 0.4);
+}
+
+.sub-header{
+    display: flex;
+    align-items: center;
+    padding:0 20px;
+}
+.sub-header>div{
+    padding:0 20px;
+    flex-grow: 2;
+    width:100%;
+    font-size: 13px;
+    font-weight: 400;
+    opacity: .7;
+    text-align: center;
+}
+
+.liked-list {
+
+}
+
+.track-list-item {
+    //width: 100%;
+    margin-left: 10px;
+    margin-right: 10px;
+    margin-bottom: 6px;
+}
+
+.track-list-item:last-child {
+    margin-bottom: 0;
 }
 </style>

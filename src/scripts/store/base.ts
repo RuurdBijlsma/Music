@@ -1,6 +1,6 @@
 import {defineStore} from 'pinia'
 import {openDB} from "idb";
-import {ref} from "vue";
+import {ref, toRaw} from "vue";
 
 export interface Item {
     type: string,
@@ -11,14 +11,16 @@ export interface Item {
     to: string,
     images: { url: string }[],
     album_type: string,
-    artists: { name: string }[]
+    artists: { name: string }[],
+    album: Item,
 }
 
 export const baseDb = openDB("base", 1, {
     upgrade(db, oldVersion, newVersion, transaction, event) {
         db.createObjectStore('spotify');
         const trackStore = db.createObjectStore('tracks', {keyPath: 'id'})
-        trackStore.createIndex("title", "name", {unique: false})
+        trackStore.createIndex('searchString', 'searchString', {unique: false})
+        trackStore.createIndex('title', 'title', {unique: false})
         trackStore.createIndex('artist', 'artistString', {unique: false})
         console.log('db upgrade', {oldVersion, newVersion, transaction, event});
     },
@@ -83,10 +85,16 @@ export const useBaseStore = defineStore('base', () => {
     }
 
     function itemImage(item: Item) {
-        let image = item.images?.[0]?.url;
+        let image;
+        if (item.type === 'track') {
+            image = item?.album?.images?.[0]?.url
+        } else {
+            image = item.images?.[0]?.url
+        }
         if (image === null) {
             return 'img/notfound/' + (1 + Math.floor(Math.random() * 7)) + '.png'
         }
+        console.log("Getting item image for ", toRaw(item), image)
         return image;
     }
 

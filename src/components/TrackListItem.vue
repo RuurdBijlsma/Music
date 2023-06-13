@@ -1,7 +1,7 @@
 <template>
     <div class="track-item">
         <v-lazy v-if="number === undefined" class="lazy-img" width="70" transition="fade-transition">
-            <v-img v-if="track.album.images.length > 0" class="track-img" :src="track.album.images[0].url"/>
+            <v-img v-if="track.album.images.length > 0" class="track-img" :src="base.itemImage(track)"/>
             <v-sheet v-else class="track-img"></v-sheet>
         </v-lazy>
         <div v-else class="track-number">
@@ -28,12 +28,12 @@
 
 <script setup lang="ts">
 import type {PropType} from "vue";
-import TrackObjectFull = SpotifyApi.TrackObjectFull;
 import {useBaseStore} from "../scripts/store/base";
+import TrackObjectSimplified = SpotifyApi.TrackObjectSimplified;
 
 defineProps({
     track: {
-        type: Object as PropType<TrackObjectFull>,
+        type: Object as PropType<TrackObjectSimplified>,
         required: true
     },
     number: {
@@ -55,9 +55,7 @@ const base = useBaseStore();
     font-size: 14px;
     justify-content: space-between;
     align-items: center;
-    padding: 0 20px;
     border-radius: 5px;
-    margin: 0 10px;
 }
 
 .lazy-img {

@@ -7,7 +7,9 @@
         item-height="50">
         <template v-slot:default="{ item, index }">
             <slot v-if="item === null"/>
-            <track-list-item :number="noImages ? index + 1 : undefined" v-else :class="{'odd-item': index % 2 === 0}" class="track-list-item" :track="item"/>
+            <track-list-item :number="noImages ? item.track_number : undefined" v-else
+                             :class="{'odd-item': index % 2 === 0}"
+                             class="track-list-item" :track="item"/>
         </template>
     </v-virtual-scroll>
 </template>
@@ -57,6 +59,12 @@ const scrollItems = computed(() => [null, ...props.tracks])
 
 .dark .track-list-item.odd-item {
     background-color: rgba(255, 255, 255, 0.05);
+}
+
+.track-list-item {
+    padding: 0 20px;
+    margin-left: 10px;
+    margin-right: 10px;
 }
 
 .virtual-scroll::-webkit-scrollbar {

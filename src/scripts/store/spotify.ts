@@ -409,11 +409,14 @@ export const useSpotifyStore = defineStore('spotify', () => {
             const tx = db.transaction('tracks', 'readwrite')
             let promises: Promise<any>[] = [db.clear('tracks')]
             for (let track of liked) {
-                // @ts-ignore
-                track.artistString = track.artists
+                const artistString = track.artists
                     .map((a: SpotifyApi.ArtistObjectSimplified) => a.name)
                     .join(', ')
                     .toLowerCase()
+                // @ts-ignore
+                track.artistString = artistString
+                // @ts-ignore
+                track.searchString = track.name.toLowerCase() + ' ' + artistString
                 promises.push(db.add('tracks', track))
             }
             await Promise.all([...promises, tx.done]);
@@ -469,22 +472,21 @@ export const useSpotifyStore = defineStore('spotify', () => {
     async function searchLikedTracks(query: string) {
         let tx = await db.transaction('tracks')
         let store = tx.objectStore('tracks')
-        const titleIndex = store.index('title')
-        const artistIndex = store.index('artist')
-        let cursor = await titleIndex.openCursor()
+        const searchIndex = store.index('searchString')
+        let cursor = await searchIndex.openCursor()
         let lowerQuery = query.toLowerCase()
 
         console.log('search liked tracks, query: ', query);
-        let liked = [] as SpotifyApi.TrackObjectFull[];
+        let filtered = [] as SpotifyApi.TrackObjectFull[];
         while (cursor) {
             let key = cursor.key as string;
-            if (key.toLowerCase().includes(lowerQuery) || cursor.value.artistString.includes(lowerQuery)) {
-                liked.push(cursor.value)
+            if (key.includes(lowerQuery)) {
+                filtered.push(cursor.value)
             }
 
             cursor = await cursor.continue();
         }
-        return liked
+        return filtered
     }
 
     return {
