@@ -2,7 +2,7 @@
     <div class="menu">
         <div class="logo">
             <v-img width="30" height="30" src="icon/new-dark-192.png"></v-img>
-            <div>Vue Music</div>
+            <div>Ruurd Music</div>
         </div>
         <v-spacer/>
         <v-text-field

@@ -94,7 +94,6 @@ export const useBaseStore = defineStore('base', () => {
         if (image === null) {
             return 'img/notfound/' + (1 + Math.floor(Math.random() * 7)) + '.png'
         }
-        console.log("Getting item image for ", toRaw(item), image)
         return image;
     }
 

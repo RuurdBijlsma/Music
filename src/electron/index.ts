@@ -1,4 +1,4 @@
-import {app, BrowserWindow, ipcMain, shell, session} from 'electron'
+import {app, BrowserWindow, ipcMain, shell} from 'electron'
 import {release} from 'node:os'
 import {join} from 'node:path'
 import Directories from "./Directories";
@@ -34,7 +34,7 @@ const indexHtml = join(process.env.DIST, 'index.html')
 
 async function createWindow() {
     win = new BrowserWindow({
-        title: 'Vue Music',
+        title: 'Ruurd Music',
         icon: join(process.env.PUBLIC ?? './public', 'icon/new-dark-192.png'),
         width: 1500,
         height: 1000,

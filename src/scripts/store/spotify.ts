@@ -202,6 +202,8 @@ export const useSpotifyStore = defineStore('spotify', () => {
     let tokenTimeout: number;
 
     async function spotifyLogout() {
+        await baseDb;
+
         tokens.value = {
             code: null,
             access: null,
@@ -222,6 +224,8 @@ export const useSpotifyStore = defineStore('spotify', () => {
     }
 
     async function checkAuth() {
+        await baseDb;
+
         let now = Date.now()
         console.log('yea', tokens.value.expiryDate, now);
         if (tokens.value.expiryDate !== null && tokens.value.expiryDate > now) {
@@ -255,6 +259,8 @@ export const useSpotifyStore = defineStore('spotify', () => {
     }
 
     async function loadLibraries() {
+        await baseDb;
+
         await refreshUserInfo();
         let doneCount = 0;
         let libLoaded = library.value.tracks.length !== 0;
@@ -274,6 +280,8 @@ export const useSpotifyStore = defineStore('spotify', () => {
     }
 
     async function refreshUserInfo() {
+        await baseDb;
+
         let me = await api.getMe();
         userInfo.value = {
             id: me.id,
@@ -344,6 +352,8 @@ export const useSpotifyStore = defineStore('spotify', () => {
     let likedTracksLoaded = ref(0)
 
     async function refreshUserData(type: 'playlist' | 'artist' | 'track' | 'album') {
+        await baseDb;
+
         if (isRefreshing.value[type]) {
             console.info("This library type is already refreshing, waiting for that to finish");
             await waitFor('refreshed' + type);
@@ -432,6 +442,7 @@ export const useSpotifyStore = defineStore('spotify', () => {
     }
 
     async function refreshHomePage() {
+        await baseDb;
         await awaitAuth();
 
         //Featured playlists
@@ -469,31 +480,10 @@ export const useSpotifyStore = defineStore('spotify', () => {
         await db.put('spotify', rawView, 'view')
     }
 
-    async function searchLikedTracks(query: string) {
-        let tx = await db.transaction('tracks')
-        let store = tx.objectStore('tracks')
-        const searchIndex = store.index('searchString')
-        let cursor = await searchIndex.openCursor()
-        let lowerQuery = query.toLowerCase()
-
-        console.log('search liked tracks, query: ', query);
-        let filtered = [] as SpotifyApi.TrackObjectFull[];
-        while (cursor) {
-            let key = cursor.key as string;
-            if (key.includes(lowerQuery)) {
-                filtered.push(cursor.value)
-            }
-
-            cursor = await cursor.continue();
-        }
-        return filtered
-    }
-
     return {
         dbLoaded,
         refreshHomePage,
         refreshUserData,
-        searchLikedTracks,
         getAuthByCode,
         isLoggedIn,
         requestedScopes,
