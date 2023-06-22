@@ -34,6 +34,7 @@ export const useSpotifyStore = defineStore('spotify', () => {
     const dbLoaded = ref(false);
     const secret = ref('')
     const clientId = ref('')
+    const youtubeKey = ref('')
     let tokens: Ref<AuthToken> = ref({
         code: null,
         access: null,
@@ -48,6 +49,9 @@ export const useSpotifyStore = defineStore('spotify', () => {
         followers: 0,
         avatar: 'img/no-user.jpg',
     })
+    const hasYoutubeKey = computed(() =>
+        youtubeKey.value.length === 39 && youtubeKey.value.includes('-')
+    )
     const hasCredentials = computed(() =>
         secret.value.length === 32 && clientId.value.length === 32
     )
@@ -89,13 +93,14 @@ export const useSpotifyStore = defineStore('spotify', () => {
     // IndexedDB persistent storage
     async function loadValues() {
         console.log("Loading db value start", performance.now())
-        let [dbClientId, dbSecret, dbTokens, dbLibrary, dbView, dbUserInfo] = await Promise.all([
+        let [dbClientId, dbSecret, dbTokens, dbLibrary, dbView, dbUserInfo, dbYoutubeKey] = await Promise.all([
             db.get('spotify', 'clientId'),
             db.get('spotify', 'secret'),
             db.get('spotify', 'tokens'),
             db.get('spotify', 'library'),
             db.get('spotify', 'view'),
             db.get('spotify', 'userInfo'),
+            db.get('spotify', 'youtubeKey'),
         ])
         if (dbSecret)
             secret.value = dbSecret;
@@ -107,6 +112,8 @@ export const useSpotifyStore = defineStore('spotify', () => {
             view.value = dbView;
         if (dbUserInfo)
             userInfo.value = dbUserInfo;
+        if (dbYoutubeKey)
+            youtubeKey.value = dbYoutubeKey;
         if (dbTokens) {
             tokens.value = dbTokens;
             checkAuth().then()
@@ -124,6 +131,12 @@ export const useSpotifyStore = defineStore('spotify', () => {
         let dbClientId = await db.get('spotify', 'clientId');
         if (dbClientId !== clientId.value)
             await db.put('spotify', clientId.value, 'clientId')
+    })
+    watch(youtubeKey, async () => {
+        console.log("Change yt key", youtubeKey.value)
+        let dbYoutubeKey = await db.get('spotify', 'youtubeKey');
+        if (dbYoutubeKey !== youtubeKey.value)
+            await db.put('spotify', youtubeKey.value, 'youtubeKey')
     })
 
     // Spotify API Stuff
@@ -497,5 +510,7 @@ export const useSpotifyStore = defineStore('spotify', () => {
         library,
         likedTracksLoaded,
         likedTracksTotal,
+        youtubeKey,
+        hasYoutubeKey,
     }
 })
