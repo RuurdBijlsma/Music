@@ -1,77 +1,34 @@
 <template>
     <!--         v-if="searchValue !== '' && searchFocused && searchResults"-->
     <div class="search-suggestions"
-         v-if="searchResults"
+         v-if="likedResult.length > 0 || spotifyResult || ytResult.length > 0"
          :style="{
             left: searchX + 'px',
             top: searchY + 'px',
             width: width + 'px'}">
-        <div class="sub-list" v-if="searchResults.liked.length > 0">
-            <div class="sub-header">
-                <v-divider/>
-                <div>Library</div>
-                <v-divider/>
-            </div>
-            <track-list-item v-for="track in searchResults.liked" class="track-list-item"
-                             :track="track"></track-list-item>
-        </div>
-        <template v-if="searchResults.liked.length > 3">
-            <v-divider/>
-            <div class="list-expander">
-                <v-btn v-if="expanded.includes(0)" @click="smallify(0)" icon="mdi-chevron-up" size="small" variant="text"></v-btn>
-                <v-btn v-else @click="expand(0)" icon="mdi-chevron-down" size="small" variant="text"></v-btn>
-            </div>
-        </template>
-        <div class="sub-list" v-if="searchResults.spotify.tracks.length > 0">
-            <div class="sub-header">
-                <v-divider/>
-                <div>
-                    <v-icon class="mr-2">mdi-spotify</v-icon>
-                    Spotify
-                </div>
-                <v-divider/>
-            </div>
-            <track-list-item v-for="track in searchResults.spotify.tracks" class="track-list-item"
-                             :track="track"></track-list-item>
-        </div>
-        <template v-if="searchResults.spotify.tracks.length > 3">
-            <v-divider/>
-            <div class="list-expander">
-                <v-btn v-if="expanded.includes(1)" @click="smallify(1)" icon="mdi-chevron-up" size="small" variant="text"></v-btn>
-                <v-btn v-else @click="expand(1)" icon="mdi-chevron-down" size="small" variant="text"></v-btn>
-            </div>
-        </template>
-        <div class="sub-list" v-if="searchResults.youtube.length > 0">
-            <div class="sub-header">
-                <v-divider/>
-                <div>
-                    <v-icon class="mr-2">mdi-youtube</v-icon>
-                    YouTube
-                </div>
-                <v-divider/>
-            </div>
-            <track-list-item v-for="track in searchResults.youtube" class="track-list-item"
-                             :track="track"/>
-        </div>
-        <template v-if="searchResults.youtube.length > 3">
-            <v-divider/>
-            <div class="list-expander">
-                <v-btn v-if="expanded.includes(2)" @click="smallify(2)" icon="mdi-chevron-up" size="small" variant="text"></v-btn>
-                <v-btn v-else @click="expand(2)" icon="mdi-chevron-down" size="small" variant="text"></v-btn>
-            </div>
-        </template>
+        <search-suggestion-section :tracks="likedResult" :loading="likedLoading">
+            Library
+        </search-suggestion-section>
+        <search-suggestion-section :tracks="spotifyResult" :loading="spotifyLoading">
+            <v-icon class="mr-2">mdi-spotify</v-icon>
+            Spotify
+        </search-suggestion-section>
+        <search-suggestion-section :tracks="ytResult" :loading="ytLoading">
+            <v-icon class="mr-2">mdi-youtube</v-icon>
+            YouTube
+        </search-suggestion-section>
     </div>
 </template>
 
 <script setup lang="ts">
-import {onBeforeUnmount, onMounted, ref, toRaw, watch} from "vue";
+import {onBeforeUnmount, onMounted, ref, watch} from "vue";
 import {clearInterval} from "timers";
 import {useBaseStore} from "../scripts/store/base";
+import type {Item} from '../scripts/store/base'
 import {storeToRefs} from "pinia";
 import {useSpotifyStore} from "../scripts/store/spotify";
-import TrackListItem from "./TrackListItem.vue";
-import type {SearchResult} from "../scripts/store/search";
 import {useSearchStore} from "../scripts/store/search";
+import SearchSuggestionSection from "./SearchSuggestionSection.vue";
 
 // todo search liked tracks met IDB ipv zoals dit
 
@@ -85,25 +42,6 @@ let lastInputTime = performance.now()
 watch(searchValue, () => {
     lastInputTime = performance.now()
 });
-
-const expanded = ref([] as number[])
-const subListHeight = 185;
-
-function expand(index: number) {
-    const subLists = document.querySelectorAll('.sub-list')
-    let list = subLists[index] as HTMLElement
-    list.style.maxHeight = `${Math.max(list.scrollHeight, subListHeight)}px`
-
-    if (!expanded.value.includes(index)) expanded.value.push(index)
-}
-
-function smallify(index: number) {
-    const subLists = document.querySelectorAll('.sub-list')
-    let list = subLists[index] as HTMLElement
-    list.style.maxHeight = `${subListHeight}px`
-
-    if (expanded.value.includes(index)) expanded.value.splice(expanded.value.indexOf(index), 1)
-}
 
 let el = null as null | Element;
 let searchX = ref(200);
@@ -128,13 +66,33 @@ interval = window.setInterval(() => {
     }
 }, 200);
 
-let searchResults = ref(null as SearchResult | null)
+let ytResult = ref([] as Item[])
+let spotifyResult = ref([] as SpotifyApi.TrackObjectFull[])
+let likedResult = ref([] as SpotifyApi.TrackObjectFull[])
+let ytLoading = ref(false)
+let spotifyLoading = ref(false)
+let likedLoading = ref(false)
 
 async function performSearch() {
+    ytLoading.value = true
+    spotifyLoading.value = true
+    likedLoading.value = true
     let query = searchValue.value;
     console.log("Perform search for query: " + query);
-    searchResults.value = await search.query(query);
-    console.log(toRaw(searchResults.value))
+    search.addToRecentSearches(query)
+    search.searchSpotify(query).then(res => {
+        spotifyLoading.value = false
+        if (res.tracks)
+            spotifyResult.value = res.tracks.items
+    })
+    search.searchYouTube(query).then(res => {
+        ytLoading.value = false
+        ytResult.value = res
+    })
+    search.searchLikedTracks(query).then(res => {
+        likedLoading.value = false
+        likedResult.value = res
+    })
 }
 
 function updateSearchPos() {
@@ -186,45 +144,5 @@ onBeforeUnmount(() => clearInterval(interval));
 
 .dark .search-suggestions {
     background-color: rgba(0, 0, 0, 0.4);
-}
-
-.sub-header {
-    display: flex;
-    align-items: center;
-    padding: 0 20px;
-}
-
-.sub-header > div {
-    padding: 0 20px;
-    flex-grow: 2;
-    width: 100%;
-    font-size: 13px;
-    font-weight: 400;
-    opacity: .7;
-    text-align: center;
-}
-
-.sub-list {
-    max-height: 185px;
-    overflow-y: hidden;
-    transition: .5s;
-}
-
-.list-expander {
-    width: 100%;
-    height: 40px;
-    display: flex;
-    justify-content: center;
-}
-
-.track-list-item {
-    //width: 100%;
-    margin-left: 10px;
-    margin-right: 10px;
-    margin-bottom: 6px;
-}
-
-.track-list-item:last-child {
-    margin-bottom: 0;
 }
 </style>

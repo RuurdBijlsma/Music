@@ -3,12 +3,9 @@ import electron, {ipcRenderer} from "electron";
 import type {AuthToken} from "./spotify";
 // @ts-ignore
 import anzip from 'anzip';
-
 import {useSpotifyStore} from "./spotify";
-
 import http from "http";
 import * as fs from "fs/promises";
-import path from "path";
 
 const express = window.require('express')
 export const usePlatformStore = defineStore('platform', () => {
@@ -25,11 +22,19 @@ export const usePlatformStore = defineStore('platform', () => {
         async function searchYouTube(query: string, limit = 5) {
             let key = query + "|" + limit;
             if (ytCache.hasOwnProperty(key)) {
-                return ytCache[key];
+                let res = ytCache[key];
+                if (res.expiryDate < Date.now())
+                    delete ytCache[key]
+                else
+                    return ytCache[key].result;
             }
             console.log("INVOKE ELECTRON", query)
             let result = await ipcRenderer.invoke('searchYt', query, limit);
-            ytCache[key] = result;
+            ytCache[key] = {
+                result,
+                // expiry date 30 days from now
+                expiryDate: Date.now() + 1000 * 60 * 60 * 24 * 30
+            };
             return result;
         }
 

@@ -5,18 +5,6 @@ import {useSpotifyStore} from "./spotify";
 import type {IDBPDatabase} from "idb";
 import {usePlatformStore} from "./electron";
 
-
-export interface SearchResult {
-    liked: SpotifyApi.TrackObjectFull[],
-    spotify: {
-        artists: SpotifyApi.ArtistObjectFull[],
-        tracks: SpotifyApi.TrackObjectFull[],
-        albums: SpotifyApi.AlbumObjectSimplified[],
-        playlists: SpotifyApi.PlaylistObjectSimplified[],
-    },
-    youtube: Item[],
-}
-
 export const useSearchStore = defineStore('search', () => {
     const platform = usePlatformStore();
     let recentSearches: string[] = localStorage.getItem('recentSearch') === null ?
@@ -26,31 +14,12 @@ export const useSearchStore = defineStore('search', () => {
     let db: IDBPDatabase
     baseDb.then(r => db = r)
 
-    async function query(term: string): Promise<SearchResult> {
-        if (recentSearches.includes(term))
-            recentSearches.splice(recentSearches.indexOf(term), 1)
-        recentSearches.unshift(term)
+    function addToRecentSearches(query: string) {
+        if (recentSearches.includes(query))
+            recentSearches.splice(recentSearches.indexOf(query), 1)
+        recentSearches.unshift(query)
         recentSearches.splice(5)
         localStorage.recentSearch = JSON.stringify(recentSearches)
-
-        let [spotifyResponse, likedResponse, youtubeResponse] = await Promise.all([
-            spotify.api.search(term, ['album', 'artist', 'playlist', 'track']),
-            searchLikedTracks(term),
-            platform.searchYouTube(term, 5),
-        ])
-
-        console.log({youtubeResponse})
-
-        return {
-            liked: likedResponse,
-            youtube: youtubeResponse.map(ytResultToItem),
-            spotify: {
-                artists: spotifyResponse.artists?.items ?? [],
-                albums: spotifyResponse.albums?.items ?? [],
-                tracks: spotifyResponse.tracks?.items ?? [],
-                playlists: spotifyResponse.playlists?.items ?? [],
-            }
-        }
     }
 
     function ytResultToItem(ytResult: any): Item {
@@ -71,7 +40,15 @@ export const useSearchStore = defineStore('search', () => {
         }
     }
 
+    let likedCache = {} as any;
     async function searchLikedTracks(query: string) {
+        if (likedCache.hasOwnProperty(query)) {
+            let res = likedCache[query];
+            if (res.expiryDate < Date.now())
+                delete likedCache[query]
+            else
+                return likedCache[query].result;
+        }
         await baseDb
         let tx = await db.transaction('tracks')
         let store = tx.objectStore('tracks')
@@ -80,17 +57,45 @@ export const useSearchStore = defineStore('search', () => {
         let lowerQuery = query.toLowerCase()
 
         console.log('search liked tracks, query: ', query);
-        let filtered = [] as SpotifyApi.TrackObjectFull[];
+        let result = [] as SpotifyApi.TrackObjectFull[]
         while (cursor) {
             let key = cursor.key as string;
             if (key.includes(lowerQuery)) {
-                filtered.push(cursor.value)
+                result.push(cursor.value)
             }
 
             cursor = await cursor.continue();
         }
-        return filtered
+        likedCache[query] = {
+            result,
+            // expiry date 5 minutes from now
+            expiryDate: Date.now() + 1000 * 60 * 5
+        };
+        return result
     }
 
-    return {query}
+    async function searchYouTube(query: string) {
+        let rawResult = await platform.searchYouTube(query, 6)
+        return rawResult.map(ytResultToItem)
+    }
+
+    let spotifyCache = {} as any;
+    async function searchSpotify(query: string) {
+        if (spotifyCache.hasOwnProperty(query)) {
+            let res = spotifyCache[query];
+            if (res.expiryDate < Date.now())
+                delete spotifyCache[query]
+            else
+                return spotifyCache[query].result;
+        }
+        let result =  await spotify.api.search(query, ['album', 'artist', 'playlist', 'track'])
+        spotifyCache[query] = {
+            result,
+            // expiry date 5 minutes from now
+            expiryDate: Date.now() + 1000 * 60 * 5
+        };
+        return result
+    }
+
+    return {addToRecentSearches, searchLikedTracks, searchYouTube, searchSpotify}
 })
