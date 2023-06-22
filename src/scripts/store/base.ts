@@ -3,16 +3,17 @@ import {openDB} from "idb";
 import {ref, toRaw} from "vue";
 
 export interface Item {
-    type: string,
-    display_name: string,
-    description: string,
-    name: string,
-    id: string,
-    to: string,
-    images: { url: string }[],
-    album_type: string,
-    artists: { name: string }[],
-    album: Item,
+    type?: string,
+    display_name?: string,
+    description?: string,
+    name?: string,
+    id?: string,
+    to?: string,
+    images?: { url: string }[],
+    album_type?: string,
+    artists?: { name: string }[],
+    album?: Item,
+    duration_ms?: number,
 }
 
 export const baseDb = openDB("base", 1, {
@@ -72,7 +73,7 @@ export const useBaseStore = defineStore('base', () => {
 
     function itemDescription(item: Item) {
         if (item.type === 'album') {
-            return `${caps(item.album_type)} • ${item.artists.map(a => a.name).join(', ')}`
+            return `${caps(item?.album_type ?? "")} • ${(item?.artists ?? []).map(a => a.name).join(', ')}`
         }
         if (item.description !== null) {
             return item.description;
@@ -112,6 +113,7 @@ export const useBaseStore = defineStore('base', () => {
     const itemUrl = (item: Item) => {
         let type = item.type || 'category';
         let name = type === 'user' ? item.display_name : item.name;
+        name ??= ''
         if (type === 'category')
             return `${type}/${item.id}`;
         if (type === 'radio')

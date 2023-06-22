@@ -15,7 +15,7 @@
             <track-list-item v-for="track in searchResults.liked" class="track-list-item"
                              :track="track"></track-list-item>
         </div>
-        <template v-if="searchResults.liked.length > 6">
+        <template v-if="searchResults.liked.length > 3">
             <v-divider/>
             <div class="list-expander">
                 <v-btn v-if="expanded.includes(0)" @click="smallify(0)" icon="mdi-chevron-up" size="small" variant="text"></v-btn>
@@ -34,7 +34,7 @@
             <track-list-item v-for="track in searchResults.spotify.tracks" class="track-list-item"
                              :track="track"></track-list-item>
         </div>
-        <template v-if="searchResults.spotify.tracks.length > 6">
+        <template v-if="searchResults.spotify.tracks.length > 3">
             <v-divider/>
             <div class="list-expander">
                 <v-btn v-if="expanded.includes(1)" @click="smallify(1)" icon="mdi-chevron-up" size="small" variant="text"></v-btn>
@@ -53,7 +53,7 @@
             <track-list-item v-for="track in searchResults.youtube" class="track-list-item"
                              :track="track"/>
         </div>
-        <template v-if="searchResults.youtube.length > 6">
+        <template v-if="searchResults.youtube.length > 3">
             <v-divider/>
             <div class="list-expander">
                 <v-btn v-if="expanded.includes(2)" @click="smallify(2)" icon="mdi-chevron-up" size="small" variant="text"></v-btn>
@@ -87,7 +87,7 @@ watch(searchValue, () => {
 });
 
 const expanded = ref([] as number[])
-const subListHeight = 355;
+const subListHeight = 185;
 
 function expand(index: number) {
     const subLists = document.querySelectorAll('.sub-list')
@@ -122,10 +122,11 @@ interval = window.setInterval(() => {
     let now = performance.now();
     // als je 400 ms niks typt, start de auto search
     if (now - lastInputTime > 400 && searchValue.value.length > 1 && searchValue.value !== lastSearchedQuery) {
+        lastInputTime = now;
         performSearch();
         lastSearchedQuery = searchValue.value;
     }
-}, 100);
+}, 200);
 
 let searchResults = ref(null as SearchResult | null)
 
@@ -204,7 +205,7 @@ onBeforeUnmount(() => clearInterval(interval));
 }
 
 .sub-list {
-    max-height: 355px;
+    max-height: 185px;
     overflow-y: hidden;
     transition: .5s;
 }

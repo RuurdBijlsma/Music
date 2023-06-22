@@ -1,5 +1,5 @@
 {
-    "name": "Ruurd Music",
+    "name": "ruurd-music",
     "version": "6.0.0",
     "description": "Streaming music player",
     "keywords": [
@@ -30,17 +30,20 @@
         "anzip": "^0.2.0",
         "events": "^3.3.0",
         "express": "^4.18.2",
+        "ffbinaries": "github:ruurdbijlsma/ffbinaries-node.git#7c2b7e7958c70b1ddb6911ede6336cb294a86c74",
         "idb": "^7.1.1",
         "pinia": "^2.0.32",
         "spotify-web-api-js": "^1.5.2",
         "vue": "^3.2.47",
         "vue-router": "^4.1.6",
-        "vuetify": "^3.1.8"
+        "vuetify": "^3.1.8",
+        "yt-dlp-wrap": "^2.3.11"
     },
     "devDependencies": {
         "@mdi/font": "^7.1.96",
         "@types/events": "^3.0.0",
         "@types/express": "^4.17.17",
+        "@types/ffbinaries": "^1.1.2",
         "@types/node": "^18.14.2",
         "@vitejs/plugin-vue": "^4.0.0",
         "@vitejs/plugin-vue-jsx": "^3.0.0",

@@ -3,6 +3,8 @@ import {baseDb} from './base'
 import type {Item} from './base'
 import {useSpotifyStore} from "./spotify";
 import type {IDBPDatabase} from "idb";
+import {usePlatformStore} from "./electron";
+
 
 export interface SearchResult {
     liked: SpotifyApi.TrackObjectFull[],
@@ -16,6 +18,7 @@ export interface SearchResult {
 }
 
 export const useSearchStore = defineStore('search', () => {
+    const platform = usePlatformStore();
     let recentSearches: string[] = localStorage.getItem('recentSearch') === null ?
         [] : JSON.parse(localStorage.recentSearch)
 
@@ -33,18 +36,38 @@ export const useSearchStore = defineStore('search', () => {
         let [spotifyResponse, likedResponse, youtubeResponse] = await Promise.all([
             spotify.api.search(term, ['album', 'artist', 'playlist', 'track']),
             searchLikedTracks(term),
-            new Promise(r => r([])),
+            platform.searchYouTube(term, 5),
         ])
 
+        console.log({youtubeResponse})
+
         return {
-            liked:likedResponse,
-            youtube: youtubeResponse as Item[],
+            liked: likedResponse,
+            youtube: youtubeResponse.map(ytResultToItem),
             spotify: {
                 artists: spotifyResponse.artists?.items ?? [],
                 albums: spotifyResponse.albums?.items ?? [],
                 tracks: spotifyResponse.tracks?.items ?? [],
                 playlists: spotifyResponse.playlists?.items ?? [],
             }
+        }
+    }
+
+    function ytResultToItem(ytResult: any): Item {
+        return {
+            artists: [{name: ytResult.channel}],
+            type: "youtube",
+            description: ytResult.description,
+            display_name: ytResult.title,
+            album_type: "single",
+            to: "",
+            album: {images: [{url: ytResult.thumbnail}]},
+            images: [
+                {url: ytResult.thumbnail}
+            ],
+            name: ytResult.title,
+            id: `yt${ytResult.id}`,
+            duration_ms: ytResult.duration * 1000,
         }
     }
 

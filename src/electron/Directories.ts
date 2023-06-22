@@ -39,6 +39,7 @@ class Directories {
 
     getDir(base: PathType = 'music', dir = 'files') {
         let app = electron.app;
+        console.log(electron, app)
         if (electron.hasOwnProperty('remote'))
             app = electron.app;
         return path.join(app.getPath(base), dir);

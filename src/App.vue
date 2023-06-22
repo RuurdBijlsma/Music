@@ -40,6 +40,7 @@
 
 <script setup lang="ts">
 // todo:
+//  youtube search results cachen voor bepaalde tijd
 //  load title index values into js memory for faster search??? TRIGRAMS???
 //  maybe cache visited playlists for faster load times per session (no idb)
 //  browse page
@@ -53,16 +54,14 @@ import {useSpotifyStore} from "./scripts/store/spotify";
 import {useTheme} from "vuetify";
 import {useRoute} from "vue-router";
 import SearchSuggestions from "./components/SearchSuggestions.vue";
-import {usePlatformStore} from "./scripts/store/electron";
 
 const theme = useTheme()
 const spotify = useSpotifyStore()
 const route = useRoute()
-const platform = usePlatformStore()
-platform.downloadExes()
 
 console.log('spotify.library', spotify.library);
 console.log('theme', theme);
+
 </script>
 
 <style lang="scss">

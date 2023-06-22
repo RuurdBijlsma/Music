@@ -1,7 +1,7 @@
 <template>
     <div class="track-item">
         <v-lazy v-if="number === undefined" class="lazy-img" width="70" transition="fade-transition">
-            <v-img v-if="track.album.images.length > 0" class="track-img" :src="base.itemImage(track)"/>
+            <v-img :cover="true" v-if="track.album.images.length > 0" class="track-img" :src="base.itemImage(track)"/>
             <v-sheet v-else class="track-img"></v-sheet>
         </v-lazy>
         <div v-else class="track-number">

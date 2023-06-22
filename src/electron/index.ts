@@ -2,15 +2,13 @@ import {app, BrowserWindow, ipcMain, shell} from 'electron'
 import {release} from 'node:os'
 import {join} from 'node:path'
 import Directories from "./Directories";
+import path from "path";
+import fs from "fs/promises";
+import * as os from "os";
+var ffbinaries = require('ffbinaries');
+const YTDlpWrap = require('yt-dlp-wrap').default;
+const ytdlpPath = path.join(Directories.files, 'ytdlp.exe')
 
-// The built directory structure
-//
-// ├─┬ dist-electron
-// │ ├─┬ main
-// │   └── index.js    > Electron-Main
-// ├─┬ dist
-// │ └── index.html    > Electron-Renderer
-//
 process.env.DIST_ELECTRON = join(__dirname, '..')
 process.env.DIST = join(process.env.DIST_ELECTRON, '../dist')
 process.env.PUBLIC = process.env.VITE_DEV_SERVER_URL
@@ -42,7 +40,7 @@ async function createWindow() {
         webPreferences: {
             nodeIntegration: true,
             contextIsolation: false,
-            webSecurity:false,
+            webSecurity: false,
         },
         titleBarStyle: "hidden",
     })
@@ -99,3 +97,61 @@ ipcMain.on('focus-window', () => {
 
 // Main process
 ipcMain.handle('getFilesPath', () => Directories.files)
+ipcMain.handle('enableDevTools', () => {
+    console.log("Open dev tools", win, win?.webContents);
+    win?.webContents?.openDevTools()
+})
+ipcMain.handle('searchYt', async (_, query: string, results: number = 3) => {
+    let args = [
+        `ytsearch${results}:"${query.replace(/"/gi, "\"")}"`,
+        `--dump-json`,
+    ];
+    console.log({query, args})
+    let stdout = await ytdlp.execPromise(args);
+    try {
+        // return stdout;
+        return stdout.split('\n').filter((l:string) => l.length > 0).map((l:string) => JSON.parse(l));
+    } catch (e: any) {
+        console.error("YTDL PARSE ERROR", e)
+    }
+})
+
+const ytdlp = new YTDlpWrap()
+
+async function getBinaries() {
+    if (await checkFileExists(ytdlpPath)) {
+        console.log("YTDLP ALREADY EXISTS!", ytdlpPath)
+        ytdlp.setBinaryPath(ytdlpPath)
+    } else {
+        YTDlpWrap.downloadFromGithub(ytdlpPath).then(() => {
+            console.log("Downloaded YTDLP!", ytdlpPath)
+            ytdlp.setBinaryPath(ytdlpPath)
+        })
+    }
+    let ext = os.platform() === 'win32' ? '.exe' : ''
+
+    let ffmpegPath = path.join(Directories.files, 'ffmpeg' + ext)
+    let ffprobePath = path.join(Directories.files, 'ffprobe' + ext)
+    if (await checkFileExists(ffmpegPath) && await checkFileExists(ffprobePath)) {
+        console.log("FFMPEG/FFPROBE ALREADY EXISTS!", ffmpegPath, ffprobePath)
+    } else {
+        ffbinaries.downloadBinaries(['ffmpeg', 'ffprobe'], {quiet: true, destination: Directories.files}, () => {
+            console.log('Downloaded ffplay and ffprobe binaries to ' + Directories.files + '.');
+        });
+    }
+}
+
+getBinaries();
+
+async function checkFileExists(filePath: string) {
+    try {
+        await fs.access(filePath);
+        return true;
+    } catch (error: any) {
+        if (error.code === 'ENOENT') {
+            return false;
+        } else {
+            throw error;
+        }
+    }
+}
