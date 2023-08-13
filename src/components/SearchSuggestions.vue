@@ -1,6 +1,6 @@
 <template>
     <div class="search-suggestions"
-         v-show="searchValue !== '' && searchFocused && (likedResult.length > 0 || spotifyResult || ytResult.length > 0)"
+         v-show="showSuggestions && searchValue !== '' && (likedResult.length > 0 || spotifyResult || ytResult.length > 0)"
          :style="{
             left: searchX + 'px',
             top: searchY + 'px',
@@ -20,7 +20,7 @@
 </template>
 
 <script setup lang="ts">
-import {onBeforeUnmount, onMounted, ref, watch} from "vue";
+import {onBeforeUnmount, onMounted, onUnmounted, ref, watch} from "vue";
 import {clearInterval} from "timers";
 import {useBaseStore} from "../scripts/store/base";
 import type {Item} from '../scripts/store/base'
@@ -29,13 +29,22 @@ import {useSpotifyStore} from "../scripts/store/spotify";
 import {useSearchStore} from "../scripts/store/search";
 import SearchSuggestionSection from "./SearchSuggestionSection.vue";
 
-// todo search liked tracks met IDB ipv zoals dit
 
 const base = useBaseStore()
 const spotify = useSpotifyStore()
 const search = useSearchStore()
+const showSuggestions = ref(false)
+document.addEventListener('mousedown', onClick, false);
+onUnmounted(() => document.removeEventListener('mousedown', onClick))
 
-const {searchValue, searchFocused} = storeToRefs(base)
+function onClick(e: MouseEvent) {
+    let searchSuggestions = document.querySelector(".search-suggestions") as HTMLElement
+    let searchBox = document.querySelector('.search-field') as HTMLElement
+    let target = e.target as HTMLElement
+    showSuggestions.value = searchSuggestions.contains(target) || searchBox.contains(target);
+}
+
+const {searchValue} = storeToRefs(base)
 
 let lastInputTime = performance.now()
 watch(searchValue, () => {

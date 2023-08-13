@@ -1,5 +1,5 @@
 <template>
-    <div class="track-item">
+    <div class="track-item" @dblclick="playItem">
         <v-lazy v-if="number === undefined" class="lazy-img" width="70" transition="fade-transition">
             <v-img :cover="true" v-if="track.album.images.length > 0" class="track-img" :src="base.itemImage(track)"/>
             <v-sheet v-else class="track-img"></v-sheet>
@@ -30,8 +30,9 @@
 import type {PropType} from "vue";
 import {useBaseStore} from "../scripts/store/base";
 import TrackObjectSimplified = SpotifyApi.TrackObjectSimplified;
+import {toRaw} from "vue";
 
-defineProps({
+const props = defineProps({
     track: {
         type: Object as PropType<TrackObjectSimplified>,
         required: true
@@ -42,6 +43,10 @@ defineProps({
     },
 })
 const base = useBaseStore();
+
+function playItem(){
+    console.log("Play item", toRaw(props.track))
+}
 </script>
 
 <style scoped lang="scss">

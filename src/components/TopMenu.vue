@@ -6,8 +6,6 @@
         </div>
         <v-spacer/>
         <v-text-field
-            @focus="base.searchFocused = true"
-            @blur="base.searchFocused = false"
             no-drag
             class="search-field"
             hide-details density="compact"

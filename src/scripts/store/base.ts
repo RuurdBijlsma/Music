@@ -126,7 +126,6 @@ export const useBaseStore = defineStore('base', () => {
     }
 
     const searchValue = ref("");
-    const searchFocused = ref(false);
 
     return {
         itemUrl,
@@ -136,6 +135,5 @@ export const useBaseStore = defineStore('base', () => {
         approximateDuration,
         albumString,
         searchValue,
-        searchFocused,
     }
 })
