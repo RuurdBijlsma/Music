@@ -30,6 +30,15 @@ export const usePlatformStore = defineStore('platform', () => {
             }
             console.log("INVOKE ELECTRON", query)
             let result = await ipcRenderer.invoke('searchYt', query, limit);
+            result = result.map((r: any) => ({
+                duration: r.duration,
+                description: r.description,
+                channel:r.channel,
+                title:r.title,
+                thumbnail:r.thumbnail,
+                id:r.id,
+            }))
+            console.log("Search youtube result: ", result)
             ytCache[key] = {
                 result,
                 // expiry date 30 days from now

@@ -1,7 +1,6 @@
 <template>
-    <!--         v-if="searchValue !== '' && searchFocused && searchResults"-->
     <div class="search-suggestions"
-         v-if="likedResult.length > 0 || spotifyResult || ytResult.length > 0"
+         v-show="searchValue !== '' && searchFocused && (likedResult.length > 0 || spotifyResult || ytResult.length > 0)"
          :style="{
             left: searchX + 'px',
             top: searchY + 'px',
