@@ -5,6 +5,10 @@ import Directories from "./Directories";
 import path from "path";
 import fs from "fs/promises";
 import * as os from "os";
+import {ipcRenderer} from "electron";
+import type {Progress} from "yt-dlp-wrap";
+import {ar} from "vuetify/locale";
+
 var ffbinaries = require('ffbinaries');
 const YTDlpWrap = require('yt-dlp-wrap').default;
 const ytdlpPath = path.join(Directories.files, 'ytdlp.exe')
@@ -101,6 +105,23 @@ ipcMain.handle('enableDevTools', () => {
     console.log("Open dev tools", win, win?.webContents);
     win?.webContents?.openDevTools()
 })
+ipcMain.handle('downloadYt', async (_, query: string) => {
+    return new Promise<void>((resolve, reject) => {
+        let args = [
+            `ytsearch1:"${query.replace(/"/gi, "\"")}"`,
+            `-o`,
+            `${path.join(Directories.music, query + '.%(ext)s')}`,
+            `-x`
+        ];
+        console.log(Directories, Directories.music, args)
+        ytdlp.exec(args)
+            .on('progress', (progress: Progress) => {
+                win?.webContents.send(query + 'progress', progress)
+            })
+            .on('error', (error: Error) => reject(error))
+            .on('close', () => resolve());
+    })
+})
 ipcMain.handle('searchYt', async (_, query: string, results: number = 3) => {
     let args = [
         `ytsearch${results}:"${query.replace(/"/gi, "\"")}"`,
@@ -110,9 +131,9 @@ ipcMain.handle('searchYt', async (_, query: string, results: number = 3) => {
     let stdout = await ytdlp.execPromise(args);
     try {
         // return stdout;
-        return stdout.split('\n').filter((l:string) => l.length > 0).map((l:string) => JSON.parse(l));
+        return stdout.split('\n').filter((l: string) => l.length > 0).map((l: string) => JSON.parse(l));
     } catch (e: any) {
-        console.error("YTDL PARSE ERROR", e)
+        console.error("YTDL PARSE ERROR", e, stdout)
     }
 })
 

@@ -19,6 +19,12 @@ export const usePlatformStore = defineStore('platform', () => {
             localStorage.ytSearchCache = JSON.stringify(ytCache)
         }, 10000);
 
+        async function downloadYouTube(query: string) {
+            ipcRenderer.on(query + 'progress', (_, progress) => console.log("PROGERSS", progress.percent))
+            await ipcRenderer.invoke('downloadYt', query);
+            console.log("downloaded yt")
+        }
+
         async function searchYouTube(query: string, limit = 5) {
             let key = query + "|" + limit;
             if (ytCache.hasOwnProperty(key)) {
@@ -30,13 +36,14 @@ export const usePlatformStore = defineStore('platform', () => {
             }
             console.log("INVOKE ELECTRON", query)
             let result = await ipcRenderer.invoke('searchYt', query, limit);
+            console.log("Full result", result)
             result = result.map((r: any) => ({
                 duration: r.duration,
                 description: r.description,
-                channel:r.channel,
-                title:r.title,
-                thumbnail:r.thumbnail,
-                id:r.id,
+                channel: r.channel,
+                title: r.title,
+                thumbnail: r.thumbnail,
+                id: r.id,
             }))
             console.log("Search youtube result: ", result)
             ytCache[key] = {
@@ -106,6 +113,6 @@ export const usePlatformStore = defineStore('platform', () => {
             })
         }
 
-        return {firstLogin, searchYouTube}
+        return {firstLogin, searchYouTube, downloadYouTube}
     }
 )

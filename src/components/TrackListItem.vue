@@ -31,6 +31,7 @@ import type {PropType} from "vue";
 import {useBaseStore} from "../scripts/store/base";
 import TrackObjectSimplified = SpotifyApi.TrackObjectSimplified;
 import {toRaw} from "vue";
+import {usePlayerStore} from "../scripts/store/player";
 
 const props = defineProps({
     track: {
@@ -42,10 +43,12 @@ const props = defineProps({
         required: false,
     },
 })
-const base = useBaseStore();
+const base = useBaseStore()
+const player = usePlayerStore()
 
 function playItem(){
     console.log("Play item", toRaw(props.track))
+    player.play(toRaw(props.track))
 }
 </script>
 
