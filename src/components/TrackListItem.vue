@@ -10,9 +10,7 @@
         <div class="track-info">
             <div class="track-name">{{ track.name }}</div>
             <div class="track-artist">
-                <span class="mr-2" v-for="(artist, i) in track.artists">
-                    <router-link no-style :to="base.itemUrl(artist)">{{ artist.name }}</router-link>{{ i === track.artists.length - 1 ? '' : ', ' }}
-                </span>
+                <artists-span :artists="track.artists"></artists-span>
             </div>
         </div>
         <v-spacer/>
@@ -32,6 +30,7 @@ import {useBaseStore} from "../scripts/store/base";
 import TrackObjectSimplified = SpotifyApi.TrackObjectSimplified;
 import {toRaw} from "vue";
 import {usePlayerStore} from "../scripts/store/player";
+import ArtistsSpan from "./ArtistsSpan.vue";
 
 const props = defineProps({
     track: {

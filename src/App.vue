@@ -1,6 +1,8 @@
 <template>
     <v-app class="root" :class="{dark: theme.current.value.dark}">
-        <div class="blur-bg"></div>
+        <div class="blur-bg" :style="{
+            backgroundImage: `linear-gradient(rgb(var(--v-theme-background), 0.5), rgb(var(--v-theme-background))), url('${blurBgSrc}')`
+        }"></div>
         <div class="main">
             <top-menu class="top-menu"/>
             <search-suggestions/>
@@ -59,10 +61,20 @@ import {useSpotifyStore} from "./scripts/store/spotify";
 import {useTheme} from "vuetify";
 import {useRoute} from "vue-router";
 import SearchSuggestions from "./components/SearchSuggestions.vue";
+import {useBaseStore} from "./scripts/store/base";
+import {usePlayerStore} from "./scripts/store/player";
+import {computed} from "vue";
 
 const theme = useTheme()
 const spotify = useSpotifyStore()
 const route = useRoute()
+const base = useBaseStore()
+const player = usePlayerStore()
+
+const blurBgSrc = computed(() => {
+    if (player.track === null) return 'img/cover2.jpg'
+    return base.itemImage(player.track)
+})
 
 console.log('spotify.library', spotify.library);
 console.log('theme', theme);
@@ -91,7 +103,6 @@ html, body {
 }
 
 .blur-bg {
-    background-image: linear-gradient(rgb(var(--v-theme-background), 0.5), rgb(var(--v-theme-background))), url('assets/cover2.jpg');
     background-position: center;
     background-size: cover;
     width: calc(100% + 150px);

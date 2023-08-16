@@ -1,19 +1,19 @@
 <template>
-    <div class="mp" ref="musicContainer">
+    <div class="mp" ref="musicContainer" v-if="player.track !== null">
         <v-spacer></v-spacer>
-        <glow-image class="album-art" src="img/cover2.jpg" :width="elWidth / 1.6" :height="elWidth / 1.6"
+        <glow-image class="album-art" :src="base.itemImage(player.track)" :width="elWidth / 1.6" :height="elWidth / 1.6"
                     rounding="10px"/>
         <div class="sheet">
             <div class="music-info-text">
-                <h2 class="music-title">Capricorn</h2>
-                <h3 class="music-artist">Elderbrook</h3>
+                <h2 class="music-title">{{ player.track.name }}</h2>
+                <h3 class="music-artist"><artists-span :artists="player.track.artists"></artists-span></h3>
             </div>
             <div class="music-progress">
-                <div class="music-time-current">{{ player.currentTime }}</div>
+                <div class="music-time-current">{{ base.msToReadable(player.currentTime * 1000) }}</div>
                 <div class="progress-container">
 
                 </div>
-                <div class="music-time-total">{{ player.duration }}</div>
+                <div class="music-time-total">{{ base.msToReadable(player.duration * 1000) }}</div>
             </div>
             <div class="music-controls">
                 <v-btn variant="text" icon size="35">
@@ -21,7 +21,8 @@
                 </v-btn>
                 <v-btn variant="text" icon="mdi-skip-previous" size="35"></v-btn>
                 <v-btn icon size="60" @click="player.togglePlay">
-                    <v-progress-circular :indeterminate="isNaN(player.loadProgress)" :model-value="player.loadProgress" size="40" v-if="player.loading"></v-progress-circular>
+                    <v-progress-circular :indeterminate="isNaN(player.loadProgress)" :model-value="player.loadProgress"
+                                         size="40" v-if="player.loading"></v-progress-circular>
                     <v-icon size="30" v-else-if="player.playing">mdi-pause</v-icon>
                     <v-icon size="30" v-else>mdi-play</v-icon>
                 </v-btn>
@@ -53,8 +54,12 @@
 import {onMounted, ref} from "vue";
 import GlowImage from "./GlowImage.vue";
 import {usePlayerStore} from "../scripts/store/player";
+import {useBaseStore} from "../scripts/store/base";
+import Artists from "../views/library/Artists.vue";
+import ArtistsSpan from "./ArtistsSpan.vue";
 
 const player = usePlayerStore()
+const base = useBaseStore()
 const volume = ref(0.7);
 const elWidth = ref(0);
 const musicContainer = ref(null);

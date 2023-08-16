@@ -46,12 +46,14 @@ export const usePlayerStore = defineStore('player', () => {
     const duration = ref(0)
     const currentTime = ref(0)
     const loadProgress = ref(NaN)
+    const track = ref(null as null | SpotifyApi.TrackObjectSimplified)
 
     async function load(item: SpotifyApi.TrackObjectSimplified) {
         duration.value = 1
         currentTime.value = 1
         loading.value = true
         loadProgress.value = NaN
+        track.value = item
         console.log("Playing item", item)
         let artistsString = item.artists.map(a => a.name).join(', ')
         let query = `${artistsString} - ${item.name}`
@@ -85,5 +87,5 @@ export const usePlayerStore = defineStore('player', () => {
         await playerElement.pause()
     }
 
-    return {loading, playing, duration, currentTime, loadProgress, load, skip, play, pause, togglePlay}
+    return {loading, playing, duration, currentTime, loadProgress, track, load, skip, play, pause, togglePlay}
 })
