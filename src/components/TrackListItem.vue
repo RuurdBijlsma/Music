@@ -48,7 +48,7 @@ const player = usePlayerStore()
 
 function playItem(){
     console.log("Play item", toRaw(props.track))
-    player.play(toRaw(props.track))
+    player.load(toRaw(props.track))
 }
 </script>
 

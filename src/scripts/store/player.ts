@@ -1,23 +1,89 @@
 import {defineStore} from 'pinia'
-import {openDB} from "idb";
-import {ref, toRaw} from "vue";
-import type {Item} from "./base";
 import {usePlatformStore} from "./electron";
+import {ref} from "vue";
+import EventEmitter from "events";
 
-let playerElement = document.createElement('audio')
-let playerSwapElement = document.createElement('audio')
+const events = new EventEmitter()
+
 
 export const usePlayerStore = defineStore('player', () => {
-    const platform = usePlatformStore();
+    let playerElement = createAudioElement()
+    let playerSwapElement = createAudioElement()
 
-    async function play(item: SpotifyApi.TrackObjectSimplified) {
-        console.log("Playing item", item)
-        let query = `${item.artists.map(a => a.name).join(', ')} - ${item.name}`
-        console.log("Query", query)
-        // let results = await platform.searchYouTube(query, 3)
-        // console.log('results:', results)
-        await platform.downloadYouTube(query)
+    function createAudioElement() {
+        let element = document.createElement('audio')
+        element.autoplay = true
+        element.addEventListener('play', () => {
+            playing.value = !element.paused
+            console.log("Playing status is", playing.value)
+        })
+        element.addEventListener('pause', () => {
+            playing.value = !element.paused
+            console.log("Playing status is", playing.value)
+        })
+        element.addEventListener('durationchange', () => {
+            duration.value = element.duration
+            console.log("audio duration change", duration.value)
+        })
+        element.addEventListener('canplay', () => {
+            console.log("audio load")
+            loading.value = false
+        })
+        element.addEventListener('timeupdate', () => {
+            console.log("audio timeupdate")
+            currentTime.value = element.currentTime
+        })
+        element.addEventListener('ended', async () => {
+            console.log("audio ended")
+            await skip(1)
+        })
+        return element
     }
 
-    return {play}
+    const platform = usePlatformStore();
+    const loading = ref(false)
+    const playing = ref(false)
+    const duration = ref(0)
+    const currentTime = ref(0)
+    const loadProgress = ref(NaN)
+
+    async function load(item: SpotifyApi.TrackObjectSimplified) {
+        duration.value = 1
+        currentTime.value = 1
+        loading.value = true
+        loadProgress.value = NaN
+        console.log("Playing item", item)
+        let artistsString = item.artists.map(a => a.name).join(', ')
+        let query = `${artistsString} - ${item.name}`
+        let filename = `${item.name} - ${artistsString}`
+        console.log("Query", query, 'filename', filename)
+        events.on(query + 'progress', progress => {
+            loadProgress.value = progress.percent
+        })
+        let outPath = await platform.getTrackFile(query, filename, events)
+        playerElement.src = outPath
+        console.log(playerElement)
+    }
+
+    async function skip(n = 1) {
+        console.log("Skip next song", n)
+    }
+
+    async function togglePlay() {
+        if (playing.value) {
+            await pause();
+        } else {
+            await play();
+        }
+    }
+
+    async function play() {
+        await playerElement.play()
+    }
+
+    async function pause() {
+        await playerElement.pause()
+    }
+
+    return {loading, playing, duration, currentTime, loadProgress, load, skip, play, pause, togglePlay}
 })

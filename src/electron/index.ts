@@ -100,26 +100,26 @@ ipcMain.on('focus-window', () => {
 })
 
 // Main process
-ipcMain.handle('getFilesPath', () => Directories.files)
+ipcMain.handle('getDirectories', () => Directories)
 ipcMain.handle('enableDevTools', () => {
     console.log("Open dev tools", win, win?.webContents);
     win?.webContents?.openDevTools()
 })
-ipcMain.handle('downloadYt', async (_, query: string) => {
-    return new Promise<void>((resolve, reject) => {
+ipcMain.handle('downloadYt', async (_, query: string, filename: string) => {
+    return new Promise<string>((resolve, reject) => {
         let args = [
             `ytsearch1:"${query.replace(/"/gi, "\"")}"`,
             `-o`,
-            `${path.join(Directories.music, query + '.%(ext)s')}`,
+            `${path.join(Directories.music, filename + '.%(ext)s')}`,
             `-x`
         ];
-        console.log(Directories, Directories.music, args)
+        console.log(args)
         ytdlp.exec(args)
             .on('progress', (progress: Progress) => {
                 win?.webContents.send(query + 'progress', progress)
             })
             .on('error', (error: Error) => reject(error))
-            .on('close', () => resolve());
+            .on('close', () => resolve(path.join(Directories.music, filename) + '.opus'));
     })
 })
 ipcMain.handle('searchYt', async (_, query: string, results: number = 3) => {

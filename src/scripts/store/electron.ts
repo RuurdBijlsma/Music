@@ -6,23 +6,39 @@ import anzip from 'anzip';
 import {useSpotifyStore} from "./spotify";
 import http from "http";
 import * as fs from "fs/promises";
+import path from 'path'
+import type EventEmitter from "events";
 
 const express = window.require('express')
 export const usePlatformStore = defineStore('platform', () => {
-        const spotify = useSpotifyStore();
-        let server: any = null;
-        let ytCache = {} as any;
+        const spotify = useSpotifyStore()
+        let directories: { music: string } | null = null
+        ipcRenderer.invoke('getDirectories').then((d: any) => {
+            console.log("Got directories", d)
+            directories = d
+        })
+        let server: any = null
+        let ytCache = {} as any
         if (localStorage.getItem('ytSearchCache') !== null) {
-            ytCache = JSON.parse(localStorage.ytSearchCache);
+            ytCache = JSON.parse(localStorage.ytSearchCache)
         }
         setInterval(() => {
             localStorage.ytSearchCache = JSON.stringify(ytCache)
         }, 10000);
 
-        async function downloadYouTube(query: string) {
-            ipcRenderer.on(query + 'progress', (_, progress) => console.log("PROGERSS", progress.percent))
-            await ipcRenderer.invoke('downloadYt', query);
-            console.log("downloaded yt")
+        async function getTrackFile(query: string, filename: string, events: EventEmitter) {
+            let outPath = path.join(directories?.music ?? "", filename + '.opus')
+            if (!await checkFileExists(outPath)) {
+                ipcRenderer.on(query + 'progress', (_, progress) => {
+                    console.log("PROGERSS", progress.percent)
+                    events.emit(query + 'progress', progress)
+                })
+                await ipcRenderer.invoke('downloadYt', query, filename)
+                console.log("downloaded yt")
+            } else {
+                console.log("Using cached file for track")
+            }
+            return outPath
         }
 
         async function searchYouTube(query: string, limit = 5) {
@@ -32,10 +48,10 @@ export const usePlatformStore = defineStore('platform', () => {
                 if (res.expiryDate < Date.now())
                     delete ytCache[key]
                 else
-                    return ytCache[key].result;
+                    return ytCache[key].result
             }
             console.log("INVOKE ELECTRON", query)
-            let result = await ipcRenderer.invoke('searchYt', query, limit);
+            let result = await ipcRenderer.invoke('searchYt', query, limit)
             console.log("Full result", result)
             result = result.map((r: any) => ({
                 duration: r.duration,
@@ -113,6 +129,6 @@ export const usePlatformStore = defineStore('platform', () => {
             })
         }
 
-        return {firstLogin, searchYouTube, downloadYouTube}
+        return {firstLogin, searchYouTube, getTrackFile}
     }
 )

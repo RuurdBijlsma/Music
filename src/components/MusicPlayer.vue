@@ -9,19 +9,21 @@
                 <h3 class="music-artist">Elderbrook</h3>
             </div>
             <div class="music-progress">
-                <div class="music-time-current">2:34</div>
+                <div class="music-time-current">{{ player.currentTime }}</div>
                 <div class="progress-container">
 
                 </div>
-                <div class="music-time-total">4:31</div>
+                <div class="music-time-total">{{ player.duration }}</div>
             </div>
             <div class="music-controls">
                 <v-btn variant="text" icon size="35">
                     <v-icon size="20">mdi-shuffle</v-icon>
                 </v-btn>
                 <v-btn variant="text" icon="mdi-skip-previous" size="35"></v-btn>
-                <v-btn icon size="60">
-                    <v-icon size="30">mdi-play</v-icon>
+                <v-btn icon size="60" @click="player.togglePlay">
+                    <v-progress-circular :indeterminate="isNaN(player.loadProgress)" :model-value="player.loadProgress" size="40" v-if="player.loading"></v-progress-circular>
+                    <v-icon size="30" v-else-if="player.playing">mdi-pause</v-icon>
+                    <v-icon size="30" v-else>mdi-play</v-icon>
                 </v-btn>
                 <v-btn variant="text" icon="mdi-skip-next" size="35"></v-btn>
                 <v-btn variant="text" icon size="35">
@@ -50,7 +52,9 @@
 <script setup lang="ts">
 import {onMounted, ref} from "vue";
 import GlowImage from "./GlowImage.vue";
+import {usePlayerStore} from "../scripts/store/player";
 
+const player = usePlayerStore()
 const volume = ref(0.7);
 const elWidth = ref(0);
 const musicContainer = ref(null);
@@ -77,7 +81,7 @@ onMounted(() => {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding:10px;
+    padding: 10px;
 }
 
 .album-art {
