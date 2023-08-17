@@ -19,7 +19,6 @@
                 <v-btn color="primary" icon="mdi-heart-outline" variant="text"/>
                 <v-divider/>
             </div>
-            <p>{{ artist.description }}</p>
         </div>
         <div>
             <track-list-item v-for="(track, index) in topTracks"

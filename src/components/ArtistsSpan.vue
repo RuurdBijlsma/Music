@@ -6,11 +6,12 @@
 
 <script setup lang="ts">
 import {useBaseStore} from "../scripts/store/base";
+import type {PropType} from "vue";
 
 const base = useBaseStore()
 defineProps({
     artists: {
-        type: Array,
+        type: Array as PropType<any[]>,
         required: true
     },
 })

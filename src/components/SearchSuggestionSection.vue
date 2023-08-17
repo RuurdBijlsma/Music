@@ -29,7 +29,6 @@
 import {ref, watch} from "vue";
 import type {PropType} from "vue";
 import {useBaseStore} from "../scripts/store/base";
-import type {Item} from "../scripts/store/base";
 import {storeToRefs} from "pinia";
 import {useSpotifyStore} from "../scripts/store/spotify";
 import TrackListItem from "./TrackListItem.vue";
@@ -38,7 +37,7 @@ const subList = ref<HTMLElement | null>(null);
 
 defineProps({
     tracks: {
-        type: Object as PropType<Item[]>,
+        type: Object as PropType<SpotifyApi.TrackObjectFull[]>,
         required: true
     },
     loading: {

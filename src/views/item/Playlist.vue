@@ -39,8 +39,6 @@ import {useRoute} from "vue-router";
 import {useBaseStore} from "../../scripts/store/base";
 import GlowImage from "../../components/GlowImage.vue";
 import TrackList from "../../components/TrackList.vue";
-import PlaylistTrackObject = SpotifyApi.PlaylistTrackObject;
-import TrackObjectFull = SpotifyApi.TrackObjectFull;
 
 const route = useRoute()
 const base = useBaseStore();
@@ -60,8 +58,8 @@ spotify.api.getPlaylist(loadedId).then((r: any) => {
 const tracks = computed(() => {
     if (playlist.value === null) return [];
     return playlist.value.tracks.items
-        .map((t: PlaylistTrackObject) => t.track as TrackObjectFull)
         .filter(t => !t.is_local)
+        .map((t: SpotifyApi.PlaylistTrackObject) => t.track as SpotifyApi.TrackObjectFull)
 });
 const followerString = computed(() => {
     if (playlist.value === null) return '0 followers';

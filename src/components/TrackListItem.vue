@@ -27,14 +27,13 @@
 <script setup lang="ts">
 import type {PropType} from "vue";
 import {useBaseStore} from "../scripts/store/base";
-import TrackObjectSimplified = SpotifyApi.TrackObjectSimplified;
 import {toRaw} from "vue";
 import {usePlayerStore} from "../scripts/store/player";
 import ArtistsSpan from "./ArtistsSpan.vue";
 
 const props = defineProps({
     track: {
-        type: Object as PropType<TrackObjectSimplified>,
+        type: Object as PropType<SpotifyApi.TrackObjectFull>,
         required: true
     },
     number: {

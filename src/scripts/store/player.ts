@@ -49,6 +49,7 @@ export const usePlayerStore = defineStore('player', () => {
     const track = ref(null as null | SpotifyApi.TrackObjectSimplified)
 
     async function load(item: SpotifyApi.TrackObjectSimplified) {
+        playerElement.src = ''
         duration.value = 1
         currentTime.value = 1
         loading.value = true

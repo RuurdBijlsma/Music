@@ -43,7 +43,6 @@ import {useRoute} from "vue-router";
 import {useBaseStore} from "../../scripts/store/base";
 import GlowImage from "../../components/GlowImage.vue";
 import TrackList from "../../components/TrackList.vue";
-import TrackObjectSimplified = SpotifyApi.TrackObjectSimplified;
 
 const route = useRoute()
 const base = useBaseStore();
@@ -60,9 +59,9 @@ spotify.api.getAlbum(loadedId).then((r: any) => {
     album.value = r;
     console.log("album", r);
 });
-const tracks = computed((): TrackObjectSimplified[] => {
+const tracks = computed((): SpotifyApi.TrackObjectFull[] => {
     if (album.value === null) return [];
-    return album.value.tracks.items;
+    return album.value.tracks.items as SpotifyApi.TrackObjectFull[];
 });
 const totalDurationMs = computed(() => {
     return tracks.value.reduce((a, b) => a + b.duration_ms, 0);

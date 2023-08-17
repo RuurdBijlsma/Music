@@ -74,7 +74,7 @@ interval = window.setInterval(() => {
     }
 }, 200);
 
-let ytResult = ref([] as Item[])
+let ytResult = ref([] as SpotifyApi.TrackObjectFull[])
 let spotifyResult = ref([] as SpotifyApi.TrackObjectFull[])
 let likedResult = ref([] as SpotifyApi.TrackObjectFull[])
 let ytLoading = ref(false)

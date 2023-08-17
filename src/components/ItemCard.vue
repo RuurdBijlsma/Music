@@ -18,7 +18,7 @@ import type {Item} from '../scripts/store/base'
 const base = useBaseStore();
 defineProps({
     item: {
-        type: Object as PropType<Item>,
+        type: Object,
         required: true
     },
     size: {

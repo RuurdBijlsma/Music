@@ -44,7 +44,7 @@ export const useBaseStore = defineStore('base', () => {
         return minutes + ' minute' + (minutes === 1 ? '' : 's');
     }
 
-    function albumString(item: SpotifyApi.AlbumObjectFull) {
+    function albumString(item: SpotifyApi.AlbumObjectFull | any) {
         // @ts-ignore
         return `${item.total_tracks} track${item.total_tracks === 1 ? '' : 's'} • ${item.artists.map(a => a.name).join(', ')} • ${item.release_date.substring(0, 4)} • ${caps(item.album_type)}`;
     }
@@ -76,7 +76,7 @@ export const useBaseStore = defineStore('base', () => {
             return `${caps(item?.album_type ?? "")} • ${(item?.artists ?? []).map(a => a.name).join(', ')}`
         }
         if (item.description !== null) {
-            return item.description;
+            return item.description ?? "";
         }
         return '';
     }
@@ -92,7 +92,7 @@ export const useBaseStore = defineStore('base', () => {
         } else {
             image = item.images?.[0]?.url
         }
-        if (image === null) {
+        if (image === null || image === undefined) {
             return 'img/notfound/' + (1 + Math.floor(Math.random() * 7)) + '.png'
         }
         return image;
@@ -110,7 +110,7 @@ export const useBaseStore = defineStore('base', () => {
         return encoded;
     }
 
-    const itemUrl = (item: Item) => {
+    const itemUrl = (item: Item | any) => {
         let type = item.type || 'category';
         let name = type === 'user' ? item.display_name : item.name;
         name ??= ''
@@ -119,7 +119,7 @@ export const useBaseStore = defineStore('base', () => {
         if (type === 'radio')
             return '';
         if (type === 'search')
-            return item.to;
+            return item.to ?? "/";
         if (type === 'liked')
             return '/library/tracks';
         return `/${type}/${encodeUrlName(name)}/${item.id}`;

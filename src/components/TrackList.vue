@@ -18,13 +18,12 @@
 import {computed, ref} from "vue";
 import type {PropType} from "vue";
 import TrackListItem from "./TrackListItem.vue";
-import TrackObjectFull = SpotifyApi.TrackObjectFull;
 import {useBaseStore} from "../scripts/store/base";
 
 const base = useBaseStore();
 const props = defineProps({
     tracks: {
-        type: Object as PropType<TrackObjectFull[]>,
+        type: Object as PropType<SpotifyApi.TrackObjectFull[]>,
         required: true
     },
     subtractHeight: {

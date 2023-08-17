@@ -43,7 +43,8 @@
 <script setup lang="ts">
 // todo:
 // VERSE TODO
-// yt kan gestreamt met ytdlp, de exe moet wel up to date zijn
+// transition de blur bg change
+// yt KAN gestreamt met ytdlp, de exe moet wel up to date zijn
 // is dat het uberhaubt waard? download is best snel en idk of streamen niet problemen gaat oplossen
 // gebruik progress voor progress indicator in play/apuse knop
 
