@@ -1,7 +1,12 @@
 <template>
     <v-app class="root" :class="{dark: theme.current.value.dark}">
-        <div class="blur-bg" :style="{
+        <div class="blurry-bg" :style="{
             backgroundImage: `linear-gradient(rgb(var(--v-theme-background), 0.5), rgb(var(--v-theme-background))), url('${blurBgSrc}')`
+        }"></div>
+        <div class="blurry-bg-transition" :style="{
+            transitionDuration,
+            opacity: transitionBgOpacity,
+            backgroundImage: `linear-gradient(rgb(var(--v-theme-background), 0.5), rgb(var(--v-theme-background))), url('${transitionBgSrc}')`
         }"></div>
         <div class="main">
             <top-menu class="top-menu"/>
@@ -64,7 +69,7 @@ import {useRoute} from "vue-router";
 import SearchSuggestions from "./components/SearchSuggestions.vue";
 import {useBaseStore} from "./scripts/store/base";
 import {usePlayerStore} from "./scripts/store/player";
-import {computed} from "vue";
+import {computed, ref, watch} from "vue";
 
 const theme = useTheme()
 const spotify = useSpotifyStore()
@@ -75,6 +80,28 @@ const player = usePlayerStore()
 const blurBgSrc = computed(() => {
     if (player.track === null) return 'img/cover2.jpg'
     return base.itemImage(player.track)
+})
+
+const transitionBgSrc = ref('img/cover2.jpg')
+const transitionDuration = ref("3s")
+const transitionBgOpacity = ref('1')
+const timeoutId = ref(-1)
+
+// Fade transition when switching blurry bg
+watch(blurBgSrc, () => {
+    clearTimeout(timeoutId.value)
+    console.log("Blur change", blurBgSrc.value)
+    transitionBgOpacity.value = '0'
+    //@ts-ignore
+    timeoutId.value = setTimeout(() => {
+        transitionBgSrc.value = blurBgSrc.value;
+        transitionDuration.value = "0s"
+        transitionBgOpacity.value = '1'
+        //@ts-ignore
+        timeoutId.value = setTimeout(() => {
+            transitionDuration.value = "3s"
+        }, 50)
+    }, 3000)
 })
 
 console.log('spotify.library', spotify.library);
@@ -103,7 +130,7 @@ html, body {
     background-color: rgb(var(--v-theme-background));
 }
 
-.blur-bg {
+.blurry-bg, .blurry-bg-transition {
     background-position: center;
     background-size: cover;
     width: calc(100% + 150px);
@@ -113,6 +140,11 @@ html, body {
     position: fixed;
     z-index: 1;
     filter: blur(60px);
+}
+
+.blurry-bg-transition {
+    transition: opacity 3s;
+    opacity: 1;
 }
 
 .main {
