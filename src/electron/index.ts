@@ -111,6 +111,21 @@ ipcMain.handle('setTheme', (_, theme: 'dark' | 'light') => {
     if (theme === 'light')
         win?.setIcon(lightIcon)
 })
+ipcMain.handle('minimizeWindow', () => {
+    win?.minimize()
+})
+ipcMain.handle('closeWindow', () => {
+    win?.close()
+})
+ipcMain.handle('toggleMaximizeWindow', () => {
+    if (win?.isMaximized()) {
+        win?.unmaximize()
+        return false
+    } else {
+        win?.maximize()
+        return true
+    }
+})
 ipcMain.handle('downloadYt', async (_, query: string, filename: string) => {
     return new Promise<string>((resolve, reject) => {
         let args = [

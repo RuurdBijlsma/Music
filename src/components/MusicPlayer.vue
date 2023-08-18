@@ -96,11 +96,13 @@ onUnmounted(() => {
     flex-direction: column;
     align-items: center;
     padding: 10px;
+    text-align: center;
 }
 
 .album-art {
-    flex-grow: 0;
     box-shadow: 0 8px 20px -3px rgba(0, 0, 0, 0.3);
+    position: absolute;
+    top: 200px;
 }
 
 .sheet {
@@ -110,6 +112,8 @@ onUnmounted(() => {
     align-items: center;
     width: 400px;
     margin-top: 40px;
+    position: absolute;
+    top: 500px;
 }
 
 .music-info-text {
@@ -124,17 +128,26 @@ onUnmounted(() => {
 
 .music-title {
     font-weight: 400;
+    text-align: center;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2; /* number of lines to show */
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
 }
 
 .music-artist {
     font-weight: 300;
     opacity: 0.7;
+    text-align: center;
     font-size: 18px;
 }
 
 .music-progress {
     display: flex;
     font-size: 13px;
+    position: absolute;
+    top:160px;
 }
 
 .music-time-current, .music-time-total {
@@ -147,7 +160,7 @@ onUnmounted(() => {
     height: 10px;
     background-color: rgba(0, 0, 0, 0.5);
     margin: 5px 20px 20px;
-    border-radius: 5px
+    border-radius: 5px;
 }
 
 .extra-bar-buttons {
@@ -159,6 +172,8 @@ onUnmounted(() => {
     justify-content: space-evenly;
     display: flex;
     align-items: center;
+    position: absolute;
+    top: 200px;
 }
 
 .volume-slider {

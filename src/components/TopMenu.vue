@@ -77,15 +77,15 @@
         </v-menu>
         <v-spacer/>
         <div class="app-buttons" no-drag>
-            <div class="minimize">
+            <v-btn class="minimize window-button" variant="plain" density="compact" @click="platform.minimize()">
                 <v-icon icon="mdi-window-minimize"/>
-            </div>
-            <div class="maximize">
+            </v-btn>
+            <v-btn class="maximize window-button" variant="plain" density="compact" @click="platform.toggleMaximize()">
                 <v-icon icon="mdi-window-restore"/>
-            </div>
-            <div class="close">
+            </v-btn>
+            <v-btn class="close window-button" variant="plain" density="compact" @click="platform.close()">
                 <v-icon icon="mdi-window-close"/>
-            </div>
+            </v-btn>
         </div>
     </div>
 </template>
@@ -225,7 +225,7 @@ window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e =
     margin-right: -15px;
 }
 
-.app-buttons > div {
+.app-buttons > .window-button {
     width: 50px;
     height: 35px;
     text-align: center;
@@ -235,15 +235,15 @@ window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e =
     transition: 0.1s;
 }
 
-.dark .app-buttons > div {
+.dark .app-buttons > .window-button {
     color: rgba(255, 255, 255, 0.7);
 }
 
-.dark .app-buttons > div:hover {
+.dark .app-buttons > .window-button:hover {
     background-color: rgba(255, 255, 255, 0.15);
 }
 
-.app-buttons > div:hover {
+.app-buttons > .window-button:hover {
     background-color: rgba(0, 0, 0, 0.15);
 }
 

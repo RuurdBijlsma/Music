@@ -32,7 +32,7 @@ export const usePlayerStore = defineStore('player', () => {
             loading.value = false
         })
         element.addEventListener('timeupdate', () => {
-            console.log("audio timeupdate")
+            // console.log("audio timeupdate")
             currentTime.value = element.currentTime
         })
         element.addEventListener('ended', async () => {
@@ -73,12 +73,20 @@ export const usePlayerStore = defineStore('player', () => {
         let filename = `${track.value.name} - ${artistsString}`
         console.log("Query", query, 'filename', filename)
         events.on(query + 'progress', progress => {
-            loadProgress.value = progress.percent
+            // Check if user hasn't changed track while it was progressing
+            if (_collection.id === collection.value.id && index === collectionIndex.value)
+                loadProgress.value = progress.percent
         })
         let outPath = await platform.getTrackFile(query, filename, events)
-        playerElement.src = outPath
+        // Check if user hasn't changed track while it was loading
+        if (_collection.id === collection.value.id && index === collectionIndex.value)
+            playerElement.src = outPath
         console.log(playerElement)
     }
+
+    setInterval(() => {
+        console.log(`Current collection id: ${collection.value.id}, current index: ${collectionIndex.value}, current track: ${track.value?.name}`)
+    }, 1000)
 
     async function skip(n = 1) {
         if (n === -1 && currentTime.value > 5) {
@@ -117,5 +125,19 @@ export const usePlayerStore = defineStore('player', () => {
         await playerElement.pause()
     }
 
-    return {loading, playing, duration, currentTime, loadProgress, track, collection, collectionIndex, load, skip, play, pause, togglePlay}
+    return {
+        loading,
+        playing,
+        duration,
+        currentTime,
+        loadProgress,
+        track,
+        collection,
+        collectionIndex,
+        load,
+        skip,
+        play,
+        pause,
+        togglePlay
+    }
 })

@@ -8,6 +8,7 @@ import http from "http";
 import * as fs from "fs/promises";
 import path from 'path'
 import type EventEmitter from "events";
+import {ref} from "vue";
 
 const express = window.require('express')
 export const usePlatformStore = defineStore('platform', () => {
@@ -133,6 +134,20 @@ export const usePlatformStore = defineStore('platform', () => {
             await ipcRenderer.invoke('setTheme', theme);
         }
 
-        return {firstLogin, searchYouTube, getTrackFile, setTheme}
+        async function minimize() {
+            await ipcRenderer.invoke('minimizeWindow')
+        }
+
+        async function close() {
+            await ipcRenderer.invoke('closeWindow')
+        }
+
+        const maximized = ref(false)
+
+        async function toggleMaximize() {
+            maximized.value = await ipcRenderer.invoke('toggleMaximizeWindow')
+        }
+
+        return {firstLogin, searchYouTube, getTrackFile, setTheme, close, toggleMaximize, minimize}
     }
 )

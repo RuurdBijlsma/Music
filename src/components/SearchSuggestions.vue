@@ -128,13 +128,18 @@ function updateSearchPos() {
     z-index: 8;
 
     //height: 500px;
-    background-color: rgba(128, 128, 128, 0.5);
-    backdrop-filter: blur(50px) saturate(100%) brightness(100%);
+    background-color: rgba(var(--v-theme-background), 0.5);
+    backdrop-filter: blur(50px) saturate(100%) brightness(120%);
     box-shadow: 0 3px 15px 0 rgba(0, 0, 0, 0.15);
     overflow-y: auto;
     max-height: calc(100% - 300px);
     padding-bottom: 4px;
     padding-top: 4px;
+}
+
+.dark .search-suggestions{
+    background-color: rgba(var(--v-theme-background), 0.7);
+    backdrop-filter: blur(50px) saturate(100%) brightness(80%);
 }
 
 .search-suggestions::-webkit-scrollbar {
