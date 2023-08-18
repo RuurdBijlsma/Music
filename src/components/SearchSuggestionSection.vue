@@ -40,6 +40,10 @@ const props = defineProps({
         type: Object as PropType<SpotifyApi.TrackObjectFull[]>,
         required: true
     },
+    query: {
+        type: String,
+        required: true,
+    },
     loading: {
         type: Boolean,
         required: false,
@@ -50,6 +54,7 @@ const props = defineProps({
 const collection = computed(() => ({
     tracks: props.tracks,
     type: 'search',
+    id: 'search' + props.query,
 }))
 
 const base = useBaseStore()

@@ -5,14 +5,14 @@
             left: searchX + 'px',
             top: searchY + 'px',
             width: width + 'px'}">
-        <search-suggestion-section :tracks="likedResult" :loading="likedLoading">
+        <search-suggestion-section :query="searchValue" :tracks="likedResult" :loading="likedLoading">
             Library
         </search-suggestion-section>
-        <search-suggestion-section :tracks="spotifyResult" :loading="spotifyLoading">
+        <search-suggestion-section :query="searchValue" :tracks="spotifyResult" :loading="spotifyLoading">
             <v-icon class="mr-2">mdi-spotify</v-icon>
             Spotify
         </search-suggestion-section>
-        <search-suggestion-section :tracks="ytResult" :loading="ytLoading">
+        <search-suggestion-section :query="searchValue" :tracks="ytResult" :loading="ytLoading">
             <v-icon class="mr-2">mdi-youtube</v-icon>
             YouTube
         </search-suggestion-section>

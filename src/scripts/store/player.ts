@@ -117,5 +117,5 @@ export const usePlayerStore = defineStore('player', () => {
         await playerElement.pause()
     }
 
-    return {loading, playing, duration, currentTime, loadProgress, track, load, skip, play, pause, togglePlay}
+    return {loading, playing, duration, currentTime, loadProgress, track, collection, collectionIndex, load, skip, play, pause, togglePlay}
 })

@@ -17,7 +17,7 @@
                            class="mb-2 progress"
                            rounded
                            :model-value="trackLoadProgress"></v-progress-linear>
-        <track-list item-height :collection="collection" type="liked"
+        <track-list-virtual item-height :collection="collection" type="liked"
                     :subtract-height="188" padding-top="0"/>
     </div>
 </template>
@@ -26,7 +26,7 @@
 import {useSpotifyStore} from "../../scripts/store/spotify";
 import {useBaseStore} from "../../scripts/store/base";
 import {computed, toRaw} from "vue";
-import TrackList from "../../components/TrackList.vue";
+import TrackListVirtual from "../../components/TrackListVirtual.vue";
 
 const spotify = useSpotifyStore();
 const base = useBaseStore();
@@ -37,6 +37,7 @@ const collection = computed(() => {
     return {
         tracks: toRaw(spotify.library.tracks) as SpotifyApi.TrackObjectFull[],
         type: 'liked',
+        id: 'liked',
     }
 })
 // spotify.refreshUserData('track');

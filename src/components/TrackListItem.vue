@@ -10,7 +10,7 @@
         <div class="track-info">
             <div class="track-name">{{ track.name }}</div>
             <div class="track-artist">
-                <artists-span :artists="track.artists"></artists-span>
+                <artists-span :artists="track.artists"/>
             </div>
         </div>
         <v-spacer/>
@@ -47,6 +47,10 @@ const props = defineProps({
     number: {
         type: Number,
         required: false,
+    },
+    active: {
+        type: Boolean,
+        default:false,
     },
 })
 const base = useBaseStore()

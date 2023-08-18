@@ -1,6 +1,6 @@
 <template>
     <div class="album" v-if="album">
-        <track-list :collection="album" type="album" no-images>
+        <track-list-virtual :collection="album" type="album" no-images>
             <div class="mb-8 album-info">
                 <glow-image
                     rounding="5px"
@@ -32,7 +32,7 @@
                 </div>
                 <p class="album-genres">{{ album.genres.join(', ') }}</p>
             </div>
-        </track-list>
+        </track-list-virtual>
     </div>
 </template>
 
@@ -42,7 +42,7 @@ import {computed, ref, watch} from "vue";
 import {useRoute} from "vue-router";
 import {useBaseStore} from "../../scripts/store/base";
 import GlowImage from "../../components/GlowImage.vue";
-import TrackList from "../../components/TrackList.vue";
+import TrackListVirtual from "../../components/TrackListVirtual.vue";
 
 const route = useRoute()
 const base = useBaseStore();

@@ -20,14 +20,7 @@
                 <v-divider/>
             </div>
         </div>
-        <div>
-            <track-list-item v-for="(track, index) in topTracks"
-                             :class="{'odd-item': index % 2 === 1}"
-                             class="track-list-item"
-                             :collection="collection"
-                             :index="index"
-                             :track="track"/>
-        </div>
+        <track-list :collection="collection"/>
         <div class="sub-header mt-6 mb-5">
             <v-divider/>
             <p class="top-tracks-text ml-4 mr-4">Albums</p>
@@ -71,6 +64,7 @@ import TrackListItem from "../../components/TrackListItem.vue";
 import ItemCard from "../../components/ItemCard.vue";
 import HighlightCard from "../../components/HighlightCard.vue";
 import HorizontalScroller from "../../components/HorizontalScroller.vue";
+import TrackList from "../../components/TrackList.vue";
 
 const route = useRoute()
 const base = useBaseStore();
@@ -85,6 +79,7 @@ const collection = computed(() => {
         tracks: topTracks.value,
         type: "artist",
         artist,
+        id: artist.value?.id ?? 'artist',
     }
 })
 
@@ -199,13 +194,5 @@ const followerString = computed(() => {
 .sub-header {
     display: flex;
     align-items: center;
-}
-
-.track-list-item.odd-item {
-    background-color: rgba(0, 0, 0, 0.07);
-}
-
-.dark .track-list-item.odd-item {
-    background-color: rgba(255, 255, 255, 0.05);
 }
 </style>

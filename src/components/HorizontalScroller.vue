@@ -19,7 +19,7 @@
 </template>
 
 <script setup lang="ts">
-import {onMounted, ref} from "vue";
+import {onMounted, onUnmounted, ref} from "vue";
 
 const canGoLeft = ref(false);
 const canGoRight = ref(false);
@@ -41,11 +41,16 @@ function checkCanScroll() {
     canGoRight.value = el.scrollWidth - (el.scrollLeft + el.clientWidth) > 0;
 }
 
+let el: HTMLElement | null
 onMounted(() => {
     checkCanScroll();
-    let el = scrollContainer.value as HTMLElement | null;
+    el = scrollContainer.value as HTMLElement | null;
     if (el === null) return;
-    el.addEventListener('scroll', () => checkCanScroll());
+    el.addEventListener('scroll', checkCanScroll);
+})
+onUnmounted(() => {
+    if (el === null) return;
+    el.removeEventListener('scroll', checkCanScroll);
 })
 
 </script>

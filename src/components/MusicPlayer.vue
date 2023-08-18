@@ -20,7 +20,7 @@
                     <v-icon size="20">mdi-shuffle</v-icon>
                 </v-btn>
                 <v-btn variant="text" icon="mdi-skip-previous" size="35" @click="player.skip(-1)"></v-btn>
-                <v-btn icon size="60" @click="player.togglePlay">
+                <v-btn variant="tonal" icon size="60" @click="player.togglePlay">
                     <v-progress-circular :indeterminate="isNaN(player.loadProgress)" :model-value="player.loadProgress"
                                          size="40" v-if="player.loading"></v-progress-circular>
                     <v-icon size="30" v-else-if="player.playing">mdi-pause</v-icon>
@@ -51,7 +51,7 @@
 </template>
 
 <script setup lang="ts">
-import {onMounted, ref} from "vue";
+import {onMounted, onUnmounted, ref} from "vue";
 import GlowImage from "./GlowImage.vue";
 import {usePlayerStore} from "../scripts/store/player";
 import {useBaseStore} from "../scripts/store/base";
@@ -71,13 +71,16 @@ function checkElWidth() {
     // console.log("Width of el = " + elWidth.value);
 }
 
-window.addEventListener('resize', () => checkElWidth());
 let interval = 0;
 onMounted(() => {
+    window.addEventListener('resize', checkElWidth);
     checkElWidth();
     interval = window.setInterval(() => {
         checkElWidth();
     }, 100);
+})
+onUnmounted(()=>{
+    window.removeEventListener('resize', checkElWidth);
 })
 </script>
 

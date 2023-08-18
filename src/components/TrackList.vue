@@ -1,65 +1,59 @@
 <template>
-    <v-virtual-scroll
-        :items="scrollItems"
-        class="virtual-scroll"
-        :style="{paddingTop: paddingTop}"
-        :height="(pageHeight - subtractHeight).toString()"
-        item-height="50">
-        <template v-slot:default="{ item, index }">
-            <slot v-if="item === null"/>
-            <track-list-item :collection="collection" :number="noImages ? item.track_number : undefined" v-else
-                             :index="index - 1"
-                             :class="{'odd-item': index % 2 === 0}"
-                             class="track-list-item" :track="item"/>
-        </template>
-    </v-virtual-scroll>
+    <div class="track-list" v-if="collection !== null">
+        <track-list-item
+            v-for="(item, index) in tracks"
+            :collection="collection" :number="noImages ? item.track_number : undefined"
+            :index="index"
+            :class="{
+                 'odd-item': !isActive(index) && index % 2 === 0,
+                 'active': isActive(index)
+             }"
+            class="track-list-item" :track="item"/>
+    </div>
 </template>
 
 <script setup lang="ts">
-import {computed, ref} from "vue";
-import type {PropType, Ref} from "vue";
+import {computed} from "vue";
+import type {PropType} from "vue";
 import TrackListItem from "./TrackListItem.vue";
 import {useBaseStore} from "../scripts/store/base";
+import {usePlayerStore} from "../scripts/store/player";
+import {useTheme} from "vuetify";
 
 const base = useBaseStore();
+const player = usePlayerStore()
 const props = defineProps({
     collection: {
         type: Object as PropType<any>,
         required: true
-    },
-    type: {
-        type: String,
-        default: "playlist",
-    },
-    subtractHeight: {
-        type: Number,
-        default: () => 0,
-    },
-    paddingTop: {
-        type: String,
-        default: () => '60px',
-    },
-    itemHeight: {
-        type: Boolean,
-        default: () => false,
     },
     noImages: {
         type: Boolean,
         default: () => false,
     },
 })
-
-const pageHeight = ref(window.innerHeight);
-window.addEventListener('resize', () => {
-    pageHeight.value = window.innerHeight;
-})
-const scrollItems = computed(() => {
-    // console.log("CHECK", props.collection.value)
-    return [null, ...base.getCollectionTracks(props.collection)]
+const theme = useTheme()
+const isActive = (index: number) => {
+    return player.collectionIndex === index && (player.collection?.id ?? '') === props.collection.id
+}
+const tracks = computed(() => {
+    return base.getCollectionTracks(props.collection)
 })
 </script>
 
 <style scoped lang="scss">
+.track-list-item.active {
+    background-color: rgba(0, 0, 0, 0.9);
+    color: white;
+    box-shadow: 0 0 12px 0 rgba(0, 0, 0, 0.3);
+}
+
+.dark .track-list-item.active {
+    background-color: white;
+    color: black;
+    box-shadow: 0 0 12px 0 rgba(255, 255, 255, 0.3);
+}
+
 .track-list-item.odd-item {
     background-color: rgba(0, 0, 0, 0.07);
 }
@@ -74,22 +68,26 @@ const scrollItems = computed(() => {
     margin-right: 10px;
 }
 
-.virtual-scroll::-webkit-scrollbar {
+.track-list {
+    overflow-y: auto;
+}
+
+.track-list::-webkit-scrollbar {
     width: 14px;
     height: 18px;
 }
 
-.virtual-scroll::-webkit-scrollbar-track {
+.track-list::-webkit-scrollbar-track {
     background: rgba(0, 0, 0, .1);
     border-radius: 3px;
 }
 
-.virtual-scroll::-webkit-scrollbar-thumb {
+.track-list::-webkit-scrollbar-thumb {
     background: rgba(0, 0, 0, 0.4);
     border-radius: 3px;
 }
 
-.virtual-scroll::-webkit-scrollbar-thumb:hover {
+.track-list::-webkit-scrollbar-thumb:hover {
     background: rgba(0, 0, 0, 0.6);
 }
 </style>

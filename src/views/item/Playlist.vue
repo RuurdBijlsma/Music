@@ -1,6 +1,6 @@
 <template>
     <div class="playlist" v-if="playlist">
-        <track-list type="playlist" :collection="playlist">
+        <track-list-virtual type="playlist" :collection="playlist">
             <div class="mb-8 playlist-info">
                 <glow-image
                     rounding="5px"
@@ -28,7 +28,7 @@
                 </div>
                 <p>{{ playlist.description }}</p>
             </div>
-        </track-list>
+        </track-list-virtual>
     </div>
 </template>
 
@@ -38,7 +38,7 @@ import {computed, ref, watch} from "vue";
 import {useRoute} from "vue-router";
 import {useBaseStore} from "../../scripts/store/base";
 import GlowImage from "../../components/GlowImage.vue";
-import TrackList from "../../components/TrackList.vue";
+import TrackListVirtual from "../../components/TrackListVirtual.vue";
 
 const route = useRoute()
 const base = useBaseStore();
