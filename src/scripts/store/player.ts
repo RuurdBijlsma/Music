@@ -1,12 +1,14 @@
 import {defineStore} from 'pinia'
 import {usePlatformStore} from "./electron";
-import {ref} from "vue";
+import {computed, ref} from "vue";
 import EventEmitter from "events";
+import {useBaseStore} from "./base";
 
 const events = new EventEmitter()
 
 
 export const usePlayerStore = defineStore('player', () => {
+    const base = useBaseStore()
     let playerElement = createAudioElement()
     let playerSwapElement = createAudioElement()
 
@@ -47,18 +49,28 @@ export const usePlayerStore = defineStore('player', () => {
     const currentTime = ref(0)
     const loadProgress = ref(NaN)
     const track = ref(null as null | SpotifyApi.TrackObjectSimplified)
+    const repeat = ref(true)
+    const shuffle = ref(false)
 
-    async function load(item: SpotifyApi.TrackObjectSimplified) {
+    const collection = ref(null as any | null)
+    const tracks = computed(() => base.getCollectionTracks(collection.value))
+    const collectionIndex = ref(0)
+
+    async function load(_collection: any, index: number) {
+        console.log("Load", {_collection, index})
         playerElement.src = ''
         duration.value = 1
         currentTime.value = 1
         loading.value = true
         loadProgress.value = NaN
-        track.value = item
-        console.log("Playing item", item)
-        let artistsString = item.artists.map(a => a.name).join(', ')
-        let query = `${artistsString} - ${item.name}`
-        let filename = `${item.name} - ${artistsString}`
+        collection.value = _collection
+        track.value = tracks.value[index]
+        console.log(tracks, tracks.value, tracks.value[index])
+        collectionIndex.value = index
+        console.log("Playing item", track.value)
+        let artistsString = track.value.artists.map(a => a.name).join(', ')
+        let query = `${artistsString} - ${track.value.name}`
+        let filename = `${track.value.name} - ${artistsString}`
         console.log("Query", query, 'filename', filename)
         events.on(query + 'progress', progress => {
             loadProgress.value = progress.percent
@@ -69,7 +81,24 @@ export const usePlayerStore = defineStore('player', () => {
     }
 
     async function skip(n = 1) {
+        if (n === -1 && currentTime.value > 5) {
+            playerElement.currentTime = 0
+            return
+        }
         console.log("Skip next song", n)
+        let newIndex = collectionIndex.value + n
+        let repeatRequired = false
+        if (newIndex >= tracks.value.length) {
+            repeatRequired = true
+            newIndex = 0
+        }
+        if (newIndex < 0) {
+            repeatRequired = true
+            newIndex = tracks.value.length - 1
+        }
+        if (repeatRequired && !repeat.value)
+            return;
+        await load(collection.value, newIndex)
     }
 
     async function togglePlay() {

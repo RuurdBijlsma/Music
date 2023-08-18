@@ -34,7 +34,15 @@ import ArtistsSpan from "./ArtistsSpan.vue";
 const props = defineProps({
     track: {
         type: Object as PropType<SpotifyApi.TrackObjectFull>,
-        required: true
+        required: true,
+    },
+    index: {
+        type: Number,
+        required: true,
+    },
+    collection: {
+        type: Object as PropType<any>,
+        required: true,
     },
     number: {
         type: Number,
@@ -44,9 +52,9 @@ const props = defineProps({
 const base = useBaseStore()
 const player = usePlayerStore()
 
-function playItem(){
+function playItem() {
     console.log("Play item", toRaw(props.track))
-    player.load(toRaw(props.track))
+    player.load(toRaw(props.collection), toRaw(props.index))
 }
 </script>
 

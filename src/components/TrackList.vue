@@ -7,7 +7,8 @@
         item-height="50">
         <template v-slot:default="{ item, index }">
             <slot v-if="item === null"/>
-            <track-list-item :number="noImages ? item.track_number : undefined" v-else
+            <track-list-item :collection="collection" :number="noImages ? item.track_number : undefined" v-else
+                             :index="index - 1"
                              :class="{'odd-item': index % 2 === 0}"
                              class="track-list-item" :track="item"/>
         </template>
@@ -16,15 +17,19 @@
 
 <script setup lang="ts">
 import {computed, ref} from "vue";
-import type {PropType} from "vue";
+import type {PropType, Ref} from "vue";
 import TrackListItem from "./TrackListItem.vue";
 import {useBaseStore} from "../scripts/store/base";
 
 const base = useBaseStore();
 const props = defineProps({
-    tracks: {
-        type: Object as PropType<SpotifyApi.TrackObjectFull[]>,
+    collection: {
+        type: Object as PropType<any>,
         required: true
+    },
+    type: {
+        type: String,
+        default: "playlist",
     },
     subtractHeight: {
         type: Number,
@@ -48,7 +53,10 @@ const pageHeight = ref(window.innerHeight);
 window.addEventListener('resize', () => {
     pageHeight.value = window.innerHeight;
 })
-const scrollItems = computed(() => [null, ...props.tracks])
+const scrollItems = computed(() => {
+    // console.log("CHECK", props.collection.value)
+    return [null, ...props.collection.tracks]
+})
 </script>
 
 <style scoped lang="scss">

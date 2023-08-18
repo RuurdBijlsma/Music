@@ -19,14 +19,14 @@
                 <v-btn variant="text" icon size="35">
                     <v-icon size="20">mdi-shuffle</v-icon>
                 </v-btn>
-                <v-btn variant="text" icon="mdi-skip-previous" size="35"></v-btn>
+                <v-btn variant="text" icon="mdi-skip-previous" size="35" @click="player.skip(-1)"></v-btn>
                 <v-btn icon size="60" @click="player.togglePlay">
                     <v-progress-circular :indeterminate="isNaN(player.loadProgress)" :model-value="player.loadProgress"
                                          size="40" v-if="player.loading"></v-progress-circular>
                     <v-icon size="30" v-else-if="player.playing">mdi-pause</v-icon>
                     <v-icon size="30" v-else>mdi-play</v-icon>
                 </v-btn>
-                <v-btn variant="text" icon="mdi-skip-next" size="35"></v-btn>
+                <v-btn variant="text" icon="mdi-skip-next" size="35" @click="player.skip(1)"></v-btn>
                 <v-btn variant="text" icon size="35">
                     <v-icon size="20">mdi-repeat</v-icon>
                 </v-btn>

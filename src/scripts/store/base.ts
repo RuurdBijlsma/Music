@@ -110,6 +110,21 @@ export const useBaseStore = defineStore('base', () => {
         return encoded;
     }
 
+    const getCollectionTracks = (collection: any): SpotifyApi.TrackObjectFull[] => {
+        console.log("Get collection tracks", collection)
+        if (collection === null) return []
+
+        if (collection.type === 'playlist') {
+            return collection.tracks.items
+                .filter((t: any) => !t.is_local)
+                .map((t: SpotifyApi.PlaylistTrackObject) => t.track as SpotifyApi.TrackObjectFull)
+        } else if (collection.type === 'album') {
+            return collection.tracks.items as SpotifyApi.TrackObjectFull[]
+        } else {
+            return collection.tracks as SpotifyApi.TrackObjectFull[]
+        }
+    }
+
     const itemUrl = (item: Item | any) => {
         let type = item.type || 'category';
         let name = type === 'user' ? item.display_name : item.name;
@@ -134,6 +149,7 @@ export const useBaseStore = defineStore('base', () => {
         msToReadable,
         approximateDuration,
         albumString,
+        getCollectionTracks,
         searchValue,
     }
 })

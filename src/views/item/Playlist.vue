@@ -1,6 +1,6 @@
 <template>
     <div class="playlist" v-if="playlist">
-        <track-list :tracks="tracks">
+        <track-list type="playlist" :collection="playlist">
             <div class="mb-8 playlist-info">
                 <glow-image
                     rounding="5px"
@@ -43,6 +43,7 @@ import TrackList from "../../components/TrackList.vue";
 const route = useRoute()
 const base = useBaseStore();
 const spotify = useSpotifyStore();
+
 const playlist = ref(null as null | SpotifyApi.SinglePlaylistResponse);
 let loadedId = route.params.id as string;
 watch(route, async () => {
@@ -55,12 +56,6 @@ spotify.api.getPlaylist(loadedId).then((r: any) => {
     playlist.value = r;
     console.log("Playlist", r);
 });
-const tracks = computed(() => {
-    if (playlist.value === null) return [];
-    return playlist.value.tracks.items
-        .filter(t => !t.is_local)
-        .map((t: SpotifyApi.PlaylistTrackObject) => t.track as SpotifyApi.TrackObjectFull)
-});
 const followerString = computed(() => {
     if (playlist.value === null) return '0 followers';
     if (playlist.value.followers.total > 1000000) {
@@ -69,6 +64,7 @@ const followerString = computed(() => {
     }
     return playlist.value.followers.total.toLocaleString() + ' follower' + (playlist.value.followers.total === 1 ? '' : 's');
 })
+const tracks = computed(() => base.getCollectionTracks(playlist.value))
 const totalDurationMs = computed(() => {
     return tracks.value.reduce((a, b) => a + b.duration_ms, 0);
 });

@@ -17,18 +17,28 @@
                            class="mb-2 progress"
                            rounded
                            :model-value="trackLoadProgress"></v-progress-linear>
-        <track-list item-height :tracks="spotify.library.tracks" :subtract-height="188" padding-top="0"/>
+        <track-list item-height :collection="collection" type="liked"
+                    :subtract-height="188" padding-top="0"/>
     </div>
 </template>
 
 <script setup lang="ts">
 import {useSpotifyStore} from "../../scripts/store/spotify";
 import {useBaseStore} from "../../scripts/store/base";
-import {computed} from "vue";
+import {computed, toRaw} from "vue";
 import TrackList from "../../components/TrackList.vue";
 
 const spotify = useSpotifyStore();
 const base = useBaseStore();
+const collection = computed(() => {
+    if (spotify.library.tracks === null || spotify.library.tracks === undefined) {
+        return null
+    }
+    return {
+        tracks: toRaw(spotify.library.tracks) as SpotifyApi.TrackObjectFull[],
+        type: 'liked',
+    }
+})
 // spotify.refreshUserData('track');
 const totalDurationMs = computed(() => {
     if (spotify.library.tracks === null) return 0;
