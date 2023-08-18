@@ -33,8 +33,12 @@
                 <span class="button-text nav-3-text"
                       :class="{active: route.path === '/library'}">Library</span>
             </div>
-            <music-player class="music-player" v-if="spotify.dbLoaded"/>
-            <div class="router-view" v-if="spotify.dbLoaded">
+            <music-player class="music-player" :style="{
+                    transform: player.track === null ? 'translateX(-100%)' : 'translateX(0%)',
+            }" v-if="spotify.dbLoaded"/>
+            <div class="router-view" v-if="spotify.dbLoaded" :style="{
+                    width: player.track === null ? 'calc(100% - 90px)' : '50%',
+                }">
                 <router-view v-slot="{ Component }">
                     <transition name="slide-fade" mode="out-in">
                         <component :is="Component"/>
@@ -257,6 +261,7 @@ html, body {
 }
 
 .router-view {
+    transition: width 0.5s;
     overflow-y: auto;
     //background-color: blue;
     position: fixed;
@@ -271,6 +276,8 @@ html, body {
     //background-color: red;
     width: calc(50% - 70px);
     left: 70px;
+    transform: translateX(-100%);
+    transition: transform 0.5s;
 }
 
 @media only screen and (max-width: 900px) {

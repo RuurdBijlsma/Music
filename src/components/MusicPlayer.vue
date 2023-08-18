@@ -1,52 +1,58 @@
 <template>
-    <div class="mp" ref="musicContainer" v-if="player.track !== null">
-        <v-spacer></v-spacer>
-        <glow-image class="album-art" :src="base.itemImage(player.track)" :width="elWidth / 1.6" :height="elWidth / 1.6"
-                    rounding="10px"/>
-        <div class="sheet">
-            <div class="music-info-text">
-                <h2 class="music-title">{{ player.track.name }}</h2>
-                <h3 class="music-artist"><artists-span :artists="player.track.artists"></artists-span></h3>
-            </div>
-            <div class="music-progress">
-                <div class="music-time-current">{{ base.msToReadable(player.currentTime * 1000) }}</div>
-                <div class="progress-container">
-
+    <div class="mp" ref="musicContainer">
+        <template v-if="player.track !== null">
+            <v-spacer></v-spacer>
+            <glow-image class="album-art" :src="base.itemImage(player.track)" :width="elWidth / 1.6"
+                        :height="elWidth / 1.6"
+                        rounding="10px"/>
+            <div class="sheet">
+                <div class="music-info-text">
+                    <h2 class="music-title">{{ player.track.name }}</h2>
+                    <h3 class="music-artist">
+                        <artists-span :artists="player.track.artists"></artists-span>
+                    </h3>
                 </div>
-                <div class="music-time-total">{{ base.msToReadable(player.duration * 1000) }}</div>
+                <div class="music-progress">
+                    <div class="music-time-current">{{ base.msToReadable(player.currentTime * 1000) }}</div>
+                    <div class="progress-container">
+
+                    </div>
+                    <div class="music-time-total">{{ base.msToReadable(player.duration * 1000) }}</div>
+                </div>
+                <div class="music-controls">
+                    <v-btn variant="text" icon size="35">
+                        <v-icon size="20">mdi-shuffle</v-icon>
+                    </v-btn>
+                    <v-btn variant="text" icon="mdi-skip-previous" size="35" @click="player.skip(-1)"></v-btn>
+                    <v-btn variant="tonal" icon size="60" @click="player.togglePlay">
+                        <v-progress-circular :indeterminate="isNaN(player.loadProgress)"
+                                             :model-value="player.loadProgress"
+                                             size="40" v-if="player.loading"></v-progress-circular>
+                        <v-icon size="30" v-else-if="player.playing">mdi-pause</v-icon>
+                        <v-icon size="30" v-else>mdi-play</v-icon>
+                    </v-btn>
+                    <v-btn variant="text" icon="mdi-skip-next" size="35" @click="player.skip(1)"></v-btn>
+                    <v-btn variant="text" icon size="35">
+                        <v-icon size="20">mdi-repeat</v-icon>
+                    </v-btn>
+                </div>
             </div>
-            <div class="music-controls">
-                <v-btn variant="text" icon size="35">
-                    <v-icon size="20">mdi-shuffle</v-icon>
+            <v-spacer></v-spacer>
+            <div class="extra-bar-buttons">
+                <v-btn rounded variant="text">
+                    <v-icon>mdi-heart</v-icon>
                 </v-btn>
-                <v-btn variant="text" icon="mdi-skip-previous" size="35" @click="player.skip(-1)"></v-btn>
-                <v-btn variant="tonal" icon size="60" @click="player.togglePlay">
-                    <v-progress-circular :indeterminate="isNaN(player.loadProgress)" :model-value="player.loadProgress"
-                                         size="40" v-if="player.loading"></v-progress-circular>
-                    <v-icon size="30" v-else-if="player.playing">mdi-pause</v-icon>
-                    <v-icon size="30" v-else>mdi-play</v-icon>
+                <v-btn rounded variant="text">
+                    <v-icon>mdi-playlist-play</v-icon>
                 </v-btn>
-                <v-btn variant="text" icon="mdi-skip-next" size="35" @click="player.skip(1)"></v-btn>
-                <v-btn variant="text" icon size="35">
-                    <v-icon size="20">mdi-repeat</v-icon>
-                </v-btn>
+                <div class="volume-slider">
+                    <v-btn variant="text" rounded flat>
+                        <v-icon>mdi-volume-high</v-icon>
+                    </v-btn>
+                    <v-slider hide-details :min="0" :max="1" :model-value="volume"></v-slider>
+                </div>
             </div>
-        </div>
-        <v-spacer></v-spacer>
-        <div class="extra-bar-buttons">
-            <v-btn rounded variant="text">
-                <v-icon>mdi-heart</v-icon>
-            </v-btn>
-            <v-btn rounded variant="text">
-                <v-icon>mdi-playlist-play</v-icon>
-            </v-btn>
-            <div class="volume-slider">
-                <v-btn variant="text" rounded flat>
-                    <v-icon>mdi-volume-high</v-icon>
-                </v-btn>
-                <v-slider hide-details :min="0" :max="1" :model-value="volume"></v-slider>
-            </div>
-        </div>
+        </template>
     </div>
 </template>
 
@@ -79,7 +85,7 @@ onMounted(() => {
         checkElWidth();
     }, 100);
 })
-onUnmounted(()=>{
+onUnmounted(() => {
     window.removeEventListener('resize', checkElWidth);
 })
 </script>
