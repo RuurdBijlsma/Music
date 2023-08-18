@@ -55,7 +55,7 @@ window.addEventListener('resize', () => {
 })
 const scrollItems = computed(() => {
     // console.log("CHECK", props.collection.value)
-    return [null, ...props.collection.tracks]
+    return [null, ...base.getCollectionTracks(props.collection)]
 })
 </script>
 

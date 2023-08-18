@@ -8,8 +8,8 @@
                 </div>
                 <v-divider/>
             </div>
-            <track-list-item v-for="track in tracks" class="track-list-item"
-                             :track="track"></track-list-item>
+            <track-list-item v-for="(track, index) in tracks" :collection="collection" class="track-list-item"
+                             :index="index" :track="track"></track-list-item>
         </div>
         <template v-if="tracks.length > 3">
             <v-divider/>
@@ -26,7 +26,7 @@
 </template>
 
 <script setup lang="ts">
-import {ref, watch} from "vue";
+import {computed, ref, watch} from "vue";
 import type {PropType} from "vue";
 import {useBaseStore} from "../scripts/store/base";
 import {storeToRefs} from "pinia";
@@ -35,7 +35,7 @@ import TrackListItem from "./TrackListItem.vue";
 
 const subList = ref<HTMLElement | null>(null);
 
-defineProps({
+const props = defineProps({
     tracks: {
         type: Object as PropType<SpotifyApi.TrackObjectFull[]>,
         required: true
@@ -46,6 +46,11 @@ defineProps({
         default: () => false,
     },
 })
+
+const collection = computed(() => ({
+    tracks: props.tracks,
+    type: 'search',
+}))
 
 const base = useBaseStore()
 const spotify = useSpotifyStore()
@@ -118,7 +123,7 @@ function smallify() {
 .loading-circle {
     display: flex;
     justify-content: center;
-    padding:40px;
-    height:226px;
+    padding: 40px;
+    height: 226px;
 }
 </style>

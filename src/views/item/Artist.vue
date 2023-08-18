@@ -24,7 +24,9 @@
             <track-list-item v-for="(track, index) in topTracks"
                              :class="{'odd-item': index % 2 === 1}"
                              class="track-list-item"
-                             :track="track"></track-list-item>
+                             :collection="collection"
+                             :index="index"
+                             :track="track"/>
         </div>
         <div class="sub-header mt-6 mb-5">
             <v-divider/>
@@ -78,6 +80,13 @@ const artist = ref(null as null | SpotifyApi.SingleArtistResponse)
 const albums = ref(null as null | SpotifyApi.AlbumObjectSimplified[])
 const relatedArtists = ref(null as null | SpotifyApi.ArtistObjectSimplified[])
 const topTracks = ref(null as null | SpotifyApi.TrackObjectFull[])
+const collection = computed(() => {
+    return {
+        tracks: topTracks.value,
+        type: "artist",
+        artist,
+    }
+})
 
 let loadedId = route.params.id as string;
 reloadArtist(loadedId);

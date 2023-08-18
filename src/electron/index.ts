@@ -1,13 +1,11 @@
-import {app, BrowserWindow, ipcMain, shell} from 'electron'
+import {app, BrowserWindow, ipcMain, shell, nativeImage} from 'electron'
 import {release} from 'node:os'
 import {join} from 'node:path'
 import Directories from "./Directories";
 import path from "path";
 import fs from "fs/promises";
 import * as os from "os";
-import {ipcRenderer} from "electron";
 import type {Progress} from "yt-dlp-wrap";
-import {ar} from "vuetify/locale";
 
 var ffbinaries = require('ffbinaries');
 const YTDlpWrap = require('yt-dlp-wrap').default;
@@ -67,7 +65,6 @@ async function createWindow() {
         if (url.startsWith('https:')) shell.openExternal(url)
         return {action: 'deny'}
     })
-    // win.webContents.on('will-navigate', (event, url) => { }) #344
 }
 
 app.whenReady().then(createWindow)
@@ -104,6 +101,15 @@ ipcMain.handle('getDirectories', () => Directories)
 ipcMain.handle('enableDevTools', () => {
     console.log("Open dev tools", win, win?.webContents);
     win?.webContents?.openDevTools()
+})
+
+let lightIcon = nativeImage.createFromPath(join(process.env.PUBLIC ?? './public', 'icon/new-light-500.png'))
+let darkIcon = nativeImage.createFromPath(join(process.env.PUBLIC ?? './public', 'icon/new-dark-500.png'))
+ipcMain.handle('setTheme', (_, theme: 'dark' | 'light') => {
+    if (theme === 'dark')
+        win?.setIcon(darkIcon)
+    if (theme === 'light')
+        win?.setIcon(lightIcon)
 })
 ipcMain.handle('downloadYt', async (_, query: string, filename: string) => {
     return new Promise<string>((resolve, reject) => {

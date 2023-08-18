@@ -112,11 +112,11 @@ export const useBaseStore = defineStore('base', () => {
 
     const getCollectionTracks = (collection: any): SpotifyApi.TrackObjectFull[] => {
         console.log("Get collection tracks", collection)
-        if (collection === null) return []
+        if (collection === null || collection === undefined) return []
 
         if (collection.type === 'playlist') {
             return collection.tracks.items
-                .filter((t: any) => !t.is_local)
+                .filter((t: any) => !t.is_local && t.track !== null)
                 .map((t: SpotifyApi.PlaylistTrackObject) => t.track as SpotifyApi.TrackObjectFull)
         } else if (collection.type === 'album') {
             return collection.tracks.items as SpotifyApi.TrackObjectFull[]

@@ -55,7 +55,13 @@ watch(route, async () => {
         album.value = await spotify.api.getAlbum(loadedId);
     }
 })
-spotify.api.getAlbum(loadedId).then((r: any) => {
+spotify.api.getAlbum(loadedId).then((r: SpotifyApi.SingleAlbumResponse) => {
+    for (let item of r.tracks.items) {
+        //@ts-ignore
+        item.album = {
+            images: [...r.images]
+        }
+    }
     album.value = r;
     console.log("album", r);
 });

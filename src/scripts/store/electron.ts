@@ -129,6 +129,10 @@ export const usePlatformStore = defineStore('platform', () => {
             })
         }
 
-        return {firstLogin, searchYouTube, getTrackFile}
+        async function setTheme(theme: string) {
+            await ipcRenderer.invoke('setTheme', theme);
+        }
+
+        return {firstLogin, searchYouTube, getTrackFile, setTheme}
     }
 )

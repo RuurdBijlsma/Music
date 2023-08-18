@@ -94,8 +94,8 @@ import {useSpotifyStore} from "../scripts/store/spotify";
 import {ref, watch} from "vue";
 import {useRoute} from "vue-router";
 import {useTheme} from "vuetify";
-import Search from "./SearchSuggestions.vue";
 import {useBaseStore} from "../scripts/store/base";
+import {usePlatformStore} from "../scripts/store/electron";
 
 const route = useRoute();
 const theme = useTheme();
@@ -104,6 +104,7 @@ const spotify = useSpotifyStore();
 const dropdownOpen = ref(false);
 const themeOptions = ['light', 'dark', 'system'];
 const chosenTheme = ref(2);
+const platform = usePlatformStore()
 watch(route, () => {
     dropdownOpen.value = false;
 })
@@ -128,6 +129,7 @@ function applyTheme() {
         }
         console.log(`Setting theme to ${theme.global.name.value} from system preferences`);
     }
+    platform.setTheme(theme.global.name.value)
 }
 
 applyTheme();

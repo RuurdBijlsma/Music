@@ -66,6 +66,9 @@ const followerString = computed(() => {
 })
 const tracks = computed(() => base.getCollectionTracks(playlist.value))
 const totalDurationMs = computed(() => {
+    if (tracks.value === null)
+        return 0
+    console.log(tracks.value)
     return tracks.value.reduce((a, b) => a + b.duration_ms, 0);
 });
 
