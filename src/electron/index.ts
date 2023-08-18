@@ -96,6 +96,10 @@ ipcMain.on('focus-window', () => {
         win.focus();
 })
 
+ipcMain.handle("getDominantColor", async(_, imgUrl:string) => {
+
+})
+
 // Main process
 ipcMain.handle('getDirectories', () => Directories)
 ipcMain.handle('enableDevTools', () => {
@@ -131,8 +135,9 @@ ipcMain.handle('downloadYt', async (_, query: string, filename: string) => {
         let args = [
             `ytsearch1:"${query.replace(/"/gi, "\"")}"`,
             `-o`,
-            `${path.join(Directories.music, filename + '.%(ext)s')}`,
-            `-x`
+            // `${path.join(Directories.music, filename + '.%(ext)s')}`,
+            `${path.join('C://Users/Ruurd/Desktop', filename + '.%(ext)s')}`,
+            `-x`,
         ];
         console.log(args)
         ytdlp.exec(args)
