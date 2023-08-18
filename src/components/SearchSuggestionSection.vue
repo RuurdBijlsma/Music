@@ -8,8 +8,7 @@
                 </div>
                 <v-divider/>
             </div>
-            <track-list-item v-for="(track, index) in tracks" :collection="collection" class="track-list-item"
-                             :index="index" :track="track"></track-list-item>
+            <track-list :collection="collection"/>
         </div>
         <template v-if="tracks.length > 3">
             <v-divider/>
@@ -31,7 +30,7 @@ import type {PropType} from "vue";
 import {useBaseStore} from "../scripts/store/base";
 import {storeToRefs} from "pinia";
 import {useSpotifyStore} from "../scripts/store/spotify";
-import TrackListItem from "./TrackListItem.vue";
+import TrackList from "./TrackList.vue";
 
 const subList = ref<HTMLElement | null>(null);
 
@@ -40,7 +39,7 @@ const props = defineProps({
         type: Object as PropType<SpotifyApi.TrackObjectFull[]>,
         required: true
     },
-    query: {
+    id: {
         type: String,
         required: true,
     },
@@ -54,7 +53,7 @@ const props = defineProps({
 const collection = computed(() => ({
     tracks: props.tracks,
     type: 'search',
-    id: 'search' + props.query,
+    id: 'search' + props.id,
 }))
 
 const base = useBaseStore()
@@ -68,7 +67,7 @@ watch(searchValue, () => {
 });
 
 const expanded = ref(false)
-const subListHeight = 185;
+const subListHeight = 177;
 
 function expand() {
     if (subList.value === null) return
@@ -102,7 +101,7 @@ function smallify() {
 }
 
 .sub-list {
-    max-height: 185px;
+    max-height: 177px;
     overflow-y: hidden;
     transition: .5s;
 }

@@ -1,18 +1,18 @@
 <template>
     <div class="search-suggestions"
-         v-show="showSuggestions && searchValue !== '' && (likedResult.length > 0 || spotifyResult || ytResult.length > 0)"
+         v-show="showSuggestions && searchValue !== null && searchValue !== '' && (likedResult.length > 0 || spotifyResult || ytResult.length > 0)"
          :style="{
             left: searchX + 'px',
             top: searchY + 'px',
             width: width + 'px'}">
-        <search-suggestion-section :query="searchValue" :tracks="likedResult" :loading="likedLoading">
+        <search-suggestion-section :id="'library' + searchValue" :tracks="likedResult" :loading="likedLoading">
             Library
         </search-suggestion-section>
-        <search-suggestion-section :query="searchValue" :tracks="spotifyResult" :loading="spotifyLoading">
+        <search-suggestion-section :id="'spotify' + searchValue" :tracks="spotifyResult" :loading="spotifyLoading">
             <v-icon class="mr-2">mdi-spotify</v-icon>
             Spotify
         </search-suggestion-section>
-        <search-suggestion-section :query="searchValue" :tracks="ytResult" :loading="ytLoading">
+        <search-suggestion-section :id="'youtube' + searchValue" :tracks="ytResult" :loading="ytLoading">
             <v-icon class="mr-2">mdi-youtube</v-icon>
             YouTube
         </search-suggestion-section>
@@ -66,13 +66,14 @@ let interval: number;
 interval = window.setInterval(() => {
     updateSearchPos()
     let now = performance.now();
-    // als je 400 ms niks typt, start de auto search
-    if (now - lastInputTime > 400 && searchValue.value.length > 1 && searchValue.value !== lastSearchedQuery) {
+    // als je 500 ms niks typt, start de auto search
+    if (now - lastInputTime > 500 && searchValue.value !== lastSearchedQuery) {
         lastInputTime = now;
         performSearch();
         lastSearchedQuery = searchValue.value;
     }
 }, 200);
+onBeforeUnmount(() => clearInterval(interval));
 
 let ytResult = ref([] as SpotifyApi.TrackObjectFull[])
 let spotifyResult = ref([] as SpotifyApi.TrackObjectFull[])
@@ -82,6 +83,12 @@ let spotifyLoading = ref(false)
 let likedLoading = ref(false)
 
 async function performSearch() {
+    spotifyResult.value = []
+    ytResult.value = []
+    likedResult.value = []
+    if (searchValue.value === null || searchValue.value === '') {
+        return
+    }
     ytLoading.value = true
     spotifyLoading.value = true
     likedLoading.value = true
@@ -111,7 +118,6 @@ function updateSearchPos() {
     width.value = Math.round(bounds.width);
 }
 
-onBeforeUnmount(() => clearInterval(interval));
 </script>
 
 <style scoped lang="scss">

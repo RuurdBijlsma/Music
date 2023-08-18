@@ -12,6 +12,7 @@
             v-model="base.searchValue"
             append-inner-icon="mdi-magnify"
             placeholder="Search tracks, artists, playlists, and more"
+            :clearable="true"
             variant="solo">
         </v-text-field>
         <v-spacer/>
