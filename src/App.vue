@@ -59,6 +59,7 @@
 // yt KAN gestreamt met ytdlp, de exe moet wel up to date zijn
 // is dat het uberhaubt waard? download is best snel en idk of streamen niet problemen gaat oplossen
 // gebruik progress voor progress indicator in play/apuse knop
+// if file is downloading or post processing, dont download and post process when user clicks on the song again
 
 //  youtube search results cachen voor bepaalde tijd
 //  load title index values into js memory for faster search??? TRIGRAMS???
