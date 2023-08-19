@@ -134,15 +134,17 @@ ipcMain.handle('toggleMaximizeWindow', () => {
         return true
     }
 })
-ipcMain.handle('downloadYt', async (_, filename: string, tags: any, image: string) => {
+
+async function downloadYtByQuery(query: string, filename: string, destinationFolder = Directories.temp) {
     return new Promise<string>((resolve, reject) => {
-        let artistsString = tags.artist.join(', ')
-        let query = `${artistsString} - ${tags.title}`
         let args = [
             `ytsearch1:"${query.replace(/"/gi, "\"")}"`,
             `-o`,
-            `${path.join(Directories.temp, filename + '.%(ext)s')}`,
+            `${path.join(destinationFolder, filename + '.%(ext)s')}`,
             `-x`,
+            // uncomment to set let ytdlp handle the conversion to mp3
+            // '--audio-format', 'mp3',
+            // '--audio-quality', '0',//second-best audio quality
         ];
         console.log(args)
         ytdlp.exec(args)
@@ -150,48 +152,43 @@ ipcMain.handle('downloadYt', async (_, filename: string, tags: any, image: strin
                 win?.webContents.send(filename + 'progress', progress)
             })
             .on('error', (error: Error) => reject(error))
-            .on('close', () => {
-                let outPath = path.join(Directories.temp, filename + '.opus')
-                ffmpegProcessing(tags, image, outPath).then((mp3File) => {
-                    resolve(mp3File);
-                })
-            });
+            .on('close', () => resolve(path.join(destinationFolder, filename + '.opus')));
     })
-})
-
-
-async function ffmpegProcessing(tags: any, image: string, trackInputFile: string) {
-    let baseFileName = path.basename(trackInputFile)
-    baseFileName = baseFileName.substring(0, baseFileName.length - 5)
-    console.log({baseFileName})
-
-    let imageFile = path.join(Directories.temp, `image-${baseFileName}.jpg`);
-    if (image !== '')
-        await downloadFile(image, imageFile);
-
-    let outputFile = path.join(Directories.temp, baseFileName + '.mp3');
-
-    try {
-        await ffmpegMetadata(trackInputFile, outputFile, image !== '' ? imageFile : '', tags);
-    } catch (e) {
-        console.error("Failed ffmpeg processing", baseFileName, e)
-    }
-
-    let destinationFile = path.join(Directories.music, baseFileName + '.mp3');
-    await fs.rename(outputFile, destinationFile)
-    fs.unlink(trackInputFile).then()
-    if (image !== '')
-        fs.unlink(imageFile).then();
-    return destinationFile
 }
 
+ipcMain.handle('downloadYt', async (_, filename: string, tags: any, image: string) => {
+    let time = performance.now()
+    let artistsString = tags.artist.join(', ')
+    let query = `${artistsString} - ${tags.title}`
+    let imageFile = path.join(Directories.temp, `image-${filename}.jpg`);
+    // noinspection ES6MissingAwait
+    let promises = [downloadYtByQuery(query, filename)]
+    if (image !== '')
+        promises.push(downloadFile(image, imageFile))
+    let outPaths = await Promise.all(promises)
+    let middleOut = path.join(Directories.temp, filename + '.mp3')
+    let finalOut = path.join(Directories.music, filename + '.mp3')
+
+    // convert to mp3 and add metadata
+    await ffmpegMetadata(outPaths[0], middleOut, imageFile, tags)
+    console.log(`Time cost: ${performance.now() - time}ms`)
+
+    // clean up
+    await fs.rename(middleOut, finalOut)
+    fs.unlink(outPaths[0]).then()
+    if (image !== '')
+        fs.unlink(imageFile).then();
+
+    return finalOut
+})
+
 async function downloadFile(url: string, destinationFile: string) {
-    return new Promise((resolve, reject) => {
+    return new Promise<string>((resolve, reject) => {
         var file = sadFs.createWriteStream(destinationFile);
-        var request = https.get(url, function (response) {
+        https.get(url, function (response) {
             response.pipe(file);
             file.on('finish', function () {
-                file.close(resolve);
+                file.close(() => resolve(destinationFile));
             });
         }).on('error', function (err) {
             fs.unlink(destinationFile);
@@ -214,7 +211,7 @@ async function ffmpegMetadata(fileInput: string, fileOutput: string, coverImageF
         if (await checkFileExists(fileOutput))
             await fs.unlink(fileOutput);
 
-        let process = child_process.exec(command, (error, stdout, stderr) => {
+        child_process.exec(command, (error, stdout, stderr) => {
             if (error)
                 return reject(error);
             resolve({err: stderr, out: stdout});
