@@ -9,6 +9,8 @@ import * as fs from "fs/promises";
 import path from 'path'
 import type EventEmitter from "events";
 import {ref} from "vue";
+//@ts-ignore
+import fileNamify from 'filenamify';
 
 const express = window.require('express')
 export const usePlatformStore = defineStore('platform', () => {
@@ -27,14 +29,31 @@ export const usePlatformStore = defineStore('platform', () => {
             localStorage.ytSearchCache = JSON.stringify(ytCache)
         }, 10000);
 
-        async function getTrackFile(query: string, filename: string, events: EventEmitter) {
-            let outPath = path.join(directories?.music ?? "", filename + '.opus')
+        async function getTrackFile(track: SpotifyApi.TrackObjectFull, events: EventEmitter) {
+            let artistsString = track.artists.map(a => a.name).join(', ')
+            let filename = fileNamify(`${track.name} - ${artistsString}`)
+            let outPath = path.join(directories?.music ?? "", filename + '.mp3')
             if (!await checkFileExists(outPath)) {
-                ipcRenderer.on(query + 'progress', (_, progress) => {
+                ipcRenderer.on(filename + 'progress', (_, progress) => {
                     console.log("PROGERSS", progress.percent)
-                    events.emit(query + 'progress', progress)
+                    events.emit(track.id + 'progress', progress)
                 })
-                await ipcRenderer.invoke('downloadYt', query, filename)
+                let tags: any = {
+                    title: track.name,
+                    artist: track.artists.map(a => a.name),
+                    disc: track.disc_number,
+                    track: track.track_number,
+                };
+                if (track.hasOwnProperty('album')) {
+                    if (track.album.hasOwnProperty('name'))
+                        tags.album = track.album.name;
+                    if (track.album.hasOwnProperty('release_date'))
+                        //@ts-ignore
+                        tags.year = new Date(track.album.release_date).getFullYear();
+                }
+                let hasImage = track.hasOwnProperty('album') && track.album.images.length > 0;
+                console.log("Sending payload", tags, hasImage ? track.album.images[0].url : '')
+                await ipcRenderer.invoke('downloadYt', filename, tags, hasImage ? track.album.images[0].url : '')
                 console.log("downloaded yt")
             } else {
                 console.log("Using cached file for track")

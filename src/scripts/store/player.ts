@@ -48,7 +48,7 @@ export const usePlayerStore = defineStore('player', () => {
     const duration = ref(0)
     const currentTime = ref(0)
     const loadProgress = ref(NaN)
-    const track = ref(null as null | SpotifyApi.TrackObjectSimplified)
+    const track = ref(null as null | SpotifyApi.TrackObjectFull)
     const repeat = ref(true)
     const shuffle = ref(false)
 
@@ -68,16 +68,12 @@ export const usePlayerStore = defineStore('player', () => {
         console.log(tracks, tracks.value, tracks.value[index])
         collectionIndex.value = index
         console.log("Playing item", track.value)
-        let artistsString = track.value.artists.map(a => a.name).join(', ')
-        let query = `${artistsString} - ${track.value.name}`
-        let filename = `${track.value.name} - ${artistsString}`
-        console.log("Query", query, 'filename', filename)
-        events.on(query + 'progress', progress => {
+        events.on(track.value.id + 'progress', progress => {
             // Check if user hasn't changed track while it was progressing
             if (_collection.id === collection.value.id && index === collectionIndex.value)
                 loadProgress.value = progress.percent
         })
-        let outPath = await platform.getTrackFile(query, filename, events)
+        let outPath = await platform.getTrackFile(track.value, events)
         // Check if user hasn't changed track while it was loading
         if (_collection.id === collection.value.id && index === collectionIndex.value)
             playerElement.src = outPath

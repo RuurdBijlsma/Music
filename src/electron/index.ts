@@ -4,8 +4,12 @@ import {join} from 'node:path'
 import Directories from "./Directories";
 import path from "path";
 import fs from "fs/promises";
+import sadFs from 'fs'
 import * as os from "os";
 import type {Progress} from "yt-dlp-wrap";
+import child_process from "child_process";
+import SpotifyWebApi from "spotify-web-api-js";
+import * as https from "https";
 
 var ffbinaries = require('ffbinaries');
 const YTDlpWrap = require('yt-dlp-wrap').default;
@@ -96,7 +100,7 @@ ipcMain.on('focus-window', () => {
         win.focus();
 })
 
-ipcMain.handle("getDominantColor", async(_, imgUrl:string) => {
+ipcMain.handle("getDominantColor", async (_, imgUrl: string) => {
 
 })
 
@@ -130,24 +134,107 @@ ipcMain.handle('toggleMaximizeWindow', () => {
         return true
     }
 })
-ipcMain.handle('downloadYt', async (_, query: string, filename: string) => {
+ipcMain.handle('downloadYt', async (_, filename: string, tags: any, image: string) => {
     return new Promise<string>((resolve, reject) => {
+        let artistsString = tags.artist.join(', ')
+        let query = `${artistsString} - ${tags.title}`
         let args = [
             `ytsearch1:"${query.replace(/"/gi, "\"")}"`,
             `-o`,
-            // `${path.join(Directories.music, filename + '.%(ext)s')}`,
-            `${path.join('C://Users/Ruurd/Desktop', filename + '.%(ext)s')}`,
+            `${path.join(Directories.temp, filename + '.%(ext)s')}`,
             `-x`,
         ];
         console.log(args)
         ytdlp.exec(args)
             .on('progress', (progress: Progress) => {
-                win?.webContents.send(query + 'progress', progress)
+                win?.webContents.send(filename + 'progress', progress)
             })
             .on('error', (error: Error) => reject(error))
-            .on('close', () => resolve(path.join(Directories.music, filename) + '.opus'));
+            .on('close', () => {
+                let outPath = path.join(Directories.temp, filename + '.opus')
+                ffmpegProcessing(tags, image, outPath).then((mp3File) => {
+                    resolve(mp3File);
+                })
+            });
     })
 })
+
+
+async function ffmpegProcessing(tags: any, image: string, trackInputFile: string) {
+    let baseFileName = path.basename(trackInputFile)
+    baseFileName = baseFileName.substring(0, baseFileName.length - 5)
+    console.log({baseFileName})
+
+    let imageFile = path.join(Directories.temp, `image-${baseFileName}.jpg`);
+    if (image !== '')
+        await downloadFile(image, imageFile);
+
+    let outputFile = path.join(Directories.temp, baseFileName + '.mp3');
+
+    try {
+        await ffmpegMetadata(trackInputFile, outputFile, image !== '' ? imageFile : '', tags);
+    } catch (e) {
+        console.error("Failed ffmpeg processing", baseFileName, e)
+    }
+
+    let destinationFile = path.join(Directories.music, baseFileName + '.mp3');
+    await fs.rename(outputFile, destinationFile)
+    fs.unlink(trackInputFile).then()
+    if (image !== '')
+        fs.unlink(imageFile).then();
+    return destinationFile
+}
+
+async function downloadFile(url: string, destinationFile: string) {
+    return new Promise((resolve, reject) => {
+        var file = sadFs.createWriteStream(destinationFile);
+        var request = https.get(url, function (response) {
+            response.pipe(file);
+            file.on('finish', function () {
+                file.close(resolve);
+            });
+        }).on('error', function (err) {
+            fs.unlink(destinationFile);
+            reject(err)
+        });
+    })
+}
+
+async function ffmpegMetadata(fileInput: string, fileOutput: string, coverImageFile: string, tags: any) {
+    return new Promise(async (resolve, reject) => {
+        let command;
+        if (coverImageFile) {
+            command = `${ffmpegPath} -y -i "${fileInput}" -i "${coverImageFile}"` +
+                ` -map 0:0 -map 1:0 -id3v2_version 3 -metadata:s:v title="Album cover" -metadata:s:v comment="Cover (Front)" ` +
+                `${tagsToString(tags)} "${fileOutput}"`;
+        } else {
+            command = `${ffmpegPath} -y -i "${fileInput}"` +
+                `${tagsToString(tags)} "${fileOutput}"`;
+        }
+        if (await checkFileExists(fileOutput))
+            await fs.unlink(fileOutput);
+
+        let process = child_process.exec(command, (error, stdout, stderr) => {
+            if (error)
+                return reject(error);
+            resolve({err: stderr, out: stdout});
+        });
+    })
+}
+
+function tagsToString(tags: any) {
+    let result = [];
+    for (let tag in tags)
+        if (tags.hasOwnProperty(tag))
+            if (tags[tag] instanceof Array)
+                result.push(`-metadata ${tag}="${tags[tag].join('; ')}"`);
+                // for (let part of tags[tag])
+            //     result.push(`-metadata ${tag}="${part}"`);
+            else
+                result.push(`-metadata ${tag}="${tags[tag]}"`);
+    return result.join(' ');
+}
+
 ipcMain.handle('searchYt', async (_, query: string, results: number = 3) => {
     let args = [
         `ytsearch${results}:"${query.replace(/"/gi, "\"")}"`,
@@ -164,6 +251,7 @@ ipcMain.handle('searchYt', async (_, query: string, results: number = 3) => {
 })
 
 const ytdlp = new YTDlpWrap()
+let ffmpegPath = ""
 
 async function getBinaries() {
     if (await checkFileExists(ytdlpPath)) {
@@ -177,7 +265,7 @@ async function getBinaries() {
     }
     let ext = os.platform() === 'win32' ? '.exe' : ''
 
-    let ffmpegPath = path.join(Directories.files, 'ffmpeg' + ext)
+    ffmpegPath = path.join(Directories.files, 'ffmpeg' + ext)
     let ffprobePath = path.join(Directories.files, 'ffprobe' + ext)
     if (await checkFileExists(ffmpegPath) && await checkFileExists(ffprobePath)) {
         console.log("FFMPEG/FFPROBE ALREADY EXISTS!", ffmpegPath, ffprobePath)
