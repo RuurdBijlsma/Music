@@ -52,7 +52,6 @@
 <script setup lang="ts">
 // todo:
 // VERSE TODO
-// metadata zetten in downloaded file
 // playlists in search functie
 // dingen liken enzo
 // transition de blur bg change

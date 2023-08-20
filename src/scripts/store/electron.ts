@@ -30,6 +30,10 @@ export const usePlatformStore = defineStore('platform', () => {
         }, 10000);
 
         async function getTrackFile(track: SpotifyApi.TrackObjectFull, events: EventEmitter) {
+            let hasImage = track.hasOwnProperty('album') && track.album.images.length > 0;
+            if(hasImage){
+                await ipcRenderer.invoke('getDominantColor', track.album.images[0].url)
+            }
             let artistsString = track.artists.map(a => a.name).join(', ')
             let filename = fileNamify(`${track.name} - ${artistsString}`)
             let outPath = path.join(directories?.music ?? "", filename + '.mp3')
