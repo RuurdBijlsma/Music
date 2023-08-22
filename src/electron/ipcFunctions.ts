@@ -69,6 +69,6 @@ export default class IpcFunctions {
 
         ipcMain.handle('searchYt', async (_, query: string, results: number = 3) => nf.searchYouTube(query, results))
 
-        ipcMain.handle("getDominantColor", async (_, imgUrl: string) => nf.getDominantColor(imgUrl))
+        ipcMain.handle("getDominantColor", (_, imgUrl: string) => nf.getDominantColor(imgUrl))
     }
 }

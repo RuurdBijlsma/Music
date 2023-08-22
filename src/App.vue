@@ -375,4 +375,8 @@ a[no-style]:hover {
 ::-webkit-scrollbar-thumb:hover {
     background: rgba(0, 0, 0, 0.4);
 }
+
+.v-btn--icon {
+    transition: color 1s, caret-color 1s !important;
+}
 </style>

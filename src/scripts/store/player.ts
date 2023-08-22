@@ -80,9 +80,9 @@ export const usePlayerStore = defineStore('player', () => {
         console.log(playerElement)
     }
 
-    setInterval(() => {
-        console.log(`Current collection id: ${collection.value.id}, current index: ${collectionIndex.value}, current track: ${track.value?.name}`)
-    }, 1000)
+    // setInterval(() => {
+    //     // console.log(`Current collection id: ${collection.value.id}, current index: ${collectionIndex.value}, current track: ${track.value?.name}`)
+    // }, 1000)
 
     async function skip(n = 1) {
         if (n === -1 && currentTime.value > 5) {

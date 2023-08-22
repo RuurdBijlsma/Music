@@ -12,7 +12,8 @@
                 <h1>{{ playlist.name }}</h1>
                 <p class="playlist-stats">
                     Created by
-                    <router-link class="user-url" :to="base.itemUrl(playlist.owner)">{{
+                    <router-link :style="{color:base.themeColor.value}" class="user-url"
+                                 :to="base.itemUrl(playlist.owner)">{{
                             playlist.owner.display_name
                         }}
                     </router-link>
@@ -21,9 +22,9 @@
                 </p>
                 <div class="play-buttons mt-2 mb-2">
                     <v-divider/>
-                    <v-btn color="primary" icon="mdi-play-outline" variant="text"/>
-                    <v-btn color="primary" icon="mdi-shuffle" variant="text"/>
-                    <v-btn color="primary" icon="mdi-heart-outline" variant="text"/>
+                    <v-btn :color="base.themeColor.value" icon="mdi-play-outline" variant="text"/>
+                    <v-btn :color="base.themeColor.value" icon="mdi-shuffle" variant="text"/>
+                    <v-btn :color="base.themeColor.value" icon="mdi-heart-outline" variant="text"/>
                     <v-divider/>
                 </div>
                 <p>{{ playlist.description }}</p>
@@ -90,6 +91,7 @@ const totalDurationMs = computed(() => {
 
 .user-url {
     color: rgb(var(--v-theme-primary));
+    transition: color 1s;
     text-decoration: none;
 }
 

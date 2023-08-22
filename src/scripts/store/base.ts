@@ -1,6 +1,7 @@
 import {defineStore} from 'pinia'
 import {openDB} from "idb";
-import {ref, toRaw} from "vue";
+import {computed, ref} from "vue";
+import {useTheme} from "vuetify";
 
 export interface Item {
     type?: string,
@@ -37,6 +38,11 @@ export const baseDb = openDB("base", 1, {
 });
 
 export const useBaseStore = defineStore('base', () => {
+    const theme = useTheme()
+    const themeColorDark = ref('#FFFFFF')
+    const themeColorLight = ref('#000000')
+    const themeColor = computed(() => theme.global.name.value === 'dark' ? themeColorDark : themeColorLight)
+
     function approximateDuration(millis: number) {
         if (millis > 7200000)
             return Math.round(millis / 3600000) + ' hours';
@@ -151,5 +157,8 @@ export const useBaseStore = defineStore('base', () => {
         albumString,
         getCollectionTracks,
         searchValue,
+        themeColor,
+        themeColorDark,
+        themeColorLight,
     }
 })

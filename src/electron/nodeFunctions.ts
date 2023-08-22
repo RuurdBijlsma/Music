@@ -34,37 +34,6 @@ export default class NodeFunctions {
     }
 
 
-    rgbToHsl(r: number, g: number, b: number) {
-        r /= 255;
-        g /= 255;
-        b /= 255;
-
-        const max = Math.max(r, g, b);
-        const min = Math.min(r, g, b);
-        let h: number = 0, s: number = 0, l: number = (max + min) / 2;
-
-        if (max === min) {
-            h = s = 0; // achromatic
-        } else {
-            const d = max - min;
-            s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-            switch (max) {
-                case r:
-                    h = (g - b) / d + (g < b ? 6 : 0);
-                    break;
-                case g:
-                    h = (b - r) / d + 2;
-                    break;
-                case b:
-                    h = (r - g) / d + 4;
-                    break;
-            }
-            h /= 6;
-        }
-
-        return [h * 360, s * 100, l * 100];
-    }
-
     async downloadYtByQuery(query: string, filename: string, destinationFolder = Directories.temp) {
         return new Promise<string>((resolve, reject) => {
             let args = [
@@ -187,12 +156,85 @@ export default class NodeFunctions {
         }
     }
 
+    // A function to calculate the relative luminance of an RGB color
+    getRelativeLuminance(rgb: number[]): number {
+        // Apply a linear transformation to each component
+        const [r, g, b] = rgb.map(c => {
+            c /= 255; // Normalize to [0, 1]
+            return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+        });
+        // Return the weighted sum of the components
+        return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    }
+
+
+    RGBToHSL(r: number, g: number, b: number) {
+        r /= 255;
+        g /= 255;
+        b /= 255;
+        const l = Math.max(r, g, b);
+        const s = l - Math.min(r, g, b);
+        const h = s
+            ? l === r
+                ? (g - b) / s
+                : l === g
+                    ? 2 + (b - r) / s
+                    : 4 + (r - g) / s
+            : 0;
+        return [
+            60 * h < 0 ? 60 * h + 360 : 60 * h,
+            100 * (s ? (l <= 0.5 ? s / (2 * l - s) : s / (2 - (2 * l - s))) : 0),
+            (100 * (2 * l - s)) / 2,
+        ];
+    };
+
+    RGBToHex(r: number, g: number, b: number): string {
+        return '#' + [r, g, b].map(x => x.toString(16).padStart(2, '0')).join('');
+    }
+
+    // A function to calculate the contrast ratio between two RGB colors
+    getContrastRatio(rgb1: number[], rgb2: number[]): number {
+        // Get the relative luminance of each color
+        const l1 = this.getRelativeLuminance(rgb1);
+        const l2 = this.getRelativeLuminance(rgb2);
+        // Return the ratio of the larger luminance to the smaller luminance
+        return (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05);
+    }
+
     async getDominantColor(imgUrl: string) {
         let imgId = Math.random().toString()
         let imageFile = path.join(Directories.temp, `color-thief-${imgId}.jpg`);
         await this.downloadFile(imgUrl, imageFile)
-        let color = await ColorThief.getPalette(imageFile)
-        let hsbs = color.map(this.rgbToHsl)
-        console.log("Thief color: ", hsbs)
+        let rgbs = await ColorThief.getPalette(imageFile)
+        let hsls = rgbs.map(([r, g, b]: number[]) => this.RGBToHSL(r, g, b))
+        let hexes = rgbs.map(([r, g, b]: number[]) => this.RGBToHex(r, g, b))
+        console.log("Thief color: ", rgbs)
+
+        let bgColorDark = [45, 45, 45] // for dark theme
+        let bgColorLight = [240, 240, 240] // for dark theme
+        let pickColor = (bgColor: number[]) => {
+            let contrasts = rgbs.map(([r, g, b]: number[]) => this.getContrastRatio([r, g, b], bgColor))
+            console.log(contrasts)
+            let minimumContrast = 4
+            let acceptableThemeColors: { rgb: number[], hsl: number[] }[] = []
+            for (let i = 0; i < contrasts.length; i++) {
+                if (contrasts[i] > minimumContrast) {
+                    acceptableThemeColors.push({rgb: rgbs[i], hsl: hsls[i]})
+                }
+            }
+            if (acceptableThemeColors.length === 0) {
+                console.log("No contrasting colors found in album art");
+                let clr = 255 - bgColor[0];
+                return [clr, clr, clr]
+            }
+            acceptableThemeColors = acceptableThemeColors.sort((a, b) => b.hsl[1] - a.hsl[1])
+            // console.log(acceptableThemeColors.map(a => a.hsl))
+            let rgbest = acceptableThemeColors[0].rgb
+            return this.RGBToHex(rgbest[0], rgbest[1], rgbest[2])
+        }
+        return {
+            light: pickColor(bgColorLight),
+            dark: pickColor(bgColorDark),
+        }
     }
 }
