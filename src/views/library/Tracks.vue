@@ -1,8 +1,8 @@
 <template>
     <div class="playlist">
         <p class="tracks-info">
-            {{ spotify.library.tracks.length.toLocaleString() }}
-            Track{{ spotify.library.tracks.length === 1 ? '' : 's' }}
+            {{ tracksAmount }}
+            Track{{ trucks.length === 1 ? '' : 's' }}
             • {{ base.approximateDuration((totalDurationMs)) }}
         </p>
         <div class="play-buttons mb-1">
@@ -17,36 +17,47 @@
                            class="mb-2 progress"
                            rounded
                            :model-value="trackLoadProgress"></v-progress-linear>
-        <track-list-virtual item-height :collection="collection" type="liked"
-                    :subtract-height="188" padding-top="0"/>
+        <track-list-virtual v-if="collection !== null" item-height :collection="collection" type="liked"
+                            :subtract-height="188" padding-top="0"/>
     </div>
 </template>
 
 <script setup lang="ts">
 import {useSpotifyStore} from "../../scripts/store/spotify";
 import {useBaseStore} from "../../scripts/store/base";
-import {computed, toRaw} from "vue";
+import {computed, ref, toRaw, watch} from "vue";
 import TrackListVirtual from "../../components/TrackListVirtual.vue";
+import {storeToRefs} from "pinia";
 
 const spotify = useSpotifyStore();
+const {trucks} = storeToRefs(spotify)
 const base = useBaseStore();
+
 const collection = computed(() => {
-    if (spotify.library.tracks === null || spotify.library.tracks === undefined) {
+    if (trucks.value === null || trucks.value === undefined) {
         return null
     }
     return {
-        tracks: toRaw(spotify.library.tracks) as SpotifyApi.TrackObjectFull[],
+        tracks: toRaw(trucks.value).map(t=>t.track),
         type: 'liked',
         id: 'liked',
+        loaded: spotify.likedTracksLoaded,
     }
 })
-// spotify.refreshUserData('track');
+// spotify.loadLikedTracks()
 const totalDurationMs = computed(() => {
-    if (spotify.library.tracks === null) return 0;
-    return spotify.library.tracks.reduce((a, b) => a + b.duration_ms, 0);
+    if (trucks.value === null || trucks.value === undefined) return 0;
+    return trucks.value.reduce((a, b) => a + b.track.duration_ms, 0);
 });
-const trackLoadProgress = computed(() => 100)
-// const trackLoadProgress = computed(()=> 100 * spotify.likedTracksLoaded / spotify.likedTracksTotal)
+// const trackLoadProgress = computed(() => 100)
+const trackLoadProgress = computed(() => 100 * spotify.likedTracksLoaded / spotify.likedTracksTotal)
+
+const tracksAmount = computed(() => {
+    if (trackLoadProgress.value === 100) {
+        return trucks.value.length.toLocaleString()
+    }
+    return `${spotify.likedTracksLoaded.toLocaleString()} / ${spotify.likedTracksTotal.toLocaleString()}`
+})
 </script>
 
 <style scoped>

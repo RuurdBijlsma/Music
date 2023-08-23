@@ -31,17 +31,6 @@
         <div v-if="spotify.isLoggedIn">
             hi you are logged in {{ spotify.userInfo.name }}
         </div>
-        <h3 class="mt-5">
-            <v-icon :color="spotify.hasYoutubeKey ? 'red' : 'default'">mdi-youtube</v-icon>
-            YouTube
-        </h3>
-        <v-text-field
-            class="mt-5"
-            variant="filled"
-            density="compact"
-            hide-details
-            v-model="spotify.youtubeKey"
-            label="YouTube API Key"/>
     </div>
 </template>
 

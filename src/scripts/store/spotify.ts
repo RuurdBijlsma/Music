@@ -1,5 +1,5 @@
 import {defineStore} from 'pinia'
-import {computed, ref, toRaw, watch} from "vue";
+import {computed, reactive, ref, toRaw, watch} from "vue";
 import type {Ref} from 'vue';
 import {baseDb} from './base'
 import SpotifyWebApi from "spotify-web-api-js";
@@ -7,11 +7,6 @@ import SpotifyWebApi from "spotify-web-api-js";
 import EventEmitter from 'events';
 import {usePlatformStore} from "./electron";
 import type {IDBPDatabase} from "idb";
-
-//todo:
-//  Add library tracks to indexeddb
-//  change localstorage dings to idb
-//  change dispatch('cacheState') calls to cache with indexeddb
 
 export interface AuthToken {
     code: null | string,
@@ -34,7 +29,6 @@ export const useSpotifyStore = defineStore('spotify', () => {
     const dbLoaded = ref(false);
     const secret = ref('')
     const clientId = ref('')
-    const youtubeKey = ref('')
     let tokens: Ref<AuthToken> = ref({
         code: null,
         access: null,
@@ -49,9 +43,6 @@ export const useSpotifyStore = defineStore('spotify', () => {
         followers: 0,
         avatar: 'img/no-user.jpg',
     })
-    const hasYoutubeKey = computed(() =>
-        youtubeKey.value.length === 39 && youtubeKey.value.includes('-')
-    )
     const hasCredentials = computed(() =>
         secret.value.length === 32 && clientId.value.length === 32
     )
@@ -61,19 +52,23 @@ export const useSpotifyStore = defineStore('spotify', () => {
         tokens.value.refresh !== null &&
         tokens.value.expiryDate !== null
     )
-    let library = ref({
+
+    const library = ref({
         playlists: [] as SpotifyApi.PlaylistObjectFull[],
         artists: [] as SpotifyApi.ArtistObjectFull[],
         albums: [] as SpotifyApi.AlbumObjectFull[],
-        tracks: [] as SpotifyApi.TrackObjectFull[],
     })
-    let isRefreshing = ref({
+    const trucks = ref([] as SpotifyApi.PlaylistTrackObject[])
+    const likedTracksTotal = ref(1)
+    const likedTracksLoaded = ref(0)
+
+    const isRefreshing = ref({
         playlist: false,
         album: false,
         artist: false,
         track: false,
     })
-    let view = ref({
+    const view = ref({
         homePage: {
             featured: {
                 title: '' as string | undefined,
@@ -93,50 +88,43 @@ export const useSpotifyStore = defineStore('spotify', () => {
     // IndexedDB persistent storage
     async function loadValues() {
         console.log("Loading db value start", performance.now())
-        let [dbClientId, dbSecret, dbTokens, dbLibrary, dbView, dbUserInfo, dbYoutubeKey] = await Promise.all([
-            db.get('spotify', 'clientId'),
-            db.get('spotify', 'secret'),
-            db.get('spotify', 'tokens'),
+        let [dbLibrary, dbView] = await Promise.all([
             db.get('spotify', 'library'),
             db.get('spotify', 'view'),
-            db.get('spotify', 'userInfo'),
-            db.get('spotify', 'youtubeKey'),
         ])
-        if (dbSecret)
-            secret.value = dbSecret;
-        if (dbClientId)
-            clientId.value = dbClientId;
+
         if (dbLibrary)
             library.value = dbLibrary;
         if (dbView)
             view.value = dbView;
-        if (dbUserInfo)
-            userInfo.value = dbUserInfo;
-        if (dbYoutubeKey)
-            youtubeKey.value = dbYoutubeKey;
-        if (dbTokens) {
-            tokens.value = dbTokens;
+
+        if (localStorage.getItem('secret') !== null) {
+            secret.value = localStorage.secret
+            console.log("[LOAD] secret.value = " + localStorage.secret)
+        }
+        if (localStorage.getItem('clientId') !== null) {
+            clientId.value = localStorage.clientId
+            console.log("[LOAD] clientId.value = " + localStorage.clientId)
+        }
+        if (localStorage.getItem('userInfo') !== null)
+            userInfo.value = JSON.parse(localStorage.userInfo)
+        if (localStorage.getItem('tokens') !== null) {
+            tokens.value = JSON.parse(localStorage.tokens)
+            console.log("[LOAD] tokens.value = ", JSON.parse(localStorage.tokens))
             checkAuth().then()
         }
+
         dbLoaded.value = true;
         console.log("Loading db value end", performance.now())
     }
 
     watch(secret, async () => {
-        let dbSecret = await db.get('spotify', 'secret');
-        if (dbSecret !== secret.value)
-            await db.put('spotify', secret.value, 'secret')
+        localStorage.secret = secret.value
+        console.log("[WATCH] localStorage.secret = " + secret.value)
     })
     watch(clientId, async () => {
-        let dbClientId = await db.get('spotify', 'clientId');
-        if (dbClientId !== clientId.value)
-            await db.put('spotify', clientId.value, 'clientId')
-    })
-    watch(youtubeKey, async () => {
-        console.log("Change yt key", youtubeKey.value)
-        let dbYoutubeKey = await db.get('spotify', 'youtubeKey');
-        if (dbYoutubeKey !== youtubeKey.value)
-            await db.put('spotify', youtubeKey.value, 'youtubeKey')
+        localStorage.clientId = clientId.value
+        console.log("[WATCH] localStorage.clientId = " + clientId.value)
     })
 
     // Spotify API Stuff
@@ -208,7 +196,6 @@ export const useSpotifyStore = defineStore('spotify', () => {
         tokens.value.access = access;
         tokens.value.expiryDate = expiryDate;
 
-        // await dispatch('cacheState');
         await checkAuth()
     }
 
@@ -231,8 +218,11 @@ export const useSpotifyStore = defineStore('spotify', () => {
             followers: 0,
             avatar: 'img/no-user.jpg',
         }
-        await db.put('spotify', toRaw(userInfo.value), 'userInfo')
-        // await dispatch('cacheState');
+        localStorage.userInfo = JSON.stringify(toRaw(userInfo.value))
+        localStorage.tokens = JSON.stringify(toRaw(tokens.value))
+        await db.delete('spotify', 'library')
+        await db.delete('spotify', 'view')
+
         clearTimeout(tokenTimeout);
     }
 
@@ -253,7 +243,7 @@ export const useSpotifyStore = defineStore('spotify', () => {
                 await loginByRefreshToken()
             }, msUntilExpire - 1000 * 60 * 5)
 
-            await db.put('spotify', toRaw(tokens.value), 'tokens')
+            localStorage.tokens = JSON.stringify(toRaw(tokens.value))
             await loadLibraries()
         } else {
             console.warn("Auth has expired, getting new token")
@@ -276,10 +266,11 @@ export const useSpotifyStore = defineStore('spotify', () => {
 
         await refreshUserInfo();
         let doneCount = 0;
-        let libLoaded = library.value.tracks.length !== 0;
+        let shouldLoadTracks = trucks.value.length === 0;
+
         let checkDone = async () => {
             doneCount++;
-            if (doneCount === (libLoaded ? 3 : 4)) {
+            if (doneCount === (shouldLoadTracks ? 4 : 3)) {
                 await db.put('spotify', toRaw(library.value), 'library')
             }
         }
@@ -287,8 +278,8 @@ export const useSpotifyStore = defineStore('spotify', () => {
         refreshUserData('playlist').then(checkDone);
         refreshUserData('artist').then(checkDone);
         refreshUserData('album').then(checkDone);
-        if (!libLoaded) {
-            refreshUserData('track').then(checkDone);
+        if (shouldLoadTracks) {
+            loadLikedTracks().then(checkDone)
         }
     }
 
@@ -304,7 +295,7 @@ export const useSpotifyStore = defineStore('spotify', () => {
             followers: me.followers?.total ?? 0,
             avatar: me.images?.[0]?.url ?? '',
         }
-        await db.put('spotify', toRaw(userInfo.value), 'userInfo')
+        localStorage.userInfo = JSON.stringify(toRaw(userInfo.value))
     }
 
     function findPagination(object: any): Function | false {
@@ -361,10 +352,7 @@ export const useSpotifyStore = defineStore('spotify', () => {
         }
     }
 
-    let likedTracksTotal = ref(1)
-    let likedTracksLoaded = ref(0)
-
-    async function refreshUserData(type: 'playlist' | 'artist' | 'track' | 'album') {
+    async function refreshUserData(type: 'playlist' | 'artist' | 'album') {
         await baseDb;
 
         if (isRefreshing.value[type]) {
@@ -397,14 +385,9 @@ export const useSpotifyStore = defineStore('spotify', () => {
                 retrieval = () => api.getFollowedArtists();
                 page = r => r.artists;
                 break;
-            case 'track':
-                retrieval = () => api.getMySavedTracks({limit: 50});
-                break;
         }
 
         let items: any[] = [];
-        likedTracksLoaded.value = 0;
-        likedTracksTotal.value = 1;
         let addToLib = (item: any) => {
             if (isInitial) {
                 // @ts-ignore
@@ -412,37 +395,13 @@ export const useSpotifyStore = defineStore('spotify', () => {
             } else items.push(item);
         }
 
-        let liked: SpotifyApi.TrackObjectFull[] = [];
         for await(let batch of await retrieveSpotifyArray(retrieval)) {
-            likedTracksTotal.value = batch.total;
             for (let item of page(batch).items) {
-                likedTracksLoaded.value++;
-                if (type === 'track') {
-                    if (!item.track.is_local) {
-                        liked.push(item.track);
-                        addToLib(item.track);
-                    }
-                } else if (type === 'album')
+                if (type === 'album')
                     addToLib(item.album);
                 else
                     addToLib(item);
             }
-        }
-        if (liked.length > 0) {
-            const tx = db.transaction('tracks', 'readwrite')
-            let promises: Promise<any>[] = [db.clear('tracks')]
-            for (let track of liked) {
-                const artistString = track.artists
-                    .map((a: SpotifyApi.ArtistObjectSimplified) => a.name)
-                    .join(', ')
-                    .toLowerCase()
-                // @ts-ignore
-                track.artistString = artistString
-                // @ts-ignore
-                track.searchString = track.name.toLowerCase() + ' ' + artistString
-                promises.push(db.add('tracks', track))
-            }
-            await Promise.all([...promises, tx.done]);
         }
         if (!isInitial) {
             // @ts-ignore
@@ -452,6 +411,70 @@ export const useSpotifyStore = defineStore('spotify', () => {
         events.emit('refreshed' + type);
         console.log(toRaw(library.value));
         isRefreshing.value[type] = false;
+    }
+
+    async function loadLikedTracks() {
+        console.log("Loading liked tracks!");
+        await baseDb;
+        let type = 'track'
+
+        if (isRefreshing.value['track']) {
+            console.info("This library type is already refreshing, waiting for that to finish");
+            await waitFor('refreshed' + type);
+            return;
+        }
+        await awaitAuth();
+        isRefreshing.value['track'] = true;
+
+        let isInitial = trucks.value.length === 0;
+        if (isInitial)
+            trucks.value = []
+        console.log("TRACK", {isInitial})
+        let items: SpotifyApi.PlaylistTrackObject[] = [];
+        likedTracksLoaded.value = 0;
+        likedTracksTotal.value = 1;
+
+        for await(let batch of await retrieveSpotifyArray(() => api.getMySavedTracks({limit: 50}))) {
+            likedTracksTotal.value = batch.total;
+            for (let item of batch.items) {
+                likedTracksLoaded.value++;
+                if (!item.track.is_local) {
+                    items.push(item);
+                    if (isInitial) {
+                        trucks.value.push(item)
+                    }
+                }
+            }
+        }
+        if (!isInitial)
+            trucks.value = items;
+
+        // put loaded tracks in db
+        if (items.length > 0) {
+            const tx = db.transaction('tracks', 'readwrite')
+            let promises: Promise<any>[] = [db.clear('tracks')]
+            for (let item of items) {
+                const artistString = item.track.artists
+                    .map((a: SpotifyApi.ArtistObjectSimplified) => a.name)
+                    .join(', ')
+                    .toLowerCase()
+                // @ts-ignore
+                item.artistString = artistString
+                // @ts-ignore
+                item.searchString = item.track.name.toLowerCase() + ' ' + artistString
+                // @ts-ignore
+                item.id = item.track.id
+                // @ts-ignore
+                item.title = item.track.title
+                console.log("Adding item", item)
+                promises.push(db.add('tracks', item))
+            }
+            await Promise.all([...promises, tx.done]);
+        }
+
+        events.emit('refreshed' + type);
+        isRefreshing.value['track'] = false;
+        console.log("DONE Loading liked tracks!");
     }
 
     async function refreshHomePage() {
@@ -488,9 +511,12 @@ export const useSpotifyStore = defineStore('spotify', () => {
         //New releases
         let newReleases = await api.getNewReleases({limit: 50})
         view.value.homePage.newReleases = newReleases.albums.items
-        const rawView = toRaw(view.value);
-        console.log("Putting in DB", rawView, performance.now());
-        await db.put('spotify', rawView, 'view')
+        await db.put('spotify', toRaw(view.value), 'view')
+    }
+
+    async function getPlaylist(id: string) {
+        await baseDb
+        return api.getPlaylist(id)
     }
 
     return {
@@ -508,9 +534,10 @@ export const useSpotifyStore = defineStore('spotify', () => {
         view,
         api,
         library,
+        trucks,
         likedTracksLoaded,
         likedTracksTotal,
-        youtubeKey,
-        hasYoutubeKey,
+        isRefreshing,
+        getPlaylist,
     }
 })

@@ -23,7 +23,6 @@
 import {onBeforeUnmount, onMounted, onUnmounted, ref, watch} from "vue";
 import {clearInterval} from "timers";
 import {useBaseStore} from "../scripts/store/base";
-import type {Item} from '../scripts/store/base'
 import {storeToRefs} from "pinia";
 import {useSpotifyStore} from "../scripts/store/spotify";
 import {useSearchStore} from "../scripts/store/search";

@@ -50,13 +50,13 @@ let loadedId = route.params.id as string;
 watch(route, async () => {
     if (route.path.startsWith('/playlist') && typeof route.params.id === 'string' && route.params.id !== loadedId) {
         loadedId = route.params.id;
-        playlist.value = await spotify.api.getPlaylist(loadedId);
+        playlist.value = await spotify.getPlaylist(loadedId);
     }
 })
-spotify.api.getPlaylist(loadedId).then((r: any) => {
+spotify.getPlaylist(loadedId).then(r=>{
     playlist.value = r;
     console.log("Playlist", r);
-});
+})
 const followerString = computed(() => {
     if (playlist.value === null) return '0 followers';
     if (playlist.value.followers.total > 1000000) {

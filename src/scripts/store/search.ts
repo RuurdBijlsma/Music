@@ -41,6 +41,7 @@ export const useSearchStore = defineStore('search', () => {
     }
 
     let likedCache = {} as any;
+
     async function searchLikedTracks(query: string) {
         if (likedCache.hasOwnProperty(query)) {
             let res = likedCache[query];
@@ -79,21 +80,22 @@ export const useSearchStore = defineStore('search', () => {
         return rawResult.map(ytResultToItem)
     }
 
-    let spotifyCache = {} as any;
     async function searchSpotify(query: string) {
-        if (spotifyCache.hasOwnProperty(query)) {
-            let res = spotifyCache[query];
-            if (res.expiryDate < Date.now())
-                delete spotifyCache[query]
+        let key = 'sp' + query
+        let cache = await db.get('cache', key)
+        if (cache) {
+            if (cache.expiryDate < Date.now())
+                db.delete('cache', key).then()
             else
-                return spotifyCache[query].result;
+                return cache.result;
         }
-        let result =  await spotify.api.search(query, ['album', 'artist', 'playlist', 'track'])
-        spotifyCache[query] = {
+        await baseDb
+        let result = await spotify.api.search(query, ['album', 'artist', 'playlist', 'track'])
+        db.put('cache', {
             result,
             // expiry date 5 minutes from now
             expiryDate: Date.now() + 1000 * 60 * 5
-        };
+        }, key).then()
         return result
     }
 

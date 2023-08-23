@@ -11,25 +11,23 @@ import type EventEmitter from "events";
 import {ref} from "vue";
 //@ts-ignore
 import fileNamify from 'filenamify';
-import {useBaseStore} from "./base";
+import {baseDb, useBaseStore} from "./base";
+import type {IDBPDatabase} from "idb";
+
 
 const express = window.require('express')
 export const usePlatformStore = defineStore('platform', () => {
     const spotify = useSpotifyStore()
     const base = useBaseStore()
+    let db: IDBPDatabase
+    baseDb.then(async r => db = r)
+
     let directories: { music: string } | null = null
     ipcRenderer.invoke('getDirectories').then((d: any) => {
         console.log("Got directories", d)
         directories = d
     })
     let server: any = null
-    let ytCache = {} as any
-    if (localStorage.getItem('ytSearchCache') !== null) {
-        ytCache = JSON.parse(localStorage.ytSearchCache)
-    }
-    setInterval(() => {
-        localStorage.ytSearchCache = JSON.stringify(ytCache)
-    }, 10000);
 
     async function getTrackFile(track: SpotifyApi.TrackObjectFull, events: EventEmitter) {
         let hasImage = track.hasOwnProperty('album') && track.album.images.length > 0;
@@ -73,13 +71,13 @@ export const usePlatformStore = defineStore('platform', () => {
     }
 
     async function searchYouTube(query: string, limit = 5) {
-        let key = query + "|" + limit;
-        if (ytCache.hasOwnProperty(key)) {
-            let res = ytCache[key];
-            if (res.expiryDate < Date.now())
-                delete ytCache[key]
+        let key = 'yt' + query + "|" + limit;
+        let ytCache = await db.get('cache', key)
+        if (ytCache) {
+            if (ytCache.expiryDate < Date.now())
+                db.delete('cache', key).then()
             else
-                return ytCache[key].result
+                return ytCache.result
         }
         console.log("INVOKE ELECTRON", query)
         let result = await ipcRenderer.invoke('searchYt', query, limit)
@@ -93,11 +91,12 @@ export const usePlatformStore = defineStore('platform', () => {
             id: r.id,
         }))
         console.log("Search youtube result: ", result)
-        ytCache[key] = {
+        db.put('cache', {
             result,
             // expiry date 30 days from now
             expiryDate: Date.now() + 1000 * 60 * 60 * 24 * 30
-        };
+        }, key).then()
+
         return result;
     }
 

@@ -25,6 +25,7 @@ export const baseDb = openDB("base", 1, {
         trackStore.createIndex('title', 'title', {unique: false})
         trackStore.createIndex('artist', 'artistString', {unique: false})
         console.log('db upgrade', {oldVersion, newVersion, transaction, event});
+        db.createObjectStore('cache')
     },
     blocked(currentVersion, blockedVersion, event) {
         console.log('db blocked', {currentVersion, blockedVersion, event});
@@ -117,7 +118,6 @@ export const useBaseStore = defineStore('base', () => {
     }
 
     const getCollectionTracks = (collection: any): SpotifyApi.TrackObjectFull[] => {
-        console.log("Get collection tracks", collection)
         if (collection === null || collection === undefined) return []
 
         if (collection.type === 'playlist') {

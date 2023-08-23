@@ -3,17 +3,19 @@
         <v-btn @click="scroll(-1)"
                @dblclick="scroll(-10)"
                v-show="canGoLeft"
-               density="compact" class="arrow left" variant="flat"
+               density="default" class="arrow left" variant="flat"
                icon="mdi-chevron-left"/>
+
         <div class="horizontal-scroller"
              ref="scrollContainer"
              :style="{'-webkit-mask-image': canGoLeft ? 'linear-gradient(to right, transparent 0%, white 5%)' : 'none'}">
             <slot></slot>
         </div>
+
         <v-btn @click="scroll(1)"
                @dblclick="scroll(10)"
                v-show="canGoRight"
-               density="compact" class="arrow right" variant="flat"
+               density="default" class="arrow right" variant="flat"
                icon="mdi-chevron-right"/>
     </div>
 </template>
@@ -66,7 +68,7 @@ onUnmounted(() => {
 
 .arrow {
     position: absolute;
-    top: calc(50% - 24px);
+    top: calc(50% - 48px);
     z-index: 3;
     opacity: 0;
 }

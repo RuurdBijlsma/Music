@@ -207,14 +207,14 @@ export default class NodeFunctions {
         await this.downloadFile(imgUrl, imageFile)
         let rgbs = await ColorThief.getPalette(imageFile)
         let hsls = rgbs.map(([r, g, b]: number[]) => this.RGBToHSL(r, g, b))
-        let hexes = rgbs.map(([r, g, b]: number[]) => this.RGBToHex(r, g, b))
-        console.log("Thief color: ", rgbs)
+        // let hexes = rgbs.map(([r, g, b]: number[]) => this.RGBToHex(r, g, b))
+        // console.log("Thief color: ", rgbs)
 
         let bgColorDark = [45, 45, 45] // for dark theme
         let bgColorLight = [240, 240, 240] // for dark theme
         let pickColor = (bgColor: number[]) => {
             let contrasts = rgbs.map(([r, g, b]: number[]) => this.getContrastRatio([r, g, b], bgColor))
-            console.log(contrasts)
+            // console.log(contrasts)
             let minimumContrast = 4
             let acceptableThemeColors: { rgb: number[], hsl: number[] }[] = []
             for (let i = 0; i < contrasts.length; i++) {
