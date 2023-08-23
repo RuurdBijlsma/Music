@@ -42,10 +42,11 @@ export default class IpcFunctions {
         })
 
         ipcMain.handle('downloadYt', async (_, filename: string, tags: any, image: string) => {
+            console.log({filename})
             let time = performance.now()
             let artistsString = tags.artist.join(', ')
             let query = `${artistsString} - ${tags.title}`
-            let imageFile = path.join(Directories.temp, `image-${filename}.jpg`);
+            let imageFile = path.join(Directories.temp, `image-${Math.random()}.jpg`);
             // noinspection ES6MissingAwait
             let promises = [nf.downloadYtByQuery(query, filename)]
             if (image !== '')

@@ -29,6 +29,10 @@ export const usePlatformStore = defineStore('platform', () => {
     })
     let server: any = null
 
+    function musicFileNamify(file: string) {
+        return fileNamify(file).substring(0, 150)
+    }
+
     async function getTrackFile(track: SpotifyApi.TrackObjectFull, events: EventEmitter) {
         let hasImage = track.hasOwnProperty('album') && track.album.images.length > 0;
         if (hasImage) {
@@ -40,7 +44,7 @@ export const usePlatformStore = defineStore('platform', () => {
             })
         }
         let artistsString = track.artists.map(a => a.name).join(', ')
-        let filename = fileNamify(`${track.name} - ${artistsString}`)
+        let filename = musicFileNamify(`${track.name} - ${artistsString}`)
         let outPath = path.join(directories?.music ?? "", filename + '.mp3')
         if (!await checkFileExists(outPath)) {
             ipcRenderer.on(filename + 'progress', (_, progress) => {
