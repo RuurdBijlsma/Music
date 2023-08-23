@@ -454,7 +454,7 @@ export const useSpotifyStore = defineStore('spotify', () => {
             const tx = db.transaction('tracks', 'readwrite')
             let promises: Promise<any>[] = [db.clear('tracks')]
             for (let item of items) {
-                const artistString = item.track.artists
+                const artistString = (item.track as SpotifyApi.TrackObjectFull).artists
                     .map((a: SpotifyApi.ArtistObjectSimplified) => a.name)
                     .join(', ')
                     .toLowerCase()
