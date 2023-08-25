@@ -24,6 +24,8 @@ export const baseDb = openDB("base", 1, {
         trackStore.createIndex('searchString', 'searchString', {unique: false})
         trackStore.createIndex('title', 'title', {unique: false})
         trackStore.createIndex('artist', 'artistString', {unique: false})
+        trackStore.createIndex('oldToNew', 'added_at', {unique: false})
+        trackStore.createIndex('newToOld', 'added_at_reverse', {unique: false})
         console.log('db upgrade', {oldVersion, newVersion, transaction, event});
         db.createObjectStore('cache')
     },

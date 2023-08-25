@@ -4,6 +4,7 @@
             {{ tracksAmount }}
             Track{{ trucks.length === 1 ? '' : 's' }}
             • {{ base.approximateDuration((totalDurationMs)) }}
+            <v-btn v-show="trackLoadProgress === 100" @click="spotify.loadLikedTracks" icon="mdi-refresh" density="compact" variant="plain" size="10" class="refresh-button"/>
         </p>
         <div class="play-buttons mb-1">
             <v-divider/>
@@ -38,13 +39,24 @@ const collection = computed(() => {
         return null
     }
     return {
-        tracks: toRaw(trucks.value).map(t=>t.track),
+        tracks: toRaw(trucks.value).map(t => t.track),
         type: 'liked',
         id: 'liked',
         loaded: spotify.likedTracksLoaded,
     }
 })
-// spotify.loadLikedTracks()
+
+setTimeout(() => {
+    console.log("Checking for need to reload tracks")
+    if (localStorage.getItem('lastTracksLoad') === null || Date.now() - 1000 * 60 * 10 > +localStorage.lastTracksLoad) {
+        console.log("Reloading tracks!")
+        spotify.loadLikedTracks()
+    } else {
+        console.log("No need to reload tracks, they were refreshed less than 10 minutes ago")
+    }
+}, 500)
+
+
 const totalDurationMs = computed(() => {
     if (trucks.value === null || trucks.value === undefined) return 0;
     return trucks.value.reduce((a, b) => a + b.track.duration_ms, 0);
@@ -86,5 +98,10 @@ const tracksAmount = computed(() => {
     font-weight: 400;
     opacity: .7;
     text-align: center;
+}
+
+.refresh-button {
+    margin-left: 20px;
+    margin-top: -8px;
 }
 </style>

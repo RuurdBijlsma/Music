@@ -7,6 +7,7 @@ import SpotifyWebApi from "spotify-web-api-js";
 import EventEmitter from 'events';
 import {usePlatformStore} from "./electron";
 import type {IDBPDatabase} from "idb";
+import {tr} from "vuetify/locale";
 
 export interface AuthToken {
     code: null | string,
@@ -266,11 +267,20 @@ export const useSpotifyStore = defineStore('spotify', () => {
 
         await refreshUserInfo();
         let doneCount = 0;
-        let shouldLoadTracks = trucks.value.length === 0;
+        loadDbTracks().then((tracksCached) => {
+            if (tracksCached) {
+                console.log("Tracks were loaded from cache")
+            } else {
+                console.log("Tracks NOT cached. Starting load tracks from spotify api")
+                loadLikedTracks().then(() => {
+                    console.log("Loaded tracks from spotify api")
+                })
+            }
+        })
 
         let checkDone = async () => {
             doneCount++;
-            if (doneCount === (shouldLoadTracks ? 4 : 3)) {
+            if (doneCount === 3) {
                 await db.put('spotify', toRaw(library.value), 'library')
             }
         }
@@ -278,9 +288,6 @@ export const useSpotifyStore = defineStore('spotify', () => {
         refreshUserData('playlist').then(checkDone);
         refreshUserData('artist').then(checkDone);
         refreshUserData('album').then(checkDone);
-        if (shouldLoadTracks) {
-            loadLikedTracks().then(checkDone)
-        }
     }
 
     async function refreshUserInfo() {
@@ -413,6 +420,27 @@ export const useSpotifyStore = defineStore('spotify', () => {
         isRefreshing.value[type] = false;
     }
 
+    async function loadDbTracks() {
+        let type = 'track'
+        if (isRefreshing.value['track']) {
+            console.info("This library type is already refreshing, waiting for that to finish");
+            await waitFor('refreshed' + type);
+            return;
+        }
+        isRefreshing.value['track'] = true;
+        let likedTracks = await db.getAllFromIndex('tracks', 'newToOld')
+        trucks.value = likedTracks
+        events.emit('refreshed' + type);
+        isRefreshing.value['track'] = false;
+
+        if (likedTracks.length !== 0) {
+            likedTracksLoaded.value = likedTracks.length
+            likedTracksTotal.value = likedTracks.length
+            return true
+        }
+        return false
+    }
+
     async function loadLikedTracks() {
         console.log("Loading liked tracks!");
         await baseDb;
@@ -427,9 +455,7 @@ export const useSpotifyStore = defineStore('spotify', () => {
         isRefreshing.value['track'] = true;
 
         let isInitial = trucks.value.length === 0;
-        if (isInitial)
-            trucks.value = []
-        console.log("TRACK", {isInitial})
+        console.log("TRACK", {isInitial}, trucks.value.length)
         let items: SpotifyApi.PlaylistTrackObject[] = [];
         likedTracksLoaded.value = 0;
         likedTracksTotal.value = 1;
@@ -446,8 +472,9 @@ export const useSpotifyStore = defineStore('spotify', () => {
                 }
             }
         }
-        if (!isInitial)
+        if (!isInitial) {
             trucks.value = items;
+        }
 
         // put loaded tracks in db
         if (items.length > 0) {
@@ -465,11 +492,13 @@ export const useSpotifyStore = defineStore('spotify', () => {
                 // @ts-ignore
                 item.id = item.track.id
                 // @ts-ignore
-                item.title = item.track.title
-                console.log("Adding item", item)
+                item.title = item.track.name
+                // @ts-ignore
+                item.added_at_reverse = 10000000000000 - +(new Date(item.added_at))
                 promises.push(db.add('tracks', item))
             }
             await Promise.all([...promises, tx.done]);
+            localStorage.lastTracksLoad = Date.now()
         }
 
         events.emit('refreshed' + type);
@@ -539,5 +568,6 @@ export const useSpotifyStore = defineStore('spotify', () => {
         likedTracksTotal,
         isRefreshing,
         getPlaylist,
+        loadLikedTracks,
     }
 })

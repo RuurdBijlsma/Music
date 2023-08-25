@@ -50,23 +50,21 @@ export const useSearchStore = defineStore('search', () => {
             else
                 return likedCache[query].result;
         }
-        await baseDb
-        let tx = await db.transaction('tracks')
-        let store = tx.objectStore('tracks')
-        const searchIndex = store.index('searchString')
-        let cursor = await searchIndex.openCursor()
+        let tracks: any[]
+        if (spotify.trucks.length > 0) {
+            tracks = spotify.trucks
+        } else {
+            await baseDb
+            tracks = await db.getAllFromIndex('tracks', 'searchString')
+        }
+        let result = [] as SpotifyApi.TrackObjectFull[]
         let lowerQuery = query.toLowerCase()
 
-        console.log('search liked tracks, query: ', query);
-        let result = [] as SpotifyApi.TrackObjectFull[]
-        while (cursor) {
-            let key = cursor.key as string;
-            if (key.includes(lowerQuery)) {
-                result.push(cursor.value)
-            }
-
-            cursor = await cursor.continue();
+        for (let track of tracks) {
+            if (track.searchString.includes(lowerQuery))
+                result.push(track.track)
         }
+        console.log("Search result", result)
         likedCache[query] = {
             result,
             // expiry date 5 minutes from now
