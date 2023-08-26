@@ -9,6 +9,8 @@ const events = new EventEmitter()
 
 export const usePlayerStore = defineStore('player', () => {
     const base = useBaseStore()
+    const platform = usePlatformStore();
+
     let playerElement = createAudioElement()
     let playerSwapElement = createAudioElement()
 
@@ -42,7 +44,6 @@ export const usePlayerStore = defineStore('player', () => {
         return element
     }
 
-    const platform = usePlatformStore();
     const loading = ref(false)
     const playing = ref(false)
     const duration = ref(0)
@@ -65,6 +66,7 @@ export const usePlayerStore = defineStore('player', () => {
         loadProgress.value = NaN
         collection.value = _collection
         track.value = tracks.value[index]
+        setMetadata(track.value)
         console.log(tracks, tracks.value, tracks.value[index])
         collectionIndex.value = index
         console.log("Playing item", track.value)
@@ -83,6 +85,68 @@ export const usePlayerStore = defineStore('player', () => {
     // setInterval(() => {
     //     // console.log(`Current collection id: ${collection.value.id}, current index: ${collectionIndex.value}, current track: ${track.value?.name}`)
     // }, 1000)
+
+
+    function setMetadata(track: SpotifyApi.TrackObjectFull) {
+        let artistsString = track.artists.map(a => a.name).join(', ');
+        document.title = track.name + ' - ' + artistsString;
+
+        if (!('mediaSession' in navigator))
+            return;
+
+        let artwork = [{
+            src: base.notFoundImage(),
+            type: 'image/png',
+            sizes: '512x512',
+        }];
+        if (track.album.images.length > 0)
+            artwork = track.album.images.map(i => ({
+                src: i.url,
+                type: 'image/png',
+                sizes: `${i.width}x${i.height}`,
+            }));
+
+        navigator.mediaSession.metadata = new MediaMetadata({
+            title: track.name,
+            artist: artistsString,
+            album: track.album.name,
+            artwork
+        });
+
+        navigator.mediaSession.setActionHandler('previoustrack', () => skip(-1));
+        navigator.mediaSession.setActionHandler('nexttrack', () => skip(1));
+
+        let defaultSkipTime = 10;
+        navigator.mediaSession.setActionHandler('seekbackward', (event) => {
+            const skipTime = event.seekOffset || defaultSkipTime;
+            playerElement.currentTime = Math.max(playerElement.currentTime - skipTime, 0);
+        });
+
+        navigator.mediaSession.setActionHandler('seekforward', (event) => {
+            const skipTime = event.seekOffset || defaultSkipTime;
+            playerElement.currentTime = Math.min(playerElement.currentTime + skipTime, playerElement.duration);
+        });
+
+        navigator.mediaSession.setActionHandler('play', () => play());
+
+        navigator.mediaSession.setActionHandler('pause', () => pause());
+
+        try {
+            navigator.mediaSession.setActionHandler('stop', () => pause());
+        } catch (error) {
+            console.warn('Warning! The "stop" media session action is not supported.');
+        }
+
+        try {
+            navigator.mediaSession.setActionHandler('seekto', (event) => {
+                if (event.seekTime !== undefined && event.seekTime !== null)
+                    playerElement.currentTime = event.seekTime
+            });
+        } catch (error) {
+            console.warn('Warning! The "seekto" media session action is not supported.');
+        }
+    }
+
 
     async function skip(n = 1) {
         if (n === -1 && currentTime.value > 5) {

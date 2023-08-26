@@ -148,6 +148,11 @@ export const useBaseStore = defineStore('base', () => {
         return `/${type}/${encodeUrlName(name)}/${item.id}`;
     }
 
+    const notFoundImage=()=>{
+        let i = Math.floor(Math.random() * 7) + 1;
+        return `img/notfound/${i}.png`;
+    }
+
     const searchValue = ref("");
 
     return {
@@ -158,6 +163,7 @@ export const useBaseStore = defineStore('base', () => {
         approximateDuration,
         albumString,
         getCollectionTracks,
+        notFoundImage,
         searchValue,
         themeColor,
         themeColorDark,
