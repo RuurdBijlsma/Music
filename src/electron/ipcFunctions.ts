@@ -71,5 +71,6 @@ export default class IpcFunctions {
         ipcMain.handle('searchYt', async (_, query: string, results: number = 3) => nf.searchYouTube(query, results))
 
         ipcMain.handle("getDominantColor", (_, imgUrl: string) => nf.getDominantColor(imgUrl))
+        ipcMain.handle("setPlatformPlaying", (_, value: boolean, darkTheme: boolean) => nf.setPlatformPlaying(value, darkTheme))
     }
 }

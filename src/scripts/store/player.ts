@@ -20,10 +20,12 @@ export const usePlayerStore = defineStore('player', () => {
         element.addEventListener('play', () => {
             playing.value = !element.paused
             console.log("Playing status is", playing.value)
+            platform.setPlatformPlaying(true)
         })
         element.addEventListener('pause', () => {
             playing.value = !element.paused
             console.log("Playing status is", playing.value)
+            platform.setPlatformPlaying(false)
         })
         element.addEventListener('durationchange', () => {
             duration.value = element.duration

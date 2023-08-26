@@ -13,12 +13,15 @@ import {ref} from "vue";
 import fileNamify from 'filenamify';
 import {baseDb, useBaseStore} from "./base";
 import type {IDBPDatabase} from "idb";
+import {usePlayerStore} from "./player";
 
 
 const express = window.require('express')
 export const usePlatformStore = defineStore('platform', () => {
     const spotify = useSpotifyStore()
     const base = useBaseStore()
+    const player = usePlayerStore()
+
     let db: IDBPDatabase
     baseDb.then(async r => db = r)
 
@@ -31,6 +34,22 @@ export const usePlatformStore = defineStore('platform', () => {
 
     function musicFileNamify(file: string) {
         return fileNamify(file).substring(0, 150)
+    }
+
+    ipcRenderer.on('invoke', (_, channel, data) => {
+        console.log("Invoke received", channel, data)
+        ipcRenderer.send('reply', channel, 'hoi')
+    })
+    ipcRenderer.on('play', () => player.play())
+    ipcRenderer.on('pause', () => player.pause())
+    ipcRenderer.on('skip', (_,n) => player.skip(n))
+
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+        setPlatformPlaying(player.playing)
+    });
+
+    function setPlatformPlaying(playing: boolean) {
+        ipcRenderer.invoke('setPlatformPlaying', playing, window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)
     }
 
     async function getTrackFile(track: SpotifyApi.TrackObjectFull, events: EventEmitter) {
@@ -181,5 +200,5 @@ export const usePlatformStore = defineStore('platform', () => {
         maximized.value = await ipcRenderer.invoke('toggleMaximizeWindow')
     }
 
-    return {firstLogin, searchYouTube, getTrackFile, setTheme, close, toggleMaximize, minimize}
+    return {firstLogin, searchYouTube, getTrackFile, setTheme, close, toggleMaximize, minimize, setPlatformPlaying}
 })

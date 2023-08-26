@@ -6,12 +6,12 @@ import os from "os";
 import type {BrowserWindow} from 'electron'
 import type {Progress} from "yt-dlp-wrap";
 import child_process from "child_process";
-import SpotifyWebApi from "spotify-web-api-js";
 import * as https from "https";
 //@ts-ignore
 import {contrastColor} from 'contrast-color'
 //@ts-ignore
 import ColorThief from 'color-extr-thief'
+import {ipcRenderer, globalShortcut, ipcMain} from "electron";
 
 const YTDlpWrap = require("yt-dlp-wrap").default
 
@@ -23,14 +23,19 @@ export default class NodeFunctions {
     //@ts-ignore
     private ytdlp: YTDlpWrap;
     private ffmpegPath: string;
+    private darkIcons: { playIcon: any, pauseIcon: any, nextIcon: any, prevIcon: any } | null;
+    private lightIcons: { playIcon: any, pauseIcon: any, nextIcon: any, prevIcon: any } | null;
 
     constructor(win: BrowserWindow) {
         this.win = win
         this.ytdlpPath = path.join(Directories.files, 'ytdlp.exe')
         this.ytdlp = new YTDlpWrap()
         this.ffmpegPath = ""
+        this.darkIcons = null
+        this.lightIcons = null
 
         this.getBinaries().then()
+        this.initializePlatform().then()
     }
 
 
@@ -236,5 +241,86 @@ export default class NodeFunctions {
             light: pickColor(bgColorLight),
             dark: pickColor(bgColorDark),
         }
+    }
+
+    async webInvoke(channel: string, data: any = null) {
+        return new Promise<any>((resolve) => {
+            this.win.webContents.send("invoke", channel, data)
+            ipcMain.once("reply", (_event, channel, value) => {
+                console.log("Received", channel, value)
+                if (channel === channel)
+                    resolve(value)
+            })
+        })
+    }
+
+    async initializePlatform() {
+        let pubPath = process.env.PUBLIC ?? './public'
+
+        const likeShortcut = 'Shift+Alt+L';
+        if (globalShortcut.isRegistered(likeShortcut))
+            globalShortcut.unregister(likeShortcut);
+        let regResult = globalShortcut.register(likeShortcut, async () => {
+            let added = await this.webInvoke('toggleFavorite')
+            // let speech = added ? 'Added to favorites' : 'Removed from favorites';
+            // let voices = speechSynthesis.getVoices();
+            // let voice = voices[Math.floor(Math.random() * voices.length)];
+            // let utterance = new SpeechSynthesisUtterance(speech);
+            // utterance.voice = voice;
+            // speechSynthesis.speak(utterance);
+        });
+        if (regResult)
+            console.log("Registered global shortcut ✔")
+        else
+            console.log("Failed to register global shortcut ❌")
+
+
+        const getIcons = (theme = 'dark') => {
+            let playIcon = {
+                tooltip: 'Play',
+                icon: path.join(pubPath, `/img/${theme}-playicon.png`),
+                click: () => this.win.webContents.send('play'),
+            };
+            let pauseIcon = {
+                tooltip: 'Play',
+                icon: path.join(pubPath, `/img/${theme}-pauseicon.png`),
+                click: () => this.win.webContents.send('pause'),
+            };
+            let prevIcon = {
+                tooltip: 'Previous Song',
+                icon: path.join(pubPath, `/img/${theme}-previcon.png`),
+                click: () => this.win.webContents.send('skip', -1),
+            };
+            let nextIcon = {
+                tooltip: 'Next Song',
+                icon: path.join(pubPath, `/img/${theme}-nexticon.png`),
+                click: () => this.win.webContents.send('skip', 1),
+            };
+            return {playIcon, pauseIcon, prevIcon, nextIcon}
+        }
+        this.darkIcons = getIcons('dark')
+        this.lightIcons = getIcons('light')
+    }
+
+    get playingIcons() {
+        if (this.darkIcons === null || this.lightIcons === null) return []
+        return {
+            dark: [this.darkIcons.prevIcon, this.darkIcons.pauseIcon, this.darkIcons.nextIcon],
+            light: [this.lightIcons.prevIcon, this.lightIcons.pauseIcon, this.lightIcons.nextIcon],
+        }
+    }
+
+    get pausedIcons() {
+        if (this.darkIcons === null || this.lightIcons === null) return []
+        return {
+            dark: [this.darkIcons.prevIcon, this.darkIcons.playIcon, this.darkIcons.nextIcon],
+            light: [this.lightIcons.prevIcon, this.lightIcons.playIcon, this.lightIcons.nextIcon],
+        }
+    }
+
+    setPlatformPlaying(playing: boolean, darkTheme: boolean) {
+        let iconSet = playing ? this.playingIcons : this.pausedIcons
+        //@ts-ignore
+        let thumbAdded = this.win.setThumbarButtons(iconSet[darkTheme ? 'dark' : 'light']);
     }
 }
