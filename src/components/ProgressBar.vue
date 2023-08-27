@@ -9,7 +9,7 @@ import {storeToRefs} from "pinia";
 
 const player = usePlayerStore()
 let canvas: HTMLCanvasElement | null = null
-const {mouseActive, mouseHoverPercent} = storeToRefs(player)
+const {mouseActive, mouseHoverPercent, mouseHover} = storeToRefs(player)
 
 function seek(e: MouseEvent) {
     if (canvas === null) return
@@ -17,12 +17,14 @@ function seek(e: MouseEvent) {
     let x = e.pageX - bounds.left
     let percent = x / bounds.width
     mouseHoverPercent.value = percent
-    player.seekTo(player.duration * percent)
+    if (mouseActive.value) {
+        player.seekTo(player.duration * percent)
+    }
 }
 
 function canvasDown(e: MouseEvent) {
-    seek(e)
     mouseActive.value = true
+    seek(e)
 }
 
 function canvasUp(e: MouseEvent) {
@@ -30,10 +32,11 @@ function canvasUp(e: MouseEvent) {
 }
 
 function canvasMove(e: MouseEvent) {
-    if (mouseActive.value) {
-        seek(e)
-    }
+    seek(e)
 }
+
+const mouseEnter = () => mouseHover.value = true
+const mouseLeave = () => mouseHover.value = false
 
 onMounted(() => {
     canvas = document.querySelector('.progress-canvas')
@@ -41,14 +44,18 @@ onMounted(() => {
         canvas.addEventListener('mousedown', canvasDown, false)
         document.addEventListener('mouseup', canvasUp, false)
         document.addEventListener('mousemove', canvasMove, false)
+        canvas.addEventListener('mouseenter', mouseEnter, false)
+        canvas.addEventListener('mouseleave', mouseLeave, false)
     }
 })
 onUnmounted(() => {
     if (canvas !== null) {
         canvas.removeEventListener('mousedown', canvasDown)
+        canvas.removeEventListener('mouseenter', mouseEnter)
+        canvas.removeEventListener('mouseleave', mouseLeave)
     }
-    document.removeEventListener('mouseup', canvasUp, false)
-    document.removeEventListener('mousemove', canvasMove, false)
+    document.removeEventListener('mouseup', canvasUp)
+    document.removeEventListener('mousemove', canvasMove)
 })
 </script>
 

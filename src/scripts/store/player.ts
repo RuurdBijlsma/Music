@@ -20,6 +20,7 @@ export const usePlayerStore = defineStore('player', () => {
     let playerSwapElement = createAudioElement()
     let mouseHoverPercent = ref(0)
     let mouseActive = ref(false)
+    let mouseHover = ref(false)
 
     function createAudioElement() {
         let element = document.createElement('audio')
@@ -185,9 +186,9 @@ export const usePlayerStore = defineStore('player', () => {
 
             let h = negHeight + posHeight
             let y = (canvas.height / 2 - negHeight) | 0
-            if (mouseActive.value) {
+            if (mouseActive.value || mouseHover.value) {
                 let mouseDistanceToBar = Math.abs(mouseHoverBar - i)
-                let addedHeight = 20 - mouseDistanceToBar * 3
+                let addedHeight = mouseActive.value ? 20 - mouseDistanceToBar * 3 : 10 - mouseDistanceToBar
                 if (addedHeight > 0) {
                     y -= addedHeight / 2
                     h += addedHeight
@@ -328,5 +329,6 @@ export const usePlayerStore = defineStore('player', () => {
         seekTo,
         mouseHoverPercent,
         mouseActive,
+        mouseHover,
     }
 })
