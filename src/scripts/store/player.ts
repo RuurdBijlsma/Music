@@ -5,12 +5,14 @@ import EventEmitter from "events";
 import {baseDb, useBaseStore} from "./base";
 import {contrastColor} from 'contrast-color'
 import type {IDBPDatabase} from "idb";
+import {useTheme} from "vuetify";
 
 const events = new EventEmitter()
 
 
 export const usePlayerStore = defineStore('player', () => {
     const base = useBaseStore()
+    const theme = useTheme()
     const platform = usePlatformStore();
     let db: IDBPDatabase
     baseDb.then(r => db = r)
@@ -161,7 +163,7 @@ export const usePlayerStore = defineStore('player', () => {
         if (playerElement.duration)
             duration = playerElement.duration
 
-        const defaultBarFill = base.themeColor.value === 'dark' ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.2)'
+        const defaultBarFill = theme.current.value.dark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.2)'
         let {binSize, binWidth, barSpacing} = canvasBars
         context.clearRect(0, 0, canvas.width, canvas.height)
         for (let i = 0; i < canvasBars.binPos.length; i++) {
