@@ -15,7 +15,7 @@
                 <div class="music-progress">
                     <div class="music-time-current">{{ base.msToReadable(player.currentTime * 1000) }}</div>
                     <div class="progress-container">
-
+                        <progress-bar></progress-bar>
                     </div>
                     <div class="music-time-total">{{ base.msToReadable(player.duration * 1000) }}</div>
                 </div>
@@ -57,12 +57,13 @@
 </template>
 
 <script setup lang="ts">
-import {onMounted, onUnmounted, ref} from "vue";
+import {onMounted, onUnmounted, ref, watch} from "vue";
 import GlowImage from "./GlowImage.vue";
 import {usePlayerStore} from "../scripts/store/player";
 import {useBaseStore} from "../scripts/store/base";
 import Artists from "../views/library/Artists.vue";
 import ArtistsSpan from "./ArtistsSpan.vue";
+import ProgressBar from "./ProgressBar.vue";
 
 const player = usePlayerStore()
 const base = useBaseStore()
@@ -74,19 +75,17 @@ function checkElWidth() {
     let el = musicContainer.value as HTMLElement | null;
     if (el === null) return;
     elWidth.value = el.getBoundingClientRect().width;
-    // console.log("Width of el = " + elWidth.value);
 }
+
 
 let interval = 0;
 onMounted(() => {
     window.addEventListener('resize', checkElWidth);
     checkElWidth();
-    interval = window.setInterval(() => {
-        checkElWidth();
-    }, 100);
+    interval = window.setInterval(() => checkElWidth(), 100);
 })
 onUnmounted(() => {
-    window.removeEventListener('resize', checkElWidth);
+    window.removeEventListener('resize', checkElWidth)
 })
 </script>
 
@@ -147,20 +146,22 @@ onUnmounted(() => {
     display: flex;
     font-size: 13px;
     position: absolute;
-    top:160px;
+    top: 100px;
 }
 
 .music-time-current, .music-time-total {
     opacity: 0.7;
     font-weight: 600;
+    width: 35px;
+    text-align: left;
+    padding-top: 38px;
 }
 
 .progress-container {
-    width: 250px;
-    height: 10px;
-    background-color: rgba(0, 0, 0, 0.5);
-    margin: 5px 20px 20px;
-    border-radius: 5px;
+    width: 300px;
+    height: 100px;
+    margin-left: 10px;
+    margin-right: 10px;
 }
 
 .extra-bar-buttons {

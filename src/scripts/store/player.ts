@@ -3,6 +3,7 @@ import {usePlatformStore} from "./electron";
 import {computed, ref} from "vue";
 import EventEmitter from "events";
 import {useBaseStore} from "./base";
+import {contrastColor} from 'contrast-color'
 
 const events = new EventEmitter()
 
@@ -59,9 +60,17 @@ export const usePlayerStore = defineStore('player', () => {
     const tracks = computed(() => base.getCollectionTracks(collection.value))
     const collectionIndex = ref(0)
 
+    let canvasBars: { binSize: number, binWidth: number, barSpacing: number, binPos: number[], binNeg: number[] } | null = null
+    let canvas: HTMLCanvasElement | null = null
+    let context: CanvasRenderingContext2D | null = null
+    requestAnimationFrame(renderProgress)
+
     async function load(_collection: any, index: number) {
         console.log("Load", {_collection, index})
         playerElement.src = ''
+
+        // playerElement.volume = 0
+
         duration.value = 1
         currentTime.value = 1
         loading.value = true
@@ -72,6 +81,19 @@ export const usePlayerStore = defineStore('player', () => {
         console.log(tracks, tracks.value, tracks.value[index])
         collectionIndex.value = index
         console.log("Playing item", track.value)
+
+        const binWidth = 2
+        const barSpacing = 1
+        const canvasWidth = 300
+        const barCount = canvasWidth / (binWidth + barSpacing)
+        canvasBars = {
+            binSize: 1,
+            binWidth,
+            barSpacing,
+            binPos: new Array<number>(barCount).fill(.05),
+            binNeg: new Array<number>(barCount).fill(-.05),
+        }
+
         events.on(track.value.id + 'progress', progress => {
             // Check if user hasn't changed track while it was progressing
             if (_collection.id === collection.value.id && index === collectionIndex.value)
@@ -82,6 +104,70 @@ export const usePlayerStore = defineStore('player', () => {
         if (_collection.id === collection.value.id && index === collectionIndex.value)
             playerElement.src = outPath
         console.log(playerElement)
+
+        let audioContext = new AudioContext()
+        let response = await fetch(outPath)
+        let decoded = await audioContext.decodeAudioData(await response.arrayBuffer())
+        let channelData = decoded.getChannelData(0)
+
+        canvas = document.querySelector('.progress-canvas')
+        if (canvas === null) return
+        canvas.width = canvasWidth
+        canvas.height = 100
+        context = canvas.getContext('2d')
+        if (context === null) return
+
+        let binSize = (channelData.length / barCount | 0)
+        let binPos = 0
+        let binNeg = 0
+        canvasBars = {binSize, binWidth, barSpacing, binPos: [] as number[], binNeg: [] as number[]}
+        for (let i = 0; i < channelData.length; i++) {
+            if (channelData[i] > 0)
+                binPos += channelData[i]
+            else
+                binNeg += channelData[i]
+            if (i % binSize === binSize - 1) {
+                canvasBars.binPos.push(binPos)
+                canvasBars.binNeg.push(binNeg)
+                binPos = 0
+                binNeg = 0
+            }
+        }
+    }
+
+    function renderProgress() {
+        requestAnimationFrame(renderProgress)
+        if (context === null || canvasBars === null || canvas === null) return
+        let duration = 1, currentTime = playerElement.currentTime
+        if (playerElement.duration)
+            duration = playerElement.duration
+
+        const defaultBarFill = 'rgba(255,255,255,0.6)'
+        let {binSize, binWidth, barSpacing} = canvasBars
+        context.clearRect(0, 0, canvas.width, canvas.height)
+        for (let i = 0; i < canvasBars.binPos.length; i++) {
+            let timePercent = currentTime / duration
+            let isActiveBar = (canvasBars.binPos.length * timePercent | 0) === i
+            let barPartFill = canvasBars.binPos.length * timePercent % 1
+
+            let binPos = canvasBars.binPos[i]
+            let binNeg = canvasBars.binNeg[i]
+            let posHeight = binPos / binSize * canvas.height
+            let negHeight = -binNeg / binSize * canvas.height
+            let x = (binWidth + barSpacing) * i | 0
+
+            context.fillStyle = defaultBarFill
+            if (x / canvas.width < currentTime / duration)
+                context.fillStyle = base.themeColor.value
+
+            if (isActiveBar) {
+                context.fillRect(x, (canvas.height / 2 - negHeight) | 0, binWidth * barPartFill, negHeight + posHeight)
+                context.fillStyle = defaultBarFill
+                context.fillRect(x + (binWidth * barPartFill), (canvas.height / 2 - negHeight) | 0, binWidth * (1 - barPartFill), negHeight + posHeight)
+            } else {
+                context.fillRect(x, (canvas.height / 2 - negHeight) | 0, binWidth, negHeight + posHeight)
+            }
+        }
     }
 
     // setInterval(() => {
@@ -187,6 +273,10 @@ export const usePlayerStore = defineStore('player', () => {
         await playerElement.pause()
     }
 
+    function seekTo(time: number) {
+        playerElement.currentTime = time
+    }
+
     return {
         loading,
         playing,
@@ -200,6 +290,7 @@ export const usePlayerStore = defineStore('player', () => {
         skip,
         play,
         pause,
-        togglePlay
+        togglePlay,
+        seekTo,
     }
 })
