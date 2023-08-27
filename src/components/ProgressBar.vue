@@ -5,35 +5,37 @@
 <script setup lang="ts">
 import {usePlayerStore} from "../scripts/store/player";
 import {onMounted, onUnmounted} from "vue";
+import {storeToRefs} from "pinia";
 
 const player = usePlayerStore()
 let canvas: HTMLCanvasElement | null = null
-
-let seeking = false
+const {mouseActive, mouseHoverPercent} = storeToRefs(player)
 
 function seek(e: MouseEvent) {
     if (canvas === null) return
     let bounds = canvas.getBoundingClientRect()
     let x = e.pageX - bounds.left
     let percent = x / bounds.width
+    mouseHoverPercent.value = percent
     player.seekTo(player.duration * percent)
 }
 
 function canvasDown(e: MouseEvent) {
     seek(e)
-    seeking = true
+    mouseActive.value = true
 }
 
 function canvasUp(e: MouseEvent) {
-    seeking = false
+    mouseActive.value = false
 }
 
 function canvasMove(e: MouseEvent) {
-    if (seeking) {
+    if (mouseActive.value) {
         seek(e)
     }
 }
-onMounted(()=>{
+
+onMounted(() => {
     canvas = document.querySelector('.progress-canvas')
     if (canvas !== null) {
         canvas.addEventListener('mousedown', canvasDown, false)
@@ -41,7 +43,7 @@ onMounted(()=>{
         document.addEventListener('mousemove', canvasMove, false)
     }
 })
-onUnmounted(()=>{
+onUnmounted(() => {
     if (canvas !== null) {
         canvas.removeEventListener('mousedown', canvasDown)
     }

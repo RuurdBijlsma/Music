@@ -59,7 +59,8 @@ export const useSpotifyStore = defineStore('spotify', () => {
         artists: [] as SpotifyApi.ArtistObjectFull[],
         albums: [] as SpotifyApi.AlbumObjectFull[],
     })
-    const trucks = ref([] as SpotifyApi.PlaylistTrackObject[])
+    const tracks = ref([] as SpotifyApi.PlaylistTrackObject[])
+    const ytTracks = ref([] as SpotifyApi.PlaylistTrackObject[])
     const likedTracksTotal = ref(1)
     const likedTracksLoaded = ref(0)
 
@@ -429,7 +430,7 @@ export const useSpotifyStore = defineStore('spotify', () => {
         }
         isRefreshing.value['track'] = true;
         let likedTracks = await db.getAllFromIndex('tracks', 'newToOld')
-        trucks.value = likedTracks
+        tracks.value = likedTracks
         events.emit('refreshed' + type);
         isRefreshing.value['track'] = false;
 
@@ -454,8 +455,8 @@ export const useSpotifyStore = defineStore('spotify', () => {
         await awaitAuth();
         isRefreshing.value['track'] = true;
 
-        let isInitial = trucks.value.length === 0;
-        console.log("TRACK", {isInitial}, trucks.value.length)
+        let isInitial = tracks.value.length === 0;
+        console.log("TRACK", {isInitial}, tracks.value.length)
         let items: SpotifyApi.PlaylistTrackObject[] = [];
         likedTracksLoaded.value = 0;
         likedTracksTotal.value = 1;
@@ -467,13 +468,13 @@ export const useSpotifyStore = defineStore('spotify', () => {
                 if (!item.track.is_local) {
                     items.push(item);
                     if (isInitial) {
-                        trucks.value.push(item)
+                        tracks.value.push(item)
                     }
                 }
             }
         }
         if (!isInitial) {
-            trucks.value = items;
+            tracks.value = items;
         }
 
         // put loaded tracks in db
@@ -563,7 +564,7 @@ export const useSpotifyStore = defineStore('spotify', () => {
         view,
         api,
         library,
-        trucks,
+        tracks,
         likedTracksLoaded,
         likedTracksTotal,
         isRefreshing,

@@ -51,8 +51,8 @@ export const useSearchStore = defineStore('search', () => {
                 return likedCache[query].result;
         }
         let tracks: any[]
-        if (spotify.trucks.length > 0) {
-            tracks = spotify.trucks
+        if (spotify.tracks.length > 0) {
+            tracks = spotify.tracks
         } else {
             await baseDb
             tracks = await db.getAllFromIndex('tracks', 'searchString')

@@ -2,7 +2,7 @@
     <div class="playlist">
         <p class="tracks-info">
             {{ tracksAmount }}
-            Track{{ trucks.length === 1 ? '' : 's' }}
+            Track{{ tracks.length === 1 ? '' : 's' }}
             • {{ base.approximateDuration((totalDurationMs)) }}
             <v-btn v-show="trackLoadProgress === 100" @click="spotify.loadLikedTracks" icon="mdi-refresh" density="compact" variant="plain" size="10" class="refresh-button"/>
         </p>
@@ -31,15 +31,15 @@ import TrackListVirtual from "../../components/TrackListVirtual.vue";
 import {storeToRefs} from "pinia";
 
 const spotify = useSpotifyStore();
-const {trucks} = storeToRefs(spotify)
+const {tracks} = storeToRefs(spotify)
 const base = useBaseStore();
 
 const collection = computed(() => {
-    if (trucks.value === null || trucks.value === undefined) {
+    if (tracks.value === null || tracks.value === undefined) {
         return null
     }
     return {
-        tracks: toRaw(trucks.value).map(t => t.track),
+        tracks: toRaw(tracks.value).map(t => t.track),
         type: 'liked',
         id: 'liked',
         loaded: spotify.likedTracksLoaded,
@@ -58,15 +58,15 @@ setTimeout(() => {
 
 
 const totalDurationMs = computed(() => {
-    if (trucks.value === null || trucks.value === undefined) return 0;
-    return trucks.value.reduce((a, b) => a + b.track.duration_ms, 0);
+    if (tracks.value === null || tracks.value === undefined) return 0;
+    return tracks.value.reduce((a, b) => a + b.track.duration_ms, 0);
 });
 // const trackLoadProgress = computed(() => 100)
 const trackLoadProgress = computed(() => 100 * spotify.likedTracksLoaded / spotify.likedTracksTotal)
 
 const tracksAmount = computed(() => {
     if (trackLoadProgress.value === 100) {
-        return trucks.value.length.toLocaleString()
+        return tracks.value.length.toLocaleString()
     }
     return `${spotify.likedTracksLoaded.toLocaleString()} / ${spotify.likedTracksTotal.toLocaleString()}`
 })

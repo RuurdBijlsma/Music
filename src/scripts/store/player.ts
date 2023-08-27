@@ -18,6 +18,8 @@ export const usePlayerStore = defineStore('player', () => {
 
     let playerElement = createAudioElement()
     let playerSwapElement = createAudioElement()
+    let mouseHoverPercent = ref(0)
+    let mouseActive = ref(false)
 
     function createAudioElement() {
         let element = document.createElement('audio')
@@ -162,6 +164,7 @@ export const usePlayerStore = defineStore('player', () => {
         if (playerElement.duration)
             duration = playerElement.duration
 
+        let mouseHoverBar = canvasBars.binPos.length * mouseHoverPercent.value
         const defaultBarFill = theme.current.value.dark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.2)'
         let {binSize, binWidth, barSpacing} = canvasBars
         context.clearRect(0, 0, canvas.width, canvas.height)
@@ -180,12 +183,23 @@ export const usePlayerStore = defineStore('player', () => {
             if (x / canvas.width < currentTime / duration)
                 context.fillStyle = base.themeColor.value
 
+            let h = negHeight + posHeight
+            let y = (canvas.height / 2 - negHeight) | 0
+            if (mouseActive.value) {
+                let mouseDistanceToBar = Math.abs(mouseHoverBar - i)
+                let addedHeight = 20 - mouseDistanceToBar * 3
+                if (addedHeight > 0) {
+                    y -= addedHeight / 2
+                    h += addedHeight
+                }
+            }
+
             if (isActiveBar) {
-                context.fillRect(x, (canvas.height / 2 - negHeight) | 0, binWidth * barPartFill, negHeight + posHeight)
+                context.fillRect(x, y, binWidth * barPartFill, h)
                 context.fillStyle = defaultBarFill
-                context.fillRect(x + (binWidth * barPartFill), (canvas.height / 2 - negHeight) | 0, binWidth * (1 - barPartFill), negHeight + posHeight)
+                context.fillRect(x + (binWidth * barPartFill), y, binWidth * (1 - barPartFill), h)
             } else {
-                context.fillRect(x, (canvas.height / 2 - negHeight) | 0, binWidth, negHeight + posHeight)
+                context.fillRect(x, y, binWidth, h)
             }
         }
     }
@@ -312,5 +326,7 @@ export const usePlayerStore = defineStore('player', () => {
         pause,
         togglePlay,
         seekTo,
+        mouseHoverPercent,
+        mouseActive,
     }
 })
