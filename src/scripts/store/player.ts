@@ -1,9 +1,10 @@
 import {defineStore} from 'pinia'
 import {usePlatformStore} from "./electron";
-import {computed, ref} from "vue";
+import {computed, ref, toRaw} from "vue";
 import EventEmitter from "events";
-import {useBaseStore} from "./base";
+import {baseDb, useBaseStore} from "./base";
 import {contrastColor} from 'contrast-color'
+import type {IDBPDatabase} from "idb";
 
 const events = new EventEmitter()
 
@@ -11,6 +12,8 @@ const events = new EventEmitter()
 export const usePlayerStore = defineStore('player', () => {
     const base = useBaseStore()
     const platform = usePlatformStore();
+    let db: IDBPDatabase
+    baseDb.then(r => db = r)
 
     let playerElement = createAudioElement()
     let playerSwapElement = createAudioElement()
@@ -69,7 +72,7 @@ export const usePlayerStore = defineStore('player', () => {
         console.log("Load", {_collection, index})
         playerElement.src = ''
 
-        // playerElement.volume = 0
+        playerElement.volume = 0
 
         duration.value = 1
         currentTime.value = 1
@@ -80,18 +83,26 @@ export const usePlayerStore = defineStore('player', () => {
         setMetadata(track.value)
         console.log(tracks, tracks.value, tracks.value[index])
         collectionIndex.value = index
-        console.log("Playing item", track.value)
+        console.log("Playing item", toRaw(track.value))
 
+        // get track bars from db or create empty structure
         const binWidth = 2
         const barSpacing = 1
         const canvasWidth = 300
         const barCount = canvasWidth / (binWidth + barSpacing)
-        canvasBars = {
-            binSize: 1,
-            binWidth,
-            barSpacing,
-            binPos: new Array<number>(barCount).fill(.05),
-            binNeg: new Array<number>(barCount).fill(-.05),
+        await baseDb
+        let dbTrackBars = await db.get('trackBars', track.value.id)
+        console.log(dbTrackBars)
+        if (dbTrackBars !== undefined) {
+            canvasBars = dbTrackBars
+        } else {
+            canvasBars = {
+                binSize: 1,
+                binWidth,
+                barSpacing,
+                binPos: new Array<number>(barCount).fill(.05),
+                binNeg: new Array<number>(barCount).fill(-.05),
+            }
         }
 
         events.on(track.value.id + 'progress', progress => {
@@ -105,34 +116,42 @@ export const usePlayerStore = defineStore('player', () => {
             playerElement.src = outPath
         console.log(playerElement)
 
-        let audioContext = new AudioContext()
-        let response = await fetch(outPath)
-        let decoded = await audioContext.decodeAudioData(await response.arrayBuffer())
-        let channelData = decoded.getChannelData(0)
-
         canvas = document.querySelector('.progress-canvas')
         if (canvas === null) return
         canvas.width = canvasWidth
         canvas.height = 100
         context = canvas.getContext('2d')
         if (context === null) return
+        // only calculate track bars if they werent retrieved from db cache
+        if (dbTrackBars === undefined) calculateTrackBars(outPath, track.value.id, barCount, binWidth, barSpacing).then()
+    }
+
+    async function calculateTrackBars(outPath: string, trackId: string, barCount: number, binWidth: number, barSpacing: number) {
+        let audioContext = new AudioContext()
+        let response = await fetch(outPath)
+        let decoded = await audioContext.decodeAudioData(await response.arrayBuffer())
+        let channelData = decoded.getChannelData(0)
 
         let binSize = (channelData.length / barCount | 0)
         let binPos = 0
         let binNeg = 0
-        canvasBars = {binSize, binWidth, barSpacing, binPos: [] as number[], binNeg: [] as number[]}
+        //only set canvasBars if the playing track is still the one being calculated
+        let bars = {binSize, binWidth, barSpacing, binPos: [] as number[], binNeg: [] as number[]}
         for (let i = 0; i < channelData.length; i++) {
             if (channelData[i] > 0)
                 binPos += channelData[i]
             else
                 binNeg += channelData[i]
             if (i % binSize === binSize - 1) {
-                canvasBars.binPos.push(binPos)
-                canvasBars.binNeg.push(binNeg)
+                bars.binPos.push(binPos)
+                bars.binNeg.push(binNeg)
                 binPos = 0
                 binNeg = 0
             }
         }
+        if (track.value !== null && track.value.id === trackId)
+            canvasBars = bars
+        db.put('trackBars', bars, trackId).then()
     }
 
     function renderProgress() {
@@ -142,7 +161,7 @@ export const usePlayerStore = defineStore('player', () => {
         if (playerElement.duration)
             duration = playerElement.duration
 
-        const defaultBarFill = 'rgba(255,255,255,0.6)'
+        const defaultBarFill = base.themeColor.value === 'dark' ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.2)'
         let {binSize, binWidth, barSpacing} = canvasBars
         context.clearRect(0, 0, canvas.width, canvas.height)
         for (let i = 0; i < canvasBars.binPos.length; i++) {

@@ -19,7 +19,8 @@ export interface Item {
 
 export const baseDb = openDB("base", 1, {
     upgrade(db, oldVersion, newVersion, transaction, event) {
-        db.createObjectStore('spotify');
+        db.createObjectStore('trackBars')
+        db.createObjectStore('spotify')
         const trackStore = db.createObjectStore('tracks', {keyPath: 'id'})
         trackStore.createIndex('searchString', 'searchString', {unique: false})
         trackStore.createIndex('title', 'title', {unique: false})
