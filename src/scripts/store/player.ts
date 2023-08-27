@@ -3,7 +3,6 @@ import {usePlatformStore} from "./electron";
 import {computed, ref, toRaw} from "vue";
 import EventEmitter from "events";
 import {baseDb, useBaseStore} from "./base";
-import {contrastColor} from 'contrast-color'
 import type {IDBPDatabase} from "idb";
 import {useTheme} from "vuetify";
 
@@ -74,7 +73,7 @@ export const usePlayerStore = defineStore('player', () => {
         console.log("Load", {_collection, index})
         playerElement.src = ''
 
-        playerElement.volume = 0
+        // playerElement.volume = 0
 
         duration.value = 1
         currentTime.value = 1

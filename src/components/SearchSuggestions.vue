@@ -48,6 +48,7 @@ const {searchValue} = storeToRefs(base)
 let lastInputTime = performance.now()
 watch(searchValue, () => {
     lastInputTime = performance.now()
+    console.log('input happened')
 });
 
 let el = null as null | Element;
@@ -64,14 +65,14 @@ onMounted(() => {
 let interval: number;
 interval = window.setInterval(() => {
     updateSearchPos()
-    let now = performance.now();
-    // als je 500 ms niks typt, start de auto search
-    if (now - lastInputTime > 500 && searchValue.value !== lastSearchedQuery) {
-        lastInputTime = now;
-        performSearch();
-        lastSearchedQuery = searchValue.value;
+    let now = performance.now()
+    // als je 750 ms niks typt, start de auto search
+    if (now - lastInputTime > 750 && searchValue.value !== lastSearchedQuery) {
+        lastInputTime = now
+        performSearch()
+        lastSearchedQuery = searchValue.value
     }
-}, 200);
+}, 375)
 onBeforeUnmount(() => clearInterval(interval));
 
 let ytResult = ref([] as SpotifyApi.TrackObjectFull[])
@@ -95,17 +96,23 @@ async function performSearch() {
     console.log("Perform search for query: " + query);
     search.addToRecentSearches(query)
     search.searchSpotify(query).then(res => {
-        spotifyLoading.value = false
-        if (res.tracks)
-            spotifyResult.value = res.tracks.items
+        if (query === searchValue.value) {
+            spotifyLoading.value = false
+            if (res.tracks)
+                spotifyResult.value = res.tracks.items
+        }
     })
     search.searchYouTube(query).then(res => {
-        ytLoading.value = false
-        ytResult.value = res
+        if (query === searchValue.value) {
+            ytLoading.value = false
+            ytResult.value = res
+        }
     })
     search.searchLikedTracks(query).then(res => {
-        likedLoading.value = false
-        likedResult.value = res
+        if (query === searchValue.value) {
+            likedLoading.value = false
+            likedResult.value = res
+        }
     })
 }
 
@@ -136,7 +143,7 @@ function updateSearchPos() {
     padding-top: 4px;
 }
 
-.dark .search-suggestions{
+.dark .search-suggestions {
     background-color: rgba(var(--v-theme-background), 0.7);
     backdrop-filter: blur(50px) saturate(100%) brightness(80%);
 }
