@@ -84,6 +84,7 @@ export const usePlayerStore = defineStore('player', () => {
         loadProgress.value = NaN
         collection.value = _collection
         track.value = tracks.value[index]
+        const trackId = track.value.id
         setMetadata(track.value)
         console.log(tracks, tracks.value, tracks.value[index])
         collectionIndex.value = index
@@ -97,9 +98,9 @@ export const usePlayerStore = defineStore('player', () => {
         await baseDb
         let dbTrackBars = await db.get('trackBars', track.value.id)
         console.log(dbTrackBars)
-        if (dbTrackBars !== undefined) {
+        if (dbTrackBars !== undefined && trackId === track.value.id) {
             canvasBars = dbTrackBars
-        } else {
+        } else if (trackId === track.value.id) {
             canvasBars = {
                 binSize: 1,
                 binWidth,
@@ -111,12 +112,12 @@ export const usePlayerStore = defineStore('player', () => {
 
         events.on(track.value.id + 'progress', progress => {
             // Check if user hasn't changed track while it was progressing
-            if (_collection.id === collection.value.id && index === collectionIndex.value)
+            if (_collection.id === collection.value.id && track.value && trackId === track.value.id)
                 loadProgress.value = progress.percent
         })
         let outPath = await platform.getTrackFile(track.value, events)
         // Check if user hasn't changed track while it was loading
-        if (_collection.id === collection.value.id && index === collectionIndex.value)
+        if (_collection.id === collection.value.id && track.value && trackId === track.value.id)
             playerElement.src = outPath
         console.log(playerElement)
 
@@ -127,7 +128,7 @@ export const usePlayerStore = defineStore('player', () => {
         context = canvas.getContext('2d')
         if (context === null) return
         // only calculate track bars if they werent retrieved from db cache
-        if (dbTrackBars === undefined) calculateTrackBars(outPath, track.value.id, barCount, binWidth, barSpacing).then()
+        if (dbTrackBars === undefined) calculateTrackBars(outPath, trackId, barCount, binWidth, barSpacing).then()
     }
 
     async function calculateTrackBars(outPath: string, trackId: string, barCount: number, binWidth: number, barSpacing: number) {
