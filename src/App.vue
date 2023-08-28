@@ -52,22 +52,16 @@
 <script setup lang="ts">
 // todo:
 // VERSE TODO
-// playlists in search functie
-// dingen liken enzo
-// transition de blur bg change
-// yt KAN gestreamt met ytdlp, de exe moet wel up to date zijn
-// is dat het uberhaubt waard? download is best snel en idk of streamen niet problemen gaat oplossen
-// gebruik progress voor progress indicator in play/apuse knop
+// paste spotify url in search balk
+// playlists, etc. in search functie
+// maak knop om ytdlp te updaten
+// alles kunnen liken
 // if file is downloading or post processing, dont download and post process when user clicks on the song again
-
-//  youtube search results cachen voor bepaalde tijd
-//  load title index values into js memory for faster search??? TRIGRAMS???
-//  maybe cache visited playlists for faster load times per session (no idb)
-//  browse page
-//  make maximize/minimize/close functional
-//  make music player
-// add spotify en youtube search
+// maak knop: export liked mp3s to folder
+// browse page
 // bug report: play song in liked -> remove song from liked -> the highlight goes to next (wrong) song
+// edit information about yt track (change title, artist)
+// edit information about any track (start/end time, more?)
 
 import TopMenu from "./components/TopMenu.vue";
 import MusicPlayer from "./components/MusicPlayer.vue";
@@ -185,8 +179,8 @@ html, body {
     position: fixed;
     pointer-events: none;
     top: 0;
-    left: 70px;
-    width: calc(100% - 70px);
+    right: 0;
+    width: calc(100% - 71px);
     height: 50px;
     box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.15);
 }
