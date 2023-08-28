@@ -67,6 +67,7 @@
 //  make maximize/minimize/close functional
 //  make music player
 // add spotify en youtube search
+// bug report: play song in liked -> remove song from liked -> the highlight goes to next (wrong) song
 
 import TopMenu from "./components/TopMenu.vue";
 import MusicPlayer from "./components/MusicPlayer.vue";
@@ -135,6 +136,7 @@ html, body {
     overflow-y: hidden !important;
     height: 100%;
     background-color: rgb(var(--v-theme-background));
+    user-select: none;
 }
 
 .blurry-bg, .blurry-bg-transition {
@@ -161,7 +163,6 @@ html, body {
     flex-direction: column;
     width: 100%;
     height: 100%;
-    user-select: none;
     font-family: "Segoe UI", Helvetica Neue, Helvetica, Arial, sans-serif;
 }
 
@@ -196,15 +197,15 @@ html, body {
     top: 50px;
     width: 70px;
     height: calc(100% - 50px);
-    backdrop-filter: blur(40px) saturate(150%);
     box-shadow: 1px 0 1px 0 rgba(0, 0, 0, 0.1);
-    background-color: rgba(var(--v-theme-background), 0.3);
     align-items: center;
     display: flex;
     flex-direction: column;
     gap: 10px;
     padding-top: 20px;
     z-index: 3;
+    backdrop-filter: blur(40px) saturate(150%);
+    background-color: rgba(var(--v-theme-background), 0.3);
 }
 
 .dark .left-nav {

@@ -17,19 +17,35 @@
         <div class="track-duration ml-2">
             {{ base.msToReadable(track.duration_ms) }}
         </div>
-        <v-btn class="track-options ml-2"
-               variant="text" size="30"
-               density="compact"
-               icon="mdi-dots-horizontal"/>
+        <v-menu>
+            <template v-slot:activator="{ props }">
+                <v-btn class="track-options ml-2"
+                       v-bind="props"
+                       variant="text" size="30"
+                       density="compact"
+                       icon="mdi-dots-horizontal"/>
+            </template>
+            <v-list density="compact">
+                <v-list-item @click="spotify.toggleLike('track', track)">
+                    <template v-slot:prepend>
+                        <v-icon v-if="isLiked" icon="mdi-heart"></v-icon>
+                        <v-icon v-else icon="mdi-heart-outline"></v-icon>
+                    </template>
+                    <v-list-item-title v-if="isLiked">Remove from library</v-list-item-title>
+                    <v-list-item-title v-else>Add to library</v-list-item-title>
+                </v-list-item>
+            </v-list>
+        </v-menu>
     </div>
 </template>
 
 <script setup lang="ts">
 import type {PropType} from "vue";
 import {useBaseStore} from "../scripts/store/base";
-import {toRaw} from "vue";
+import {computed, ref, toRaw} from "vue";
 import {usePlayerStore} from "../scripts/store/player";
 import ArtistsSpan from "./ArtistsSpan.vue";
+import {useSpotifyStore} from "../scripts/store/spotify";
 
 const props = defineProps({
     track: {
@@ -50,11 +66,14 @@ const props = defineProps({
     },
     active: {
         type: Boolean,
-        default:false,
+        default: false,
     },
 })
 const base = useBaseStore()
 const player = usePlayerStore()
+const spotify = useSpotifyStore()
+
+const isLiked = computed(() => spotify.checkLiked('track', props.track.id))
 
 function playItem() {
     console.log("Play item", toRaw(props.track))

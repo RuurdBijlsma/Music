@@ -22,19 +22,13 @@ function seek(e: MouseEvent) {
     }
 }
 
-function canvasDown(e: MouseEvent) {
+const canvasDown = (e: MouseEvent) => {
     mouseActive.value = true
     seek(e)
 }
 
-function canvasUp(e: MouseEvent) {
-    mouseActive.value = false
-}
-
-function canvasMove(e: MouseEvent) {
-    seek(e)
-}
-
+const canvasUp = () => mouseActive.value = false;
+const canvasMove = (e: MouseEvent) => seek(e);
 const mouseEnter = () => mouseHover.value = true
 const mouseLeave = () => mouseHover.value = false
 

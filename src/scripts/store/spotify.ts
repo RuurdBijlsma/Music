@@ -442,6 +442,21 @@ export const useSpotifyStore = defineStore('spotify', () => {
         return false
     }
 
+    function enhancePlaylistObject(item: SpotifyApi.PlaylistTrackObject) {
+        let track = item.track as SpotifyApi.TrackObjectFull
+        let artistString = track.artists
+            .map((a: SpotifyApi.ArtistObjectSimplified) => a.name)
+            .join(', ')
+            .toLowerCase()
+
+        let searchString = track.name.toLowerCase() + ' ' + artistString
+        let id = track.id
+        let title = track.name
+        let added_at_reverse = 10000000000000 - +(new Date(item.added_at))
+
+        return {...item, artistString, searchString, id, title, added_at_reverse}
+    }
+
     async function loadLikedTracks() {
         console.log("Loading liked tracks!");
         await baseDb;
@@ -482,21 +497,7 @@ export const useSpotifyStore = defineStore('spotify', () => {
             const tx = db.transaction('tracks', 'readwrite')
             let promises: Promise<any>[] = [db.clear('tracks')]
             for (let item of items) {
-                const artistString = (item.track as SpotifyApi.TrackObjectFull).artists
-                    .map((a: SpotifyApi.ArtistObjectSimplified) => a.name)
-                    .join(', ')
-                    .toLowerCase()
-                // @ts-ignore
-                item.artistString = artistString
-                // @ts-ignore
-                item.searchString = item.track.name.toLowerCase() + ' ' + artistString
-                // @ts-ignore
-                item.id = item.track.id
-                // @ts-ignore
-                item.title = item.track.name
-                // @ts-ignore
-                item.added_at_reverse = 10000000000000 - +(new Date(item.added_at))
-                promises.push(db.add('tracks', item))
+                promises.push(db.add('tracks', enhancePlaylistObject(item)))
             }
             await Promise.all([...promises, tx.done]);
             localStorage.lastTracksLoad = Date.now()
@@ -549,6 +550,58 @@ export const useSpotifyStore = defineStore('spotify', () => {
         return api.getPlaylist(id)
     }
 
+    function checkLiked(type: 'track' | 'playlist' | 'album' | 'artist', id: string) {
+        let result: any
+        if (type === 'track') {
+            result = tracks.value.find(t => t.track.id === id)
+        } else {
+            //@ts-ignore
+            result = library.value[type].find((t: any) => t.id === id)
+        }
+        return result !== undefined
+    }
+
+    async function toggleLike(type: 'track' | 'playlist' | 'album' | 'artist', item: any) {
+        const id = item.id
+        let liked = checkLiked(type, id)
+        console.log({liked})
+        if (type === 'track') {
+            if (liked) {
+                await api.removeFromMySavedTracks([id])
+                db.delete('tracks', id).then()
+                tracks.value.splice(tracks.value.findIndex((t: SpotifyApi.PlaylistTrackObject) => t.track.id === id), 1)
+                console.log("Removed", item, "from favorites")
+                if (!isRefreshing.value['track']) {
+                    likedTracksTotal.value++
+                    likedTracksLoaded.value++
+                }
+            } else {
+                await api.addToMySavedTracks([id])
+                let date = (new Date()).toISOString()
+                let playlistObject = enhancePlaylistObject({
+                    track: toRaw(item),
+                    added_at: date
+                } as SpotifyApi.PlaylistTrackObject)
+                tracks.value.unshift(playlistObject)
+                db.add('tracks', playlistObject).then()
+                console.log("Added", item, "to favorites")
+                if (!isRefreshing.value['track']) {
+                    likedTracksTotal.value--
+                    likedTracksLoaded.value--
+                }
+            }
+        } else if (type === 'playlist') {
+            if (liked) await api.unfollowPlaylist(id)
+            else await api.followPlaylist(id)
+        } else if (type === 'album') {
+            if (liked) await api.removeFromMySavedAlbums([id])
+            else await api.addToMySavedAlbums([id])
+        } else if (type === 'artist') {
+            if (liked) await api.unfollowArtists([id])
+            else await api.followArtists([id])
+        }
+    }
+
     return {
         dbLoaded,
         refreshHomePage,
@@ -570,5 +623,7 @@ export const useSpotifyStore = defineStore('spotify', () => {
         isRefreshing,
         getPlaylist,
         loadLikedTracks,
+        checkLiked,
+        toggleLike,
     }
 })
