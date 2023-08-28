@@ -38,12 +38,12 @@ const collection = computed(() => {
     if (tracks.value === null || tracks.value === undefined) {
         return null
     }
-    console.log(spotify.likedTracksTotal.value)
     return {
         tracks: toRaw(tracks.value).map(t => t.track),
         type: 'liked',
         id: 'liked',
         loaded: spotify.likedTracksLoaded,
+        total: spotify.likedTracksTotal
     }
 })
 
