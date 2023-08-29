@@ -68,6 +68,7 @@
 // in die database kan dan: track customizations (start/end time, etc), spotify api keys, yt liked tracks
 // fix get dominant color for youtube tracks
 // uitvinden waarom ik verkeerde yt muziek krijg als ik esta vida zoek in yt
+// hide context menu on blur
 
 import TopMenu from "./components/TopMenu.vue";
 import MusicPlayer from "./components/MusicPlayer.vue";
