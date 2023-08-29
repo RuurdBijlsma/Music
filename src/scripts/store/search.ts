@@ -36,7 +36,7 @@ export const useSearchStore = defineStore('search', () => {
             track_number: 0,
             uri: "",
             artists: [{
-                name: ytResult.channel,
+                name: ytResult.channel.replace('"', ''),
                 type: 'artist',
                 id: ytResult.channelId,
                 uri: '',
@@ -50,11 +50,11 @@ export const useSearchStore = defineStore('search', () => {
                 href: '',
                 album_type: 'youtube',
                 external_urls: {spotify: ''},
-                name: ytResult.playlist ?? '',
+                name: (ytResult.playlist ?? '').replace('"', ''),
                 uri: ''
             },
             type: "track",
-            name: ytResult.title,
+            name: ytResult.title.replace('"', ''),
             id: `yt${ytResult.id}`,
             duration_ms: ytResult.duration * 1000,
             popularity: ytResult.viewCount,

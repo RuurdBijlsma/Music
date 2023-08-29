@@ -8,10 +8,8 @@ import type {Progress} from "yt-dlp-wrap";
 import child_process from "child_process";
 import * as https from "https";
 //@ts-ignore
-import {contrastColor} from 'contrast-color'
-//@ts-ignore
 import ColorThief from 'color-extr-thief'
-import {ipcRenderer, globalShortcut, ipcMain} from "electron";
+import {globalShortcut, ipcMain} from "electron";
 
 const YTDlpWrap = require("yt-dlp-wrap").default
 

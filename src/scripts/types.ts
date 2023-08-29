@@ -44,7 +44,7 @@ export interface ItemCollection {
     id: string,
     tracks: SpotifyApi.TrackObjectFull[],
     type: CollectionType,
-    context: Item,
+    context?: Item,
     loaded?: number,
     total?: number,
 }

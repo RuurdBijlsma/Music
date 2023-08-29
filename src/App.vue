@@ -66,6 +66,8 @@
 // in item menu / item context menu show optie om andere yt video te kiezen
 // maak knop: export database naar file of cloud?
 // in die database kan dan: track customizations (start/end time, etc), spotify api keys, yt liked tracks
+// fix get dominant color for youtube tracks
+// uitvinden waarom ik verkeerde yt muziek krijg als ik esta vida zoek in yt
 
 import TopMenu from "./components/TopMenu.vue";
 import MusicPlayer from "./components/MusicPlayer.vue";

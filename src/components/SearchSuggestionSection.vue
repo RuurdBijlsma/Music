@@ -31,6 +31,7 @@ import {useBaseStore} from "../scripts/store/base";
 import {storeToRefs} from "pinia";
 import {useSpotifyStore} from "../scripts/store/spotify";
 import TrackList from "./TrackList.vue";
+import type {ItemCollection} from "../scripts/types";
 
 const subList = ref<HTMLElement | null>(null);
 
@@ -54,7 +55,7 @@ const collection = computed(() => ({
     tracks: props.tracks,
     type: 'search',
     id: 'search' + props.id,
-}))
+} as ItemCollection))
 
 const base = useBaseStore()
 const spotify = useSpotifyStore()

@@ -66,8 +66,8 @@ import HorizontalScroller from "../components/HorizontalScroller.vue";
 const spotify = useSpotifyStore();
 spotify.refreshHomePage();
 
-const highlight = computed(() => spotify.view.homePage.featured.playlists[0])
-const otherPlaylists = computed(() => spotify.view.homePage.featured.playlists.slice(1))
+const highlight = computed(() => spotify.view.homePage.featured.playlists[0] as SpotifyApi.PlaylistObjectFull)
+const otherPlaylists = computed(() => spotify.view.homePage.featured.playlists.slice(1) as SpotifyApi.PlaylistObjectFull[])
 </script>
 
 <style scoped>

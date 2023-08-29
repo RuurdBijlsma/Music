@@ -11,14 +11,14 @@
 </template>
 
 <script setup lang="ts">
+import {useBaseStore} from "../scripts/store/base"
+import type {Item} from "../scripts/types";
 import type {PropType} from "vue";
-import {useBaseStore} from "../scripts/store/base";
-import type {Item} from '../scripts/store/base'
 
 const base = useBaseStore();
 defineProps({
     item: {
-        type: Object,
+        type: Object as PropType<Item>,
         required: true
     },
     size: {

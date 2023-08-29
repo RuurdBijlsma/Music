@@ -71,8 +71,8 @@ const base = useBaseStore();
 const spotify = useSpotifyStore();
 
 const artist = ref(null as null | SpotifyApi.ArtistObjectFull)
-const albums = ref(null as null | SpotifyApi.AlbumObjectSimplified[])
-const relatedArtists = ref(null as null | SpotifyApi.ArtistObjectSimplified[])
+const albums = ref(null as null | SpotifyApi.AlbumObjectFull[])
+const relatedArtists = ref(null as null | SpotifyApi.ArtistObjectFull[])
 const topTracks = ref(null as null | SpotifyApi.TrackObjectFull[])
 const collection = computed(() => {
     return {
@@ -103,7 +103,7 @@ async function reloadArtist(id: string) {
         console.log("Artist", r);
     });
     spotify.api.getArtistAlbums(id).then(r => {
-        albums.value = r.items;
+        albums.value = r.items as SpotifyApi.AlbumObjectFull[]
         console.log("getArtistAlbums", r);
     });
     spotify.api.getArtistRelatedArtists(id).then(r => {

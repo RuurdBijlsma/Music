@@ -37,7 +37,7 @@ const base = useBaseStore();
 const spotify = useSpotifyStore();
 
 const user = ref(null as null | SpotifyApi.UserProfileResponse)
-const playlists = ref(null as null | SpotifyApi.PlaylistObjectSimplified[]);
+const playlists = ref(null as null | SpotifyApi.PlaylistObjectFull[]);
 
 let loadedId = route.params.id as string;
 reloadUser()
@@ -68,7 +68,7 @@ function reloadUser() {
         console.log("User", r);
     });
     spotify.api.getUserPlaylists(id).then(r => {
-        playlists.value = r.items;
+        playlists.value = r.items as SpotifyApi.PlaylistObjectFull[]
         console.log("getUserPlaylists", r);
     });
 }

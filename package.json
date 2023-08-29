@@ -29,7 +29,6 @@
     "dependencies": {
         "anzip": "^0.2.0",
         "color-extr-thief": "^2.3.4",
-        "contrast-color": "^1.0.1",
         "events": "^3.3.0",
         "express": "^4.18.2",
         "ffbinaries": "github:ruurdbijlsma/ffbinaries-node.git#7c2b7e7958c70b1ddb6911ede6336cb294a86c74",

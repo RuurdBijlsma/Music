@@ -6,7 +6,7 @@
                     <h2 class="card-title">{{ item.name }}</h2>
                 </router-link>
                 <p class="card-description mt-3">
-                    <template v-if="item.type !== 'album'">{{ item.description }}</template>
+                    <template v-if="item.type !== 'album'">{{ base.itemDescription(item) }}</template>
                     <template v-else>{{ base.albumString(item) }}</template>
                 </p>
             </div>
@@ -26,8 +26,8 @@
 
 <script setup lang="ts">
 import {useBaseStore} from "../scripts/store/base"
-import type {Item} from '../scripts/store/base'
 import type {PropType} from "vue"
+import type {Item} from "../scripts/types";
 
 const base = useBaseStore();
 defineProps({

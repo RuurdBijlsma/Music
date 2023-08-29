@@ -45,7 +45,7 @@ const props = defineProps({
 const base = useBaseStore()
 const followerString = computed(() => {
     if (props.collection === null) return '0 followers';
-    let followers = props.collection.context.followers
+    let followers = playlist.value.followers
     if (followers.total > 1000000) {
         let followerMillions = Math.round(followers.total / 1000000);
         return followerMillions + 'M follower' + (followerMillions === 1 ? '' : 's');
