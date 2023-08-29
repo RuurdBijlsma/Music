@@ -1,6 +1,6 @@
 <template>
     <div class="album" v-if="album">
-        <track-list-virtual :collection="album" type="album" no-images>
+        <track-list-virtual :collection="collection" type="album" no-images>
             <div class="mb-8 album-info">
                 <glow-image
                     rounding="5px"
@@ -43,18 +43,28 @@ import {useRoute} from "vue-router";
 import {useBaseStore} from "../../scripts/store/base";
 import GlowImage from "../../components/GlowImage.vue";
 import TrackListVirtual from "../../components/TrackListVirtual.vue";
+import type {ItemCollection} from "../../scripts/types";
 
 const route = useRoute()
 const base = useBaseStore();
 const spotify = useSpotifyStore();
-const album = ref(null as null | SpotifyApi.SingleAlbumResponse);
+const album = ref(null as null | SpotifyApi.AlbumObjectFull);
 let loadedId = route.params.id as string;
+const collection = computed(() => {
+    return {
+        id: album.value?.id ?? 'album',
+        tracks: album.value?.tracks.items ?? [],
+        type: "album",
+        context: album.value,
+    } as ItemCollection
+})
 watch(route, async () => {
     if (route.path.startsWith('/album') && typeof route.params.id === 'string' && route.params.id !== loadedId) {
         loadedId = route.params.id
         album.value = await spotify.api.getAlbum(loadedId);
     }
 })
+
 spotify.api.getAlbum(loadedId).then((r: SpotifyApi.SingleAlbumResponse) => {
     for (let item of r.tracks.items) {
         //@ts-ignore

@@ -1,13 +1,12 @@
 import {defineStore} from 'pinia'
-import {computed, reactive, ref, toRaw, watch} from "vue";
+import {computed, ref, toRaw, watch} from "vue";
 import type {Ref} from 'vue';
 import {baseDb} from './base'
 import SpotifyWebApi from "spotify-web-api-js";
-// @ts-ignore
 import EventEmitter from 'events';
 import {usePlatformStore} from "./electron";
 import type {IDBPDatabase} from "idb";
-import {tr} from "vuetify/locale";
+import type {ExtendedPlaylistTrack, Item, ItemType} from "../types";
 
 export interface AuthToken {
     code: null | string,
@@ -59,8 +58,8 @@ export const useSpotifyStore = defineStore('spotify', () => {
         artists: [] as SpotifyApi.ArtistObjectFull[],
         albums: [] as SpotifyApi.AlbumObjectFull[],
     })
-    const tracks = ref([] as SpotifyApi.PlaylistTrackObject[])
-    const ytTracks = ref([] as SpotifyApi.PlaylistTrackObject[])
+    const tracks = ref([] as ExtendedPlaylistTrack[])
+    const ytTracks = ref([] as ExtendedPlaylistTrack[])
     const likedTracksTotal = ref(1)
     const likedTracksLoaded = ref(0)
 
@@ -74,7 +73,7 @@ export const useSpotifyStore = defineStore('spotify', () => {
         homePage: {
             featured: {
                 title: '' as string | undefined,
-                playlists: [] as any[]
+                playlists: [] as SpotifyApi.PlaylistObjectSimplified[]
             },
             newReleases: [] as any[],
             personalized: [] as any[],
@@ -454,7 +453,7 @@ export const useSpotifyStore = defineStore('spotify', () => {
         let title = track.name
         let added_at_reverse = 10000000000000 - +(new Date(item.added_at))
 
-        return {...item, artistString, searchString, id, title, added_at_reverse}
+        return {...item, artistString, searchString, id, title, added_at_reverse} as ExtendedPlaylistTrack
     }
 
     async function loadLikedTracks() {
@@ -472,7 +471,7 @@ export const useSpotifyStore = defineStore('spotify', () => {
 
         let isInitial = tracks.value.length === 0;
         console.log("TRACK", {isInitial}, tracks.value.length)
-        let items: SpotifyApi.PlaylistTrackObject[] = [];
+        let items: ExtendedPlaylistTrack[] = [];
         likedTracksLoaded.value = 0;
         likedTracksTotal.value = 1;
 
@@ -550,8 +549,8 @@ export const useSpotifyStore = defineStore('spotify', () => {
         return api.getPlaylist(id)
     }
 
-    function checkLiked(type: 'track' | 'playlist' | 'album' | 'artist', id: string) {
-        let result: any
+    function checkLiked(type: ItemType, id: string) {
+        let result: ExtendedPlaylistTrack | undefined
         if (type === 'track') {
             result = tracks.value.find(t => t.track.id === id)
         } else {
@@ -561,7 +560,7 @@ export const useSpotifyStore = defineStore('spotify', () => {
         return result !== undefined
     }
 
-    async function toggleLike(type: 'track' | 'playlist' | 'album' | 'artist', item: any) {
+    async function toggleLike(type: ItemType, item: Item) {
         const id = item.id
         let liked = checkLiked(type, id)
         console.log({liked})
@@ -569,7 +568,7 @@ export const useSpotifyStore = defineStore('spotify', () => {
             if (liked) {
                 await api.removeFromMySavedTracks([id])
                 db.delete('tracks', id).then()
-                tracks.value.splice(tracks.value.findIndex((t: SpotifyApi.PlaylistTrackObject) => t.track.id === id), 1)
+                tracks.value.splice(tracks.value.findIndex((t) => t.track.id === id), 1)
                 console.log("Removed", item, "from favorites")
                 if (!isRefreshing.value['track']) {
                     likedTracksTotal.value++
@@ -579,7 +578,7 @@ export const useSpotifyStore = defineStore('spotify', () => {
                 await api.addToMySavedTracks([id])
                 let date = (new Date()).toISOString()
                 let playlistObject = enhancePlaylistObject({
-                    track: toRaw(item),
+                    track: toRaw(item) as SpotifyApi.TrackObjectFull,
                     added_at: date
                 } as SpotifyApi.PlaylistTrackObject)
                 tracks.value.unshift(playlistObject)

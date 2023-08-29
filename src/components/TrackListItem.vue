@@ -1,5 +1,5 @@
 <template>
-    <div class="track-item" @dblclick="playItem">
+    <div class="track-item" @dblclick="playItem" @click.right="base.setContextMenuItem($event, track)">
         <v-lazy v-if="number === undefined" class="lazy-img" width="70" transition="fade-transition">
             <v-img :cover="true" v-if="track.album.images.length > 0" class="track-img" :src="base.itemImage(track)"/>
             <v-sheet v-else class="track-img"></v-sheet>
@@ -25,16 +25,7 @@
                        density="compact"
                        icon="mdi-dots-horizontal"/>
             </template>
-            <v-list density="compact">
-                <v-list-item @click="spotify.toggleLike('track', track)">
-                    <template v-slot:prepend>
-                        <v-icon v-if="isLiked" icon="mdi-heart"></v-icon>
-                        <v-icon v-else icon="mdi-heart-outline"></v-icon>
-                    </template>
-                    <v-list-item-title v-if="isLiked">Remove from library</v-list-item-title>
-                    <v-list-item-title v-else>Add to library</v-list-item-title>
-                </v-list-item>
-            </v-list>
+            <item-menu :item="track"/>
         </v-menu>
     </div>
 </template>
@@ -46,6 +37,7 @@ import {computed, ref, toRaw} from "vue";
 import {usePlayerStore} from "../scripts/store/player";
 import ArtistsSpan from "./ArtistsSpan.vue";
 import {useSpotifyStore} from "../scripts/store/spotify";
+import ItemMenu from "./ItemMenu.vue";
 
 const props = defineProps({
     track: {

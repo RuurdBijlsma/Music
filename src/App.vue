@@ -46,6 +46,7 @@
                 </router-view>
             </div>
         </div>
+        <item-context-menu/>
     </v-app>
 </template>
 
@@ -62,6 +63,9 @@
 // bug report: play song in liked -> remove song from liked -> the highlight goes to next (wrong) song
 // edit information about yt track (change title, artist)
 // edit information about any track (start/end time, more?)
+// in item menu / item context menu show optie om andere yt video te kiezen
+// maak knop: export database naar file of cloud?
+// in die database kan dan: track customizations (start/end time, etc), spotify api keys, yt liked tracks
 
 import TopMenu from "./components/TopMenu.vue";
 import MusicPlayer from "./components/MusicPlayer.vue";
@@ -72,6 +76,7 @@ import SearchSuggestions from "./components/SearchSuggestions.vue";
 import {useBaseStore} from "./scripts/store/base";
 import {usePlayerStore} from "./scripts/store/player";
 import {computed, ref, watch} from "vue";
+import ItemContextMenu from "./components/ItemContextMenu.vue";
 
 const theme = useTheme()
 const spotify = useSpotifyStore()

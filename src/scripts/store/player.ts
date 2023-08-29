@@ -5,6 +5,7 @@ import EventEmitter from "events";
 import {baseDb, useBaseStore} from "./base";
 import type {IDBPDatabase} from "idb";
 import {useTheme} from "vuetify";
+import type {ItemCollection} from "../types";
 
 const events = new EventEmitter()
 
@@ -63,8 +64,8 @@ export const usePlayerStore = defineStore('player', () => {
     const repeat = ref(true)
     const shuffle = ref(false)
 
-    const collection = ref(null as any | null)
-    const tracks = computed(() => base.getCollectionTracks(collection.value))
+    const collection = ref(null as ItemCollection | null)
+    const tracks = computed(() => collection.value?.tracks ?? [])
     const collectionIndex = ref(0)
 
     let canvasBars: { binSize: number, binWidth: number, barSpacing: number, binPos: number[], binNeg: number[] } | null = null
@@ -72,7 +73,7 @@ export const usePlayerStore = defineStore('player', () => {
     let context: CanvasRenderingContext2D | null = null
     requestAnimationFrame(renderProgress)
 
-    async function load(_collection: any, index: number) {
+    async function load(_collection: ItemCollection, index: number) {
         console.log("Load", {_collection, index})
         playerElement.src = ''
 
@@ -86,7 +87,6 @@ export const usePlayerStore = defineStore('player', () => {
         track.value = tracks.value[index]
         const trackId = track.value.id
         setMetadata(track.value)
-        console.log(tracks, tracks.value, tracks.value[index])
         collectionIndex.value = index
         console.log("Playing item", toRaw(track.value))
 
@@ -112,7 +112,7 @@ export const usePlayerStore = defineStore('player', () => {
 
         events.on(track.value.id + 'progress', progress => {
             // Check if user hasn't changed track while it was progressing
-            if (_collection.id === collection.value.id && track.value && trackId === track.value.id)
+            if (_collection.id === collection.value?.id && track.value && trackId === track.value.id)
                 loadProgress.value = progress.percent
         })
         let outPath = await platform.getTrackFile(track.value, events)
@@ -290,7 +290,8 @@ export const usePlayerStore = defineStore('player', () => {
         }
         if (repeatRequired && !repeat.value)
             return;
-        await load(collection.value, newIndex)
+        if (collection.value !== null)
+            await load(collection.value, newIndex)
     }
 
     async function togglePlay() {

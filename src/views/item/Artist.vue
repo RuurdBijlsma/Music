@@ -58,29 +58,29 @@
 import {useSpotifyStore} from "../../scripts/store/spotify";
 import {computed, ref, watch} from "vue";
 import {useRoute} from "vue-router";
-import {useBaseStore} from "../../scripts/store/base";
+import {baseDb, useBaseStore} from "../../scripts/store/base";
 import GlowImage from "../../components/GlowImage.vue";
-import TrackListItem from "../../components/TrackListItem.vue";
 import ItemCard from "../../components/ItemCard.vue";
 import HighlightCard from "../../components/HighlightCard.vue";
 import HorizontalScroller from "../../components/HorizontalScroller.vue";
 import TrackList from "../../components/TrackList.vue";
+import type {ItemCollection} from "../../scripts/types";
 
 const route = useRoute()
 const base = useBaseStore();
 const spotify = useSpotifyStore();
 
-const artist = ref(null as null | SpotifyApi.SingleArtistResponse)
+const artist = ref(null as null | SpotifyApi.ArtistObjectFull)
 const albums = ref(null as null | SpotifyApi.AlbumObjectSimplified[])
 const relatedArtists = ref(null as null | SpotifyApi.ArtistObjectSimplified[])
 const topTracks = ref(null as null | SpotifyApi.TrackObjectFull[])
 const collection = computed(() => {
     return {
-        tracks: topTracks.value,
-        type: "artist",
-        artist,
         id: artist.value?.id ?? 'artist',
-    }
+        tracks: topTracks.value ?? [],
+        type: "artist",
+        context: artist.value,
+    } as ItemCollection
 })
 
 let loadedId = route.params.id as string;
@@ -89,14 +89,15 @@ reloadArtist(loadedId);
 watch(route, async () => {
     if (route.path.startsWith('/artist') && typeof route.params.id === 'string' && route.params.id !== loadedId) {
         loadedId = route.params.id;
-        reloadArtist(loadedId);
+        reloadArtist(loadedId).then()
         let el = document.querySelector('.router-view');
         if (el !== null)
             el.scrollTop = 0;
     }
 })
 
-function reloadArtist(id: string) {
+async function reloadArtist(id: string) {
+    await baseDb
     spotify.api.getArtist(id).then(r => {
         artist.value = r;
         console.log("Artist", r);

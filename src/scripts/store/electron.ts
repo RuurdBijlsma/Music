@@ -42,7 +42,7 @@ export const usePlatformStore = defineStore('platform', () => {
     })
     ipcRenderer.on('play', () => player.play())
     ipcRenderer.on('pause', () => player.pause())
-    ipcRenderer.on('skip', (_,n) => player.skip(n))
+    ipcRenderer.on('skip', (_, n) => player.skip(n))
 
     window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
         setPlatformPlaying(player.playing)
@@ -112,6 +112,11 @@ export const usePlatformStore = defineStore('platform', () => {
             title: r.title,
             thumbnail: r.thumbnail,
             id: r.id,
+            channelUrl: r.channel_url,
+            channelId: r.channel_id,
+            playlist: r.playlist,
+            playlistId: r.playlist_id,
+            viewCount:r.view_count,
         }))
         console.log("Search youtube result: ", result)
         db.put('cache', {

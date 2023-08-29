@@ -1,9 +1,9 @@
 import {defineStore} from 'pinia'
 import {baseDb} from './base'
-import type {Item} from './base'
 import {useSpotifyStore} from "./spotify";
 import type {IDBPDatabase} from "idb";
 import {usePlatformStore} from "./electron";
+import type {ExtendedPlaylistTrack, Item} from "../types";
 
 export const useSearchStore = defineStore('search', () => {
     const platform = usePlatformStore();
@@ -23,20 +23,41 @@ export const useSearchStore = defineStore('search', () => {
     }
 
     function ytResultToItem(ytResult: any): Item {
+        console.log('yt result to item', ytResult)
         return {
-            artists: [{name: ytResult.channel}],
-            type: "youtube",
-            description: ytResult.description,
-            display_name: ytResult.title,
-            album_type: "single",
-            to: "",
-            album: {images: [{url: ytResult.thumbnail}]},
-            images: [
-                {url: ytResult.thumbnail}
-            ],
+            available_markets: [],
+            disc_number: 0,
+            explicit: false,
+            external_ids: {},
+            external_urls: {spotify: ''},
+            href: "",
+            is_playable: false,
+            preview_url: "",
+            track_number: 0,
+            uri: "",
+            artists: [{
+                name: ytResult.channel,
+                type: 'artist',
+                id: ytResult.channelId,
+                uri: '',
+                href: ytResult.channelUrl,
+                external_urls: {spotify: ''},
+            }],
+            album: {
+                images: [{url: ytResult.thumbnail}],
+                type: 'album',
+                id: ytResult.playlistId,
+                href: '',
+                album_type: 'youtube',
+                external_urls: {spotify: ''},
+                name: ytResult.playlist ?? '',
+                uri: ''
+            },
+            type: "track",
             name: ytResult.title,
             id: `yt${ytResult.id}`,
             duration_ms: ytResult.duration * 1000,
+            popularity: ytResult.viewCount,
         }
     }
 
@@ -50,7 +71,7 @@ export const useSearchStore = defineStore('search', () => {
             else
                 return likedCache[query].result;
         }
-        let tracks: any[]
+        let tracks: ExtendedPlaylistTrack[]
         if (spotify.tracks.length > 0) {
             tracks = spotify.tracks
         } else {
@@ -62,7 +83,7 @@ export const useSearchStore = defineStore('search', () => {
 
         for (let track of tracks) {
             if (track.searchString.includes(lowerQuery))
-                result.push(track.track)
+                result.push(track.track as SpotifyApi.TrackObjectFull)
         }
         console.log("Search result", result)
         likedCache[query] = {

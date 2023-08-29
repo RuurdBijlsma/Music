@@ -8,7 +8,7 @@
                 </div>
                 <v-divider/>
             </div>
-            <track-list :collection="collection"/>
+            <track-list padding-top="0" :collection="collection"/>
         </div>
         <template v-if="tracks.length > 3">
             <v-divider/>

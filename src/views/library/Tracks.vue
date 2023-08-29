@@ -4,7 +4,8 @@
             {{ tracksAmount }}
             Track{{ tracks.length === 1 ? '' : 's' }}
             • {{ base.approximateDuration((totalDurationMs)) }}
-            <v-btn v-show="trackLoadProgress === 100" @click="spotify.loadLikedTracks" icon="mdi-refresh" density="compact" variant="plain" size="10" class="refresh-button"/>
+            <v-btn v-show="trackLoadProgress === 100" @click="spotify.loadLikedTracks" icon="mdi-refresh"
+                   density="compact" variant="plain" size="10" class="refresh-button"/>
         </p>
         <div class="play-buttons mb-1">
             <v-divider/>
@@ -26,9 +27,10 @@
 <script setup lang="ts">
 import {useSpotifyStore} from "../../scripts/store/spotify";
 import {useBaseStore} from "../../scripts/store/base";
-import {computed, ref, toRaw, watch} from "vue";
+import {computed, toRaw} from "vue";
 import TrackListVirtual from "../../components/TrackListVirtual.vue";
 import {storeToRefs} from "pinia";
+import type {ItemCollection} from "../../scripts/types";
 
 const spotify = useSpotifyStore();
 const {tracks} = storeToRefs(spotify)
@@ -44,7 +46,7 @@ const collection = computed(() => {
         id: 'liked',
         loaded: spotify.likedTracksLoaded,
         total: spotify.likedTracksTotal
-    }
+    } as ItemCollection
 })
 
 setTimeout(() => {

@@ -26,12 +26,13 @@ import TrackListItem from "./TrackListItem.vue";
 import {useBaseStore} from "../scripts/store/base";
 import {usePlayerStore} from "../scripts/store/player";
 import {useTheme} from "vuetify";
+import type {ItemCollection} from "../scripts/types";
 
 const base = useBaseStore();
 const player = usePlayerStore()
 const props = defineProps({
     collection: {
-        type: Object as PropType<any>,
+        type: Object as PropType<ItemCollection>,
         required: true
     },
     subtractHeight: {
@@ -69,7 +70,7 @@ function handleWindowResize() {
 }
 
 const scrollItems = computed(() => {
-    return [null, ...base.getCollectionTracks(props.collection)]
+    return [null, ...props.collection.tracks]
 })
 </script>
 

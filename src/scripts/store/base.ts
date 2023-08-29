@@ -2,20 +2,7 @@ import {defineStore} from 'pinia'
 import {openDB} from "idb";
 import {computed, ref} from "vue";
 import {useTheme} from "vuetify";
-
-export interface Item {
-    type?: string,
-    display_name?: string,
-    description?: string,
-    name?: string,
-    id?: string,
-    to?: string,
-    images?: { url: string }[],
-    album_type?: string,
-    artists?: { name: string }[],
-    album?: Item,
-    duration_ms?: number,
-}
+import type {Item} from "../types";
 
 export const baseDb = openDB("base", 1, {
     upgrade(db, oldVersion, newVersion, transaction, event) {
@@ -46,6 +33,13 @@ export const useBaseStore = defineStore('base', () => {
     const themeColorDark = ref('#FFFFFF')
     const themeColorLight = ref('#000000')
     const themeColor = computed(() => theme.global.name.value === 'dark' ? themeColorDark : themeColorLight)
+
+    const contextMenu = ref({
+        x: 0,
+        y: 0,
+        show: false,
+        item: null as any,
+    })
 
     function approximateDuration(millis: number) {
         if (millis > 7200000)
@@ -85,10 +79,8 @@ export const useBaseStore = defineStore('base', () => {
         if (item.type === 'album') {
             return `${caps(item?.album_type ?? "")} • ${(item?.artists ?? []).map(a => a.name).join(', ')}`
         }
-        if (item.description !== null) {
-            return item.description ?? "";
-        }
-        return '';
+        if (item.type !== 'playlist') return ''
+        return item.description ?? ""
     }
 
     function caps(str: string) {
@@ -120,20 +112,6 @@ export const useBaseStore = defineStore('base', () => {
         return encoded;
     }
 
-    const getCollectionTracks = (collection: any): SpotifyApi.TrackObjectFull[] => {
-        if (collection === null || collection === undefined) return []
-
-        if (collection.type === 'playlist') {
-            return collection.tracks.items
-                .filter((t: any) => !t.is_local && t.track !== null)
-                .map((t: SpotifyApi.PlaylistTrackObject) => t.track as SpotifyApi.TrackObjectFull)
-        } else if (collection.type === 'album') {
-            return collection.tracks.items as SpotifyApi.TrackObjectFull[]
-        } else {
-            return collection.tracks as SpotifyApi.TrackObjectFull[]
-        }
-    }
-
     const itemUrl = (item: Item | any) => {
         let type = item.type || 'category';
         let name = type === 'user' ? item.display_name : item.name;
@@ -149,12 +127,19 @@ export const useBaseStore = defineStore('base', () => {
         return `/${type}/${encodeUrlName(name)}/${item.id}`;
     }
 
-    const notFoundImage=()=>{
+    const notFoundImage = () => {
         let i = Math.floor(Math.random() * 7) + 1;
         return `img/notfound/${i}.png`;
     }
 
     const searchValue = ref("");
+
+    const setContextMenuItem = (e: MouseEvent, item: any) => {
+        contextMenu.value.item = item
+        contextMenu.value.show = true
+        contextMenu.value.x = e.pageX
+        contextMenu.value.y = e.pageY
+    }
 
     return {
         itemUrl,
@@ -163,11 +148,12 @@ export const useBaseStore = defineStore('base', () => {
         msToReadable,
         approximateDuration,
         albumString,
-        getCollectionTracks,
         notFoundImage,
         searchValue,
         themeColor,
         themeColorDark,
         themeColorLight,
+        setContextMenuItem,
+        contextMenu,
     }
 })

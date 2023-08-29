@@ -1,5 +1,7 @@
 <template>
-    <div class="track-list" v-if="collection !== null">
+    <div class="track-list" v-if="collection !== null"
+         :style="{paddingTop: paddingTop}">
+        <slot/>
         <track-list-item
             v-for="(item, index) in tracks"
             :collection="collection" :number="noImages ? item.track_number : undefined"
@@ -19,26 +21,29 @@ import TrackListItem from "./TrackListItem.vue";
 import {useBaseStore} from "../scripts/store/base";
 import {usePlayerStore} from "../scripts/store/player";
 import {useTheme} from "vuetify";
+import type {ItemCollection} from "../scripts/types";
 
 const base = useBaseStore();
 const player = usePlayerStore()
 const props = defineProps({
     collection: {
-        type: Object as PropType<any>,
+        type: Object as PropType<ItemCollection>,
         required: true
     },
     noImages: {
         type: Boolean,
         default: () => false,
     },
+    paddingTop: {
+        type: String,
+        default: () => '60px',
+    },
 })
 const theme = useTheme()
 const isActive = (index: number) => {
     return player.collectionIndex === index && (player.collection?.id ?? '') === props.collection.id
 }
-const tracks = computed(() => {
-    return base.getCollectionTracks(props.collection)
-})
+const tracks = computed(() => props.collection.tracks)
 </script>
 
 <style scoped lang="scss">
