@@ -318,8 +318,9 @@ export const usePlayerStore = defineStore('player', () => {
             repeatRequired = true
             newIndex = tracks.value.length - 1
         }
-        if (repeatRequired && !repeat.value)
-            return;
+        if (repeatRequired && !repeat.value) {
+            await unload()
+        }
         if (collection.value !== null)
             await load(collection.value, newIndex)
     }
