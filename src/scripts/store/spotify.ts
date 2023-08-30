@@ -1,12 +1,13 @@
 import {defineStore} from 'pinia'
 import {computed, ref, toRaw, watch} from "vue";
 import type {Ref} from 'vue';
-import {baseDb} from './base'
+import {baseDb, useBaseStore} from './base'
 import SpotifyWebApi from "spotify-web-api-js";
 import EventEmitter from 'events';
 import {usePlatformStore} from "./electron";
 import type {IDBPDatabase} from "idb";
 import type {ExtendedPlaylistTrack, Item, ItemType} from "../types";
+import {usePlayerStore} from "./player";
 
 export interface AuthToken {
     code: null | string,
@@ -17,6 +18,8 @@ export interface AuthToken {
 
 export const useSpotifyStore = defineStore('spotify', () => {
     const platform = usePlatformStore()
+    const base = useBaseStore()
+    const player = usePlayerStore()
     let db: IDBPDatabase;
     baseDb.then(r => {
         db = r
@@ -560,7 +563,8 @@ export const useSpotifyStore = defineStore('spotify', () => {
         return result !== undefined
     }
 
-    async function toggleLike(type: ItemType, item: Item) {
+    async function toggleLike(item: Item) {
+        const type = item.type
         const id = item.id
         let liked = checkLiked(type, id)
         console.log({liked})
@@ -601,6 +605,58 @@ export const useSpotifyStore = defineStore('spotify', () => {
         }
     }
 
+    async function chooseSource(track: SpotifyApi.TrackObjectFull) {
+        if (player.playing)
+            player.pause()
+        base.sourceDialog.show = true
+        base.sourceDialog.loading = true
+        base.sourceDialog.spotifyTrack = track
+
+        const {cacheKey, query} = platform.trackToNames(track)
+        let [options, selectedId] = await Promise.all([
+            platform.searchYouTube(query, 6),
+            db.get('nameToId', cacheKey)
+        ])
+        console.log("SOURCE OPTIONS", options)
+        console.log("Selected id", selectedId)
+
+        base.sourceDialog.loading = false
+        base.sourceDialog.items = options
+        base.sourceSelectedId = selectedId ?? ''
+    }
+
+    async function activateSource(id: string) {
+        let track = base.sourceDialog.spotifyTrack
+        if (track === null) return
+        const trackId = track.id
+        const {cacheKey, outPath} = platform.trackToNames(track)
+        await db.put('nameToId', id, cacheKey)
+        console.log("updated db with new prefered nameToId")
+        await platform.deleteFile(outPath)
+        await db.delete('trackBars', track.id)
+        if (player.track !== null && player.collection !== null && player.track.id === track.id) {
+            console.log("Collection rn", toRaw(player.collection), toRaw(player.collection.tracks))
+            let index = player.collection.tracks.findIndex(t => t.id === trackId)
+            console.log(index)
+            base.sourceDialog.show = false
+
+            if (index !== -1) {
+                console.log("Doing a load", player.collection, index, trackId)
+                let collection = player.collection
+                player.unload()
+                player.playerElement.src = './silence.mp3'
+                const onload = () => {
+                    player.playerElement.removeEventListener('canplaythrough', onload)
+                    player.load(collection, index)
+                }
+                player.playerElement.addEventListener('canplaythrough', onload, false)
+            } else {
+                console.log("Doing an unload", player.collection, trackId)
+                player.unload()
+            }
+        }
+    }
+
     return {
         dbLoaded,
         refreshHomePage,
@@ -624,5 +680,7 @@ export const useSpotifyStore = defineStore('spotify', () => {
         loadLikedTracks,
         checkLiked,
         toggleLike,
+        chooseSource,
+        activateSource,
     }
 })

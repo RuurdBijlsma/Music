@@ -52,7 +52,36 @@ export const usePlatformStore = defineStore('platform', () => {
         ipcRenderer.invoke('setPlatformPlaying', playing, window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)
     }
 
+    function stopPlatformPlaying(){
+        ipcRenderer.invoke('stopPlatformPlaying')
+    }
+
+    async function deleteFile(filename: string) {
+        if (await checkFileExists(filename))
+            await fs.unlink(filename)
+    }
+
+    async function trackIsDownloaded(track: SpotifyApi.TrackObjectFull) {
+        let {outPath} = trackToNames(track)
+        return await checkFileExists(outPath)
+    }
+
+    async function deleteTrack(track: SpotifyApi.TrackObjectFull) {
+        let {outPath} = trackToNames(track)
+        await deleteFile(outPath)
+    }
+
+    function trackToNames(track: SpotifyApi.TrackObjectFull) {
+        let artistsString = track.artists.map(a => a.name).join(', ')
+        const isYouTubeTrack = track.id.startsWith('yt-')
+        let filename = musicFileNamify(isYouTubeTrack ? `${track.name} [${track.id.substring(3)}]` : `${track.name} - ${artistsString}`)
+        let outPath = path.join(directories?.music ?? "", filename + '.mp3')
+        let query = `${artistsString} - ${track.name}`
+        return {cacheKey: `PTI-${filename}`, filename, outPath, query}
+    }
+
     async function getTrackFile(track: SpotifyApi.TrackObjectFull, events: EventEmitter) {
+        const isYouTubeTrack = track.id.startsWith('yt-')
         let hasImage = track.hasOwnProperty('album') && track.album.images.length > 0;
         if (hasImage) {
             ipcRenderer.invoke('getDominantColor', track.album.images[0].url).then(c => {
@@ -62,9 +91,9 @@ export const usePlatformStore = defineStore('platform', () => {
                 console.log(base.themeColorLight, base.themeColorDark)
             })
         }
-        let artistsString = track.artists.map(a => a.name).join(', ')
-        let filename = musicFileNamify(`${track.name} - ${artistsString}`)
-        let outPath = path.join(directories?.music ?? "", filename + '.mp3')
+        let {cacheKey, filename, outPath} = trackToNames(track)
+        let cachedId = await db.get('nameToId', cacheKey)
+        console.log("CACHED ID RESULT", cachedId)
         if (!await checkFileExists(outPath)) {
             ipcRenderer.on(filename + 'progress', (_, progress) => {
                 console.log("PROGERSS", progress.percent)
@@ -75,7 +104,11 @@ export const usePlatformStore = defineStore('platform', () => {
                 artist: track.artists.map(a => a.name),
                 disc: track.disc_number,
                 track: track.track_number,
+                id: isYouTubeTrack ? track.id.split('-')[1] : undefined
             };
+            if (cachedId !== undefined && cachedId !== '') {
+                tags.id = cachedId
+            }
             if (track.hasOwnProperty('album')) {
                 if (track.album.hasOwnProperty('name'))
                     tags.album = track.album.name;
@@ -83,10 +116,16 @@ export const usePlatformStore = defineStore('platform', () => {
                     //@ts-ignore
                     tags.year = new Date(track.album.release_date).getFullYear();
             }
-            let hasImage = track.hasOwnProperty('album') && track.album.images.length > 0;
             console.log("Sending payload", tags, hasImage ? track.album.images[0].url : '')
-            await ipcRenderer.invoke('downloadYt', filename, tags, hasImage ? track.album.images[0].url : '')
-            console.log("downloaded yt")
+            let {
+                outPath,
+                id
+            } = await ipcRenderer.invoke('downloadYt', filename, tags, hasImage ? track.album.images[0].url : '')
+            console.log("ID", id)
+            if (id !== '') {
+                db.put('nameToId', id, cacheKey).then()
+                console.log("downloaded yt", {outPath, id})
+            }
         } else {
             console.log("Using cached file for track")
         }
@@ -116,7 +155,8 @@ export const usePlatformStore = defineStore('platform', () => {
             channelId: r.channel_id,
             playlist: r.playlist,
             playlistId: r.playlist_id,
-            viewCount:r.view_count,
+            viewCount: r.view_count,
+            uploadDate: new Date(`${r.upload_date.substring(0, 4)}-${r.upload_date.substring(4, 6)}-${r.upload_date.substring(6, 8)}`)
         }))
         console.log("Search youtube result: ", result)
         db.put('cache', {
@@ -205,5 +245,18 @@ export const usePlatformStore = defineStore('platform', () => {
         maximized.value = await ipcRenderer.invoke('toggleMaximizeWindow')
     }
 
-    return {firstLogin, searchYouTube, getTrackFile, setTheme, close, toggleMaximize, minimize, setPlatformPlaying}
+    return {
+        firstLogin,
+        searchYouTube,
+        getTrackFile,
+        setTheme,
+        close,
+        toggleMaximize,
+        minimize,
+        setPlatformPlaying,
+        trackToNames,
+        deleteFile,
+        trackIsDownloaded,
+        deleteTrack,
+    }
 })

@@ -131,6 +131,30 @@ export const usePlayerStore = defineStore('player', () => {
         if (dbTrackBars === undefined) calculateTrackBars(outPath, trackId, barCount, binWidth, barSpacing).then()
     }
 
+    async function unload() {
+        playerElement.src = ''
+        duration.value = 1
+        currentTime.value = 1
+        loading.value = false
+        loadProgress.value = NaN
+        collection.value = null
+        track.value = null
+        collectionIndex.value = 0
+
+        const binWidth = 2
+        const barSpacing = 1
+        const canvasWidth = 300
+        const barCount = canvasWidth / (binWidth + barSpacing)
+        canvasBars = {
+            binSize: 1,
+            binWidth,
+            barSpacing,
+            binPos: new Array<number>(barCount).fill(.05),
+            binNeg: new Array<number>(barCount).fill(-.05),
+        }
+        platform.setPlatformPlaying(true)
+    }
+
     async function calculateTrackBars(outPath: string, trackId: string, barCount: number, binWidth: number, barSpacing: number) {
         let audioContext = new AudioContext()
         let response = await fetch(outPath)
@@ -332,5 +356,7 @@ export const usePlayerStore = defineStore('player', () => {
         mouseHoverPercent,
         mouseActive,
         mouseHover,
+        unload,
+        playerElement,
     }
 })

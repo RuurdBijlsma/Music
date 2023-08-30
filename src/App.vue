@@ -46,12 +46,17 @@
                 </router-view>
             </div>
         </div>
+        <source-dialog/>
         <item-context-menu/>
     </v-app>
 </template>
 
 <script setup lang="ts">
 // todo:
+
+// er is een bende onderin spotify.ts, fix pls
+// * waarom verandert ie de audio pas als je van track wisselt en terug nadat je de source veranderd?
+
 // VERSE TODO
 // paste spotify url in search balk
 // playlists, etc. in search functie
@@ -69,6 +74,7 @@
 // fix get dominant color for youtube tracks
 // uitvinden waarom ik verkeerde yt muziek krijg als ik esta vida zoek in yt
 // hide context menu on blur
+// if delete file thats currently playing, do something about it?
 
 import TopMenu from "./components/TopMenu.vue";
 import MusicPlayer from "./components/MusicPlayer.vue";
@@ -80,6 +86,7 @@ import {useBaseStore} from "./scripts/store/base";
 import {usePlayerStore} from "./scripts/store/player";
 import {computed, ref, watch} from "vue";
 import ItemContextMenu from "./components/ItemContextMenu.vue";
+import SourceDialog from "./components/SourceDialog.vue";
 
 const theme = useTheme()
 const spotify = useSpotifyStore()

@@ -1,7 +1,7 @@
 <template>
     <v-list density="compact">
         <v-list-subheader v-if="showDescriptor" class="descriptor">{{ descriptor }}</v-list-subheader>
-        <v-list-item @click="spotify.toggleLike(item.type, item)">
+        <v-list-item @click="spotify.toggleLike(item)">
             <template v-slot:prepend>
                 <v-icon v-if="isLiked" icon="mdi-heart"></v-icon>
                 <v-icon v-else icon="mdi-heart-outline"></v-icon>
@@ -9,15 +9,28 @@
             <v-list-item-title v-if="isLiked">Remove from library</v-list-item-title>
             <v-list-item-title v-else>Add to library</v-list-item-title>
         </v-list-item>
+        <v-list-item v-if="item.type==='track'" @click="spotify.chooseSource(item)">
+            <template v-slot:prepend>
+                <v-icon icon="mdi-youtube"/>
+            </template>
+            <v-list-item-title>Choose different source</v-list-item-title>
+        </v-list-item>
+        <v-list-item v-if="item.type==='track' && isDownloaded" @click="deleteTrack">
+            <template v-slot:prepend>
+                <v-icon icon="mdi-trash-can"/>
+            </template>
+            <v-list-item-title>Delete file</v-list-item-title>
+        </v-list-item>
     </v-list>
 </template>
 
 <script setup lang="ts">
-import {computed} from "vue";
+import {computed, onMounted, ref, watch} from "vue";
 import type {PropType} from "vue";
 import {useBaseStore} from "../scripts/store/base";
 import {useSpotifyStore} from "../scripts/store/spotify";
 import type {Item} from "../scripts/types";
+import {usePlatformStore} from "../scripts/store/electron";
 
 const props = defineProps({
     item: {
@@ -31,6 +44,21 @@ const props = defineProps({
 })
 const base = useBaseStore()
 const spotify = useSpotifyStore()
+const platform = usePlatformStore()
+const isDownloaded = ref(false)
+onMounted(() => {
+    console.log("MOUNTED")
+    platform.trackIsDownloaded(props.item as SpotifyApi.TrackObjectFull).then(v => {
+        console.log("is downloaded",v )
+        isDownloaded.value = v
+    })
+})
+
+async function deleteTrack() {
+    await platform.deleteTrack(props.item as SpotifyApi.TrackObjectFull);
+    isDownloaded.value = false
+}
+
 const descriptor = computed(() => {
     const item = props.item
     if (item.type === 'track') {

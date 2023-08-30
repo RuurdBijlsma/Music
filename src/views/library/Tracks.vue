@@ -51,7 +51,8 @@ const collection = computed(() => {
 
 setTimeout(() => {
     console.log("Checking for need to reload tracks")
-    if (localStorage.getItem('lastTracksLoad') === null || Date.now() - 1000 * 60 * 10 > +localStorage.lastTracksLoad) {
+    // if last track reload is 60 or more minutes ago then reload tracks
+    if (localStorage.getItem('lastTracksLoad') === null || Date.now() - 1000 * 60 * 60 > +localStorage.lastTracksLoad) {
         console.log("Reloading tracks!")
         spotify.loadLikedTracks()
     } else {

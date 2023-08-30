@@ -38,7 +38,7 @@ export default class NodeFunctions {
 
 
     async downloadYtByQuery(query: string, filename: string, destinationFolder = Directories.temp) {
-        return new Promise<string>((resolve, reject) => {
+        return new Promise<{ outPath: string, id: string }>((resolve, reject) => {
             let args = [
                 `ytsearch1:"${query.replace(/"/gi, "\"")}"`,
                 `-o`,
@@ -49,22 +49,49 @@ export default class NodeFunctions {
                 // '--audio-quality', '0',//second-best audio quality
             ];
             console.log(args)
+            let id: string = ''
+            this.ytdlp.exec(args)
+                .on('progress', (progress: Progress) => {
+                    this.win?.webContents.send(filename + 'progress', progress)
+                })
+                .on('ytDlpEvent', (a: string, b: string) => {
+                    console.log(a, b)
+                    if (id === '' && b.includes('watch?v=')) {
+                        console.log("ID FOUND", id)
+                        id = b.split('watch?v=')[1]
+                    }
+                })
+                .on('error', (error: Error) => reject(error))
+                .on('close', () => resolve({outPath: path.join(destinationFolder, filename + '.opus'), id}));
+        })
+    }
+
+
+    async downloadYtById(id: string, filename: string, destinationFolder = Directories.temp) {
+        return new Promise<{ outPath: string, id: string }>((resolve, reject) => {
+            let args = [
+                `-o`,
+                `${path.join(destinationFolder, filename + '.%(ext)s')}`,
+                `-x`,
+                `${id}`
+            ];
+            console.log(args)
             this.ytdlp.exec(args)
                 .on('progress', (progress: Progress) => {
                     this.win?.webContents.send(filename + 'progress', progress)
                 })
                 .on('error', (error: Error) => reject(error))
-                .on('close', () => resolve(path.join(destinationFolder, filename + '.opus')));
+                .on('close', () => resolve({outPath: path.join(destinationFolder, filename + '.opus'), id}));
         })
     }
 
     async downloadFile(url: string, destinationFile: string) {
-        return new Promise<string>((resolve, reject) => {
+        return new Promise<{ outPath: string, id: string }>((resolve, reject) => {
             var file = sadFs.createWriteStream(destinationFile);
             https.get(url, function (response) {
                 response.pipe(file);
                 file.on('finish', function () {
-                    file.close(() => resolve(destinationFile));
+                    file.close(() => resolve({outPath: destinationFile, id: ''}));
                 });
             }).on('error', function (err) {
                 fs.unlink(destinationFile);
@@ -320,5 +347,9 @@ export default class NodeFunctions {
         let iconSet = playing ? this.playingIcons : this.pausedIcons
         //@ts-ignore
         let thumbAdded = this.win.setThumbarButtons(iconSet[darkTheme ? 'dark' : 'light']);
+    }
+
+    stopPlatformPlaying() {
+        this.win.setThumbarButtons([]);
     }
 }

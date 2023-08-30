@@ -22,8 +22,7 @@ export const useSearchStore = defineStore('search', () => {
         localStorage.recentSearch = JSON.stringify(recentSearches)
     }
 
-    function ytResultToItem(ytResult: any): Item {
-        console.log('yt result to item', ytResult)
+    function ytResultToTrack(ytResult: any): SpotifyApi.TrackObjectFull {
         return {
             available_markets: [],
             disc_number: 0,
@@ -36,7 +35,7 @@ export const useSearchStore = defineStore('search', () => {
             track_number: 0,
             uri: "",
             artists: [{
-                name: ytResult.channel.replace('"', ''),
+                name: ytResult.channel.replaceAll('"', ''),
                 type: 'artist',
                 id: ytResult.channelId,
                 uri: '',
@@ -50,12 +49,12 @@ export const useSearchStore = defineStore('search', () => {
                 href: '',
                 album_type: 'youtube',
                 external_urls: {spotify: ''},
-                name: (ytResult.playlist ?? '').replace('"', ''),
+                name: (ytResult.playlist ?? '').replaceAll('"', ''),
                 uri: ''
             },
             type: "track",
-            name: ytResult.title.replace('"', ''),
-            id: `yt${ytResult.id}`,
+            name: ytResult.title.replaceAll('"', ''),
+            id: `yt-${ytResult.id}`,
             duration_ms: ytResult.duration * 1000,
             popularity: ytResult.viewCount,
         }
@@ -96,7 +95,7 @@ export const useSearchStore = defineStore('search', () => {
 
     async function searchYouTube(query: string) {
         let rawResult = await platform.searchYouTube(query, 6)
-        return rawResult.map(ytResultToItem)
+        return rawResult.map(ytResultToTrack)
     }
 
     async function searchSpotify(query: string) {
@@ -118,5 +117,5 @@ export const useSearchStore = defineStore('search', () => {
         return result
     }
 
-    return {addToRecentSearches, searchLikedTracks, searchYouTube, searchSpotify}
+    return {addToRecentSearches, searchLikedTracks, searchYouTube, searchSpotify,ytResultToTrack}
 })

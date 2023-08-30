@@ -43,12 +43,14 @@ export default class IpcFunctions {
 
         ipcMain.handle('downloadYt', async (_, filename: string, tags: any, image: string) => {
             console.log({filename})
+            const isYouTubeTrack = tags.id !== undefined
+            const ytId = tags.id
             let time = performance.now()
             let artistsString = tags.artist.join(', ')
             let query = `${artistsString} - ${tags.title}`
             let imageFile = path.join(Directories.temp, `image-${Math.random()}.jpg`);
             // noinspection ES6MissingAwait
-            let promises = [nf.downloadYtByQuery(query, filename)]
+            let promises = [isYouTubeTrack ? nf.downloadYtById(ytId, filename) : nf.downloadYtByQuery(query, filename)]
             if (image !== '')
                 promises.push(nf.downloadFile(image, imageFile))
             let outPaths = await Promise.all(promises)
@@ -56,21 +58,23 @@ export default class IpcFunctions {
             let finalOut = path.join(Directories.music, filename + '.mp3')
 
             // convert to mp3 and add metadata
-            await nf.ffmpegMetadata(outPaths[0], middleOut, imageFile, tags)
+            await nf.ffmpegMetadata(outPaths[0].outPath, middleOut, imageFile, tags)
             console.log(`Time cost: ${performance.now() - time}ms`)
 
             // clean up
             await fs.rename(middleOut, finalOut)
-            fs.unlink(outPaths[0]).then()
+            fs.unlink(outPaths[0].outPath).then()
             if (image !== '')
                 fs.unlink(imageFile).then();
 
-            return finalOut
+            console.log("ID HERE IS", outPaths[0].id)
+            return {outPath: finalOut, id: outPaths[0].id}
         })
 
         ipcMain.handle('searchYt', async (_, query: string, results: number = 3) => nf.searchYouTube(query, results))
 
         ipcMain.handle("getDominantColor", (_, imgUrl: string) => nf.getDominantColor(imgUrl))
         ipcMain.handle("setPlatformPlaying", (_, value: boolean, darkTheme: boolean) => nf.setPlatformPlaying(value, darkTheme))
+        ipcMain.handle("stopPlatformPlaying", (_) => nf.stopPlatformPlaying())
     }
 }

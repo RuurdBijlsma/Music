@@ -16,6 +16,7 @@ export const baseDb = openDB("base", 1, {
         trackStore.createIndex('newToOld', 'added_at_reverse', {unique: false})
         console.log('db upgrade', {oldVersion, newVersion, transaction, event});
         db.createObjectStore('cache')
+        db.createObjectStore('nameToId')
     },
     blocked(currentVersion, blockedVersion, event) {
         console.log('db blocked', {currentVersion, blockedVersion, event});
@@ -41,6 +42,14 @@ export const useBaseStore = defineStore('base', () => {
         item: null as any,
     })
 
+    const sourceDialog = ref({
+        show: false,
+        items: [] as any[],
+        loading: false,
+        spotifyTrack: null as SpotifyApi.TrackObjectFull | null,
+    })
+    const sourceSelectedId = ref('')
+
     function approximateDuration(millis: number) {
         if (millis > 7200000)
             return Math.round(millis / 3600000) + ' hours';
@@ -58,21 +67,21 @@ export const useBaseStore = defineStore('base', () => {
             return '0:00';
 
         let seconds = Math.round(millis / 1000);
-        let h = Math.floor(seconds / 3600);
-        let m = Math.floor((seconds % 3600) / 60);
-        let s = seconds % 60;
-        let hString = h.toString();
-        let mString = m.toString();
-        let sString = s.toString();
+        let h = Math.floor(seconds / 3600)
+        let m = Math.floor((seconds % 3600) / 60)
+        let s = seconds % 60
+        let hString = h.toString()
+        let mString = m.toString()
+        let sString = s.toString()
         if (hString !== '0') {
-            mString = mString.padStart(2, '0');
-            sString = sString.padStart(2, '0');
+            mString = mString.padStart(2, '0')
+            sString = sString.padStart(2, '0')
         }
-        sString = sString.padStart(2, '0');
+        sString = sString.padStart(2, '0')
 
         if (hString === '0')
-            return `${mString}:${sString}`;
-        else return `${hString}:${mString}:${sString}`;
+            return `${mString}:${sString}`
+        else return `${hString}:${mString}:${sString}`
     }
 
     function itemDescription(item: Item) {
@@ -155,5 +164,7 @@ export const useBaseStore = defineStore('base', () => {
         themeColorLight,
         setContextMenuItem,
         contextMenu,
+        sourceDialog,
+        sourceSelectedId,
     }
 })
