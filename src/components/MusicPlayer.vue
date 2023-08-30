@@ -39,17 +39,20 @@
             </div>
             <v-spacer></v-spacer>
             <div class="extra-bar-buttons">
-                <v-btn rounded variant="text">
-                    <v-icon>mdi-heart</v-icon>
-                </v-btn>
+                <like-button :item="player.track"/>
                 <v-btn rounded variant="text">
                     <v-icon>mdi-playlist-play</v-icon>
                 </v-btn>
                 <div class="volume-slider">
-                    <v-btn variant="text" rounded flat>
-                        <v-icon>mdi-volume-high</v-icon>
-                    </v-btn>
-                    <v-slider hide-details :min="0" :max="1" :model-value="volume"></v-slider>
+                    <v-slider v-model="volume"
+                              density="compact"
+                              thumb-size="10"
+                              :thumb-color="base.themeColor"
+                              :track-fill-color="base.themeColor"
+                              track-size="1"
+                              @click:prepend="toggleMute"
+                              :prepend-icon="volume < .1 ? 'mdi-volume-low' : volume < .8 ? 'mdi-volume-medium' : 'mdi-volume-high'"
+                              hide-details :min="0" :max="1"></v-slider>
                 </div>
             </div>
         </template>
@@ -64,12 +67,24 @@ import {useBaseStore} from "../scripts/store/base";
 import Artists from "../views/library/Artists.vue";
 import ArtistsSpan from "./ArtistsSpan.vue";
 import ProgressBar from "./ProgressBar.vue";
+import LikeButton from "./LikeButton.vue";
 
 const player = usePlayerStore()
 const base = useBaseStore()
-const volume = ref(0.7);
-const elWidth = ref(0);
-const musicContainer = ref(null);
+const volume = ref(0.7)
+const elWidth = ref(0)
+const musicContainer = ref(null)
+
+let volumeBeforeMute = 1
+
+function toggleMute() {
+    if (volume.value > 0) {
+        volumeBeforeMute = volume.value
+        volume.value = 0
+    } else {
+        volume.value = volumeBeforeMute
+    }
+}
 
 function checkElWidth() {
     let el = musicContainer.value as HTMLElement | null;

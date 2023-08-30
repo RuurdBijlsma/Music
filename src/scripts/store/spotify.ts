@@ -578,6 +578,7 @@ export const useSpotifyStore = defineStore('spotify', () => {
                     likedTracksTotal.value++
                     likedTracksLoaded.value++
                 }
+                return false
             } else {
                 await api.addToMySavedTracks([id])
                 let date = (new Date()).toISOString()
@@ -592,17 +593,34 @@ export const useSpotifyStore = defineStore('spotify', () => {
                     likedTracksTotal.value--
                     likedTracksLoaded.value--
                 }
+                return true
             }
         } else if (type === 'playlist') {
-            if (liked) await api.unfollowPlaylist(id)
-            else await api.followPlaylist(id)
+            if (liked) {
+                await api.unfollowPlaylist(id)
+                return false
+            } else {
+                await api.followPlaylist(id)
+                return true
+            }
         } else if (type === 'album') {
-            if (liked) await api.removeFromMySavedAlbums([id])
-            else await api.addToMySavedAlbums([id])
+            if (liked) {
+                await api.removeFromMySavedAlbums([id])
+                return false
+            } else {
+                await api.addToMySavedAlbums([id])
+                return true
+            }
         } else if (type === 'artist') {
-            if (liked) await api.unfollowArtists([id])
-            else await api.followArtists([id])
+            if (liked) {
+                await api.unfollowArtists([id])
+                return false
+            } else {
+                await api.followArtists([id])
+                return true
+            }
         }
+        return false
     }
 
     async function chooseSource(track: SpotifyApi.TrackObjectFull) {
@@ -641,7 +659,7 @@ export const useSpotifyStore = defineStore('spotify', () => {
             base.sourceDialog.show = false
 
             if (index !== -1) {
-                base.sourceDialog.tempTrackOverride={
+                base.sourceDialog.tempTrackOverride = {
                     ytId: id,
                     trackId: trackId,
                 }

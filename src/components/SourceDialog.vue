@@ -36,7 +36,7 @@
             </v-card-text>
             <v-divider></v-divider>
             <v-card-actions>
-                <v-btn :color="base.themeColor.value" block @click="base.sourceDialog.show = false">Dismiss</v-btn>
+                <v-btn :color="base.themeColor" block @click="base.sourceDialog.show = false">Dismiss</v-btn>
             </v-card-actions>
         </div>
     </v-dialog>

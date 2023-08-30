@@ -36,10 +36,22 @@ export const usePlatformStore = defineStore('platform', () => {
         return fileNamify(file).substring(0, 150)
     }
 
-    ipcRenderer.on('invoke', (_, channel, data) => {
-        console.log("Invoke received", channel, data)
-        ipcRenderer.send('reply', channel, 'hoi')
+    ipcRenderer.on('invoke', async (_, channel, data) => {
+        if (channel === 'toggleFavorite') {
+            if (player.track !== null) {
+                let added = await spotify.toggleLike(player.track)
+                await ipcRenderer.send('reply', channel, added)
+
+                let speech = added ? 'Added to favorites' : 'Removed from favorites';
+                let voices = speechSynthesis.getVoices();
+                let voice = voices[Math.floor(Math.random() * voices.length)];
+                let utterance = new SpeechSynthesisUtterance(speech);
+                utterance.voice = voice;
+                speechSynthesis.speak(utterance);
+            }
+        }
     })
+
     ipcRenderer.on('play', () => player.play())
     ipcRenderer.on('pause', () => player.pause())
     ipcRenderer.on('skip', (_, n) => player.skip(n))

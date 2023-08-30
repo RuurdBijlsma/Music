@@ -5,7 +5,7 @@
             <div class="progress-bar">
                 <div class="progress" :style="{
                     width: `${percent}%`,
-                    backgroundColor: base.themeColor.value,
+                    backgroundColor: base.themeColor,
                 }"></div>
             </div>
         </div>

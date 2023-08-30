@@ -10,6 +10,7 @@ import * as https from "https";
 //@ts-ignore
 import ColorThief from 'color-extr-thief'
 import {globalShortcut, ipcMain} from "electron";
+import {getContrastRatio, RGBToHex, RGBToHSL} from "../scripts/utils";
 
 const YTDlpWrap = require("yt-dlp-wrap").default
 
@@ -186,64 +187,19 @@ export default class NodeFunctions {
         }
     }
 
-    // A function to calculate the relative luminance of an RGB color
-    getRelativeLuminance(rgb: number[]): number {
-        // Apply a linear transformation to each component
-        const [r, g, b] = rgb.map(c => {
-            c /= 255; // Normalize to [0, 1]
-            return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
-        });
-        // Return the weighted sum of the components
-        return 0.2126 * r + 0.7152 * g + 0.0722 * b;
-    }
-
-
-    RGBToHSL(r: number, g: number, b: number) {
-        r /= 255;
-        g /= 255;
-        b /= 255;
-        const l = Math.max(r, g, b);
-        const s = l - Math.min(r, g, b);
-        const h = s
-            ? l === r
-                ? (g - b) / s
-                : l === g
-                    ? 2 + (b - r) / s
-                    : 4 + (r - g) / s
-            : 0;
-        return [
-            60 * h < 0 ? 60 * h + 360 : 60 * h,
-            100 * (s ? (l <= 0.5 ? s / (2 * l - s) : s / (2 - (2 * l - s))) : 0),
-            (100 * (2 * l - s)) / 2,
-        ];
-    };
-
-    RGBToHex(r: number, g: number, b: number): string {
-        return '#' + [r, g, b].map(x => x.toString(16).padStart(2, '0')).join('');
-    }
-
-    // A function to calculate the contrast ratio between two RGB colors
-    getContrastRatio(rgb1: number[], rgb2: number[]): number {
-        // Get the relative luminance of each color
-        const l1 = this.getRelativeLuminance(rgb1);
-        const l2 = this.getRelativeLuminance(rgb2);
-        // Return the ratio of the larger luminance to the smaller luminance
-        return (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05);
-    }
-
     async getDominantColor(imgUrl: string) {
         let imgId = Math.random().toString()
         let imageFile = path.join(Directories.temp, `color-thief-${imgId}.jpg`);
         await this.downloadFile(imgUrl, imageFile)
         let rgbs = await ColorThief.getPalette(imageFile)
-        let hsls = rgbs.map(([r, g, b]: number[]) => this.RGBToHSL(r, g, b))
+        let hsls = rgbs.map(([r, g, b]: number[]) => RGBToHSL(r, g, b))
         // let hexes = rgbs.map(([r, g, b]: number[]) => this.RGBToHex(r, g, b))
         // console.log("Thief color: ", rgbs)
 
         let bgColorDark = [45, 45, 45] // for dark theme
         let bgColorLight = [240, 240, 240] // for dark theme
         let pickColor = (bgColor: number[]) => {
-            let contrasts = rgbs.map(([r, g, b]: number[]) => this.getContrastRatio([r, g, b], bgColor))
+            let contrasts = rgbs.map(([r, g, b]: number[]) => getContrastRatio([r, g, b], bgColor))
             // console.log(contrasts)
             let minimumContrast = 4
             let acceptableThemeColors: { rgb: number[], hsl: number[] }[] = []
@@ -260,7 +216,7 @@ export default class NodeFunctions {
             acceptableThemeColors = acceptableThemeColors.sort((a, b) => b.hsl[1] - a.hsl[1])
             // console.log(acceptableThemeColors.map(a => a.hsl))
             let rgbest = acceptableThemeColors[0].rgb
-            return this.RGBToHex(rgbest[0], rgbest[1], rgbest[2])
+            return RGBToHex(rgbest[0], rgbest[1], rgbest[2])
         }
         return {
             light: pickColor(bgColorLight),
@@ -286,13 +242,7 @@ export default class NodeFunctions {
         if (globalShortcut.isRegistered(likeShortcut))
             globalShortcut.unregister(likeShortcut);
         let regResult = globalShortcut.register(likeShortcut, async () => {
-            let added = await this.webInvoke('toggleFavorite')
-            // let speech = added ? 'Added to favorites' : 'Removed from favorites';
-            // let voices = speechSynthesis.getVoices();
-            // let voice = voices[Math.floor(Math.random() * voices.length)];
-            // let utterance = new SpeechSynthesisUtterance(speech);
-            // utterance.voice = voice;
-            // speechSynthesis.speak(utterance);
+            await this.webInvoke('toggleFavorite')
         });
         if (regResult)
             console.log("Registered global shortcut ✔")

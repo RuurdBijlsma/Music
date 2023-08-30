@@ -1,8 +1,15 @@
 {
   "extends": "@vue/tsconfig/tsconfig.node.json",
-  "include": ["vite.config.*", "src/electron", "package.json"],
+  "include": [
+    "vite.config.*",
+    "src/electron",
+    "package.json",
+    "src/scripts/utils.ts"
+  ],
   "compilerOptions": {
     "composite": true,
-    "types": ["node"]
+    "types": [
+      "node"
+    ]
   }
 }

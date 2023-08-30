@@ -207,7 +207,7 @@ export const usePlayerStore = defineStore('player', () => {
 
             context.fillStyle = defaultBarFill
             if (x / canvas.width < currentTime / duration)
-                context.fillStyle = base.themeColor.value
+                context.fillStyle = base.themeColor
 
             let h = negHeight + posHeight
             let y = (canvas.height / 2 - negHeight) | 0

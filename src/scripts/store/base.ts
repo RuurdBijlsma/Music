@@ -1,8 +1,9 @@
 import {defineStore} from 'pinia'
 import {openDB} from "idb";
-import {computed, ref} from "vue";
+import {computed, ref, watch} from "vue";
 import {useTheme} from "vuetify";
 import type {Item} from "../types";
+import {deltaE, getContrastRatio, hexToRgb} from "../utils";
 
 export const baseDb = openDB("base", 1, {
     upgrade(db, oldVersion, newVersion, transaction, event) {
@@ -33,7 +34,15 @@ export const useBaseStore = defineStore('base', () => {
     const theme = useTheme()
     const themeColorDark = ref('#FFFFFF')
     const themeColorLight = ref('#000000')
-    const themeColor = computed(() => theme.global.name.value === 'dark' ? themeColorDark : themeColorLight)
+    const themeColor = computed(() => theme.global.name.value === 'dark' ? themeColorDark.value : themeColorLight.value)
+    const contrastToForeground = computed(() => {
+        let themeRgb = hexToRgb(themeColor.value)
+        let fgRgb = hexToRgb(theme.current.value.colors["on-background"])
+
+        let colorDifference = deltaE(themeRgb, fgRgb)
+        console.log({themeRgb, fgRgb, colorDifference})
+        return colorDifference
+    })
 
     const contextMenu = ref({
         x: 0,
@@ -48,7 +57,7 @@ export const useBaseStore = defineStore('base', () => {
         loading: false,
         tempTrackOverride: {
             ytId: '',
-            trackId:'',
+            trackId: '',
         },
         spotifyTrack: null as SpotifyApi.TrackObjectFull | null,
     })
@@ -170,5 +179,6 @@ export const useBaseStore = defineStore('base', () => {
         contextMenu,
         sourceDialog,
         sourceSelectedId,
+        contrastToForeground,
     }
 })

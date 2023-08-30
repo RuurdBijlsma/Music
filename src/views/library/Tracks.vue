@@ -9,9 +9,9 @@
         </p>
         <div class="play-buttons mb-1">
             <v-divider/>
-            <v-btn :color="base.themeColor.value" icon="mdi-play-outline" variant="text"/>
-            <v-btn :color="base.themeColor.value" icon="mdi-shuffle" variant="text"/>
-            <v-btn :color="base.themeColor.value" icon="mdi-filter-outline" variant="text"/>
+            <v-btn :color="base.themeColor" icon="mdi-play-outline" variant="text"/>
+            <v-btn :color="base.themeColor" icon="mdi-shuffle" variant="text"/>
+            <v-btn :color="base.themeColor" icon="mdi-filter-outline" variant="text"/>
             <v-divider/>
         </div>
         <v-progress-linear :indeterminate="trackLoadProgress === 0"
