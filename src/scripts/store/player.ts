@@ -1,6 +1,6 @@
 import {defineStore} from 'pinia'
 import {usePlatformStore} from "./electron";
-import {computed, ref, toRaw} from "vue";
+import {computed, ref, toRaw, watch} from "vue";
 import EventEmitter from "events";
 import {baseDb, useBaseStore} from "./base";
 import type {IDBPDatabase} from "idb";
@@ -18,7 +18,6 @@ export const usePlayerStore = defineStore('player', () => {
     baseDb.then(r => db = r)
 
     let playerElement = createAudioElement()
-    let playerSwapElement = createAudioElement()
     let mouseHoverPercent = ref(0)
     let mouseActive = ref(false)
     let mouseHover = ref(false)
@@ -52,6 +51,10 @@ export const usePlayerStore = defineStore('player', () => {
             console.log("audio ended")
             await skip(1)
         })
+        element.addEventListener('volumechange', () => {
+            volume.value = element.volume
+            localStorage.volume = volume.value
+        })
         return element
     }
 
@@ -61,8 +64,13 @@ export const usePlayerStore = defineStore('player', () => {
     const currentTime = ref(0)
     const loadProgress = ref(NaN)
     const track = ref(null as null | SpotifyApi.TrackObjectFull)
-    const repeat = ref(true)
-    const shuffle = ref(false)
+    const repeat = ref(localStorage.getItem('repeat') === null ? true : localStorage.repeat === 'true')
+    const shuffle = ref(localStorage.getItem('shuffle') === null ? false : localStorage.shuffle === 'true')
+    const volume = ref(localStorage.getItem('volume') === null ? 1 : +localStorage.volume)
+
+    watch(volume, () => {
+        playerElement.volume = volume.value
+    })
 
     const collection = ref(null as ItemCollection | null)
     const tracks = computed(() => collection.value?.tracks ?? [])
@@ -76,8 +84,6 @@ export const usePlayerStore = defineStore('player', () => {
     async function load(_collection: ItemCollection, index: number) {
         console.log("Load", {_collection, index})
         playerElement.src = ''
-
-        // playerElement.volume = 0
 
         duration.value = 1
         currentTime.value = 1
@@ -338,6 +344,16 @@ export const usePlayerStore = defineStore('player', () => {
         playerElement.currentTime = time
     }
 
+    function toggleShuffle() {
+        shuffle.value = !shuffle.value
+        localStorage.shuffle = shuffle.value
+    }
+
+    function toggleRepeat() {
+        repeat.value = !repeat.value
+        localStorage.repeat = repeat.value
+    }
+
     return {
         loading,
         playing,
@@ -358,5 +374,10 @@ export const usePlayerStore = defineStore('player', () => {
         mouseHover,
         unload,
         playerElement,
+        volume,
+        toggleShuffle,
+        toggleRepeat,
+        shuffle,
+        repeat,
     }
 })

@@ -20,7 +20,9 @@
                     <div class="music-time-total">{{ base.msToReadable(player.duration * 1000) }}</div>
                 </div>
                 <div class="music-controls">
-                    <v-btn variant="text" icon size="35">
+                    <v-btn variant="text" icon size="35"
+                           @click="player.toggleShuffle"
+                           :color="player.shuffle ? base.themeColor : 'default'">
                         <v-icon size="20">mdi-shuffle</v-icon>
                     </v-btn>
                     <v-btn variant="text" icon="mdi-skip-previous" size="35" @click="player.skip(-1)"></v-btn>
@@ -32,7 +34,9 @@
                         <v-icon size="30" v-else>mdi-play</v-icon>
                     </v-btn>
                     <v-btn variant="text" icon="mdi-skip-next" size="35" @click="player.skip(1)"></v-btn>
-                    <v-btn variant="text" icon size="35">
+                    <v-btn variant="text" icon size="35"
+                           @click="player.toggleRepeat"
+                           :color="player.repeat ? base.themeColor : 'default'">
                         <v-icon size="20">mdi-repeat</v-icon>
                     </v-btn>
                 </div>
@@ -44,14 +48,12 @@
                     <v-icon>mdi-playlist-play</v-icon>
                 </v-btn>
                 <div class="volume-slider">
-                    <v-slider v-model="volume"
+                    <v-slider v-model="player.volume"
                               density="compact"
                               thumb-size="10"
-                              :thumb-color="base.themeColor"
-                              :track-fill-color="base.themeColor"
                               track-size="1"
                               @click:prepend="toggleMute"
-                              :prepend-icon="volume < .1 ? 'mdi-volume-low' : volume < .8 ? 'mdi-volume-medium' : 'mdi-volume-high'"
+                              :prepend-icon="player.volume < .1 ? 'mdi-volume-low' : player.volume < .8 ? 'mdi-volume-medium' : 'mdi-volume-high'"
                               hide-details :min="0" :max="1"></v-slider>
                 </div>
             </div>
@@ -78,11 +80,11 @@ const musicContainer = ref(null)
 let volumeBeforeMute = 1
 
 function toggleMute() {
-    if (volume.value > 0) {
-        volumeBeforeMute = volume.value
-        volume.value = 0
+    if (player.volume > 0) {
+        volumeBeforeMute = player.volume
+        player.playerElement.volume = 0
     } else {
-        volume.value = volumeBeforeMute
+        player.playerElement.volume = volumeBeforeMute
     }
 }
 
