@@ -641,15 +641,13 @@ export const useSpotifyStore = defineStore('spotify', () => {
             base.sourceDialog.show = false
 
             if (index !== -1) {
+                base.sourceDialog.tempTrackOverride={
+                    ytId: id,
+                    trackId: trackId,
+                }
                 console.log("Doing a load", player.collection, index, trackId)
                 let collection = player.collection
-                player.unload()
-                player.playerElement.src = './silence.mp3'
-                const onload = () => {
-                    player.playerElement.removeEventListener('canplaythrough', onload)
-                    player.load(collection, index)
-                }
-                player.playerElement.addEventListener('canplaythrough', onload, false)
+                await player.load(collection, index)
             } else {
                 console.log("Doing an unload", player.collection, trackId)
                 player.unload()

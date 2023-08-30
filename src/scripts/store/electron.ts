@@ -25,7 +25,7 @@ export const usePlatformStore = defineStore('platform', () => {
     let db: IDBPDatabase
     baseDb.then(async r => db = r)
 
-    let directories: { music: string } | null = null
+    let directories: { music: string, temp: string } | null = null
     ipcRenderer.invoke('getDirectories').then((d: any) => {
         console.log("Got directories", d)
         directories = d
@@ -52,7 +52,7 @@ export const usePlatformStore = defineStore('platform', () => {
         ipcRenderer.invoke('setPlatformPlaying', playing, window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)
     }
 
-    function stopPlatformPlaying(){
+    function stopPlatformPlaying() {
         ipcRenderer.invoke('stopPlatformPlaying')
     }
 
@@ -69,6 +69,13 @@ export const usePlatformStore = defineStore('platform', () => {
     async function deleteTrack(track: SpotifyApi.TrackObjectFull) {
         let {outPath} = trackToNames(track)
         await deleteFile(outPath)
+    }
+
+    async function makeTempTrack(track: SpotifyApi.TrackObjectFull) {
+        let {outPath, filename} = trackToNames(track)
+        let tempDir = path.join(directories?.temp ?? "", filename + '.mp3')
+        await fs.copyFile(outPath, tempDir)
+        return tempDir
     }
 
     function trackToNames(track: SpotifyApi.TrackObjectFull) {
@@ -117,11 +124,13 @@ export const usePlatformStore = defineStore('platform', () => {
                     tags.year = new Date(track.album.release_date).getFullYear();
             }
             console.log("Sending payload", tags, hasImage ? track.album.images[0].url : '')
-            let {
-                outPath,
-                id
-            } = await ipcRenderer.invoke('downloadYt', filename, tags, hasImage ? track.album.images[0].url : '')
+            let {id} = await ipcRenderer.invoke('downloadYt', filename, tags, hasImage ? track.album.images[0].url : '')
             console.log("ID", id)
+            if (base.sourceDialog.tempTrackOverride.trackId === track.id) {
+                outPath = await makeTempTrack(track)
+                console.log("TEMP TRACK OVERRIDE REQUESTED, new outPath=", outPath)
+                base.sourceDialog.tempTrackOverride.trackId = ''
+            }
             if (id !== '') {
                 db.put('nameToId', id, cacheKey).then()
                 console.log("downloaded yt", {outPath, id})

@@ -46,6 +46,10 @@ export const useBaseStore = defineStore('base', () => {
         show: false,
         items: [] as any[],
         loading: false,
+        tempTrackOverride: {
+            ytId: '',
+            trackId:'',
+        },
         spotifyTrack: null as SpotifyApi.TrackObjectFull | null,
     })
     const sourceSelectedId = ref('')
