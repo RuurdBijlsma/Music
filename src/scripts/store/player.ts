@@ -234,7 +234,7 @@ export const usePlayerStore = defineStore('player', () => {
             let y = (canvas.height / 2 - negHeight) | 0
             if (mouseActive.value || mouseHover.value) {
                 let mouseDistanceToBar = Math.abs(mouseHoverBar - i)
-                let addedHeight = mouseActive.value ? 20 - mouseDistanceToBar * 3 : 10 - mouseDistanceToBar
+                let addedHeight = mouseActive.value ? 10 - mouseDistanceToBar * 2 : 7 - mouseDistanceToBar / 1.7
                 if (addedHeight > 0) {
                     y -= addedHeight / 2
                     h += addedHeight
