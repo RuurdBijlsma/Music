@@ -1,7 +1,7 @@
 <template>
     <v-btn rounded variant="text" :loading="likedLoading" :color="isLiked ? base.themeColor : 'default'"
            @click="toggleLike()">
-        <v-icon>{{ fillNeeded ? 'mdi-heart' : 'mdi-heart-outline' }}</v-icon>
+        <v-icon>{{ base.themeTooSimilarToFg ? 'mdi-heart' : 'mdi-heart-outline' }}</v-icon>
     </v-btn>
 </template>
 
@@ -22,7 +22,6 @@ const props = defineProps({
     },
 })
 const isLiked = computed(() => spotify.checkLiked(props.item.type, props.item.id))
-const fillNeeded = computed(() => base.contrastToForeground < 17)
 let likedLoading = ref(false)
 
 async function toggleLike() {

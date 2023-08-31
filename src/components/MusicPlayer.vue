@@ -20,7 +20,8 @@
                     <div class="music-time-total">{{ base.msToReadable(player.duration * 1000) }}</div>
                 </div>
                 <div class="music-controls">
-                    <v-btn variant="text" icon size="35"
+                    <v-btn :variant="base.themeTooSimilarToFg && player.shuffle ? 'tonal' : 'text'"
+                           icon size="35"
                            @click="player.toggleShuffle"
                            :color="player.shuffle ? base.themeColor : 'default'">
                         <v-icon size="20">mdi-shuffle</v-icon>
@@ -34,7 +35,7 @@
                         <v-icon size="30" v-else>mdi-play</v-icon>
                     </v-btn>
                     <v-btn variant="text" icon="mdi-skip-next" size="35" @click="player.skip(1)"></v-btn>
-                    <v-btn variant="text" icon size="35"
+                    <v-btn :variant="base.themeTooSimilarToFg && player.repeat ? 'tonal' : 'text'" icon size="35"
                            @click="player.toggleRepeat"
                            :color="player.repeat ? base.themeColor : 'default'">
                         <v-icon size="20">mdi-repeat</v-icon>

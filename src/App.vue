@@ -35,9 +35,11 @@
             </div>
             <music-player class="music-player" :style="{
                     transform: player.track === null ? 'translateX(-100%)' : 'translateX(0%)',
+                    transitionDuration: musicPlayerTransitionDuration,
             }" v-if="spotify.dbLoaded"/>
             <div class="router-view" v-if="spotify.dbLoaded" :style="{
                     width: player.track === null ? 'calc(100% - 90px)' : '50%',
+                    transitionDuration: musicPlayerTransitionDuration,
                 }">
                 <router-view v-slot="{ Component }">
                     <transition name="slide-fade" mode="out-in">
@@ -93,16 +95,21 @@ const spotify = useSpotifyStore()
 const route = useRoute()
 const base = useBaseStore()
 const player = usePlayerStore()
-
+const initialBg = localStorage.hasTrackInMemory === 'true' ? '' : 'img/cover2.jpg'
 const blurBgSrc = computed(() => {
-    if (player.track === null) return 'img/cover2.jpg'
+    if (player.track === null) return initialBg
     return base.itemImage(player.track)
 })
 
-const transitionBgSrc = ref('img/cover2.jpg')
-const transitionDuration = ref("3s")
+const transitionBgSrc = ref(initialBg)
+const transitionDuration = ref("0s")
 const transitionBgOpacity = ref('1')
 const timeoutId = ref(-1)
+const musicPlayerTransitionDuration = ref('0s')
+setTimeout(() => {
+    musicPlayerTransitionDuration.value = '0.5s'
+    transitionDuration.value = '3s'
+}, 1500)
 
 // Fade transition when switching blurry bg
 watch(blurBgSrc, () => {

@@ -43,6 +43,7 @@ export const useBaseStore = defineStore('base', () => {
         console.log({themeRgb, fgRgb, colorDifference})
         return colorDifference
     })
+    const themeTooSimilarToFg = computed(() => contrastToForeground.value < 17)
 
     const contextMenu = ref({
         x: 0,
@@ -180,5 +181,6 @@ export const useBaseStore = defineStore('base', () => {
         sourceDialog,
         sourceSelectedId,
         contrastToForeground,
+        themeTooSimilarToFg,
     }
 })

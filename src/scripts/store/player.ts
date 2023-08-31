@@ -108,9 +108,9 @@ export const usePlayerStore = defineStore('player', () => {
         console.log("Playing item", toRaw(track.value), 'from collection', toRaw(_collection))
         await baseDb
         db.put('cache', {
-            collection: _collection,
+            collection: toRaw(_collection),
             track: toRaw(track.value)
-        }, 'nowPlaying').then()
+        }, 'nowPlaying').then(() => localStorage.hasTrackInMemory = 'true')
 
         // get track bars from db or create empty structure
         const binWidth = 2
@@ -153,6 +153,11 @@ export const usePlayerStore = defineStore('player', () => {
     }
 
     async function unload() {
+        localStorage.hasTrackInMemory = 'false'
+        db.delete('cache', 'nowPlaying').then(() => localStorage.removeItem('hasTrackInMemory'))
+
+        base.themeColorDark = '#FFFFFF'
+        base.themeColorLight = '#000000'
         playerElement.src = ''
         duration.value = 1
         currentTime.value = 1
