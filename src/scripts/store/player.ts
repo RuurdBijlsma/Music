@@ -15,7 +15,16 @@ export const usePlayerStore = defineStore('player', () => {
     const theme = useTheme()
     const platform = usePlatformStore();
     let db: IDBPDatabase
-    baseDb.then(r => db = r)
+    baseDb.then(async r => {
+        db = r
+        let lastPlaying = await db.get('cache', 'nowPlaying')
+        if (lastPlaying !== undefined) {
+            let collection: ItemCollection = lastPlaying.collection
+            let track: SpotifyApi.TrackObjectFull = lastPlaying.track
+            let index = collection.tracks.findIndex(t => t.id === track.id)
+            load(collection, index, false).then()
+        }
+    })
 
     let playerElement = createAudioElement()
     let mouseHoverPercent = ref(0)
@@ -24,7 +33,6 @@ export const usePlayerStore = defineStore('player', () => {
 
     function createAudioElement() {
         let element = document.createElement('audio')
-        element.autoplay = true
         element.addEventListener('play', () => {
             playing.value = !element.paused
             console.log("Playing status is", playing.value)
@@ -81,9 +89,11 @@ export const usePlayerStore = defineStore('player', () => {
     let context: CanvasRenderingContext2D | null = null
     requestAnimationFrame(renderProgress)
 
-    async function load(_collection: ItemCollection, index: number) {
+    async function load(_collection: ItemCollection, index: number, autoplay = true) {
+
         console.log("Load", {_collection, index})
         playerElement.src = ''
+        playerElement.autoplay = autoplay
 
         duration.value = 1
         currentTime.value = 1
@@ -94,14 +104,19 @@ export const usePlayerStore = defineStore('player', () => {
         const trackId = track.value.id
         setMetadata(track.value)
         collectionIndex.value = index
-        console.log("Playing item", toRaw(track.value))
+
+        console.log("Playing item", toRaw(track.value), 'from collection', toRaw(_collection))
+        await baseDb
+        db.put('cache', {
+            collection: _collection,
+            track: toRaw(track.value)
+        }, 'nowPlaying').then()
 
         // get track bars from db or create empty structure
         const binWidth = 2
         const barSpacing = 1
         const canvasWidth = 300
         const barCount = canvasWidth / (binWidth + barSpacing)
-        await baseDb
         let dbTrackBars = await db.get('trackBars', track.value.id)
         console.log(dbTrackBars)
         if (dbTrackBars !== undefined && trackId === track.value.id) {
