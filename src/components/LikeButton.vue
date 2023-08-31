@@ -1,7 +1,7 @@
 <template>
     <v-btn rounded variant="text" :loading="likedLoading" :color="isLiked ? base.themeColor : 'default'"
            @click="toggleLike()">
-        <v-icon>{{ base.themeTooSimilarToFg ? 'mdi-heart' : 'mdi-heart-outline' }}</v-icon>
+        <v-icon>{{ base.themeTooSimilarToFg && isLiked ? 'mdi-heart' : 'mdi-heart-outline' }}</v-icon>
     </v-btn>
 </template>
 
