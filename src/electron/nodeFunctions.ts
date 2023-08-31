@@ -10,7 +10,7 @@ import * as https from "https";
 //@ts-ignore
 import ColorThief from 'color-extr-thief'
 import {globalShortcut, ipcMain} from "electron";
-import {getContrastRatio, RGBToHex, RGBToHSL} from "../scripts/utils";
+import {getContrastRatio, RGBToHex, RGBToHSL} from "./utils";
 
 const YTDlpWrap = require("yt-dlp-wrap").default
 

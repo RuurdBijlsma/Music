@@ -4,7 +4,6 @@
     "vite.config.*",
     "src/electron",
     "package.json",
-    "src/scripts/utils.ts"
   ],
   "compilerOptions": {
     "composite": true,

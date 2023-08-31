@@ -1,9 +1,9 @@
 import {defineStore} from 'pinia'
 import {openDB} from "idb";
-import {computed, ref, watch} from "vue";
+import {computed, ref} from "vue";
 import {useTheme} from "vuetify";
 import type {Item} from "../types";
-import {deltaE, getContrastRatio, hexToRgb} from "../utils";
+import {deltaE, hexToRgb} from "../utils";
 
 export const baseDb = openDB("base", 1, {
     upgrade(db, oldVersion, newVersion, transaction, event) {
