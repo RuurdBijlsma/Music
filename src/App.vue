@@ -69,6 +69,7 @@
 // fix get dominant color for youtube tracks
 // if delete file thats currently playing, do something about it?
 // possibly replace color thief with something without vulnerabilities
+// bug: turn off shuffle then it still shuffles
 
 import TopMenu from "./components/TopMenu.vue";
 import MusicPlayer from "./components/MusicPlayer.vue";
