@@ -50,7 +50,7 @@ const collection = computed(() => {
         total: spotify.likedTracksTotal,
         name: "Liked tracks",
         buttonText: "Library",
-        to: '/library/liked',
+        to: '/library',
     } as ItemCollection
 })
 
