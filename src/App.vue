@@ -68,6 +68,7 @@
 // in die database kan dan: track customizations (start/end time, etc), spotify api keys, yt liked tracks
 // fix get dominant color for youtube tracks
 // if delete file thats currently playing, do something about it?
+// possibly replace color thief with something without vulnerabilities
 
 import TopMenu from "./components/TopMenu.vue";
 import MusicPlayer from "./components/MusicPlayer.vue";
