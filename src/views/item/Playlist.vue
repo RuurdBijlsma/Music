@@ -1,9 +1,9 @@
 <template>
     <div class="playlist" v-if="playlist">
-        <track-list :collection="collection" v-if="collection.tracks.length < 200" :tracks="collection.tracks" :height="base.pageHeight">
+        <track-list :collection="collection" v-if="collection.tracks.length < 200" :tracks="collection.tracks">
             <playlist-header :collection="collection"/>
         </track-list>
-        <track-list-virtual v-else :collection="collection" :tracks="collection.tracks" :height="base.pageHeight">
+        <track-list-virtual v-else :collection="collection" :tracks="collection.tracks" :height="base.pageHeight.toString()">
             <playlist-header :collection="collection"/>
         </track-list-virtual>
     </div>

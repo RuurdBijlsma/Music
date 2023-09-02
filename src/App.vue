@@ -54,12 +54,7 @@
 </template>
 
 <script setup lang="ts">
-// todo:
-
-// er is een bende onderin spotify.ts, fix pls
-// * waarom verandert ie de audio pas als je van track wisselt en terug nadat je de source veranderd?
-
-// VERSE TODO
+// todo
 // paste spotify url in search balk
 // playlists, etc. in search functie
 // maak knop om ytdlp te updaten
@@ -67,15 +62,11 @@
 // if file is downloading or post processing, dont download and post process when user clicks on the song again
 // maak knop: export liked mp3s to folder
 // browse page
-// bug report: play song in liked -> remove song from liked -> the highlight goes to next (wrong) song
 // edit information about yt track (change title, artist)
 // edit information about any track (start/end time, more?)
-// in item menu / item context menu show optie om andere yt video te kiezen
 // maak knop: export database naar file of cloud?
 // in die database kan dan: track customizations (start/end time, etc), spotify api keys, yt liked tracks
 // fix get dominant color for youtube tracks
-// uitvinden waarom ik verkeerde yt muziek krijg als ik esta vida zoek in yt
-// hide context menu on blur
 // if delete file thats currently playing, do something about it?
 
 import TopMenu from "./components/TopMenu.vue";
