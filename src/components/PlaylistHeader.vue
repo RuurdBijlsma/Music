@@ -20,9 +20,9 @@
         </p>
         <div class="play-buttons mt-2 mb-2">
             <v-divider/>
-            <v-btn :color="base.themeColor" icon="mdi-play-outline" variant="text"/>
-            <v-btn :color="base.themeColor" icon="mdi-shuffle" variant="text"/>
-            <v-btn :color="base.themeColor" icon="mdi-heart-outline" variant="text"/>
+            <v-btn icon="mdi-play-outline" variant="text"/>
+            <v-btn icon="mdi-shuffle" variant="text"/>
+            <like-button variant="no-theme" v-if="playlist" :item="playlist"/>
             <v-divider/>
         </div>
         <p>{{ playlist.description }}</p>
@@ -35,6 +35,7 @@ import {useBaseStore} from "../scripts/store/base";
 import {computed} from "vue";
 import type {ItemCollection} from "../scripts/types";
 import GlowImage from "../components/GlowImage.vue";
+import LikeButton from "./LikeButton.vue";
 
 const props = defineProps({
     collection: {

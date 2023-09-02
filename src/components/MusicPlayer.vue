@@ -2,8 +2,10 @@
     <div class="mp" ref="musicContainer">
         <template v-if="player.track !== null">
             <v-spacer></v-spacer>
-            <glow-image class="album-art" :src="base.itemImage(player.track)" :width="elWidth / 1.6"
-                        :height="elWidth / 1.6"
+            <glow-image class="album-art"
+                        :src="base.itemImage(player.track)"
+                        :height="elWidth / 2"
+                        :width="elWidth / 2"
                         rounding="10px"/>
             <div class="sheet">
                 <div class="music-info-text">
@@ -44,7 +46,7 @@
             </div>
             <v-spacer></v-spacer>
             <div class="extra-bar-buttons">
-                <like-button :item="player.track"/>
+                <like-button :item="player.track" variant="fill"/>
                 <queue-button/>
                 <div class="volume-slider">
                     <v-slider v-model="player.volume"
@@ -122,8 +124,6 @@ onUnmounted(() => {
 
 .album-art {
     box-shadow: 0 8px 20px -3px rgba(0, 0, 0, 0.3);
-    position: absolute;
-    top: 200px;
 }
 
 .sheet {
@@ -133,8 +133,6 @@ onUnmounted(() => {
     align-items: center;
     width: 400px;
     margin-top: 40px;
-    position: absolute;
-    top: 500px;
 }
 
 .music-info-text {
@@ -148,6 +146,7 @@ onUnmounted(() => {
 }
 
 .music-title {
+    overflow-y: hidden;
     font-weight: 400;
     text-align: center;
     text-overflow: ellipsis;
@@ -162,13 +161,17 @@ onUnmounted(() => {
     opacity: 0.7;
     text-align: center;
     font-size: 18px;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    width: calc((100vw - 70px) / 2 - 80px);
+    max-width: 700px;
 }
 
 .music-progress {
     display: flex;
     font-size: 13px;
-    position: absolute;
-    top: 100px;
 }
 
 .music-time-current, .music-time-total {
@@ -195,8 +198,6 @@ onUnmounted(() => {
     justify-content: space-evenly;
     display: flex;
     align-items: center;
-    position: absolute;
-    top: 200px;
 }
 
 .volume-slider {

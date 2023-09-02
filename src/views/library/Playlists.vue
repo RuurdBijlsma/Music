@@ -1,6 +1,6 @@
 <template>
     <div class="playlists pt-4">
-        <item-card class="mb-4" v-for="playlist in spotify.library.playlists" :item="playlist"/>
+        <item-card class="mb-4" v-for="playlist in spotify.library.playlist" :item="playlist"/>
     </div>
 </template>
 

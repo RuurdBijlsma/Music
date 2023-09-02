@@ -69,7 +69,6 @@
 // fix get dominant color for youtube tracks
 // if delete file thats currently playing, do something about it?
 // possibly replace color thief with something without vulnerabilities
-// bug: turn off shuffle then it still shuffles
 
 import TopMenu from "./components/TopMenu.vue";
 import MusicPlayer from "./components/MusicPlayer.vue";
@@ -274,7 +273,6 @@ html, body {
 .router-view {
     transition: width 0.5s;
     overflow-y: auto;
-    //background-color: blue;
     position: fixed;
     height: 100%;
     width: 50%;
@@ -284,78 +282,10 @@ html, body {
 .music-player {
     position: fixed;
     height: 100%;
-    //background-color: red;
     width: calc(50% - 70px);
     left: 70px;
     transform: translateX(-100%);
     transition: transform 0.5s;
-}
-
-@media only screen and (max-width: 900px) {
-    .router-view {
-        width: 100%;
-        height: calc(100% - 100px);
-        padding-left: 80px;
-    }
-    .music-player {
-        width: 100%;
-        height: 100px;
-        bottom: 0;
-    }
-}
-
-@media only screen and (min-width: 1000px) {
-    .router-view {
-        width: 50%;
-    }
-    .music-player {
-        width: calc(50% - 70px);
-        left: 70px;
-    }
-}
-
-@media only screen and (min-width: 1250px) {
-    .router-view {
-        width: 800px;
-    }
-    .music-player {
-        width: calc(100% - 870px);
-        left: 70px;
-        padding-left: 10px;
-    }
-}
-
-@media only screen and (min-width: 1550px) {
-    .router-view {
-        width: 1000px;
-    }
-    .music-player {
-        width: calc(100% - 1070px);
-        left: 70px;
-        padding-left: 10px;
-    }
-}
-
-@media only screen and (min-width: 1800px) {
-    .router-view {
-        width: 1000px;
-    }
-    .music-player {
-        width: calc(90% - 1070px);
-        left: calc(70px + 5%);
-        padding-left: 10px;
-    }
-}
-
-@media only screen and (min-width: 2200px) {
-    .router-view {
-        width: 1000px;
-    }
-    .music-player {
-        width: calc(75% - 1070px);
-        left: calc(70px + 12.5%);
-        padding-left: 10px;
-    }
 }
 
 a[no-style] {

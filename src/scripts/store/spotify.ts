@@ -57,9 +57,9 @@ export const useSpotifyStore = defineStore('spotify', () => {
     )
 
     const library = ref({
-        playlists: [] as SpotifyApi.PlaylistObjectFull[],
-        artists: [] as SpotifyApi.ArtistObjectFull[],
-        albums: [] as SpotifyApi.AlbumObjectFull[],
+        playlist: [] as SpotifyApi.PlaylistObjectFull[],
+        artist: [] as SpotifyApi.ArtistObjectFull[],
+        album: [] as SpotifyApi.AlbumObjectFull[],
     })
     const tracks = ref([] as ExtendedPlaylistTrack[])
     const ytTracks = ref([] as ExtendedPlaylistTrack[])
@@ -378,7 +378,7 @@ export const useSpotifyStore = defineStore('spotify', () => {
         // so we load data by pushing items as they come in
         // else we replace the array only after all new data is loaded
         // @ts-ignore
-        let isInitial = library.value[type + 's'].length === 0;
+        let isInitial = library.value[type].length === 0;
 
         if (userInfo.value.id === '')
             await refreshUserInfo;
@@ -401,7 +401,7 @@ export const useSpotifyStore = defineStore('spotify', () => {
         let addToLib = (item: any) => {
             if (isInitial) {
                 // @ts-ignore
-                library.value[type + 's'].push(item)
+                library.value[type].push(item)
             } else items.push(item);
         }
 
@@ -415,7 +415,7 @@ export const useSpotifyStore = defineStore('spotify', () => {
         }
         if (!isInitial) {
             // @ts-ignore
-            library.value[type + 's'] = items;
+            library.value[type] = items;
         }
 
         events.emit('refreshed' + type);
@@ -523,12 +523,12 @@ export const useSpotifyStore = defineStore('spotify', () => {
 
         //Personalized playlists
         let personalized;
-        if (library.value.playlists.length === 0) {
+        if (library.value.playlist.length === 0) {
             await refreshUserData('playlist')
         }
         const discoverNames = ['Discover Weekly', 'Release Radar', ...[...Array(10)].map((_, i) => 'Daily Mix ' + (i + 1))];
 
-        personalized = toRaw(library.value).playlists.filter(playlist => discoverNames
+        personalized = toRaw(library.value).playlist.filter(playlist => discoverNames
                 .findIndex(name => playlist.name.includes(name)) !== -1 &&
             playlist.owner.display_name === 'Spotify'
         );
@@ -598,9 +598,11 @@ export const useSpotifyStore = defineStore('spotify', () => {
         } else if (type === 'playlist') {
             if (liked) {
                 await api.unfollowPlaylist(id)
+                library.value.playlist.splice(library.value.playlist.findIndex(t => t.id === id), 1)
                 return false
             } else {
                 await api.followPlaylist(id)
+                library.value.playlist.unshift(item)
                 return true
             }
         } else if (type === 'album') {
