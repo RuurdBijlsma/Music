@@ -1,14 +1,14 @@
 <template>
     <div class="track-list" v-if="collection !== null"
-         :style="{paddingTop: paddingTop}">
+         :style="{paddingTop}">
         <slot/>
         <track-list-item
             v-for="(item, index) in tracks"
             :collection="collection" :number="noImages ? item.track_number : undefined"
             :index="index"
             :class="{
-                 'odd-item': !isActive(index) && index % 2 === 0,
-                 'active': isActive(index)
+                 'odd-item': !isActive(item.id) && index % 2 === 0,
+                 'active': isActive(item.id)
              }"
             class="track-list-item" :track="item"/>
     </div>
@@ -22,9 +22,12 @@ import {useBaseStore} from "../scripts/store/base";
 import {usePlayerStore} from "../scripts/store/player";
 import {useTheme} from "vuetify";
 import type {ItemCollection} from "../scripts/types";
+import {storeToRefs} from "pinia";
 
 const base = useBaseStore();
 const player = usePlayerStore()
+const theme = useTheme()
+
 const props = defineProps({
     collection: {
         type: Object as PropType<ItemCollection>,
@@ -39,11 +42,9 @@ const props = defineProps({
         default: () => '60px',
     },
 })
-const theme = useTheme()
-const isActive = (index: number) => {
-    return player.collectionIndex === index && (player.collection?.id ?? '') === props.collection.id
-}
-const tracks = computed(() => props.collection.tracks)
+const {trackId} = storeToRefs(player)
+const isActive = (id: string) => player.trackId === id && (player.collection?.id ?? '') === props.collection.id
+const tracks = computed(() => props.collection.tracks as SpotifyApi.TrackObjectFull[])
 </script>
 
 <style scoped lang="scss">

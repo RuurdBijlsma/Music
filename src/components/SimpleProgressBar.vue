@@ -1,7 +1,7 @@
 <template>
     <div class="spb">
         <div class="music-time-current">{{ base.msToReadable(currentTime * 1000) }}</div>
-        <div class="container">
+        <div class="container" @mousedown="mouseDown">
             <div class="progress-bar">
                 <div class="progress" :style="{
                     width: `${percent}%`,
@@ -17,7 +17,7 @@
 import {useBaseStore} from "../scripts/store/base";
 import {computed, onMounted, onUnmounted} from "vue";
 
-const props=defineProps({
+const props = defineProps({
     duration: {
         type: Number,
         required: true
@@ -35,33 +35,27 @@ const percent = computed(() => Math.round(10000 * props.currentTime / props.dura
 let el: HTMLElement | null = null
 let seekDown = false
 const seek = (e: MouseEvent) => {
-    if (el === null) return
     if (seekDown) {
+        if (el === null) return
         let bounds = el.getBoundingClientRect()
         let x = e.pageX - bounds.left
         let percent = x / bounds.width
 
-        emit('seek',percent*props.duration)
+        emit('seek', percent * props.duration)
     }
 }
 const mouseDown = (e: MouseEvent) => {
-    seekDown = true;
+    seekDown = true
     seek(e)
 }
 const mouseMove = (e: MouseEvent) => seek(e)
 const mouseUp = () => seekDown = false
 onMounted(() => {
     el = document.querySelector('.container')
-    if (el !== null) {
-        el.addEventListener('mousedown', mouseDown, false)
-        document.addEventListener('mousemove', mouseMove, false)
-        document.addEventListener('mouseup', mouseUp, false)
-    }
+    document.addEventListener('mousemove', mouseMove, false)
+    document.addEventListener('mouseup', mouseUp, false)
 })
 onUnmounted(() => {
-    if (el !== null) {
-        el.removeEventListener('mousedown', mouseDown)
-    }
     document.removeEventListener('mousemove', mouseMove)
     document.removeEventListener('mouseup', mouseUp)
 })

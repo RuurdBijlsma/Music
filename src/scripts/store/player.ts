@@ -21,8 +21,7 @@ export const usePlayerStore = defineStore('player', () => {
         if (lastPlaying !== undefined) {
             let collection: ItemCollection = lastPlaying.collection
             let track: SpotifyApi.TrackObjectFull = lastPlaying.track
-            let index = collection.tracks.findIndex(t => t.id === track.id)
-            load(collection, index, false).then()
+            load(collection, track, false).then()
         }
     })
 
@@ -35,12 +34,10 @@ export const usePlayerStore = defineStore('player', () => {
         let element = document.createElement('audio')
         element.addEventListener('play', () => {
             playing.value = !element.paused
-            console.log("Playing status is", playing.value)
             platform.setPlatformPlaying(true)
         })
         element.addEventListener('pause', () => {
             playing.value = !element.paused
-            console.log("Playing status is", playing.value)
             platform.setPlatformPlaying(false)
         })
         element.addEventListener('durationchange', () => {
@@ -52,11 +49,9 @@ export const usePlayerStore = defineStore('player', () => {
             loading.value = false
         })
         element.addEventListener('timeupdate', () => {
-            // console.log("audio timeupdate")
             currentTime.value = element.currentTime
         })
         element.addEventListener('ended', async () => {
-            console.log("audio ended")
             await skip(1)
         })
         element.addEventListener('volumechange', () => {
@@ -72,6 +67,7 @@ export const usePlayerStore = defineStore('player', () => {
     const currentTime = ref(0)
     const loadProgress = ref(NaN)
     const track = ref(null as null | SpotifyApi.TrackObjectFull)
+    const trackId = ref('')
     const repeat = ref(localStorage.getItem('repeat') === null ? true : localStorage.repeat === 'true')
     const shuffle = ref(localStorage.getItem('shuffle') === null ? false : localStorage.shuffle === 'true')
     const volume = ref(localStorage.getItem('volume') === null ? 1 : +localStorage.volume)
@@ -79,19 +75,20 @@ export const usePlayerStore = defineStore('player', () => {
     watch(volume, () => {
         playerElement.volume = volume.value
     })
+    playerElement.volume = volume.value
 
     const collection = ref(null as ItemCollection | null)
     const tracks = computed(() => collection.value?.tracks ?? [])
-    const collectionIndex = ref(0)
+    // const shuffledTracks
 
     let canvasBars: { binSize: number, binWidth: number, barSpacing: number, binPos: number[], binNeg: number[] } | null = null
     let canvas: HTMLCanvasElement | null = null
     let context: CanvasRenderingContext2D | null = null
     requestAnimationFrame(renderProgress)
 
-    async function load(_collection: ItemCollection, index: number, autoplay = true) {
+    async function load(_collection: ItemCollection, _track: SpotifyApi.TrackObjectFull, autoplay = true) {
 
-        console.log("Load", {_collection, index})
+        console.log("Load", {_collection, track})
         playerElement.src = ''
         playerElement.autoplay = autoplay
 
@@ -99,17 +96,21 @@ export const usePlayerStore = defineStore('player', () => {
         currentTime.value = 1
         loading.value = true
         loadProgress.value = NaN
+        _collection = toRaw(_collection)
+        _collection.tracks = _collection.tracks.map(t => toRaw(t))
+        _collection.context = toRaw(_collection.context)
         collection.value = _collection
-        track.value = tracks.value[index]
-        const trackId = track.value.id
+        _track = toRaw(_track)
+        track.value = _track
+        trackId.value = _track.id
+        const _trackId = _track.id
         setMetadata(track.value)
-        collectionIndex.value = index
 
-        console.log("Playing item", toRaw(track.value), 'from collection', toRaw(_collection))
+        console.log("Playing item", _track, 'from collection', _collection)
         await baseDb
         db.put('cache', {
-            collection: toRaw(_collection),
-            track: toRaw(track.value)
+            collection: _collection,
+            track: toRaw(_track),
         }, 'nowPlaying').then(() => localStorage.hasTrackInMemory = 'true')
 
         // get track bars from db or create empty structure
@@ -117,11 +118,11 @@ export const usePlayerStore = defineStore('player', () => {
         const barSpacing = 1
         const canvasWidth = 300
         const barCount = canvasWidth / (binWidth + barSpacing)
-        let dbTrackBars = await db.get('trackBars', track.value.id)
+        let dbTrackBars = await db.get('trackBars', _track.id)
         console.log(dbTrackBars)
-        if (dbTrackBars !== undefined && trackId === track.value.id) {
+        if (dbTrackBars !== undefined && _trackId === trackId.value) {
             canvasBars = dbTrackBars
-        } else if (trackId === track.value.id) {
+        } else if (_trackId === trackId.value) {
             canvasBars = {
                 binSize: 1,
                 binWidth,
@@ -131,14 +132,14 @@ export const usePlayerStore = defineStore('player', () => {
             }
         }
 
-        events.on(track.value.id + 'progress', progress => {
+        events.on(_trackId + 'progress', progress => {
             // Check if user hasn't changed track while it was progressing
-            if (_collection.id === collection.value?.id && track.value && trackId === track.value.id)
+            if (_collection.id === collection.value?.id && track.value && _trackId === trackId.value)
                 loadProgress.value = progress.percent
         })
         let outPath = await platform.getTrackFile(track.value, events)
         // Check if user hasn't changed track while it was loading
-        if (_collection.id === collection.value.id && track.value && trackId === track.value.id)
+        if (_collection.id === collection.value.id && track.value && _trackId === trackId.value)
             playerElement.src = outPath
         console.log(playerElement)
 
@@ -149,7 +150,7 @@ export const usePlayerStore = defineStore('player', () => {
         context = canvas.getContext('2d')
         if (context === null) return
         // only calculate track bars if they werent retrieved from db cache
-        if (dbTrackBars === undefined) calculateTrackBars(outPath, trackId, barCount, binWidth, barSpacing).then()
+        if (dbTrackBars === undefined) calculateTrackBars(outPath, _trackId, barCount, binWidth, barSpacing).then()
     }
 
     async function unload() {
@@ -165,7 +166,6 @@ export const usePlayerStore = defineStore('player', () => {
         loadProgress.value = NaN
         collection.value = null
         track.value = null
-        collectionIndex.value = 0
 
         const binWidth = 2
         const barSpacing = 1
@@ -181,7 +181,7 @@ export const usePlayerStore = defineStore('player', () => {
         platform.setPlatformPlaying(true)
     }
 
-    async function calculateTrackBars(outPath: string, trackId: string, barCount: number, binWidth: number, barSpacing: number) {
+    async function calculateTrackBars(outPath: string, _trackId: string, barCount: number, binWidth: number, barSpacing: number) {
         let audioContext = new AudioContext()
         let response = await fetch(outPath)
         let decoded = await audioContext.decodeAudioData(await response.arrayBuffer())
@@ -204,9 +204,9 @@ export const usePlayerStore = defineStore('player', () => {
                 binNeg = 0
             }
         }
-        if (track.value !== null && track.value.id === trackId)
+        if (track.value !== null && trackId.value === _trackId)
             canvasBars = bars
-        db.put('trackBars', bars, trackId).then()
+        db.put('trackBars', bars, _trackId).then()
     }
 
     function renderProgress() {
@@ -327,8 +327,12 @@ export const usePlayerStore = defineStore('player', () => {
             playerElement.currentTime = 0
             return
         }
+        let trackId = track.value?.id
+        if (collection.value === null || trackId === null) return
+
         console.log("Skip next song", n)
-        let newIndex = collectionIndex.value + n
+        let index = collection.value.tracks.findIndex(t => t.id === trackId)
+        let newIndex = index + n
         let repeatRequired = false
         if (newIndex >= tracks.value.length) {
             repeatRequired = true
@@ -341,8 +345,7 @@ export const usePlayerStore = defineStore('player', () => {
         if (repeatRequired && !repeat.value) {
             await unload()
         }
-        if (collection.value !== null)
-            await load(collection.value, newIndex)
+        await load(collection.value, tracks.value[newIndex])
     }
 
     async function togglePlay() {
@@ -383,7 +386,6 @@ export const usePlayerStore = defineStore('player', () => {
         loadProgress,
         track,
         collection,
-        collectionIndex,
         load,
         skip,
         play,
@@ -400,5 +402,6 @@ export const usePlayerStore = defineStore('player', () => {
         toggleRepeat,
         shuffle,
         repeat,
+        trackId,
     }
 })

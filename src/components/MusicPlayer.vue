@@ -51,10 +51,11 @@
                 <div class="volume-slider">
                     <v-slider v-model="player.volume"
                               density="compact"
+                              @wheel="handleScroll"
                               thumb-size="10"
                               track-size="1"
                               @click:prepend="toggleMute"
-                              :prepend-icon="player.volume < .1 ? 'mdi-volume-low' : player.volume < .8 ? 'mdi-volume-medium' : 'mdi-volume-high'"
+                              :prepend-icon="player.volume < .2 ? 'mdi-volume-low' : player.volume < .7 ? 'mdi-volume-medium' : 'mdi-volume-high'"
                               hide-details :min="0" :max="1"></v-slider>
                 </div>
             </div>
@@ -63,11 +64,10 @@
 </template>
 
 <script setup lang="ts">
-import {onMounted, onUnmounted, ref, watch} from "vue";
+import {onMounted, onUnmounted, ref} from "vue";
 import GlowImage from "./GlowImage.vue";
 import {usePlayerStore} from "../scripts/store/player";
 import {useBaseStore} from "../scripts/store/base";
-import Artists from "../views/library/Artists.vue";
 import ArtistsSpan from "./ArtistsSpan.vue";
 import ProgressBar from "./ProgressBar.vue";
 import LikeButton from "./LikeButton.vue";
@@ -79,6 +79,11 @@ const elWidth = ref(0)
 const musicContainer = ref(null)
 
 let volumeBeforeMute = 1
+
+function handleScroll(e: WheelEvent) {
+    let newVolume = player.volume - e.deltaY / 3000
+    player.volume = Math.max(0, Math.min(1, newVolume))
+}
 
 function toggleMute() {
     if (player.volume > 0) {

@@ -56,20 +56,13 @@ const props = defineProps({
         type: Number,
         required: false,
     },
-    active: {
-        type: Boolean,
-        default: false,
-    },
 })
 const base = useBaseStore()
 const player = usePlayerStore()
 const spotify = useSpotifyStore()
 
-const isLiked = computed(() => spotify.checkLiked('track', props.track.id))
-
 function playItem() {
-    console.log("Play item", toRaw(props.track))
-    player.load(toRaw(props.collection), toRaw(props.index))
+    player.load(props.collection, props.track)
 }
 </script>
 

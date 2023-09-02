@@ -5,7 +5,7 @@
             <v-card-title class="main-title pt-5 mb-3">Choose a YouTube source video</v-card-title>
             <v-divider></v-divider>
             <v-card-text class="card-content" :style="{
-                textAlign: base.sourceDialog.loading ? 'center' : 'left'
+                alignItems: base.sourceDialog.loading ? 'center' : 'left'
             }">
                 <v-progress-circular indeterminate size="100" v-if="base.sourceDialog.loading"/>
                 <template v-else>

@@ -11,8 +11,8 @@
                              v-else
                              :index="index - 1"
                              :class="{
-                                 'odd-item': !isActive(index - 1) && index % 2 === 0,
-                                 'active': isActive(index - 1)
+                                 'odd-item': !isActive(item.id) && index % 2 === 0,
+                                 'active': isActive(item.id)
                              }"
                              class="track-list-item" :track="item"/>
         </template>
@@ -27,9 +27,12 @@ import {useBaseStore} from "../scripts/store/base";
 import {usePlayerStore} from "../scripts/store/player";
 import {useTheme} from "vuetify";
 import type {ItemCollection} from "../scripts/types";
+import {storeToRefs} from "pinia";
 
 const base = useBaseStore();
 const player = usePlayerStore()
+const theme = useTheme()
+
 const props = defineProps({
     collection: {
         type: Object as PropType<ItemCollection>,
@@ -52,10 +55,8 @@ const props = defineProps({
         default: () => false,
     },
 })
-const theme = useTheme()
-const isActive = (index: number) => {
-    return player.collectionIndex === index && (player.collection?.id ?? '') === props.collection.id
-}
+const {trackId} = storeToRefs(player)
+const isActive = (id: string) =>  player.trackId === id && (player.collection?.id ?? '') === props.collection.id
 
 const pageHeight = ref(window.innerHeight);
 onMounted(() => {

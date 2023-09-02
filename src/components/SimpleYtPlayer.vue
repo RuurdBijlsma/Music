@@ -43,6 +43,11 @@ const isLoaded = ref(false)
 const playerElement = createAudioElement()
 const events = new EventEmitter()
 
+onUnmounted(() => {
+    playerElement.src = ''
+    playerElement.load()
+})
+
 function createAudioElement() {
     let element = document.createElement('audio')
     element.autoplay = true
@@ -85,10 +90,6 @@ async function togglePlay() {
         await playerElement.play()
     }
 }
-
-onUnmounted(() => {
-    playerElement.src = ''
-})
 </script>
 
 <style scoped lang="scss">

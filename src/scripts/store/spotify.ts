@@ -644,32 +644,22 @@ export const useSpotifyStore = defineStore('spotify', () => {
     }
 
     async function activateSource(id: string) {
-        let track = base.sourceDialog.spotifyTrack
-        if (track === null) return
-        const trackId = track.id
-        const {cacheKey, outPath} = platform.trackToNames(track)
+        let spotifyTrack = base.sourceDialog.spotifyTrack
+        if (spotifyTrack === null) return
+        const trackId = spotifyTrack.id
+        const {cacheKey, outPath} = platform.trackToNames(spotifyTrack)
         await db.put('nameToId', id, cacheKey)
         console.log("updated db with new prefered nameToId")
         await platform.deleteFile(outPath)
-        await db.delete('trackBars', track.id)
-        if (player.track !== null && player.collection !== null && player.track.id === track.id) {
-            console.log("Collection rn", toRaw(player.collection), toRaw(player.collection.tracks))
-            let index = player.collection.tracks.findIndex(t => t.id === trackId)
-            console.log(index)
+        await db.delete('trackBars', spotifyTrack.id)
+        if (player.track !== null && player.collection !== null && player.trackId === spotifyTrack.id) {
             base.sourceDialog.show = false
 
-            if (index !== -1) {
-                base.sourceDialog.tempTrackOverride = {
-                    ytId: id,
-                    trackId: trackId,
-                }
-                console.log("Doing a load", player.collection, index, trackId)
-                let collection = player.collection
-                await player.load(collection, index)
-            } else {
-                console.log("Doing an unload", player.collection, trackId)
-                player.unload()
+            base.sourceDialog.tempTrackOverride = {
+                ytId: id,
+                trackId: trackId,
             }
+            await player.load(player.collection, spotifyTrack)
         }
     }
 
