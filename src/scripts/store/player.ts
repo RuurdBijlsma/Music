@@ -87,8 +87,12 @@ export const usePlayerStore = defineStore('player', () => {
     let canvas: HTMLCanvasElement | null = null
     let context: CanvasRenderingContext2D | null = null
     requestAnimationFrame(renderProgress)
+    let tracksLoading = new Set()
 
     async function load(_collection: ItemCollection, _track: SpotifyApi.TrackObjectFull, autoplay = true) {
+        const _trackId = _track.id
+        let isLoading = tracksLoading.has(_trackId)
+        tracksLoading.add(_trackId)
 
         console.log("Load", {_collection, track})
         playerElement.src = ''
@@ -104,8 +108,7 @@ export const usePlayerStore = defineStore('player', () => {
         collection.value = _collection
         _track = toRaw(_track)
         track.value = _track
-        trackId.value = _track.id
-        const _trackId = _track.id
+        trackId.value = _trackId
         setMetadata(track.value)
 
         console.log("Playing item", _track, 'from collection', _collection)
@@ -139,6 +142,8 @@ export const usePlayerStore = defineStore('player', () => {
             if (_collection.id === collection.value?.id && track.value && _trackId === trackId.value)
                 loadProgress.value = progress.percent
         })
+        if (isLoading)
+            return
         let outPath = await platform.getTrackFile(track.value, events)
         // Check if user hasn't changed track while it was loading
         if (_collection.id === collection.value.id && track.value && _trackId === trackId.value)
@@ -146,6 +151,9 @@ export const usePlayerStore = defineStore('player', () => {
         console.log(playerElement)
 
         canvas = document.querySelector('.progress-canvas')
+
+        tracksLoading.delete(_trackId)
+
         if (canvas === null) return
         canvas.width = canvasWidth
         canvas.height = 100

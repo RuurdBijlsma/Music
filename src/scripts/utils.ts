@@ -54,11 +54,11 @@ export function rgb2lab(rgb: number[]) {
     return [(116 * y) - 16, 500 * (x - y), 200 * (y - z)]
 }
 
-export function shuffleArray<T>(array: T[]) {
-    console.warn("SHUFFLING WARNING!! SHUFFLING WARNING!! SHUFFLING WARNING!! SHUFFLING WARNING!! SHUFFLING WARNING!! SHUFFLING WARNING!! SHUFFLING WARNING!! SHUFFLING WARNING!! SHUFFLING WARNING!! SHUFFLING WARNING!! ")
-    for (let i = array.length - 1; i > 0; i--) {
+export function shuffleArray<T>(array: T[]): T[] {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
     }
-    return array;
+    return shuffled;
 }

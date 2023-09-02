@@ -1,7 +1,7 @@
 <template>
     <v-menu :close-on-content-click="false">
         <template v-slot:activator="{ props }">
-            <v-btn rounded variant="text" v-bind="props">
+            <v-btn rounded variant="text" v-bind="props" @click="delayedScrollToTrack">
                 <v-icon>mdi-playlist-play</v-icon>
             </v-btn>
         </template>
@@ -24,7 +24,7 @@
                     Go to {{ collection.buttonText }}
                 </v-btn>
                 <v-btn :color="base.themeColor" @click="scrollToTrack">
-                    Scroll to to track
+                    Scroll to track
                 </v-btn>
             </v-card-actions>
         </v-card>
@@ -46,13 +46,18 @@ const route = useRoute()
 const {collection} = storeToRefs(player)
 const focusTrack = ref(null as SpotifyApi.TrackObjectFull | null)
 
+function delayedScrollToTrack() {
+    setTimeout(() => scrollToTrack(), 100)
+}
+
 function scrollToTrack() {
     if (player.track === null) return
     focusTrack.value = player.track
     let index = player.queue.findIndex(t => t.id === player.trackId)
     let container = document.querySelector('.list-container')
     if (container === null) return
-    container.scrollTop = (index - 3) * 50
+    container.scrollTo({top: (index - 3) * 50, behavior: "smooth"})
+    // container.scrollTop = (index - 3) * 50
 }
 </script>
 
