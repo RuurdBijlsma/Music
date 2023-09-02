@@ -47,6 +47,9 @@ export interface ItemCollection {
     context?: Item,
     loaded?: number,
     total?: number,
+    name: string,
+    buttonText: string,
+    to: string,
 }
 
 export type CollectionType = 'radio' | 'search' | 'liked' | 'artist' | 'playlist' | 'album' | 'category'

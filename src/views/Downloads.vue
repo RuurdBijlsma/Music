@@ -8,7 +8,7 @@
 
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .downloads {
     padding-top: 60px;
 }

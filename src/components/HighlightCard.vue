@@ -44,7 +44,7 @@ defineProps({
 
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .highlight-featured {
     width: 30vw;
     height: calc(12vw + 50px);

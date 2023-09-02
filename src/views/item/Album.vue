@@ -1,6 +1,6 @@
 <template>
     <div class="album" v-if="album">
-        <track-list-virtual :collection="collection" type="album" no-images>
+        <track-list :collection="collection" type="album" no-images :tracks="collection.tracks">
             <div class="mb-8 album-info">
                 <glow-image
                     rounding="5px"
@@ -32,7 +32,7 @@
                 </div>
                 <p class="album-genres">{{ album.genres.join(', ') }}</p>
             </div>
-        </track-list-virtual>
+        </track-list>
     </div>
 </template>
 
@@ -42,8 +42,8 @@ import {computed, ref, watch} from "vue";
 import {useRoute} from "vue-router";
 import {useBaseStore} from "../../scripts/store/base";
 import GlowImage from "../../components/GlowImage.vue";
-import TrackListVirtual from "../../components/TrackListVirtual.vue";
 import type {ItemCollection} from "../../scripts/types";
+import TrackList from "../../components/TrackList.vue";
 
 const route = useRoute()
 const base = useBaseStore();
@@ -56,6 +56,9 @@ const collection = computed(() => {
         tracks: album.value?.tracks.items ?? [],
         type: "album",
         context: album.value,
+        name: album.value?.name ?? 'Album',
+        buttonText: "Album",
+        to: base.itemUrl(album.value)
     } as ItemCollection
 })
 watch(route, async () => {

@@ -11,7 +11,7 @@ import ItemCard from "../../components/ItemCard.vue";
 const spotify = useSpotifyStore()
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .artists {
     display: flex;
     flex-wrap: wrap;

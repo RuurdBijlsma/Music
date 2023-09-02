@@ -8,7 +8,7 @@
                 </div>
                 <v-divider/>
             </div>
-            <track-list padding-top="0" :collection="collection"/>
+            <track-list padding-top="0" :collection="collection" :tracks="collection.tracks"/>
         </div>
         <template v-if="tracks.length > 3">
             <v-divider/>
@@ -25,10 +25,9 @@
 </template>
 
 <script setup lang="ts">
-import {computed, ref, watch} from "vue";
+import {computed, ref} from "vue";
 import type {PropType} from "vue";
 import {useBaseStore} from "../scripts/store/base";
-import {storeToRefs} from "pinia";
 import {useSpotifyStore} from "../scripts/store/spotify";
 import TrackList from "./TrackList.vue";
 import type {ItemCollection} from "../scripts/types";
@@ -49,23 +48,24 @@ const props = defineProps({
         required: false,
         default: () => false,
     },
+    type: {
+        type: String,
+        required: true,
+    },
 })
+const base = useBaseStore()
+const spotify = useSpotifyStore()
 
+const query = base.searchValue
 const collection = computed(() => ({
     tracks: props.tracks,
     type: 'search',
     id: 'search' + props.id,
+    name: `${props.type} search results for "${query}"`,
+    buttonText: 'Search',
+    to: `/search?query=${query}`,
 } as ItemCollection))
 
-const base = useBaseStore()
-const spotify = useSpotifyStore()
-
-const {searchValue} = storeToRefs(base)
-
-let lastInputTime = performance.now()
-watch(searchValue, () => {
-    lastInputTime = performance.now()
-});
 
 const expanded = ref(false)
 const subListHeight = 177;

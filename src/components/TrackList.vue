@@ -7,15 +7,14 @@
             :collection="collection" :number="noImages ? item.track_number : undefined"
             :index="index"
             :class="{
-                 'odd-item': !isActive(item.id) && index % 2 === 0,
-                 'active': isActive(item.id)
-             }"
+                    'odd-item': !isActive(item.id) && index % 2 === 0,
+                    'active': isActive(item.id)
+                }"
             class="track-list-item" :track="item"/>
     </div>
 </template>
 
 <script setup lang="ts">
-import {computed} from "vue";
 import type {PropType} from "vue";
 import TrackListItem from "./TrackListItem.vue";
 import {useBaseStore} from "../scripts/store/base";
@@ -33,6 +32,10 @@ const props = defineProps({
         type: Object as PropType<ItemCollection>,
         required: true
     },
+    tracks: {
+        type: Object as PropType<SpotifyApi.TrackObjectFull[]>,
+        required: true,
+    },
     noImages: {
         type: Boolean,
         default: () => false,
@@ -44,28 +47,21 @@ const props = defineProps({
 })
 const {trackId} = storeToRefs(player)
 const isActive = (id: string) => player.trackId === id && (player.collection?.id ?? '') === props.collection.id
-const tracks = computed(() => props.collection.tracks as SpotifyApi.TrackObjectFull[])
 </script>
 
 <style scoped lang="scss">
-.track-list-item.active {
-    background-color: rgba(0, 0, 0, 0.9);
-    color: white;
-    box-shadow: 0 0 12px 0 rgba(0, 0, 0, 0.3);
+.track-list {
+    overflow-y: auto;
 }
 
-.dark .track-list-item.active {
-    background-color: white;
-    color: black;
-    box-shadow: 0 0 12px 0 rgba(255, 255, 255, 0.3);
+.track-list-item.active {
+    background: rgba(var(--v-theme-on-background), 1);
+    color: rgba(var(--v-theme-background), 1);
+    box-shadow: 0 0 12px 0 rgba(var(--v-theme-on-background), 0.3);
 }
 
 .track-list-item.odd-item {
-    background-color: rgba(0, 0, 0, 0.07);
-}
-
-.dark .track-list-item.odd-item {
-    background-color: rgba(255, 255, 255, 0.05);
+    background-color: rgba(var(--v-theme-on-background), .06);
 }
 
 .track-list-item {
@@ -74,26 +70,22 @@ const tracks = computed(() => props.collection.tracks as SpotifyApi.TrackObjectF
     margin-right: 10px;
 }
 
-.track-list {
-    overflow-y: auto;
-}
-
 .track-list::-webkit-scrollbar {
     width: 14px;
     height: 18px;
 }
 
 .track-list::-webkit-scrollbar-track {
-    background: rgba(0, 0, 0, .1);
+    background: rgba(var(--v-theme-on-background), 0.1);
     border-radius: 3px;
 }
 
 .track-list::-webkit-scrollbar-thumb {
-    background: rgba(0, 0, 0, 0.4);
+    background: rgba(var(--v-theme-on-background), 0.4);
     border-radius: 3px;
 }
 
 .track-list::-webkit-scrollbar-thumb:hover {
-    background: rgba(0, 0, 0, 0.6);
+    background: rgba(var(--v-theme-on-background), 0.7);
 }
 </style>

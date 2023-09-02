@@ -47,7 +47,7 @@ function checkRoute() {
 checkRoute();
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .library{
     padding-top:60px;
 }

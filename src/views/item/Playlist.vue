@@ -1,10 +1,9 @@
 <template>
     <div class="playlist" v-if="playlist">
-        <track-list :collection="collection" v-if="collection.tracks.length < 200">
-<!--            <h1>hoi</h1>-->
+        <track-list :collection="collection" v-if="collection.tracks.length < 200" :tracks="collection.tracks" :height="base.pageHeight">
             <playlist-header :collection="collection"/>
         </track-list>
-        <track-list-virtual v-else :collection="collection">
+        <track-list-virtual v-else :collection="collection" :tracks="collection.tracks" :height="base.pageHeight">
             <playlist-header :collection="collection"/>
         </track-list-virtual>
     </div>
@@ -35,6 +34,9 @@ const collection = computed(() => {
         tracks,
         type: "playlist",
         context: playlist.value,
+        name: playlist.value?.name ?? "Playlist",
+        buttonText: 'Playlist',
+        to: base.itemUrl(playlist.value),
     } as ItemCollection
 })
 

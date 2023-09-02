@@ -54,7 +54,7 @@ defineProps({
 const theme = useTheme()
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .glow-image {
     display: inline-flex;
     justify-content: center;

@@ -20,7 +20,7 @@
                 <v-divider/>
             </div>
         </div>
-        <track-list :collection="collection"/>
+        <track-list :collection="collection" :tracks="collection.tracks"/>
         <div class="sub-header mt-6 mb-5">
             <v-divider/>
             <p class="top-tracks-text ml-4 mr-4">Albums</p>
@@ -80,6 +80,9 @@ const collection = computed(() => {
         tracks: topTracks.value ?? [],
         type: "artist",
         context: artist.value,
+        name: artist.value?.name ?? "Artist",
+        buttonText: 'Artist',
+        to: base.itemUrl(artist.value)
     } as ItemCollection
 })
 

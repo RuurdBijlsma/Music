@@ -19,8 +19,10 @@
                            class="mb-2 progress"
                            rounded
                            :model-value="trackLoadProgress"></v-progress-linear>
-        <track-list-virtual v-if="collection !== null" item-height :collection="collection" type="liked"
-                            :subtract-height="188" padding-top="0"/>
+        <track-list-virtual v-if="collection !== null" :collection="collection"
+                            :tracks="collection.tracks"
+                            :height="(base.pageHeight - 188).toString()"
+                            padding-top="0"/>
     </div>
 </template>
 
@@ -45,7 +47,10 @@ const collection = computed(() => {
         type: 'liked',
         id: 'liked',
         loaded: spotify.likedTracksLoaded,
-        total: spotify.likedTracksTotal
+        total: spotify.likedTracksTotal,
+        name: "Liked tracks",
+        buttonText: "Library",
+        to: '/library/liked',
     } as ItemCollection
 })
 
@@ -76,7 +81,7 @@ const tracksAmount = computed(() => {
 })
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .track-list-item.odd-item {
     background-color: rgba(0, 0, 0, 0.07);
 }

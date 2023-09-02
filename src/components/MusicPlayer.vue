@@ -45,9 +45,7 @@
             <v-spacer></v-spacer>
             <div class="extra-bar-buttons">
                 <like-button :item="player.track"/>
-                <v-btn rounded variant="text">
-                    <v-icon>mdi-playlist-play</v-icon>
-                </v-btn>
+                <queue-button/>
                 <div class="volume-slider">
                     <v-slider v-model="player.volume"
                               density="compact"
@@ -71,6 +69,7 @@ import {useBaseStore} from "../scripts/store/base";
 import ArtistsSpan from "./ArtistsSpan.vue";
 import ProgressBar from "./ProgressBar.vue";
 import LikeButton from "./LikeButton.vue";
+import QueueButton from "./QueueButton.vue";
 
 const player = usePlayerStore()
 const base = useBaseStore()
@@ -112,7 +111,7 @@ onUnmounted(() => {
 })
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .mp {
     display: flex;
     flex-direction: column;

@@ -6,6 +6,7 @@ import {baseDb, useBaseStore} from "./base";
 import type {IDBPDatabase} from "idb";
 import {useTheme} from "vuetify";
 import type {ItemCollection} from "../types";
+import {shuffleArray} from "../utils";
 
 const events = new EventEmitter()
 
@@ -78,8 +79,9 @@ export const usePlayerStore = defineStore('player', () => {
     playerElement.volume = volume.value
 
     const collection = ref(null as ItemCollection | null)
-    const tracks = computed(() => collection.value?.tracks ?? [])
-    // const shuffledTracks
+    const tracks = computed(() => collection.value?.tracks ?? [] as SpotifyApi.TrackObjectFull[])
+    const shuffledTracks = computed(() => shuffleArray(tracks.value))
+    const queue = computed(() => shuffle.value ? shuffledTracks.value : tracks.value)
 
     let canvasBars: { binSize: number, binWidth: number, barSpacing: number, binPos: number[], binNeg: number[] } | null = null
     let canvas: HTMLCanvasElement | null = null
@@ -166,6 +168,7 @@ export const usePlayerStore = defineStore('player', () => {
         loadProgress.value = NaN
         collection.value = null
         track.value = null
+        trackId.value = ''
 
         const binWidth = 2
         const barSpacing = 1
@@ -331,21 +334,21 @@ export const usePlayerStore = defineStore('player', () => {
         if (collection.value === null || trackId === null) return
 
         console.log("Skip next song", n)
-        let index = collection.value.tracks.findIndex(t => t.id === trackId)
+        let index = queue.value.findIndex(t => t.id === trackId)
         let newIndex = index + n
         let repeatRequired = false
-        if (newIndex >= tracks.value.length) {
+        if (newIndex >= queue.value.length) {
             repeatRequired = true
             newIndex = 0
         }
         if (newIndex < 0) {
             repeatRequired = true
-            newIndex = tracks.value.length - 1
+            newIndex = queue.value.length - 1
         }
         if (repeatRequired && !repeat.value) {
             await unload()
         }
-        await load(collection.value, tracks.value[newIndex])
+        await load(collection.value, queue.value[newIndex])
     }
 
     async function togglePlay() {
@@ -403,5 +406,6 @@ export const usePlayerStore = defineStore('player', () => {
         shuffle,
         repeat,
         trackId,
+        queue,
     }
 })

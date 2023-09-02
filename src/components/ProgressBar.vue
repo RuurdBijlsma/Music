@@ -53,7 +53,7 @@ onUnmounted(() => {
 })
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .progress-canvas {
     width: 300px;
     height: 100px;

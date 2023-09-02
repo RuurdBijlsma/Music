@@ -2,8 +2,8 @@
     <v-virtual-scroll
         :items="scrollItems"
         class="virtual-scroll"
-        :style="{paddingTop: paddingTop}"
-        :height="(pageHeight - subtractHeight).toString()"
+        :style="{paddingTop}"
+        :height="height"
         item-height="50">
         <template v-slot:default="{ item, index }">
             <slot v-if="item === null"/>
@@ -20,7 +20,7 @@
 </template>
 
 <script setup lang="ts">
-import {computed, onMounted, onUnmounted, ref} from "vue";
+import {computed} from "vue";
 import type {PropType} from "vue";
 import TrackListItem from "./TrackListItem.vue";
 import {useBaseStore} from "../scripts/store/base";
@@ -38,6 +38,10 @@ const props = defineProps({
         type: Object as PropType<ItemCollection>,
         required: true
     },
+    tracks: {
+        type: Object as PropType<SpotifyApi.TrackObjectFull[]>,
+        required: true,
+    },
     subtractHeight: {
         type: Number,
         default: () => 0,
@@ -46,54 +50,37 @@ const props = defineProps({
         type: String,
         default: () => '60px',
     },
-    itemHeight: {
-        type: Boolean,
-        default: () => false,
-    },
     noImages: {
         type: Boolean,
         default: () => false,
     },
+    height: {
+        type: String,
+        required: true,
+    },
+    scrollIntoView: {
+        type: Object as PropType<SpotifyApi.TrackObjectFull | null>,
+        required: false,
+        default: () => null,
+    },
 })
 const {trackId} = storeToRefs(player)
-const isActive = (id: string) =>  player.trackId === id && (player.collection?.id ?? '') === props.collection.id
-
-const pageHeight = ref(window.innerHeight);
-onMounted(() => {
-    window.addEventListener('resize', handleWindowResize)
-})
-onUnmounted(() => {
-    window.removeEventListener('resize', handleWindowResize)
-})
-
-function handleWindowResize() {
-    pageHeight.value = window.innerHeight;
-}
+const isActive = (id: string) => player.trackId === id && (player.collection?.id ?? '') === props.collection.id
 
 const scrollItems = computed(() => {
-    return [null, ...props.collection.tracks]
+    return [null, ...props.tracks]
 })
 </script>
 
 <style scoped lang="scss">
 .track-list-item.active {
-    background-color: rgba(0, 0, 0, 0.9);
-    color: white;
-    box-shadow: 0 0 12px 0 rgba(0, 0, 0, 0.3);
-}
-
-.dark .track-list-item.active {
-    background-color: white;
-    color: black;
-    box-shadow: 0 0 12px 0 rgba(255, 255, 255, 0.3);
+    background: rgba(var(--v-theme-on-background), 1);
+    color: rgba(var(--v-theme-background), 1);
+    box-shadow: 0 0 12px 0 rgba(var(--v-theme-on-background), 0.3);
 }
 
 .track-list-item.odd-item {
-    background-color: rgba(0, 0, 0, 0.07);
-}
-
-.dark .track-list-item.odd-item {
-    background-color: rgba(255, 255, 255, 0.05);
+    background-color: rgba(var(--v-theme-on-background), .06);
 }
 
 .track-list-item {
@@ -108,16 +95,16 @@ const scrollItems = computed(() => {
 }
 
 .virtual-scroll::-webkit-scrollbar-track {
-    background: rgba(0, 0, 0, .1);
+    background: rgba(var(--v-theme-on-background), 0.1);
     border-radius: 3px;
 }
 
 .virtual-scroll::-webkit-scrollbar-thumb {
-    background: rgba(0, 0, 0, 0.4);
+    background: rgba(var(--v-theme-on-background), 0.4);
     border-radius: 3px;
 }
 
 .virtual-scroll::-webkit-scrollbar-thumb:hover {
-    background: rgba(0, 0, 0, 0.6);
+    background: rgba(var(--v-theme-on-background), 0.7);
 }
 </style>

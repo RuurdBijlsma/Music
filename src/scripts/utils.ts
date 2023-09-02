@@ -53,3 +53,12 @@ export function rgb2lab(rgb: number[]) {
     z = (z > 0.008856) ? Math.pow(z, 1 / 3) : (7.787 * z) + 16 / 116;
     return [(116 * y) - 16, 500 * (x - y), 200 * (y - z)]
 }
+
+export function shuffleArray<T>(array: T[]) {
+    console.warn("SHUFFLING WARNING!! SHUFFLING WARNING!! SHUFFLING WARNING!! SHUFFLING WARNING!! SHUFFLING WARNING!! SHUFFLING WARNING!! SHUFFLING WARNING!! SHUFFLING WARNING!! SHUFFLING WARNING!! SHUFFLING WARNING!! ")
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}

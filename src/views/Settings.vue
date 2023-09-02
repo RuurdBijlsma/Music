@@ -42,7 +42,7 @@ const spotify = useSpotifyStore()
 const showPassword = ref(false);
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .settings {
     padding: 30px;
 }

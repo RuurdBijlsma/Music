@@ -5,14 +5,14 @@
             left: searchX + 'px',
             top: searchY + 'px',
             width: width + 'px'}">
-        <search-suggestion-section :id="'library' + searchValue" :tracks="likedResult" :loading="likedLoading">
+        <search-suggestion-section type="Library" :id="'library' + searchValue" :tracks="likedResult" :loading="likedLoading">
             Library
         </search-suggestion-section>
-        <search-suggestion-section :id="'spotify' + searchValue" :tracks="spotifyResult" :loading="spotifyLoading">
+        <search-suggestion-section type="Spotify" :id="'spotify' + searchValue" :tracks="spotifyResult" :loading="spotifyLoading">
             <v-icon class="mr-2">mdi-spotify</v-icon>
             Spotify
         </search-suggestion-section>
-        <search-suggestion-section :id="'youtube' + searchValue" :tracks="ytResult" :loading="ytLoading">
+        <search-suggestion-section type="YouTube" :id="'youtube' + searchValue" :tracks="ytResult" :loading="ytLoading">
             <v-icon class="mr-2">mdi-youtube</v-icon>
             YouTube
         </search-suggestion-section>
@@ -48,7 +48,6 @@ const {searchValue} = storeToRefs(base)
 let lastInputTime = performance.now()
 watch(searchValue, () => {
     lastInputTime = performance.now()
-    console.log('input happened')
 });
 
 let el = null as null | Element;

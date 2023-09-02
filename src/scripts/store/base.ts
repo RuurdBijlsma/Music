@@ -1,6 +1,6 @@
 import {defineStore} from 'pinia'
 import {openDB} from "idb";
-import {computed, ref} from "vue";
+import {computed, onMounted, onUnmounted, ref} from "vue";
 import {useTheme} from "vuetify";
 import type {Item} from "../types";
 import {deltaE, hexToRgb} from "../utils";
@@ -136,6 +136,7 @@ export const useBaseStore = defineStore('base', () => {
     }
 
     const itemUrl = (item: Item | any) => {
+        if (item === null) return ''
         let type = item.type || 'category';
         let name = type === 'user' ? item.display_name : item.name;
         name ??= ''
@@ -164,6 +165,10 @@ export const useBaseStore = defineStore('base', () => {
         contextMenu.value.y = e.pageY
     }
 
+    const handleWindowResize = () => pageHeight.value = window.innerHeight;
+    const pageHeight = ref(window.innerHeight);
+    window.addEventListener('resize', handleWindowResize)
+
     return {
         itemUrl,
         itemImage,
@@ -182,5 +187,6 @@ export const useBaseStore = defineStore('base', () => {
         sourceSelectedId,
         contrastToForeground,
         themeTooSimilarToFg,
+        pageHeight,
     }
 })

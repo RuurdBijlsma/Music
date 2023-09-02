@@ -70,7 +70,7 @@ const highlight = computed(() => spotify.view.homePage.featured.playlists[0] as 
 const otherPlaylists = computed(() => spotify.view.homePage.featured.playlists.slice(1) as SpotifyApi.PlaylistObjectFull[])
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .home {
     padding-top:60px;
 }
