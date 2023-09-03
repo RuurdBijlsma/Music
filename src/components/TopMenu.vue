@@ -7,6 +7,7 @@
         <v-spacer/>
         <v-text-field
             no-drag
+            spellcheck="false"
             class="search-field"
             hide-details density="compact"
             v-model="base.searchValue"
