@@ -1,9 +1,10 @@
 import {defineStore} from 'pinia'
 import {openDB} from "idb";
-import {computed, onMounted, onUnmounted, ref} from "vue";
+import {computed, ref} from "vue";
 import {useTheme} from "vuetify";
 import type {Item} from "../types";
 import {deltaE, hexToRgb} from "../utils";
+import type {ItemCollection} from "../types";
 
 export const baseDb = openDB("base", 1, {
     upgrade(db, oldVersion, newVersion, transaction, event) {
@@ -151,6 +152,43 @@ export const useBaseStore = defineStore('base', () => {
         return `/${type}/${encodeUrlName(name)}/${item.id}`;
     }
 
+    const itemCollection = (item: Item, tracks: SpotifyApi.TrackObjectFull[] | null = null) => {
+        if (item.type === 'playlist') {
+            if (tracks === null)
+                tracks = item.tracks.items.map(t => t.track as SpotifyApi.TrackObjectFull)
+            return {
+                id: item.id ?? 'playlist',
+                tracks: tracks,
+                type: "playlist",
+                context: item,
+                name: item.name ?? "Playlist",
+                buttonText: 'Playlist',
+                to: itemUrl(item),
+            } as ItemCollection
+        }else if(item.type==='artist'){
+            return {
+                id: item.id ?? 'artist',
+                tracks: tracks ?? [],
+                type: "artist",
+                context: item,
+                name: item.name ?? "Artist",
+                buttonText: 'Artist',
+                to: itemUrl(item)
+            } as ItemCollection
+        } else if(item.type==='album'){
+            return {
+                id: item.id ?? 'album',
+                tracks: item.tracks.items ?? [],
+                type: "album",
+                context: item,
+                name: item.name ?? 'Album',
+                buttonText: "Album",
+                to: itemUrl(item)
+            } as ItemCollection
+        }
+        return null
+    }
+
     const notFoundImage = () => {
         let i = Math.floor(Math.random() * 7) + 1;
         return `img/notfound/${i}.png`;
@@ -188,5 +226,6 @@ export const useBaseStore = defineStore('base', () => {
         contrastToForeground,
         themeTooSimilarToFg,
         pageHeight,
+        itemCollection,
     }
 })

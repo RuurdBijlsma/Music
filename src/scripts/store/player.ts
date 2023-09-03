@@ -389,6 +389,16 @@ export const usePlayerStore = defineStore('player', () => {
         localStorage.repeat = repeat.value
     }
 
+    async function playCollection(collection: ItemCollection) {
+        shuffle.value = false
+        await load(collection, collection.tracks[0])
+    }
+
+    async function shuffleCollection(collection: ItemCollection) {
+        shuffle.value = true
+        await load(collection, collection.tracks[Math.floor(Math.random() * collection.tracks.length)])
+    }
+
     return {
         loading,
         playing,
@@ -415,5 +425,7 @@ export const usePlayerStore = defineStore('player', () => {
         repeat,
         trackId,
         queue,
+        playCollection,
+        shuffleCollection,
     }
 })

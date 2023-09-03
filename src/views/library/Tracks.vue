@@ -7,13 +7,7 @@
             <v-btn v-show="trackLoadProgress === 100" @click="spotify.loadLikedTracks" icon="mdi-refresh"
                    density="compact" variant="plain" size="10" class="refresh-button"/>
         </p>
-        <div class="play-buttons mb-1">
-            <v-divider/>
-            <v-btn icon="mdi-play-outline" variant="text"/>
-            <v-btn icon="mdi-shuffle" variant="text"/>
-            <v-btn icon="mdi-filter-outline" variant="text"/>
-            <v-divider/>
-        </div>
+        <collection-buttons :collection="collection" show-filter/>
         <v-progress-linear :indeterminate="trackLoadProgress === 0"
                            :style="{opacity: trackLoadProgress === 100 ? 0 : 1}"
                            class="mb-2 progress"
@@ -33,10 +27,11 @@ import {computed, toRaw} from "vue";
 import TrackListVirtual from "../../components/TrackListVirtual.vue";
 import {storeToRefs} from "pinia";
 import type {ItemCollection} from "../../scripts/types";
+import CollectionButtons from "../../components/CollectionButtons.vue";
 
-const spotify = useSpotifyStore();
+const spotify = useSpotifyStore()
 const {tracks} = storeToRefs(spotify)
-const base = useBaseStore();
+const base = useBaseStore()
 
 const collection = computed(() => {
     if (tracks.value === null || tracks.value === undefined) {
@@ -88,13 +83,6 @@ const tracksAmount = computed(() => {
 
 .dark .track-list-item.odd-item {
     background-color: rgba(255, 255, 255, 0.05);
-}
-
-.play-buttons {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 5px;
 }
 
 .progress {

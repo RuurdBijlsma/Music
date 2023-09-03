@@ -18,13 +18,7 @@
             • {{ tracks.length }} Track{{ tracks.length === 1 ? '' : 's' }} •
             {{ base.approximateDuration(totalDurationMs) }} • {{ followerString }}
         </p>
-        <div class="play-buttons mt-2 mb-2">
-            <v-divider/>
-            <v-btn icon="mdi-play-outline" variant="text"/>
-            <v-btn icon="mdi-shuffle" variant="text"/>
-            <like-button variant="no-theme" v-if="playlist" :item="playlist"/>
-            <v-divider/>
-        </div>
+        <collection-buttons :collection="collection" :like-item="playlist"/>
         <p>{{ playlist.description }}</p>
     </div>
 </template>
@@ -35,7 +29,7 @@ import {useBaseStore} from "../scripts/store/base";
 import {computed} from "vue";
 import type {ItemCollection} from "../scripts/types";
 import GlowImage from "../components/GlowImage.vue";
-import LikeButton from "./LikeButton.vue";
+import CollectionButtons from "./CollectionButtons.vue";
 
 const props = defineProps({
     collection: {

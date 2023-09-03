@@ -1,5 +1,5 @@
 <template>
-    <div class="album" v-if="album">
+    <div class="album pb-5" v-if="album">
         <track-list :collection="collection" type="album" no-images :tracks="collection.tracks">
             <div class="mb-8 album-info">
                 <glow-image
@@ -11,11 +11,13 @@
                 <v-spacer/>
                 <h1>{{ album.name }}</h1>
                 <h2 class="artist-names">
-                    <router-link v-for="artist in album.artists"
-                                 class="user-url"
-                                 :to="base.itemUrl(artist)">
-                        {{ artist.name }}
-                    </router-link>
+                    <template v-for="(artist, i) in album.artists">
+                        <router-link class="user-url"
+                                     :to="base.itemUrl(artist)">
+                            {{ artist.name }}
+                        </router-link>
+                        <span v-if="i < album.artists.length - 1">, </span>
+                    </template>
                 </h2>
                 <p class="album-stats">
                     {{ album.release_date.substring(0, 4) }} • {{ tracks.length }} Track{{
@@ -23,13 +25,7 @@
                     }} •
                     {{ base.approximateDuration(totalDurationMs) }}
                 </p>
-                <div class="play-buttons mt-2 mb-2">
-                    <v-divider/>
-                    <v-btn color="primary" icon="mdi-play-outline" variant="text"/>
-                    <v-btn color="primary" icon="mdi-shuffle" variant="text"/>
-                    <v-btn color="primary" icon="mdi-heart-outline" variant="text"/>
-                    <v-divider/>
-                </div>
+                <collection-buttons :collection="collection" :like-item="album"/>
                 <p class="album-genres">{{ album.genres.join(', ') }}</p>
             </div>
         </track-list>
@@ -42,8 +38,8 @@ import {computed, ref, watch} from "vue";
 import {useRoute} from "vue-router";
 import {useBaseStore} from "../../scripts/store/base";
 import GlowImage from "../../components/GlowImage.vue";
-import type {ItemCollection} from "../../scripts/types";
 import TrackList from "../../components/TrackList.vue";
+import CollectionButtons from "../../components/CollectionButtons.vue";
 
 const route = useRoute()
 const base = useBaseStore();
@@ -51,15 +47,8 @@ const spotify = useSpotifyStore();
 const album = ref(null as null | SpotifyApi.AlbumObjectFull);
 let loadedId = route.params.id as string;
 const collection = computed(() => {
-    return {
-        id: album.value?.id ?? 'album',
-        tracks: album.value?.tracks.items ?? [],
-        type: "album",
-        context: album.value,
-        name: album.value?.name ?? 'Album',
-        buttonText: "Album",
-        to: base.itemUrl(album.value)
-    } as ItemCollection
+    if (album.value === null) return null
+    return base.itemCollection(album.value)
 })
 watch(route, async () => {
     if (route.path.startsWith('/album') && typeof route.params.id === 'string' && route.params.id !== loadedId) {

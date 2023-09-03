@@ -1,5 +1,5 @@
 <template>
-    <v-btn rounded variant="text" :loading="likedLoading" :color="color"
+    <v-btn :icon="iconButton" rounded variant="text" :loading="likedLoading" :color="color"
            @click="toggleLike()">
         <v-icon>{{ fill ? 'mdi-heart' : 'mdi-heart-outline' }}</v-icon>
     </v-btn>
@@ -23,6 +23,10 @@ const props = defineProps({
     variant: {
         type: String as PropType<'color' | 'fill' | 'no-theme'>,
         default: 'color',
+    },
+    iconButton: {
+        type: Boolean,
+        defalt: false,
     }
 })
 

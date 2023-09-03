@@ -608,17 +608,21 @@ export const useSpotifyStore = defineStore('spotify', () => {
         } else if (type === 'album') {
             if (liked) {
                 await api.removeFromMySavedAlbums([id])
+                library.value.album.splice(library.value.album.findIndex(t => t.id === id), 1)
                 return false
             } else {
                 await api.addToMySavedAlbums([id])
+                library.value.album.unshift(item)
                 return true
             }
         } else if (type === 'artist') {
             if (liked) {
                 await api.unfollowArtists([id])
+                library.value.artist.splice(library.value.artist.findIndex(t => t.id === id), 1)
                 return false
             } else {
                 await api.followArtists([id])
+                library.value.artist.unshift(item)
                 return true
             }
         }

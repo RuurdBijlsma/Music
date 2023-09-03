@@ -3,7 +3,8 @@
         <track-list :collection="collection" v-if="collection.tracks.length < 200" :tracks="collection.tracks">
             <playlist-header :collection="collection"/>
         </track-list>
-        <track-list-virtual v-else :collection="collection" :tracks="collection.tracks" :height="base.pageHeight.toString()">
+        <track-list-virtual v-else :collection="collection" :tracks="collection.tracks"
+                            :height="base.pageHeight.toString()">
             <playlist-header :collection="collection"/>
         </track-list-virtual>
     </div>
@@ -11,11 +12,10 @@
 
 <script setup lang="ts">
 import {useSpotifyStore} from "../../scripts/store/spotify";
-import {computed, ref, watch} from "vue";
+import {computed, ref, toRaw, watch} from "vue";
 import {useRoute} from "vue-router";
 import {useBaseStore} from "../../scripts/store/base";
 import TrackListVirtual from "../../components/TrackListVirtual.vue";
-import type {ItemCollection} from "../../scripts/types";
 import TrackList from "../../components/TrackList.vue";
 import PlaylistHeader from "../../components/PlaylistHeader.vue";
 
@@ -25,19 +25,10 @@ const spotify = useSpotifyStore()
 const playlist = ref(null as null | SpotifyApi.PlaylistObjectFull);
 
 const collection = computed(() => {
-    let tracks = [] as SpotifyApi.TrackObjectFull[]
-    if (playlist.value !== null) {
-        tracks = playlist.value.tracks.items.map(t => t.track as SpotifyApi.TrackObjectFull)
-    }
-    return {
-        id: playlist.value?.id ?? 'playlist',
-        tracks,
-        type: "playlist",
-        context: playlist.value,
-        name: playlist.value?.name ?? "Playlist",
-        buttonText: 'Playlist',
-        to: base.itemUrl(playlist.value),
-    } as ItemCollection
+    if (playlist.value === null) return null
+    let tracks = playlist.value.tracks.items.map(t => t.track as SpotifyApi.TrackObjectFull)
+    console.log("Playlist collection update",toRaw(tracks))
+    return base.itemCollection(playlist.value, tracks)
 })
 
 let loadedId = route.params.id as string;

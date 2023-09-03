@@ -12,15 +12,9 @@
             <h1>{{ artist.name }}</h1>
             <p>{{ followerString }}</p>
             <p class="genres">{{ artist.genres.join(' / ') }}</p>
-            <div class="play-buttons mt-2 mb-2">
-                <v-divider/>
-                <v-btn color="primary" icon="mdi-play-outline" variant="text"/>
-                <v-btn color="primary" icon="mdi-shuffle" variant="text"/>
-                <v-btn color="primary" icon="mdi-heart-outline" variant="text"/>
-                <v-divider/>
-            </div>
+            <collection-buttons :collection="collection" :like-item="artist"/>
         </div>
-        <track-list :collection="collection" :tracks="collection.tracks"/>
+        <track-list padding-top="0" :collection="collection" :tracks="collection.tracks"/>
         <div class="sub-header mt-6 mb-5">
             <v-divider/>
             <p class="top-tracks-text ml-4 mr-4">Albums</p>
@@ -64,7 +58,7 @@ import ItemCard from "../../components/ItemCard.vue";
 import HighlightCard from "../../components/HighlightCard.vue";
 import HorizontalScroller from "../../components/HorizontalScroller.vue";
 import TrackList from "../../components/TrackList.vue";
-import type {ItemCollection} from "../../scripts/types";
+import CollectionButtons from "../../components/CollectionButtons.vue";
 
 const route = useRoute()
 const base = useBaseStore();
@@ -74,16 +68,10 @@ const artist = ref(null as null | SpotifyApi.ArtistObjectFull)
 const albums = ref(null as null | SpotifyApi.AlbumObjectFull[])
 const relatedArtists = ref(null as null | SpotifyApi.ArtistObjectFull[])
 const topTracks = ref(null as null | SpotifyApi.TrackObjectFull[])
+
 const collection = computed(() => {
-    return {
-        id: artist.value?.id ?? 'artist',
-        tracks: topTracks.value ?? [],
-        type: "artist",
-        context: artist.value,
-        name: artist.value?.name ?? "Artist",
-        buttonText: 'Artist',
-        to: base.itemUrl(artist.value)
-    } as ItemCollection
+    if (artist.value === null) return null
+    return base.itemCollection(artist.value, topTracks.value)
 })
 
 let loadedId = route.params.id as string;
