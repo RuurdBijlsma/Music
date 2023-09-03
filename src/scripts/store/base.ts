@@ -206,6 +206,7 @@ export const useBaseStore = defineStore('base', () => {
         if (url && url.includes('open.spotify.com/')) {
             let term = url.split('spotify.com/')[1].split('?')[0];
             let [type, id] = term.split('/');
+            console.log({type, id})
             if (type === 'track') {
                 let track = await spotify.api.getTrack(id)
                 console.log(track)

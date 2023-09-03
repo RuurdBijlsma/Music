@@ -34,8 +34,8 @@
 
 <script setup lang="ts">
 import {useSpotifyStore} from "../../scripts/store/spotify";
-import {computed, ref, watch} from "vue";
-import {useRoute} from "vue-router";
+import {computed, ref, toRaw, watch} from "vue";
+import {useRoute, useRouter} from "vue-router";
 import {useBaseStore} from "../../scripts/store/base";
 import GlowImage from "../../components/GlowImage.vue";
 import TrackList from "../../components/TrackList.vue";
@@ -43,6 +43,7 @@ import CollectionButtons from "../../components/CollectionButtons.vue";
 import {usePlayerStore} from "../../scripts/store/player";
 
 const route = useRoute()
+const router = useRouter()
 const base = useBaseStore()
 const spotify = useSpotifyStore()
 const player = usePlayerStore()
@@ -53,37 +54,40 @@ const collection = computed(() => {
     return base.itemCollection(album.value)
 })
 
-let loadTrackId = ''
-const checkQuery = () => {
-    if (!route.query.hasOwnProperty('play') || route.query.play === null) return
-    loadTrackId = route.query.play.toString()
+const loadTrackId = computed(() => route.query.play)
+
+const checkForLoadTrackId = () => {
+    console.log("CHECK 1", loadTrackId.value)
+    if (loadTrackId.value !== '' && album.value !== null) {
+        let albumTrack = album.value.tracks.items.find(t => t.id === loadTrackId.value) as SpotifyApi.TrackObjectFull | undefined
+        console.log("CHECK FOR LOAD TRACK ID", loadTrackId.value, toRaw(album.value.tracks.items))
+        if (albumTrack && collection.value !== null) {
+            player.load(collection.value, albumTrack)
+            router.replace({query: {}})
+        }
+    }
 }
-checkQuery()
+const updateAlbum = async () => {
+    console.warn("Getting album from SPOTIFY")
+    let responseAlbum = await spotify.api.getAlbum(loadedId)
+    for (let item of responseAlbum.tracks.items) {
+        //@ts-ignore
+        item.album = {
+            images: [...responseAlbum.images]
+        }
+    }
+    album.value = responseAlbum
+    console.log(responseAlbum)
+    checkForLoadTrackId()
+}
 watch(route, async () => {
     if (route.path.startsWith('/album') && typeof route.params.id === 'string' && route.params.id !== loadedId) {
         loadedId = route.params.id
-        album.value = await spotify.api.getAlbum(loadedId);
+        await updateAlbum()
     }
-    checkQuery()
 })
 
-spotify.api.getAlbum(loadedId).then((r: SpotifyApi.SingleAlbumResponse) => {
-    for (let item of r.tracks.items) {
-        //@ts-ignore
-        item.album = {
-            images: [...r.images]
-        }
-    }
-    album.value = r;
-    if (loadTrackId !== '') {
-        let albumTrack = album.value.tracks.items.find(t => t.id === loadTrackId) as SpotifyApi.TrackObjectFull | undefined
-        if (albumTrack && collection.value !== null) {
-            player.load(collection.value, albumTrack)
-        }
-        loadTrackId = ''
-    }
-    console.log("album", r);
-});
+updateAlbum().then()
 const tracks = computed((): SpotifyApi.TrackObjectFull[] => {
     if (album.value === null) return [];
     return album.value.tracks.items as SpotifyApi.TrackObjectFull[];
