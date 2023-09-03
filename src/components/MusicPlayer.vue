@@ -155,6 +155,7 @@ onUnmounted(() => {
     margin-bottom: 15px;
     font-size: 20px;
     font-weight: 300;
+    height:127px;
 }
 
 .music-title {

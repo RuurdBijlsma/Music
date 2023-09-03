@@ -142,9 +142,18 @@ export const usePlayerStore = defineStore('player', () => {
             if (_collection.id === collection.value?.id && track.value && _trackId === trackId.value)
                 loadProgress.value = progress.percent
         })
-        if (isLoading)
+        if (isLoading) {
+            console.warn("Track", track, "is already loading, So I stop")
             return
-        let outPath = await platform.getTrackFile(track.value, events)
+        }
+        let outPath = ''
+        try {
+            outPath = await platform.getTrackFile(track.value, events)
+        } catch (e: any) {
+            console.warn('Track load error', _track, e)
+        } finally {
+            tracksLoading.delete(_trackId)
+        }
         // Check if user hasn't changed track while it was loading
         if (_collection.id === collection.value.id && track.value && _trackId === trackId.value)
             playerElement.src = outPath
@@ -152,7 +161,6 @@ export const usePlayerStore = defineStore('player', () => {
 
         canvas = document.querySelector('.progress-canvas')
 
-        tracksLoading.delete(_trackId)
 
         if (canvas === null) return
         canvas.width = canvasWidth
