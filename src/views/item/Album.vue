@@ -40,21 +40,31 @@ import {useBaseStore} from "../../scripts/store/base";
 import GlowImage from "../../components/GlowImage.vue";
 import TrackList from "../../components/TrackList.vue";
 import CollectionButtons from "../../components/CollectionButtons.vue";
+import {usePlayerStore} from "../../scripts/store/player";
 
 const route = useRoute()
-const base = useBaseStore();
-const spotify = useSpotifyStore();
-const album = ref(null as null | SpotifyApi.AlbumObjectFull);
-let loadedId = route.params.id as string;
+const base = useBaseStore()
+const spotify = useSpotifyStore()
+const player = usePlayerStore()
+const album = ref(null as null | SpotifyApi.AlbumObjectFull)
+let loadedId = route.params.id as string
 const collection = computed(() => {
     if (album.value === null) return null
     return base.itemCollection(album.value)
 })
+
+let loadTrackId = ''
+const checkQuery = () => {
+    if (!route.query.hasOwnProperty('play') || route.query.play === null) return
+    loadTrackId = route.query.play.toString()
+}
+checkQuery()
 watch(route, async () => {
     if (route.path.startsWith('/album') && typeof route.params.id === 'string' && route.params.id !== loadedId) {
         loadedId = route.params.id
         album.value = await spotify.api.getAlbum(loadedId);
     }
+    checkQuery()
 })
 
 spotify.api.getAlbum(loadedId).then((r: SpotifyApi.SingleAlbumResponse) => {
@@ -65,6 +75,13 @@ spotify.api.getAlbum(loadedId).then((r: SpotifyApi.SingleAlbumResponse) => {
         }
     }
     album.value = r;
+    if (loadTrackId !== '') {
+        let albumTrack = album.value.tracks.items.find(t => t.id === loadTrackId) as SpotifyApi.TrackObjectFull | undefined
+        if (albumTrack && collection.value !== null) {
+            player.load(collection.value, albumTrack)
+        }
+        loadTrackId = ''
+    }
     console.log("album", r);
 });
 const tracks = computed((): SpotifyApi.TrackObjectFull[] => {

@@ -1,10 +1,12 @@
 import {defineStore} from 'pinia'
 import {openDB} from "idb";
-import {computed, ref} from "vue";
+import {computed, ref, watch} from "vue";
 import {useTheme} from "vuetify";
 import type {Item} from "../types";
 import {deltaE, hexToRgb} from "../utils";
 import type {ItemCollection} from "../types";
+import {useRouter} from "vue-router";
+import {useSpotifyStore} from "./spotify";
 
 export const baseDb = openDB("base", 1, {
     upgrade(db, oldVersion, newVersion, transaction, event) {
@@ -33,6 +35,7 @@ export const baseDb = openDB("base", 1, {
 
 export const useBaseStore = defineStore('base', () => {
     const theme = useTheme()
+    const spotify = useSpotifyStore()
     const themeColorDark = ref('#FFFFFF')
     const themeColorLight = ref('#000000')
     const themeColor = computed(() => theme.global.name.value === 'dark' ? themeColorDark.value : themeColorLight.value)
@@ -45,6 +48,8 @@ export const useBaseStore = defineStore('base', () => {
         return colorDifference
     })
     const themeTooSimilarToFg = computed(() => contrastToForeground.value < 17)
+
+    const snackbars = ref([] as { open: boolean, text: string, timeout: number }[])
 
     const contextMenu = ref({
         x: 0,
@@ -195,6 +200,23 @@ export const useBaseStore = defineStore('base', () => {
     }
 
     const searchValue = ref("");
+    const router = useRouter()
+    watch(searchValue, async () => {
+        let url = searchValue.value
+        if (url && url.includes('open.spotify.com/')) {
+            let term = url.split('spotify.com/')[1].split('?')[0];
+            let [type, id] = term.split('/');
+            if (type === 'track') {
+                let track = await spotify.api.getTrack(id)
+                console.log(track)
+                await router.push(`/album/${encodeUrlName(track.album.name)}/${track.album.id}?play=${id}`)
+            } else {
+                await router.push(`/${type}/from-url/${id}`)
+            }
+            addSnack('Navigated to Spotify™ link')
+            searchValue.value = ''
+        }
+    })
 
     const setContextMenuItem = (e: MouseEvent, item: any) => {
         contextMenu.value.item = item
@@ -206,6 +228,19 @@ export const useBaseStore = defineStore('base', () => {
     const handleWindowResize = () => pageHeight.value = window.innerHeight;
     const pageHeight = ref(window.innerHeight);
     window.addEventListener('resize', handleWindowResize)
+
+    function addSnack(text: string, timeout = 4000) {
+        let snack = {
+            text,
+            timeout,
+            open: true,
+        }
+        snackbars.value.push(snack)
+        setTimeout(() => {
+            snack.open = false
+            snackbars.value.splice(snackbars.value.indexOf(snack), 1)
+        }, timeout + 500)
+    }
 
     return {
         itemUrl,
@@ -227,5 +262,6 @@ export const useBaseStore = defineStore('base', () => {
         themeTooSimilarToFg,
         pageHeight,
         itemCollection,
+        snackbars,
     }
 })

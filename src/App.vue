@@ -77,12 +77,27 @@
         </div>
         <source-dialog/>
         <item-context-menu/>
+
+
+        <v-snackbar
+            v-for="snack in base.snackbars"
+            :timeout="snack.timeout"
+            v-model="snack.open">
+            {{ snack.text }}
+            <template v-slot:actions>
+                <v-btn variant="text"
+                       @click="snack.open = false">
+                    Dismiss
+                </v-btn>
+            </template>
+        </v-snackbar>
     </v-app>
 </template>
 
 <script setup lang="ts">
 // todo
 // paste spotify url in search balk
+// paste youtube link in search balk
 // playlists, etc. in search functie
 // maak knop om ytdlp te updaten
 // alles kunnen liken
