@@ -32,6 +32,33 @@
                        to="/library"/>
                 <span class="button-text nav-3-text"
                       :class="{active: route.path === '/library'}">Library</span>
+                <v-btn class="nav-4-btn nav-button"
+                       :style="{
+                            transform: playlistsExpanded ? 'rotate(180deg)' : 'rotate(0deg)'
+                       }"
+                       variant="text"
+                       @click="playlistsExpanded = !playlistsExpanded"
+                       :icon="playlistsExpanded ? 'mdi-chevron-up' : 'mdi-playlist-play'"
+                       rounded/>
+                <span class="button-text nav-4-text"
+                      :class="{active: playlistsExpanded}">Playlists</span>
+                <div class="pinned-playlists" :style="{
+                    opacity: playlistsExpanded ? '1' : '0',
+                    transform: playlistsExpanded ? 'scaleY(1) translateY(0%)' : 'scaleY(.7)',
+                    pointerEvents: playlistsExpanded ? 'auto' : 'none'
+                }">
+                    <v-tooltip location="right" :text="playlist.name" v-for="playlist in spotify.library.playlist">
+                        <template v-slot:activator="{ props }">
+                            <v-btn variant="text" v-bind="props" height="64" max-width="64">
+                                <router-link :to="base.itemUrl(playlist)">
+                                    <v-avatar rounded size="50">
+                                        <v-img :src="base.itemImage(playlist)"></v-img>
+                                    </v-avatar>
+                                </router-link>
+                            </v-btn>
+                        </template>
+                    </v-tooltip>
+                </div>
             </div>
             <music-player class="music-player" :style="{
                     transform: player.track === null ? 'translateX(-100%)' : 'translateX(0%)',
@@ -93,6 +120,8 @@ const blurBgSrc = computed(() => {
     if (player.track === null) return initialBg
     return base.itemImage(player.track)
 })
+
+const playlistsExpanded = ref(false)
 
 const transitionBgSrc = ref(initialBg)
 const transitionDuration = ref("0s")
@@ -221,6 +250,7 @@ html, body {
     background-color: rgba(var(--v-theme-background), 0.5);
 }
 
+
 .nav-button {
     transform: translateY(0);
 }
@@ -258,9 +288,28 @@ html, body {
     transform: translateY(0px);
 }
 
+.nav-4-btn:hover + .nav-4-text {
+    opacity: .6;
+    transform: translateY(0px);
+}
+
 .button-text.active {
     opacity: .8;
     transform: translateY(0px);
+}
+
+.pinned-playlists {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
+    transform-origin: top center;
+    transition: transform 0.3s, opacity 0.2s;
+    overflow-y: auto;
+}
+
+.pinned-playlists::-webkit-scrollbar {
+    width: 0;
 }
 
 .router-view::-webkit-scrollbar-track {
@@ -318,6 +367,6 @@ a[no-style]:hover {
 }
 
 .v-btn--icon {
-    transition: color 1s, caret-color 1s !important;
+    transition: transform 0.3s, color 1s, caret-color 1s !important;
 }
 </style>

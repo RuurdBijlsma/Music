@@ -98,9 +98,9 @@ export const useSpotifyStore = defineStore('spotify', () => {
         ])
 
         if (dbLibrary)
-            library.value = dbLibrary;
+            library.value = dbLibrary
         if (dbView)
-            view.value = dbView;
+            view.value = dbView
 
         if (localStorage.getItem('secret') !== null) {
             secret.value = localStorage.secret

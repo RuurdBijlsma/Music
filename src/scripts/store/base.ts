@@ -165,7 +165,7 @@ export const useBaseStore = defineStore('base', () => {
                 buttonText: 'Playlist',
                 to: itemUrl(item),
             } as ItemCollection
-        }else if(item.type==='artist'){
+        } else if (item.type === 'artist') {
             return {
                 id: item.id ?? 'artist',
                 tracks: tracks ?? [],
@@ -175,7 +175,7 @@ export const useBaseStore = defineStore('base', () => {
                 buttonText: 'Artist',
                 to: itemUrl(item)
             } as ItemCollection
-        } else if(item.type==='album'){
+        } else if (item.type === 'album') {
             return {
                 id: item.id ?? 'album',
                 tracks: item.tracks.items ?? [],

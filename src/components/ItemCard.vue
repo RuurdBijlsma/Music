@@ -1,10 +1,11 @@
 <template>
-    <router-link no-style :to="base.itemUrl(item)" :class="{round: item.type === 'artist'}">
+    <router-link no-style :to="base.itemUrl(item)" :class="{round: item.type === 'artist'}"
+                 @click.right="base.setContextMenuItem($event, item)">
         <div class="image"
              :style="{backgroundImage: `url(${base.itemImage(item)})`}"/>
         <div class="info mt-2">
             <p class="title" v-if="!hideName">{{ item.name }}</p>
-            <p class="description" v-if="item.type === 'album'">{{base.albumString(item)}}</p>
+            <p class="description" v-if="item.type === 'album'">{{ base.albumString(item) }}</p>
             <p class="description" v-else v-html="base.itemDescription(item)"></p>
         </div>
     </router-link>

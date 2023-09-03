@@ -25,7 +25,7 @@
 </template>
 
 <script setup lang="ts">
-import {computed, onMounted, ref, watch} from "vue";
+import {computed, onMounted, ref} from "vue";
 import type {PropType} from "vue";
 import {useBaseStore} from "../scripts/store/base";
 import {useSpotifyStore} from "../scripts/store/spotify";
@@ -47,11 +47,11 @@ const spotify = useSpotifyStore()
 const platform = usePlatformStore()
 const isDownloaded = ref(false)
 onMounted(() => {
-    console.log("MOUNTED")
-    platform.trackIsDownloaded(props.item as SpotifyApi.TrackObjectFull).then(v => {
-        console.log("is downloaded",v )
-        isDownloaded.value = v
-    })
+    if (props.item.type === 'track')
+        platform.trackIsDownloaded(props.item as SpotifyApi.TrackObjectFull).then(v => {
+            console.log("is downloaded", v)
+            isDownloaded.value = v
+        })
 })
 
 async function deleteTrack() {
@@ -64,6 +64,8 @@ const descriptor = computed(() => {
     if (item.type === 'track') {
         return `${item.name} - ${item.artists.map(a => a.name).join(', ')}`
     }
+    if (item.type === 'playlist')
+        return item.name
 })
 
 const isLiked = computed(() => spotify.checkLiked(props.item.type, props.item.id))

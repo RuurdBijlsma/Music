@@ -1,5 +1,5 @@
 <template>
-    <div class="highlight-featured mr-2">
+    <div class="highlight-featured mr-2" @click.right="base.setContextMenuItem($event, item)">
         <div class="card-info">
             <div class="card-text">
                 <router-link no-style :to="base.itemUrl(item)">
