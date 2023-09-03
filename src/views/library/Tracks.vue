@@ -5,7 +5,7 @@
             Track{{ tracks.length === 1 ? '' : 's' }}
             • {{ base.approximateDuration((totalDurationMs)) }}
             <v-btn v-show="trackLoadProgress === 100" @click="spotify.loadLikedTracks" icon="mdi-refresh"
-                   density="compact" variant="plain" size="10" class="refresh-button"/>
+                   density="compact" variant="plain" size="25" class="refresh-button"/>
         </p>
         <collection-buttons :collection="collection" show-filter/>
         <v-progress-linear :indeterminate="trackLoadProgress === 0"
@@ -98,7 +98,6 @@ const tracksAmount = computed(() => {
 }
 
 .refresh-button {
-    margin-left: 20px;
-    margin-top: -8px;
+    margin-left: 5px;
 }
 </style>

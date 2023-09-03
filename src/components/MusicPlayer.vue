@@ -17,7 +17,7 @@
                 <div class="music-progress">
                     <div class="music-time-current">{{ base.msToReadable(player.currentTime * 1000) }}</div>
                     <div class="progress-container">
-                        <progress-bar></progress-bar>
+                        <progress-bar/>
                     </div>
                     <div class="music-time-total">{{ base.msToReadable(player.duration * 1000) }}</div>
                 </div>
