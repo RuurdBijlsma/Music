@@ -58,6 +58,17 @@
                               :prepend-icon="player.volume < .2 ? 'mdi-volume-low' : player.volume < .7 ? 'mdi-volume-medium' : 'mdi-volume-high'"
                               hide-details :min="0" :max="1"></v-slider>
                 </div>
+                <v-menu>
+                    <template v-slot:activator="{ props }">
+                        <v-btn class="track-options ml-2"
+                               v-bind="props"
+                               rounded
+                               variant="text">
+                            <v-icon>mdi-dots-horizontal</v-icon>
+                        </v-btn>
+                    </template>
+                    <item-menu :item="player.track"/>
+                </v-menu>
             </div>
         </template>
     </div>
@@ -72,6 +83,7 @@ import ArtistsSpan from "./ArtistsSpan.vue";
 import ProgressBar from "./ProgressBar.vue";
 import LikeButton from "./LikeButton.vue";
 import QueueButton from "./QueueButton.vue";
+import ItemMenu from "./ItemMenu.vue";
 
 const player = usePlayerStore()
 const base = useBaseStore()
