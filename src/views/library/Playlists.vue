@@ -1,14 +1,14 @@
 <template>
     <div class="playlists pt-4">
-        <item-card class="mb-4" v-for="playlist in spotify.library.playlist" :item="playlist"/>
+        <item-card class="mb-4" v-for="playlist in library.saved.playlist" :item="playlist"/>
     </div>
 </template>
 
 <script setup lang="ts">
-import {useSpotifyStore} from "../../scripts/store/spotify";
+import {useLibraryStore} from "../../scripts/store/library";
 import ItemCard from "../../components/ItemCard.vue";
 
-const spotify = useSpotifyStore()
+const library = useLibraryStore()
 </script>
 
 <style scoped lang="scss">

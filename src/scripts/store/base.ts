@@ -1,12 +1,15 @@
 import {defineStore} from 'pinia'
 import {openDB} from "idb";
+import type {IDBPDatabase} from "idb";
 import {computed, ref, watch} from "vue";
 import {useTheme} from "vuetify";
 import type {Item} from "../types";
 import {deltaE, hexToRgb} from "../utils";
 import type {ItemCollection} from "../types";
 import {useRouter} from "vue-router";
-import {useSpotifyStore} from "./spotify";
+import {useSpotifyApiStore} from "./spotify-api";
+import {EventEmitter} from "events";
+import {promisify} from "util";
 
 export const baseDb = openDB("base", 1, {
     upgrade(db, oldVersion, newVersion, transaction, event) {
@@ -35,7 +38,14 @@ export const baseDb = openDB("base", 1, {
 
 export const useBaseStore = defineStore('base', () => {
     const theme = useTheme()
-    const spotify = useSpotifyStore()
+    const spotify = useSpotifyApiStore()
+    const dbLoaded = ref(false)
+    const events = new EventEmitter()
+    let db: IDBPDatabase
+    baseDb.then(r => {
+        dbLoaded.value = true
+        db = r
+    })
     const themeColorDark = ref('#FFFFFF')
     const themeColorLight = ref('#000000')
     const themeColor = computed(() => theme.global.name.value === 'dark' ? themeColorDark.value : themeColorLight.value)
@@ -208,7 +218,7 @@ export const useBaseStore = defineStore('base', () => {
             let [type, id] = term.split('/');
             console.log({type, id})
             if (type === 'track') {
-                let track = await spotify.api.getTrack(id)
+                let track = await spotify.getTrack(id)
                 console.log(track)
                 await router.push(`/album/${encodeUrlName(track.album.name)}/${track.album.id}?play=${id}`)
             } else {
@@ -243,6 +253,8 @@ export const useBaseStore = defineStore('base', () => {
         }, timeout + 500)
     }
 
+    const waitFor = (name: string) => new Promise(resolve => events.once(name, resolve))
+
     return {
         itemUrl,
         itemImage,
@@ -264,5 +276,8 @@ export const useBaseStore = defineStore('base', () => {
         pageHeight,
         itemCollection,
         snackbars,
+        dbLoaded,
+        events,
+        waitFor,
     }
 })

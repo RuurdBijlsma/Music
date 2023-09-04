@@ -33,7 +33,7 @@
 </template>
 
 <script setup lang="ts">
-import {useSpotifyStore} from "../../scripts/store/spotify";
+import {useLibraryStore} from "../../scripts/store/library";
 import {computed, ref, toRaw, watch} from "vue";
 import {useRoute, useRouter} from "vue-router";
 import {useBaseStore} from "../../scripts/store/base";
@@ -41,11 +41,13 @@ import GlowImage from "../../components/GlowImage.vue";
 import TrackList from "../../components/TrackList.vue";
 import CollectionButtons from "../../components/CollectionButtons.vue";
 import {usePlayerStore} from "../../scripts/store/player";
+import {useSpotifyApiStore} from "../../scripts/store/spotify-api";
 
 const route = useRoute()
 const router = useRouter()
 const base = useBaseStore()
-const spotify = useSpotifyStore()
+const library = useLibraryStore()
+const spotify =useSpotifyApiStore()
 const player = usePlayerStore()
 const album = ref(null as null | SpotifyApi.AlbumObjectFull)
 let loadedId = route.params.id as string
@@ -69,7 +71,7 @@ const checkForLoadTrackId = () => {
 }
 const updateAlbum = async () => {
     console.warn("Getting album from SPOTIFY")
-    let responseAlbum = await spotify.api.getAlbum(loadedId)
+    let responseAlbum = await spotify.getAlbum(loadedId)
     for (let item of responseAlbum.tracks.items) {
         //@ts-ignore
         item.album = {

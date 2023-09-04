@@ -4,7 +4,7 @@
             {{ tracksAmount }}
             Track{{ tracks.length === 1 ? '' : 's' }}
             • {{ base.approximateDuration((totalDurationMs)) }}
-            <v-btn v-show="trackLoadProgress === 100" @click="spotify.loadLikedTracks" icon="mdi-refresh"
+            <v-btn v-show="trackLoadProgress === 100" @click="library.loadLikedTracks" icon="mdi-refresh"
                    density="compact" variant="plain" size="25" class="refresh-button"/>
         </p>
         <collection-buttons :collection="collection" show-filter/>
@@ -21,7 +21,7 @@
 </template>
 
 <script setup lang="ts">
-import {useSpotifyStore} from "../../scripts/store/spotify";
+import {useLibraryStore} from "../../scripts/store/library";
 import {useBaseStore} from "../../scripts/store/base";
 import {computed, toRaw} from "vue";
 import TrackListVirtual from "../../components/TrackListVirtual.vue";
@@ -29,8 +29,8 @@ import {storeToRefs} from "pinia";
 import type {ItemCollection} from "../../scripts/types";
 import CollectionButtons from "../../components/CollectionButtons.vue";
 
-const spotify = useSpotifyStore()
-const {tracks} = storeToRefs(spotify)
+const library = useLibraryStore()
+const {tracks} = storeToRefs(library)
 const base = useBaseStore()
 
 const collection = computed(() => {
@@ -41,8 +41,8 @@ const collection = computed(() => {
         tracks: toRaw(tracks.value).map(t => t.track),
         type: 'liked',
         id: 'liked',
-        loaded: spotify.likedTracksLoaded,
-        total: spotify.likedTracksTotal,
+        loaded: library.likedTracksLoaded,
+        total: library.likedTracksTotal,
         name: "Liked tracks",
         buttonText: "Library",
         to: '/library',
@@ -54,7 +54,7 @@ setTimeout(() => {
     // if last track reload is 60 or more minutes ago then reload tracks
     if (localStorage.getItem('lastTracksLoad') === null || Date.now() - 1000 * 60 * 60 > +localStorage.lastTracksLoad) {
         console.log("Reloading tracks!")
-        spotify.loadLikedTracks()
+        library.loadLikedTracks()
     } else {
         console.log("No need to reload tracks, they were refreshed less than 10 minutes ago")
     }
@@ -66,13 +66,13 @@ const totalDurationMs = computed(() => {
     return tracks.value.reduce((a, b) => a + b.track.duration_ms, 0);
 });
 // const trackLoadProgress = computed(() => 100)
-const trackLoadProgress = computed(() => 100 * spotify.likedTracksLoaded / spotify.likedTracksTotal)
+const trackLoadProgress = computed(() => 100 * library.likedTracksLoaded / library.likedTracksTotal)
 
 const tracksAmount = computed(() => {
     if (trackLoadProgress.value === 100) {
         return tracks.value.length.toLocaleString()
     }
-    return `${spotify.likedTracksLoaded.toLocaleString()} / ${spotify.likedTracksTotal.toLocaleString()}`
+    return `${library.likedTracksLoaded.toLocaleString()} / ${library.likedTracksTotal.toLocaleString()}`
 })
 </script>
 

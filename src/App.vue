@@ -10,7 +10,7 @@
         }"></div>
         <div class="main">
             <top-menu class="top-menu"/>
-            <search-suggestions/>
+            <search-suggestions/>x
             <div class="fake-top-menu"/>
             <div class="left-nav">
                 <v-btn class="nav-1-btn nav-button"
@@ -47,7 +47,7 @@
                     transform: playlistsExpanded ? 'scaleY(1) translateY(0%)' : 'scaleY(.7)',
                     pointerEvents: playlistsExpanded ? 'auto' : 'none'
                 }">
-                    <v-tooltip location="right" :text="playlist.name" v-for="playlist in spotify.library.playlist">
+                    <v-tooltip location="right" :text="playlist.name" v-for="playlist in library.saved.playlist">
                         <template v-slot:activator="{ props }">
                             <v-btn variant="text" v-bind="props" height="64" max-width="64">
                                 <router-link :to="base.itemUrl(playlist)">
@@ -63,8 +63,8 @@
             <music-player class="music-player" :style="{
                     transform: player.track === null ? 'translateX(-100%)' : 'translateX(0%)',
                     transitionDuration: musicPlayerTransitionDuration,
-            }" v-if="spotify.dbLoaded"/>
-            <div class="router-view" v-if="spotify.dbLoaded" :style="{
+            }" v-if="base.dbLoaded"/>
+            <div class="router-view" v-if="base.dbLoaded" :style="{
                     width: player.track === null ? 'calc(100% - 90px)' : '50%',
                     transitionDuration: musicPlayerTransitionDuration,
                 }">
@@ -115,7 +115,7 @@
 
 import TopMenu from "./components/TopMenu.vue";
 import MusicPlayer from "./components/MusicPlayer.vue";
-import {useSpotifyStore} from "./scripts/store/spotify";
+import {useLibraryStore} from "./scripts/store/library";
 import {useTheme} from "vuetify";
 import {useRoute} from "vue-router";
 import SearchSuggestions from "./components/SearchSuggestions.vue";
@@ -126,7 +126,7 @@ import ItemContextMenu from "./components/ItemContextMenu.vue";
 import SourceDialog from "./components/SourceDialog.vue";
 
 const theme = useTheme()
-const spotify = useSpotifyStore()
+const library = useLibraryStore()
 const route = useRoute()
 const base = useBaseStore()
 const player = usePlayerStore()
@@ -165,7 +165,7 @@ watch(blurBgSrc, () => {
     }, 3000)
 })
 
-console.log('spotify.library', spotify.library);
+console.log('library.saved', library.saved);
 console.log('theme', theme);
 
 </script>

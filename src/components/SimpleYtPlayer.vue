@@ -20,8 +20,8 @@ import SimpleProgressBar from "./SimpleProgressBar.vue";
 import {useSearchStore} from "../scripts/store/search";
 import {onUnmounted, ref} from "vue";
 import type {PropType} from 'vue'
-import EventEmitter from "events";
 import {usePlatformStore} from "../scripts/store/electron";
+import {useBaseStore} from "../scripts/store/base";
 
 defineProps({
     track: {
@@ -32,6 +32,7 @@ defineProps({
 
 const search = useSearchStore()
 const platform = usePlatformStore()
+const base = useBaseStore()
 
 const currentTime = ref(0)
 const duration = ref(1)
@@ -41,7 +42,6 @@ const loading = ref(false)
 const isLoaded = ref(false)
 
 const playerElement = createAudioElement()
-const events = new EventEmitter()
 
 onUnmounted(() => {
     playerElement.src = ''
@@ -76,10 +76,17 @@ async function load(track: SpotifyApi.TrackObjectFull) {
     loadProgress.value = NaN
     const id = track.id
 
-    events.on(id + 'progress', progress => {
+    let onProgress: (p: { percent: number }) => void
+    onProgress = progress => {
         loadProgress.value = progress.percent
-    })
-    playerElement.src = await platform.getTrackFile(track, events)
+        console.log({percent: progress.percent})
+        console.error("TODO CHECK IF THIS PERCENT IS 1 or 100")
+        if (progress.percent === 100) {
+            base.events.off(id + 'progress', onProgress)
+        }
+    }
+    base.events.on(id + 'progress', onProgress)
+    playerElement.src = await platform.getTrackFile(track)
     console.log(playerElement)
 }
 

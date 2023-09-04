@@ -24,13 +24,13 @@ import {onBeforeUnmount, onMounted, onUnmounted, ref, watch} from "vue";
 import {clearInterval} from "timers";
 import {useBaseStore} from "../scripts/store/base";
 import {storeToRefs} from "pinia";
-import {useSpotifyStore} from "../scripts/store/spotify";
+import {useLibraryStore} from "../scripts/store/library";
 import {useSearchStore} from "../scripts/store/search";
 import SearchSuggestionSection from "./SearchSuggestionSection.vue";
 
 
 const base = useBaseStore()
-const spotify = useSpotifyStore()
+const library = useLibraryStore()
 const search = useSearchStore()
 const showSuggestions = ref(false)
 document.addEventListener('mousedown', onClick, false);

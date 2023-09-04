@@ -1,24 +1,25 @@
 import {defineStore} from 'pinia'
 import electron, {ipcRenderer} from "electron";
-import type {AuthToken} from "./spotify";
-import {useSpotifyStore} from "./spotify";
+import {useLibraryStore} from "./library";
 // @ts-ignore
 import anzip from 'anzip';
 import http from "http";
 import * as fs from "fs/promises";
 import path from 'path'
-import type EventEmitter from "events";
 import {ref} from "vue";
 //@ts-ignore
 import fileNamify from 'filenamify';
 import {baseDb, useBaseStore} from "./base";
 import type {IDBPDatabase} from "idb";
 import {usePlayerStore} from "./player";
+import type {AuthToken} from "./spotify-auth";
+import {useSpotifyAuthStore} from "./spotify-auth";
 
 
 const express = window.require('express')
 export const usePlatformStore = defineStore('platform', () => {
-    const spotify = useSpotifyStore()
+    const library = useLibraryStore()
+    const spotifyAuth = useSpotifyAuthStore()
     const base = useBaseStore()
     const player = usePlayerStore()
 
@@ -39,10 +40,10 @@ export const usePlatformStore = defineStore('platform', () => {
     ipcRenderer.on('invoke', async (_, channel, data) => {
         if (channel === 'toggleFavorite') {
             if (player.track !== null) {
-                let added = await spotify.toggleLike(player.track)
+                let added = await library.toggleLike(player.track)
                 await ipcRenderer.send('reply', channel, added)
 
-                let speech = added ? 'Added to favorites' : 'Removed from favorites';
+                let speech = added ? 'Added to liked' : 'Removed from liked';
                 let voices = speechSynthesis.getVoices();
                 let voice = voices[Math.floor(Math.random() * voices.length)];
                 let utterance = new SpeechSynthesisUtterance(speech);
@@ -56,16 +57,16 @@ export const usePlatformStore = defineStore('platform', () => {
     ipcRenderer.on('pause', () => player.pause())
     ipcRenderer.on('skip', (_, n) => player.skip(n))
 
-    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
-        setPlatformPlaying(player.playing)
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+        return setPlatformPlaying(player.playing)
     });
 
     function setPlatformPlaying(playing: boolean) {
-        ipcRenderer.invoke('setPlatformPlaying', playing, window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)
+        return ipcRenderer.invoke('setPlatformPlaying', playing, window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)
     }
 
     function stopPlatformPlaying() {
-        ipcRenderer.invoke('stopPlatformPlaying')
+        return ipcRenderer.invoke('stopPlatformPlaying')
     }
 
     async function deleteFile(filename: string) {
@@ -99,7 +100,7 @@ export const usePlatformStore = defineStore('platform', () => {
         return {cacheKey: `PTI-${filename}`, filename, outPath, query}
     }
 
-    async function getTrackFile(track: SpotifyApi.TrackObjectFull, events: EventEmitter) {
+    async function getTrackFile(track: SpotifyApi.TrackObjectFull) {
         const isYouTubeTrack = track.id.startsWith('yt-')
         let hasImage = track.hasOwnProperty('album') && track.album.images.length > 0;
         if (hasImage) {
@@ -116,7 +117,7 @@ export const usePlatformStore = defineStore('platform', () => {
         if (!await checkFileExists(outPath)) {
             ipcRenderer.on(filename + 'progress', (_, progress) => {
                 console.log("PROGERSS", progress.percent)
-                events.emit(track.id + 'progress', progress)
+                base.events.emit(track.id + 'progress', progress)
             })
             let tags: any = {
                 title: track.name,
@@ -204,14 +205,14 @@ export const usePlatformStore = defineStore('platform', () => {
 
     function firstLogin(): Promise<AuthToken> {
         return new Promise(async resolve => {
-            if (!spotify.hasCredentials) {
+            if (!spotifyAuth.hasCredentials) {
                 console.warn("Can't log in, keys are not set");
                 return;
             }
             const port = 38900;
             const redirectUrl = 'http://localhost:' + port;
-            const url = `https://accounts.spotify.com/authorize?client_id=${spotify.clientId}` +
-                `&response_type=code&redirect_uri=${redirectUrl}&scope=${encodeURIComponent(spotify.requestedScopes)}`;
+            const url = `https://accounts.spotify.com/authorize?client_id=${spotifyAuth.clientId}` +
+                `&response_type=code&redirect_uri=${redirectUrl}&scope=${encodeURIComponent(spotifyAuth.requestedScopes)}`;
             let {shell} = electron;
             await shell.openExternal(url);
 
@@ -226,7 +227,7 @@ export const usePlatformStore = defineStore('platform', () => {
                     server.close()
                     server = null;
                     console.log("Stopped listening on *:" + port);
-                    let auth = await spotify.getAuthByCode(redirectUrl, req.query.code);
+                    let auth = await spotifyAuth.getAuthByCode(redirectUrl, req.query.code);
                     ipcRenderer.send('focus-window');
                     resolve(auth);
                 }

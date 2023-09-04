@@ -10,17 +10,19 @@
 </template>
 
 <script setup lang="ts">
-import {useSpotifyStore} from "../../scripts/store/spotify";
+import {useLibraryStore} from "../../scripts/store/library";
 import {computed, ref, toRaw, watch} from "vue";
 import {useRoute} from "vue-router";
 import {useBaseStore} from "../../scripts/store/base";
 import TrackListVirtual from "../../components/TrackListVirtual.vue";
 import TrackList from "../../components/TrackList.vue";
 import PlaylistHeader from "../../components/PlaylistHeader.vue";
+import {useSpotifyApiStore} from "../../scripts/store/spotify-api";
 
 const route = useRoute()
-const base = useBaseStore();
-const spotify = useSpotifyStore()
+const base = useBaseStore()
+const library = useLibraryStore()
+const spotify = useSpotifyApiStore()
 const playlist = ref(null as null | SpotifyApi.PlaylistObjectFull);
 
 const collection = computed(() => {

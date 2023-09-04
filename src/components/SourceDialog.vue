@@ -50,18 +50,18 @@ import {usePlayerStore} from "../scripts/store/player";
 import {watch} from "vue";
 import {storeToRefs} from "pinia";
 import SimpleYtPlayer from "./SimpleYtPlayer.vue";
-import {useSpotifyStore} from "../scripts/store/spotify";
+import {useLibraryStore} from "../scripts/store/library";
 
 const theme = useTheme()
 const search = useSearchStore()
 const base = useBaseStore()
 const player = usePlayerStore()
-const spotify = useSpotifyStore()
+const library = useLibraryStore()
 const {sourceSelectedId} = storeToRefs(base)
 
 function activate(item: any) {
     sourceSelectedId.value = item.id
-    spotify.activateSource(item.id)
+    library.activateSource(item.id)
 }
 
 console.log('ssid', sourceSelectedId.value)

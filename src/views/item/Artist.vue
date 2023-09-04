@@ -49,7 +49,7 @@
 </template>
 
 <script setup lang="ts">
-import {useSpotifyStore} from "../../scripts/store/spotify";
+import {useLibraryStore} from "../../scripts/store/library";
 import {computed, ref, watch} from "vue";
 import {useRoute} from "vue-router";
 import {baseDb, useBaseStore} from "../../scripts/store/base";
@@ -59,10 +59,12 @@ import HighlightCard from "../../components/HighlightCard.vue";
 import HorizontalScroller from "../../components/HorizontalScroller.vue";
 import TrackList from "../../components/TrackList.vue";
 import CollectionButtons from "../../components/CollectionButtons.vue";
+import {useSpotifyApiStore} from "../../scripts/store/spotify-api";
 
 const route = useRoute()
 const base = useBaseStore();
-const spotify = useSpotifyStore();
+const library = useLibraryStore()
+const spotify = useSpotifyApiStore()
 
 const artist = ref(null as null | SpotifyApi.ArtistObjectFull)
 const albums = ref(null as null | SpotifyApi.AlbumObjectFull[])
@@ -89,19 +91,19 @@ watch(route, async () => {
 
 async function reloadArtist(id: string) {
     await baseDb
-    spotify.api.getArtist(id).then(r => {
+    spotify.getArtist(id).then(r => {
         artist.value = r;
         console.log("Artist", r);
     });
-    spotify.api.getArtistAlbums(id).then(r => {
+    spotify.getArtistAlbums(id).then(r => {
         albums.value = r.items as SpotifyApi.AlbumObjectFull[]
         console.log("getArtistAlbums", r);
     });
-    spotify.api.getArtistRelatedArtists(id).then(r => {
+    spotify.getArtistRelatedArtists(id).then(r => {
         relatedArtists.value = r.artists;
         console.log("getArtistRelatedArtists", r);
     });
-    spotify.api.getArtistTopTracks(id, spotify.userInfo.country).then(r => {
+    spotify.getArtistTopTracks(id).then(r => {
         topTracks.value = r.tracks;
         console.log("getArtistTopTracks", r);
     });

@@ -10,10 +10,10 @@ import {useBaseStore} from "../scripts/store/base";
 import {computed, ref} from "vue";
 import type {Item} from "../scripts/types";
 import type {PropType} from 'vue'
-import {useSpotifyStore} from "../scripts/store/spotify";
+import {useLibraryStore} from "../scripts/store/library";
 
 const base = useBaseStore()
-const spotify = useSpotifyStore()
+const library = useLibraryStore()
 
 const props = defineProps({
     item: {
@@ -30,7 +30,7 @@ const props = defineProps({
     }
 })
 
-const isLiked = computed(() => spotify.checkLiked(props.item.type, props.item.id))
+const isLiked = computed(() => library.checkLiked(props.item.type, props.item.id))
 const color = computed(() => props.variant !== 'no-theme' && (props.variant === 'fill' || isLiked.value) ? base.themeColor : 'default')
 const fill = computed(() => isLiked.value && (props.variant !== 'color' || base.themeTooSimilarToFg))
 
@@ -38,7 +38,7 @@ let likedLoading = ref(false)
 
 async function toggleLike() {
     likedLoading.value = true
-    await spotify.toggleLike(props.item)
+    await library.toggleLike(props.item)
     likedLoading.value = false
 }
 </script>

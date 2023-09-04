@@ -1,20 +1,17 @@
 import {defineStore} from 'pinia'
 import {usePlatformStore} from "./electron";
 import {computed, ref, toRaw, watch} from "vue";
-import EventEmitter from "events";
 import {baseDb, useBaseStore} from "./base";
 import type {IDBPDatabase} from "idb";
 import {useTheme} from "vuetify";
 import type {ItemCollection} from "../types";
 import {shuffleArray} from "../utils";
 
-const events = new EventEmitter()
-
 
 export const usePlayerStore = defineStore('player', () => {
     const base = useBaseStore()
     const theme = useTheme()
-    const platform = usePlatformStore();
+    const platform = usePlatformStore()
     let db: IDBPDatabase
     baseDb.then(async r => {
         db = r
@@ -137,18 +134,25 @@ export const usePlayerStore = defineStore('player', () => {
             }
         }
 
-        events.on(_trackId + 'progress', progress => {
+        let onProgress: (p: { percent: number }) => void
+        onProgress = (progress) => {
             // Check if user hasn't changed track while it was progressing
-            if (_collection.id === collection.value?.id && track.value && _trackId === trackId.value)
+            if (_collection.id === collection.value?.id && track.value && _trackId === trackId.value) {
                 loadProgress.value = progress.percent
-        })
+                console.log(progress, loadProgress.value)
+                if (progress.percent === 100) {
+                    base.events.off(_trackId + 'progress', onProgress)
+                }
+            }
+        }
+        base.events.on(_trackId + 'progress', onProgress)
         if (isLoading) {
             console.warn("Track", track, "is already loading, So I stop")
             return
         }
         let outPath = ''
         try {
-            outPath = await platform.getTrackFile(_track, events)
+            outPath = await platform.getTrackFile(_track)
         } catch (e: any) {
             console.warn('Track load error', _track, e)
         } finally {

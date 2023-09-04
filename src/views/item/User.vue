@@ -24,17 +24,18 @@
 </template>
 
 <script setup lang="ts">
-import {useSpotifyStore} from "../../scripts/store/spotify";
+import {useLibraryStore} from "../../scripts/store/library";
 import {computed, ref, watch} from "vue";
 import {useRoute} from "vue-router";
 import {useBaseStore} from "../../scripts/store/base";
 import GlowImage from "../../components/GlowImage.vue";
 import ItemCard from "../../components/ItemCard.vue";
-import HighlightCard from "../../components/HighlightCard.vue";
+import {useSpotifyApiStore} from "../../scripts/store/spotify-api";
 
 const route = useRoute()
 const base = useBaseStore();
-const spotify = useSpotifyStore();
+const library = useLibraryStore()
+const spotify = useSpotifyApiStore()
 
 const user = ref(null as null | SpotifyApi.UserProfileResponse)
 const playlists = ref(null as null | SpotifyApi.PlaylistObjectFull[]);
@@ -62,12 +63,12 @@ const userImage = computed(() => {
 function reloadUser() {
     let id = loadedId;
     if (id === '')
-        id = spotify.userInfo.id
-    spotify.api.getUser(id).then(r => {
+        id = library.userInfo.id
+    spotify.getUser(id).then(r => {
         user.value = r;
         console.log("User", r);
     });
-    spotify.api.getUserPlaylists(id).then(r => {
+    spotify.getUserPlaylists(id).then(r => {
         playlists.value = r.items as SpotifyApi.PlaylistObjectFull[]
         console.log("getUserPlaylists", r);
     });

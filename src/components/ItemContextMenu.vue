@@ -8,13 +8,13 @@
 
 <script setup lang="ts">
 import {useBaseStore} from "../scripts/store/base";
-import {useSpotifyStore} from "../scripts/store/spotify";
+import {useLibraryStore} from "../scripts/store/library";
 import {storeToRefs} from "pinia";
 import ItemMenu from "./ItemMenu.vue";
 import {onMounted, onUnmounted} from "vue";
 
 const base = useBaseStore()
-const spotify = useSpotifyStore()
+const library = useLibraryStore()
 const {contextMenu} = storeToRefs(base)
 
 const onBlur = () => contextMenu.value.show = false

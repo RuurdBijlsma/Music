@@ -1,43 +1,29 @@
 import {defineStore} from 'pinia'
-import {computed, ref, toRaw, watch} from "vue";
-import type {Ref} from 'vue';
+import {ref, toRaw} from "vue";
 import {baseDb, useBaseStore} from './base'
-import SpotifyWebApi from "spotify-web-api-js";
-import EventEmitter from 'events';
 import {usePlatformStore} from "./electron";
 import type {IDBPDatabase} from "idb";
 import type {ExtendedPlaylistTrack, Item, ItemType} from "../types";
 import {usePlayerStore} from "./player";
+import {useSpotifyApiStore} from "./spotify-api";
+import {useSpotifyAuthStore} from "./spotify-auth";
 
-export interface AuthToken {
-    code: null | string,
-    access: null | string,
-    refresh: null | string,
-    expiryDate: null | number,
-}
 
-export const useSpotifyStore = defineStore('spotify', () => {
+export const useLibraryStore = defineStore('library', () => {
     const platform = usePlatformStore()
     const base = useBaseStore()
     const player = usePlayerStore()
-    let db: IDBPDatabase;
+    const spotify = useSpotifyApiStore()
+    const spotifyAuth = useSpotifyAuthStore()
+    let db: IDBPDatabase
     baseDb.then(r => {
         db = r
         loadValues().then(() => {
             console.log("Loaded idb values into store", performance.now())
-        });
-    });
+        })
+    })
 
     // Spotify UI variables
-    const dbLoaded = ref(false);
-    const secret = ref('')
-    const clientId = ref('')
-    let tokens: Ref<AuthToken> = ref({
-        code: null,
-        access: null,
-        refresh: null,
-        expiryDate: null,
-    })
     const userInfo = ref({
         id: '',
         name: '',
@@ -46,17 +32,8 @@ export const useSpotifyStore = defineStore('spotify', () => {
         followers: 0,
         avatar: 'img/no-user.jpg',
     })
-    const hasCredentials = computed(() =>
-        secret.value.length === 32 && clientId.value.length === 32
-    )
-    const isLoggedIn = computed(() =>
-        tokens.value.code !== null &&
-        tokens.value.access !== null &&
-        tokens.value.refresh !== null &&
-        tokens.value.expiryDate !== null
-    )
 
-    const library = ref({
+    const saved = ref({
         playlist: [] as SpotifyApi.PlaylistObjectFull[],
         artist: [] as SpotifyApi.ArtistObjectFull[],
         album: [] as SpotifyApi.AlbumObjectFull[],
@@ -92,180 +69,22 @@ export const useSpotifyStore = defineStore('spotify', () => {
     // IndexedDB persistent storage
     async function loadValues() {
         console.log("Loading db value start", performance.now())
-        let [dbLibrary, dbView] = await Promise.all([
-            db.get('spotify', 'library'),
+        let [dbSaved, dbView] = await Promise.all([
+            db.get('spotify', 'saved'),
             db.get('spotify', 'view'),
         ])
 
-        if (dbLibrary)
-            library.value = dbLibrary
+        if (dbSaved)
+            saved.value = dbSaved
         if (dbView)
             view.value = dbView
 
-        if (localStorage.getItem('secret') !== null) {
-            secret.value = localStorage.secret
-            console.log("[LOAD] secret.value = " + localStorage.secret)
-        }
-        if (localStorage.getItem('clientId') !== null) {
-            clientId.value = localStorage.clientId
-            console.log("[LOAD] clientId.value = " + localStorage.clientId)
-        }
         if (localStorage.getItem('userInfo') !== null)
             userInfo.value = JSON.parse(localStorage.userInfo)
-        if (localStorage.getItem('tokens') !== null) {
-            tokens.value = JSON.parse(localStorage.tokens)
-            console.log("[LOAD] tokens.value = ", JSON.parse(localStorage.tokens))
-            checkAuth().then()
-        }
-
-        dbLoaded.value = true;
         console.log("Loading db value end", performance.now())
     }
 
-    watch(secret, async () => {
-        localStorage.secret = secret.value
-        console.log("[WATCH] localStorage.secret = " + secret.value)
-    })
-    watch(clientId, async () => {
-        localStorage.clientId = clientId.value
-        console.log("[WATCH] localStorage.clientId = " + clientId.value)
-    })
-
-    // Spotify API Stuff
-
-    const api = new SpotifyWebApi()
-    const requestedScopes = "ugc-image-upload user-read-email user-read-private playlist-read-collaborative playlist-modify-public playlist-read-private playlist-modify-private user-library-modify user-library-read user-top-read user-read-recently-played user-follow-read user-follow-modify"
-    const events = new EventEmitter();
-
-    async function getAuthByRefreshToken(refreshToken: string): Promise<AuthToken> {
-        console.log('Refresh using refreshToken', refreshToken);
-        let result = await (await fetch('https://accounts.spotify.com/api/token', {
-            method: 'post',
-            body: `grant_type=refresh_token&refresh_token=${refreshToken}&client_id=${clientId.value}&client_secret=${secret.value}`,
-            headers: {'Content-Type': 'application/x-www-form-urlencoded',}
-        })).text();
-        try {
-            let parsed = JSON.parse(result);
-            console.log(parsed);
-            return {
-                access: parsed.access_token,
-                expiryDate: (+new Date) + parsed.expires_in * 1000,
-            } as AuthToken;
-        } catch (e: any) {
-            console.log("Error", e.message, "result = ", result);
-        }
-        return {} as AuthToken;
-    }
-
-    async function getAuthByCode(redirectUrl: string, code: string): Promise<AuthToken> {
-        console.log('Getting auth using code', {redirectUrl, code});
-        let result = await (await fetch(`https://accounts.spotify.com/api/token`, {
-            method: 'post',
-            body: `grant_type=authorization_code&code=${code}&redirect_uri=${redirectUrl}&client_id=` +
-                `${clientId.value}&client_secret=${secret.value}`,
-            headers: {'Content-Type': 'application/x-www-form-urlencoded',}
-        })).text();
-        try {
-            console.log(result);
-            let parsed = JSON.parse(result);
-            if (parsed.error) {
-                console.warn("Get auth by code error", parsed);
-                return {} as AuthToken;
-            }
-            return {
-                code: code,
-                access: parsed.access_token,
-                refresh: parsed.refresh_token,
-                expiryDate: (+new Date) + parsed.expires_in * 1000,
-            }
-        } catch (e: any) {
-            console.log("Error", e.message, "t = ", result);
-        }
-        return {} as AuthToken;
-    }
-
-    async function login() {
-        tokens.value = await platform.firstLogin();
-        console.log("Auth result from 'firstLogin'", tokens);
-        // await dispatch('cacheState');
-        await checkAuth();
-    }
-
-    async function loginByRefreshToken() {
-        if (tokens.value.refresh === null || tokens.value.refresh === "") {
-            console.warn("Couldn't get new token, refresh token isn't set", tokens);
-            return;
-        }
-        let {access, expiryDate} = await getAuthByRefreshToken(tokens.value.refresh)
-        tokens.value.access = access;
-        tokens.value.expiryDate = expiryDate;
-
-        await checkAuth()
-    }
-
-    let tokenTimeout: number;
-
-    async function spotifyLogout() {
-        await baseDb;
-
-        tokens.value = {
-            code: null,
-            access: null,
-            refresh: null,
-            expiryDate: null,
-        }
-        userInfo.value = {
-            id: '',
-            name: '',
-            mail: '',
-            country: '',
-            followers: 0,
-            avatar: 'img/no-user.jpg',
-        }
-        localStorage.userInfo = JSON.stringify(toRaw(userInfo.value))
-        localStorage.tokens = JSON.stringify(toRaw(tokens.value))
-        await db.delete('spotify', 'library')
-        await db.delete('spotify', 'view')
-
-        clearTimeout(tokenTimeout);
-    }
-
-    async function checkAuth() {
-        await baseDb;
-
-        let now = Date.now()
-        console.log('yea', tokens.value.expiryDate, now);
-        if (tokens.value.expiryDate !== null && tokens.value.expiryDate > now) {
-            console.log("WE HAVE AN EXPIRY DATE");
-            api.setAccessToken(tokens.value.access)
-            events.emit('accessToken')
-
-            let msUntilExpire = tokens.value.expiryDate - now;
-            console.log("msUntilExpire", msUntilExpire);
-            clearTimeout(tokenTimeout)
-            tokenTimeout = window.setTimeout(async () => {
-                await loginByRefreshToken()
-            }, msUntilExpire - 1000 * 60 * 5)
-
-            localStorage.tokens = JSON.stringify(toRaw(tokens.value))
-            await loadLibraries()
-        } else {
-            console.warn("Auth has expired, getting new token")
-            //auth is expired
-            await loginByRefreshToken()
-        }
-    }
-
-    const waitFor = async (event: string) => new Promise(resolve => {
-        events.on(event, resolve)
-    })
-    const awaitAuth = async () => {
-        console.log("Await auth");
-        if (isLoggedIn && api.getAccessToken() !== null) return
-        return await waitFor('accessToken')
-    }
-
-    async function loadLibraries() {
+    async function initialize() {
         await baseDb;
 
         await refreshUserInfo();
@@ -284,7 +103,7 @@ export const useSpotifyStore = defineStore('spotify', () => {
         let checkDone = async () => {
             doneCount++;
             if (doneCount === 3) {
-                await db.put('spotify', toRaw(library.value), 'library')
+                await db.put('spotify', toRaw(saved.value), 'library')
             }
         }
 
@@ -296,7 +115,7 @@ export const useSpotifyStore = defineStore('spotify', () => {
     async function refreshUserInfo() {
         await baseDb;
 
-        let me = await api.getMe();
+        let me = await spotify.getMe();
         userInfo.value = {
             id: me.id,
             name: me.display_name ?? me.email,
@@ -308,69 +127,15 @@ export const useSpotifyStore = defineStore('spotify', () => {
         localStorage.userInfo = JSON.stringify(toRaw(userInfo.value))
     }
 
-    function findPagination(object: any): Function | false {
-        if (object === null)
-            return false;
-
-        let getKeyPath: Function;
-        getKeyPath = ({keys: keyPath = [], o}: { keys: any, o: any }) => {
-            if (o !== null && o.hasOwnProperty('next') && o.hasOwnProperty('items'))
-                return [true, keyPath];
-            if (typeof o !== 'object' || o === null)
-                return [false, keyPath.slice(0, -1)];
-
-            for (let key in o) {
-                if (!o.hasOwnProperty(key))
-                    continue;
-                let result;
-                [result, keyPath] = getKeyPath({keys: keyPath.concat(key), o: o[key]});
-                if (result)
-                    return [true, keyPath];
-            }
-            return [false, keyPath.slice(0, -1)];
-        }
-
-        let [success, keyPath] = getKeyPath({o: object});
-
-        if (!success)
-            return false;
-        return (r: any) => {
-            for (let key of keyPath)
-                r = r[key];
-            return r;
-        }
-    }
-
-    async function* retrieveSpotifyArray(apiFunction: Function) {
-        let getData = () => apiFunction()
-
-        while (true) {
-            let result = await getData()
-            let pageObject = findPagination(result)
-
-            if (result !== null)
-                yield result;
-
-            if (result === null || pageObject === false || pageObject(result).next === null)
-                break;
-
-            let nextUrl = pageObject(result).next;
-            if (nextUrl === undefined)
-                console.warn("next url is undefined");
-
-            getData = () => api.getGeneric(nextUrl);
-        }
-    }
-
     async function refreshUserData(type: 'playlist' | 'artist' | 'album') {
         await baseDb;
 
         if (isRefreshing.value[type]) {
             console.info("This library type is already refreshing, waiting for that to finish");
-            await waitFor('refreshed' + type);
+            await base.waitFor('refreshed' + type);
             return;
         }
-        await awaitAuth();
+        await spotifyAuth.awaitAuth();
         isRefreshing.value[type] = true;
 
         console.log({type});
@@ -378,7 +143,7 @@ export const useSpotifyStore = defineStore('spotify', () => {
         // so we load data by pushing items as they come in
         // else we replace the array only after all new data is loaded
         // @ts-ignore
-        let isInitial = library.value[type].length === 0;
+        let isInitial = saved.value[type].length === 0;
 
         if (userInfo.value.id === '')
             await refreshUserInfo;
@@ -386,13 +151,13 @@ export const useSpotifyStore = defineStore('spotify', () => {
         let retrieval: Function, page = (r: any) => r;
         switch (type) {
             case 'playlist':
-                retrieval = () => api.getUserPlaylists(userInfo.value.id, {limit: 50});
+                retrieval = () => spotify.api.getUserPlaylists(userInfo.value.id, {limit: 50});
                 break;
             case 'album':
-                retrieval = () => api.getMySavedAlbums();
+                retrieval = () => spotify.api.getMySavedAlbums();
                 break;
             case 'artist':
-                retrieval = () => api.getFollowedArtists();
+                retrieval = () => spotify.api.getFollowedArtists();
                 page = r => r.artists;
                 break;
         }
@@ -401,11 +166,11 @@ export const useSpotifyStore = defineStore('spotify', () => {
         let addToLib = (item: any) => {
             if (isInitial) {
                 // @ts-ignore
-                library.value[type].push(item)
+                saved.value[type].push(item)
             } else items.push(item);
         }
 
-        for await(let batch of await retrieveSpotifyArray(retrieval)) {
+        for await(let batch of await spotify.retrieveArray(retrieval)) {
             for (let item of page(batch).items) {
                 if (type === 'album')
                     addToLib(item.album);
@@ -415,11 +180,11 @@ export const useSpotifyStore = defineStore('spotify', () => {
         }
         if (!isInitial) {
             // @ts-ignore
-            library.value[type] = items;
+            saved.value[type] = items;
         }
 
-        events.emit('refreshed' + type);
-        console.log(toRaw(library.value));
+        base.events.emit('refreshed' + type);
+        console.log(toRaw(saved.value));
         isRefreshing.value[type] = false;
     }
 
@@ -427,13 +192,13 @@ export const useSpotifyStore = defineStore('spotify', () => {
         let type = 'track'
         if (isRefreshing.value['track']) {
             console.info("This library type is already refreshing, waiting for that to finish");
-            await waitFor('refreshed' + type);
+            await base.waitFor('refreshed' + type);
             return;
         }
         isRefreshing.value['track'] = true;
         let likedTracks = await db.getAllFromIndex('tracks', 'newToOld')
         tracks.value = likedTracks
-        events.emit('refreshed' + type);
+        base.events.emit('refreshed' + type);
         isRefreshing.value['track'] = false;
 
         if (likedTracks.length !== 0) {
@@ -466,10 +231,10 @@ export const useSpotifyStore = defineStore('spotify', () => {
 
         if (isRefreshing.value['track']) {
             console.info("This library type is already refreshing, waiting for that to finish");
-            await waitFor('refreshed' + type);
+            await base.waitFor('refreshed' + type);
             return;
         }
-        await awaitAuth();
+        await spotifyAuth.awaitAuth();
         isRefreshing.value['track'] = true;
 
         let isInitial = tracks.value.length === 0;
@@ -478,7 +243,7 @@ export const useSpotifyStore = defineStore('spotify', () => {
         likedTracksLoaded.value = 0;
         likedTracksTotal.value = 1;
 
-        for await(let batch of await retrieveSpotifyArray(() => api.getMySavedTracks({limit: 50}))) {
+        for await(let batch of await spotify.retrieveArray(() => spotify.api.getMySavedTracks({limit: 50}))) {
             likedTracksTotal.value = batch.total;
             for (let item of batch.items) {
                 likedTracksLoaded.value++;
@@ -505,17 +270,17 @@ export const useSpotifyStore = defineStore('spotify', () => {
             localStorage.lastTracksLoad = Date.now()
         }
 
-        events.emit('refreshed' + type);
+        base.events.emit('refreshed' + type);
         isRefreshing.value['track'] = false;
         console.log("DONE Loading liked tracks!");
     }
 
     async function refreshHomePage() {
         await baseDb;
-        await awaitAuth();
+        await spotifyAuth.awaitAuth();
 
         //Featured playlists
-        let featured = await api.getFeaturedPlaylists({limit: 50});
+        let featured = await spotify.api.getFeaturedPlaylists({limit: 50});
         view.value.homePage.featured = {
             title: featured.message,
             playlists: featured.playlists.items,
@@ -523,12 +288,12 @@ export const useSpotifyStore = defineStore('spotify', () => {
 
         //Personalized playlists
         let personalized;
-        if (library.value.playlist.length === 0) {
+        if (saved.value.playlist.length === 0) {
             await refreshUserData('playlist')
         }
         const discoverNames = ['Discover Weekly', 'Release Radar', ...[...Array(10)].map((_, i) => 'Daily Mix ' + (i + 1))];
 
-        personalized = toRaw(library.value).playlist.filter(playlist => discoverNames
+        personalized = toRaw(saved.value).playlist.filter(playlist => discoverNames
                 .findIndex(name => playlist.name.includes(name)) !== -1 &&
             playlist.owner.display_name === 'Spotify'
         );
@@ -542,14 +307,9 @@ export const useSpotifyStore = defineStore('spotify', () => {
         }
 
         //New releases
-        let newReleases = await api.getNewReleases({limit: 50})
+        let newReleases = await spotify.api.getNewReleases({limit: 50})
         view.value.homePage.newReleases = newReleases.albums.items
         await db.put('spotify', toRaw(view.value), 'view')
-    }
-
-    async function getPlaylist(id: string) {
-        await baseDb
-        return api.getPlaylist(id)
     }
 
     function checkLiked(type: ItemType, id: string) {
@@ -558,19 +318,19 @@ export const useSpotifyStore = defineStore('spotify', () => {
             result = tracks.value.find(t => t.track.id === id)
         } else {
             //@ts-ignore
-            result = library.value[type].find((t: any) => t.id === id)
+            result = saved.value[type].find((t: any) => t.id === id)
         }
         return result !== undefined
     }
 
     async function toggleLike(item: Item) {
+        await baseDb
         const type = item.type
         const id = item.id
         let liked = checkLiked(type, id)
-        console.log({liked})
         if (type === 'track') {
             if (liked) {
-                await api.removeFromMySavedTracks([id])
+                await spotify.api.removeFromMySavedTracks([id])
                 db.delete('tracks', id).then()
                 tracks.value.splice(tracks.value.findIndex((t) => t.track.id === id), 1)
                 console.log("Removed", item, "from favorites")
@@ -580,7 +340,7 @@ export const useSpotifyStore = defineStore('spotify', () => {
                 }
                 return false
             } else {
-                await api.addToMySavedTracks([id])
+                await spotify.api.addToMySavedTracks([id])
                 let date = (new Date()).toISOString()
                 let playlistObject = enhancePlaylistObject({
                     track: toRaw(item) as SpotifyApi.TrackObjectFull,
@@ -597,32 +357,32 @@ export const useSpotifyStore = defineStore('spotify', () => {
             }
         } else if (type === 'playlist') {
             if (liked) {
-                await api.unfollowPlaylist(id)
-                library.value.playlist.splice(library.value.playlist.findIndex(t => t.id === id), 1)
+                await spotify.api.unfollowPlaylist(id)
+                saved.value.playlist.splice(saved.value.playlist.findIndex(t => t.id === id), 1)
                 return false
             } else {
-                await api.followPlaylist(id)
-                library.value.playlist.unshift(item)
+                await spotify.api.followPlaylist(id)
+                saved.value.playlist.unshift(item)
                 return true
             }
         } else if (type === 'album') {
             if (liked) {
-                await api.removeFromMySavedAlbums([id])
-                library.value.album.splice(library.value.album.findIndex(t => t.id === id), 1)
+                await spotify.api.removeFromMySavedAlbums([id])
+                saved.value.album.splice(saved.value.album.findIndex(t => t.id === id), 1)
                 return false
             } else {
-                await api.addToMySavedAlbums([id])
-                library.value.album.unshift(item)
+                await spotify.api.addToMySavedAlbums([id])
+                saved.value.album.unshift(item)
                 return true
             }
         } else if (type === 'artist') {
             if (liked) {
-                await api.unfollowArtists([id])
-                library.value.artist.splice(library.value.artist.findIndex(t => t.id === id), 1)
+                await spotify.api.unfollowArtists([id])
+                saved.value.artist.splice(saved.value.artist.findIndex(t => t.id === id), 1)
                 return false
             } else {
-                await api.followArtists([id])
-                library.value.artist.unshift(item)
+                await spotify.api.followArtists([id])
+                saved.value.artist.unshift(item)
                 return true
             }
         }
@@ -670,29 +430,21 @@ export const useSpotifyStore = defineStore('spotify', () => {
     }
 
     return {
-        dbLoaded,
         refreshHomePage,
         refreshUserData,
-        getAuthByCode,
-        isLoggedIn,
-        requestedScopes,
-        secret,
-        clientId,
-        hasCredentials,
         userInfo,
-        login,
         view,
-        api,
-        library,
+        library: saved,
         tracks,
         likedTracksLoaded,
         likedTracksTotal,
         isRefreshing,
-        getPlaylist,
-        loadLikedTracks,
-        checkLiked,
         toggleLike,
-        chooseSource,
         activateSource,
+        chooseSource,
+        initialize,
+        saved,
+        checkLiked,
+        loadLikedTracks,
     }
 })

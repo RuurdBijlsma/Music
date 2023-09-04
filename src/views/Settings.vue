@@ -3,7 +3,7 @@
         <h1>Settings</h1>
         <v-divider class="mt-2 mb-2"></v-divider>
         <h3>
-            <v-icon :color="spotify.hasCredentials ? 'green' : 'default'">mdi-spotify</v-icon>
+            <v-icon :color="spotifyAuth.hasCredentials ? 'green' : 'default'">mdi-spotify</v-icon>
             Spotify
         </h3>
         <v-text-field
@@ -11,7 +11,7 @@
             variant="filled"
             density="compact"
             hide-details
-            v-model="spotify.clientId"
+            v-model="spotifyAuth.clientId"
             label="Spotify client ID"/>
         <v-text-field
             class="mt-5"
@@ -19,26 +19,28 @@
             hide-details
             density="compact"
             :type="showPassword ? 'text' : 'password'"
-            v-model="spotify.secret"
+            v-model="spotifyAuth.secret"
             :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
             @click:append="showPassword = !showPassword"
             label="Spotify secret"/>
-        <v-btn class="mt-4" v-if="spotify.hasCredentials && !spotify.isLoggedIn" variant="tonal" color="green"
-               @click="spotify.login()">
+        <v-btn class="mt-4" v-if="spotifyAuth.hasCredentials && !spotifyAuth.isLoggedIn" variant="tonal" color="green"
+               @click="spotifyAuth.login()">
             <v-icon class="mr-2" size="25" color="green">mdi-spotify</v-icon>
             Log in
         </v-btn>
-        <div v-if="spotify.isLoggedIn">
-            hi you are logged in {{ spotify.userInfo.name }}
+        <div v-if="spotifyAuth.isLoggedIn">
+            hi you are logged in {{ library.userInfo.name }}
         </div>
     </div>
 </template>
 
 <script setup lang="ts">
-import {useSpotifyStore} from '../scripts/store/spotify'
+import {useLibraryStore} from '../scripts/store/library'
 import {ref} from "vue";
+import {useSpotifyAuthStore} from "../scripts/store/spotify-auth";
 
-const spotify = useSpotifyStore()
+const library = useLibraryStore()
+const spotifyAuth = useSpotifyAuthStore()
 const showPassword = ref(false);
 </script>
 

@@ -28,7 +28,7 @@
 import {computed, ref} from "vue";
 import type {PropType} from "vue";
 import {useBaseStore} from "../scripts/store/base";
-import {useSpotifyStore} from "../scripts/store/spotify";
+import {useLibraryStore} from "../scripts/store/library";
 import TrackList from "./TrackList.vue";
 import type {ItemCollection} from "../scripts/types";
 
@@ -54,7 +54,7 @@ const props = defineProps({
     },
 })
 const base = useBaseStore()
-const spotify = useSpotifyStore()
+const library = useLibraryStore()
 
 const query = base.searchValue
 const collection = computed(() => ({

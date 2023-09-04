@@ -22,20 +22,20 @@
                 <v-btn no-drag size="30" variant="tonal" v-bind="props"
                        density="compact" rounded
                        class="account-button">
-                    <v-img :image="spotify.userInfo.avatar"></v-img>
+                    <v-img :image="library.userInfo.avatar"></v-img>
                     <v-icon size="20">mdi-account</v-icon>
                 </v-btn>
             </template>
 
             <v-list density="compact">
-                <v-list-item two-line v-if="spotify.isLoggedIn" to="/user">
+                <v-list-item two-line v-if="spotifyAuth.isLoggedIn" to="/user">
                     <div class="list-link">
                         <v-avatar variant="tonal" icon="mdi-account"
-                                  :image="spotify.userInfo.avatar"
+                                  :image="library.userInfo.avatar"
                                   alt="User Avatar" class="mr-3"/>
                         <div>
-                            <v-list-item-title>{{ spotify.userInfo.name }}</v-list-item-title>
-                            <v-list-item-subtitle>{{ spotify.userInfo.mail }}</v-list-item-subtitle>
+                            <v-list-item-title>{{ library.userInfo.name }}</v-list-item-title>
+                            <v-list-item-subtitle>{{ library.userInfo.mail }}</v-list-item-subtitle>
                         </div>
                     </div>
                 </v-list-item>
@@ -92,28 +92,30 @@
 </template>
 
 <script setup lang="ts">
-import {useSpotifyStore} from "../scripts/store/spotify";
+import {useLibraryStore} from "../scripts/store/library";
 import {ref, watch} from "vue";
 import {useRoute} from "vue-router";
 import {useTheme} from "vuetify";
 import {useBaseStore} from "../scripts/store/base";
 import {usePlatformStore} from "../scripts/store/electron";
+import {useSpotifyAuthStore} from "../scripts/store/spotify-auth";
 
-const route = useRoute();
-const theme = useTheme();
-const base = useBaseStore();
-const spotify = useSpotifyStore();
-const dropdownOpen = ref(false);
-const themeOptions = ['light', 'dark', 'system'];
-const chosenTheme = ref(2);
+const route = useRoute()
+const theme = useTheme()
+const base = useBaseStore()
+const library = useLibraryStore()
+const spotifyAuth = useSpotifyAuthStore()
+const dropdownOpen = ref(false)
+const themeOptions = ['light', 'dark', 'system']
+const chosenTheme = ref(2)
 const platform = usePlatformStore()
 watch(route, () => {
-    dropdownOpen.value = false;
+    dropdownOpen.value = false
 })
 watch(chosenTheme, () => {
-    console.log('chosen theme changed', chosenTheme.value);
+    console.log('chosen theme changed', chosenTheme.value)
     localStorage.theme = themeOptions[chosenTheme.value]
-    applyTheme();
+    applyTheme()
 })
 
 function applyTheme() {
@@ -121,13 +123,13 @@ function applyTheme() {
         chosenTheme.value = themeOptions.indexOf(localStorage.theme)
     if (localStorage.getItem('theme') !== null && localStorage.theme !== 'system') {
         theme.global.name.value = localStorage.theme;
-        console.log(`Changing theme to ${theme.global.name.value} from localStorage`);
+        console.log(`Changing theme to ${theme.global.name.value} from localStorage`)
     } else {
         if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
             // dark mode
-            theme.global.name.value = 'dark';
+            theme.global.name.value = 'dark'
         } else {
-            theme.global.name.value = 'light';
+            theme.global.name.value = 'light'
         }
         console.log(`Setting theme to ${theme.global.name.value} from system preferences`);
     }
@@ -140,10 +142,10 @@ window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e =
     if (localStorage.theme === 'system') {
         if (e.matches) {
             // dark mode
-            theme.global.name.value = 'dark';
+            theme.global.name.value = 'dark'
         } else {
             // light mode
-            theme.global.name.value = 'light';
+            theme.global.name.value = 'light'
         }
         console.log(`Changing theme to ${theme.global.name.value} from watching system preference`);
     }

@@ -35,7 +35,7 @@ import type {PropType} from "vue";
 import {useBaseStore} from "../scripts/store/base";
 import {usePlayerStore} from "../scripts/store/player";
 import ArtistsSpan from "./ArtistsSpan.vue";
-import {useSpotifyStore} from "../scripts/store/spotify";
+import {useLibraryStore} from "../scripts/store/library";
 import ItemMenu from "./ItemMenu.vue";
 import type {ItemCollection} from "../scripts/types";
 
@@ -59,7 +59,7 @@ const props = defineProps({
 })
 const base = useBaseStore()
 const player = usePlayerStore()
-const spotify = useSpotifyStore()
+const library = useLibraryStore()
 
 function playItem() {
     if (props.collection !== null)

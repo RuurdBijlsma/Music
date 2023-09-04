@@ -1,16 +1,19 @@
 import {defineStore} from 'pinia'
 import {baseDb} from './base'
-import {useSpotifyStore} from "./spotify";
+import {useLibraryStore} from "./library";
 import type {IDBPDatabase} from "idb";
 import {usePlatformStore} from "./electron";
 import type {ExtendedPlaylistTrack, Item} from "../types";
+import {useSpotifyApiStore} from "./spotify-api";
 
 export const useSearchStore = defineStore('search', () => {
-    const platform = usePlatformStore();
+    const platform = usePlatformStore()
+    const library = useLibraryStore()
+    const spotify = useSpotifyApiStore()
+
     let recentSearches: string[] = localStorage.getItem('recentSearch') === null ?
         [] : JSON.parse(localStorage.recentSearch)
 
-    const spotify = useSpotifyStore()
     let db: IDBPDatabase
     baseDb.then(r => db = r)
 
@@ -71,8 +74,8 @@ export const useSearchStore = defineStore('search', () => {
                 return likedCache[query].result;
         }
         let tracks: ExtendedPlaylistTrack[]
-        if (spotify.tracks.length > 0) {
-            tracks = spotify.tracks
+        if (library.tracks.length > 0) {
+            tracks = library.tracks
         } else {
             await baseDb
             tracks = await db.getAllFromIndex('tracks', 'searchString')
@@ -108,7 +111,7 @@ export const useSearchStore = defineStore('search', () => {
                 return cache.result;
         }
         await baseDb
-        let result = await spotify.api.search(query, ['album', 'artist', 'playlist', 'track'])
+        let result = await spotify.search(query, ['album', 'artist', 'playlist', 'track'])
         db.put('cache', {
             result,
             // expiry date 5 minutes from now
@@ -117,5 +120,5 @@ export const useSearchStore = defineStore('search', () => {
         return result
     }
 
-    return {addToRecentSearches, searchLikedTracks, searchYouTube, searchSpotify,ytResultToTrack}
+    return {addToRecentSearches, searchLikedTracks, searchYouTube, searchSpotify, ytResultToTrack}
 })
