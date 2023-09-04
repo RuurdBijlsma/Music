@@ -33,11 +33,11 @@
 <script setup lang="ts">
 import type {PropType} from "vue";
 import {useBaseStore} from "../scripts/store/base";
-import {computed, ref, toRaw} from "vue";
 import {usePlayerStore} from "../scripts/store/player";
 import ArtistsSpan from "./ArtistsSpan.vue";
 import {useSpotifyStore} from "../scripts/store/spotify";
 import ItemMenu from "./ItemMenu.vue";
+import type {ItemCollection} from "../scripts/types";
 
 const props = defineProps({
     track: {
@@ -49,7 +49,7 @@ const props = defineProps({
         required: true,
     },
     collection: {
-        type: Object as PropType<any>,
+        type: Object as PropType<ItemCollection | null>,
         required: true,
     },
     number: {
@@ -62,7 +62,8 @@ const player = usePlayerStore()
 const spotify = useSpotifyStore()
 
 function playItem() {
-    player.load(props.collection, props.track)
+    if (props.collection !== null)
+        player.load(props.collection, props.track)
 }
 </script>
 

@@ -1,6 +1,6 @@
 <template>
     <div class="album pb-5" v-if="album">
-        <track-list :collection="collection" type="album" no-images :tracks="collection.tracks">
+        <track-list :collection="collection" type="album" no-images>
             <div class="mb-8 album-info">
                 <glow-image
                     rounding="5px"

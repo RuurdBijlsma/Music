@@ -1,5 +1,5 @@
 <template>
-    <div class="play-buttons mb-1">
+    <div class="play-buttons mb-1" v-if="collection">
         <v-divider/>
         <v-btn icon="mdi-play-outline" variant="text" @click="player.playCollection(collection)"/>
         <v-btn icon="mdi-shuffle" variant="text" @click="player.shuffleCollection(collection)"/>
@@ -17,7 +17,7 @@ import LikeButton from "./LikeButton.vue";
 
 const props = defineProps({
     collection: {
-        type: Object as PropType<ItemCollection>,
+        type: Object as PropType<ItemCollection | null>,
         required: true,
     },
     likeItem: {

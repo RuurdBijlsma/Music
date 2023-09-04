@@ -35,12 +35,12 @@ const theme = useTheme()
 
 const props = defineProps({
     collection: {
-        type: Object as PropType<ItemCollection>,
+        type: Object as PropType<ItemCollection | null>,
         required: true
     },
     tracks: {
-        type: Object as PropType<SpotifyApi.TrackObjectFull[]>,
-        required: true,
+        type: Object as PropType<SpotifyApi.TrackObjectFull[] | null>,
+        default: () => null,
     },
     subtractHeight: {
         type: Number,
@@ -65,10 +65,15 @@ const props = defineProps({
     },
 })
 const {trackId} = storeToRefs(player)
-const isActive = (id: string) => player.trackId === id && (player.collection?.id ?? '') === props.collection.id
+const isActive = (id: string) => player.trackId === id && (player.collection?.id ?? '') === props.collection?.id
 
 const scrollItems = computed(() => {
-    return [null, ...props.tracks]
+    return [null, ...realTracks.value]
+})
+
+const realTracks = computed(() => {
+    if (props.tracks !== null) return props.tracks
+    return props.collection?.tracks ?? []
 })
 </script>
 

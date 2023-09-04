@@ -1,5 +1,5 @@
 <template>
-    <div class="mb-8 playlist-info">
+    <div class="mb-8 playlist-info" v-if="playlist">
         <glow-image
             rounding="5px"
             :width="250"
@@ -33,13 +33,13 @@ import CollectionButtons from "./CollectionButtons.vue";
 
 const props = defineProps({
     collection: {
-        type: Object as PropType<ItemCollection>,
+        type: Object as PropType<ItemCollection | null>,
         required: true
     },
 })
 const base = useBaseStore()
 const followerString = computed(() => {
-    if (props.collection === null) return '0 followers';
+    if (playlist.value === null) return '0 followers';
     let followers = playlist.value.followers
     if (followers.total > 1000000) {
         let followerMillions = Math.round(followers.total / 1000000);
@@ -47,8 +47,8 @@ const followerString = computed(() => {
     }
     return followers.total.toLocaleString() + ' follower' + (followers.total === 1 ? '' : 's');
 })
-const playlist = computed(() => props.collection.context as SpotifyApi.PlaylistObjectFull)
-const tracks = computed(() => props.collection.tracks)
+const playlist = computed(() => props.collection?.context as SpotifyApi.PlaylistObjectFull | null)
+const tracks = computed(() => props.collection?.tracks ?? [])
 const totalDurationMs = computed(() => {
     if (tracks.value === null)
         return 0

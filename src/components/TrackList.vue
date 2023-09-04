@@ -3,7 +3,7 @@
          :style="{paddingTop}">
         <slot/>
         <track-list-item
-            v-for="(item, index) in tracks"
+            v-for="(item, index) in realTracks"
             :collection="collection" :number="noImages ? item.track_number : undefined"
             :index="index"
             :class="{
@@ -22,6 +22,7 @@ import {usePlayerStore} from "../scripts/store/player";
 import {useTheme} from "vuetify";
 import type {ItemCollection} from "../scripts/types";
 import {storeToRefs} from "pinia";
+import {computed} from "vue";
 
 const base = useBaseStore();
 const player = usePlayerStore()
@@ -29,12 +30,12 @@ const theme = useTheme()
 
 const props = defineProps({
     collection: {
-        type: Object as PropType<ItemCollection>,
+        type: Object as PropType<ItemCollection | null>,
         required: true
     },
     tracks: {
-        type: Object as PropType<SpotifyApi.TrackObjectFull[]>,
-        required: true,
+        type: Object as PropType<SpotifyApi.TrackObjectFull[] | null>,
+        default: () => null,
     },
     noImages: {
         type: Boolean,
@@ -45,8 +46,14 @@ const props = defineProps({
         default: () => '60px',
     },
 })
+
 const {trackId} = storeToRefs(player)
-const isActive = (id: string) => player.trackId === id && (player.collection?.id ?? '') === props.collection.id
+const isActive = (id: string) => player.trackId === id && (player.collection?.id ?? '') === props.collection?.id
+
+const realTracks = computed(() => {
+    if (props.tracks !== null) return props.tracks
+    return props.collection?.tracks ?? []
+})
 </script>
 
 <style scoped lang="scss">

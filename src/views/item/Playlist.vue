@@ -1,10 +1,9 @@
 <template>
     <div class="playlist" v-if="playlist">
-        <track-list :collection="collection" v-if="collection.tracks.length < 200" :tracks="collection.tracks">
+        <track-list :collection="collection" v-if="collection && collection.tracks.length < 200">
             <playlist-header :collection="collection"/>
         </track-list>
-        <track-list-virtual v-else :collection="collection" :tracks="collection.tracks"
-                            :height="base.pageHeight.toString()">
+        <track-list-virtual v-else :collection="collection" :height="base.pageHeight.toString()">
             <playlist-header :collection="collection"/>
         </track-list-virtual>
     </div>
@@ -27,7 +26,7 @@ const playlist = ref(null as null | SpotifyApi.PlaylistObjectFull);
 const collection = computed(() => {
     if (playlist.value === null) return null
     let tracks = playlist.value.tracks.items.map(t => t.track as SpotifyApi.TrackObjectFull)
-    console.log("Playlist collection update",toRaw(tracks))
+    console.log("Playlist collection update", toRaw(tracks))
     return base.itemCollection(playlist.value, tracks)
 })
 

@@ -14,7 +14,7 @@
             <p class="genres">{{ artist.genres.join(' / ') }}</p>
             <collection-buttons :collection="collection" :like-item="artist"/>
         </div>
-        <track-list padding-top="0" :collection="collection" :tracks="collection.tracks"/>
+        <track-list padding-top="0" :collection="collection"/>
         <div class="sub-header mt-6 mb-5">
             <v-divider/>
             <p class="top-tracks-text ml-4 mr-4">Albums</p>
