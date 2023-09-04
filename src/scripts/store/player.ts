@@ -167,7 +167,7 @@ export const usePlayerStore = defineStore('player', () => {
         canvas.height = 100
         context = canvas.getContext('2d')
         if (context === null) return
-        // only calculate track bars if they werent retrieved from db cache
+        // only calculate track bars if they weren't retrieved from db cache
         if (dbTrackBars === undefined) calculateTrackBars(outPath, _trackId, barCount, binWidth, barSpacing).then()
     }
 
@@ -225,7 +225,7 @@ export const usePlayerStore = defineStore('player', () => {
         }
         if (track.value !== null && trackId.value === _trackId)
             canvasBars = bars
-        db.put('trackBars', bars, _trackId).then()
+        await db.put('trackBars', bars, _trackId).then()
     }
 
     function renderProgress() {

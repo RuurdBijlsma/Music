@@ -96,7 +96,6 @@
 
 <script setup lang="ts">
 // todo
-// paste spotify url in search balk
 // paste youtube link in search balk
 // playlists, etc. in search functie
 // maak knop om ytdlp te updaten
@@ -111,6 +110,7 @@
 // fix get dominant color for youtube tracks
 // if delete file thats currently playing, do something about it?
 // possibly replace color thief with something without vulnerabilities
+// bug: when fast skipping through loaded tracks, the same trackbars get put on different songs? weird
 // radio
 
 import TopMenu from "./components/TopMenu.vue";
