@@ -58,7 +58,7 @@ const loadTrackId = computed(() => route.query.play)
 
 const checkForLoadTrackId = () => {
     console.log("CHECK 1", loadTrackId.value)
-    if (loadTrackId.value !== '' && album.value !== null) {
+    if (loadTrackId.value && album.value !== null) {
         let albumTrack = album.value.tracks.items.find(t => t.id === loadTrackId.value) as SpotifyApi.TrackObjectFull | undefined
         console.log("CHECK FOR LOAD TRACK ID", loadTrackId.value, toRaw(album.value.tracks.items))
         if (albumTrack && collection.value !== null) {
