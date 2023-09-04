@@ -109,7 +109,7 @@ export const usePlayerStore = defineStore('player', () => {
         _track = toRaw(_track)
         track.value = _track
         trackId.value = _trackId
-        setMetadata(track.value)
+        setMetadata(_track)
 
         console.log("Playing item", _track, 'from collection', _collection)
         await baseDb
@@ -148,7 +148,7 @@ export const usePlayerStore = defineStore('player', () => {
         }
         let outPath = ''
         try {
-            outPath = await platform.getTrackFile(track.value, events)
+            outPath = await platform.getTrackFile(_track, events)
         } catch (e: any) {
             console.warn('Track load error', _track, e)
         } finally {
@@ -225,6 +225,7 @@ export const usePlayerStore = defineStore('player', () => {
         }
         if (track.value !== null && trackId.value === _trackId)
             canvasBars = bars
+        console.log("Putting track bars!", _trackId, bars.binSize, outPath)
         await db.put('trackBars', bars, _trackId).then()
     }
 
