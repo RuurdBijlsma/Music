@@ -4,13 +4,15 @@ import sadFs from "fs";
 import fs from "fs/promises";
 import os from "os";
 import type {BrowserWindow} from 'electron'
+import {dialog, globalShortcut, ipcMain} from 'electron'
 import type {Progress} from "yt-dlp-wrap";
 import child_process from "child_process";
 import * as https from "https";
 //@ts-ignore
 import ColorThief from 'color-extr-thief'
-import {globalShortcut, ipcMain} from "electron";
 import {getContrastRatio, RGBToHex, RGBToHSL} from "./utils";
+import replaceSpecialCharacters from "replace-special-characters";
+
 
 const YTDlpWrap = require("yt-dlp-wrap").default
 
@@ -40,14 +42,18 @@ export default class NodeFunctions {
 
     async downloadYtByQuery(query: string, filename: string, destinationFolder = Directories.temp) {
         return new Promise<{ outPath: string, id: string }>((resolve, reject) => {
+            console.log("SEARCH QUERY", query)
+            query = replaceSpecialCharacters(query)
+            console.log("SEARCH QUERY", query)
             let args = [
-                `ytsearch1:"${query.replace(/"/gi, "\"")}"`,
-                `-o`,
-                `${path.join(destinationFolder, filename + '.%(ext)s')}`,
+                `ytsearch15:"${query.replace(/"/gi, "\"")}"`,
+                `--max-downloads`, `1`,
+                `--match-filter`, `!is_live & !post_live & !was_live`,
                 `-x`,
-                // uncomment to set let ytdlp handle the conversion to mp3
-                // '--audio-format', 'mp3',
-                // '--audio-quality', '0',//second-best audio quality
+                '--audio-format', 'mp3',
+                '--audio-quality', '1',//second-best audio quality
+                `-o`,
+                `${path.join(destinationFolder, filename + '.temp.%(ext)s')}`,
             ];
             console.log(args)
             let id: string = ''
@@ -62,8 +68,11 @@ export default class NodeFunctions {
                         id = b.split('watch?v=')[1]
                     }
                 })
-                .on('error', (error: Error) => reject(error))
-                .on('close', () => resolve({outPath: path.join(destinationFolder, filename + '.opus'), id}));
+                .on('error', (error: Error) => {
+                    console.log("IS DIT WEL EEN ERROR", error.message)
+                    resolve({outPath: path.join(destinationFolder, filename + '.temp.mp3'), id})
+                })
+                .on('close', () => resolve({outPath: path.join(destinationFolder, filename + '.temp.mp3'), id}));
         })
     }
 
@@ -72,17 +81,20 @@ export default class NodeFunctions {
         return new Promise<{ outPath: string, id: string }>((resolve, reject) => {
             let args = [
                 `-o`,
-                `${path.join(destinationFolder, filename + '.%(ext)s')}`,
+                `${path.join(destinationFolder, filename + '.temp.%(ext)s')}`,
                 `-x`,
-                `${id}`
+                `${id}`,
+                '--audio-format', 'mp3',
+                '--audio-quality', '1',//second-best audio quality
             ];
             console.log(args)
             this.ytdlp.exec(args)
                 .on('progress', (progress: Progress) => {
                     this.win?.webContents.send(filename + 'progress', progress)
                 })
+                .on('ytDlpEvent', (a: string, b: string) => console.log(a, b))
                 .on('error', (error: Error) => reject(error))
-                .on('close', () => resolve({outPath: path.join(destinationFolder, filename + '.opus'), id}));
+                .on('close', () => resolve({outPath: path.join(destinationFolder, filename + '.temp.mp3'), id}));
         })
     }
 
@@ -107,10 +119,10 @@ export default class NodeFunctions {
             if (coverImageFile) {
                 command = `${this.ffmpegPath} -y -i "${fileInput}" -i "${coverImageFile}"` +
                     ` -map 0:0 -map 1:0 -id3v2_version 3 -metadata:s:v title="Album cover" -metadata:s:v comment="Cover (Front)" ` +
-                    `${this.tagsToString(tags)} "${fileOutput}"`;
+                    `${this.tagsToString(tags)} -codec copy "${fileOutput}"`;
             } else {
                 command = `${this.ffmpegPath} -y -i "${fileInput}"` +
-                    `${this.tagsToString(tags)} "${fileOutput}"`;
+                    `${this.tagsToString(tags)} -codec copy "${fileOutput}"`;
             }
             if (await this.checkFileExists(fileOutput))
                 await fs.unlink(fileOutput);
@@ -128,12 +140,12 @@ export default class NodeFunctions {
         for (let tag in tags)
             if (tags.hasOwnProperty(tag))
                 if (tags[tag] instanceof Array)
-                    result.push(`-metadata ${tag}="${tags[tag].join('; ')}"`);
+                    result.push(`-metadata ${tag}="${tags[tag].join('; ').replace(/"/g, '\\"')}"`);
                     // for (let part of tags[tag])
                 //     result.push(`-metadata ${tag}="${part}"`);
                 else
-                    result.push(`-metadata ${tag}="${tags[tag]}"`);
-        return result.join(' ');
+                    result.push(`-metadata ${tag}="${tags[tag].toString().replace(/"/g, '\\"')}"`);
+        return result.join(' ')
     }
 
     async getBinaries() {
@@ -175,6 +187,7 @@ export default class NodeFunctions {
     async searchYouTube(query: string, results: number) {
         let args = [
             `ytsearch${results}:"${query.replace(/"/gi, "\"")}"`,
+            `--match-filter`, `!is_live & !post_live & !was_live`,
             `--dump-json`,
         ];
         console.log({query, args})
@@ -301,5 +314,11 @@ export default class NodeFunctions {
 
     stopPlatformPlaying() {
         this.win.setThumbarButtons([]);
+    }
+
+    async getOutputDirectory() {
+        return await dialog.showOpenDialog(this.win, {
+            properties: ['openDirectory']
+        })
     }
 }

@@ -57,6 +57,7 @@ export default class IpcFunctions {
             let middleOut = path.join(Directories.temp, filename + '.mp3')
             let finalOut = path.join(Directories.music, filename + '.mp3')
 
+            delete tags.id
             // convert to mp3 and add metadata
             await nf.ffmpegMetadata(outPaths[0].outPath, middleOut, imageFile, tags)
             console.log(`Time cost: ${performance.now() - time}ms`)
@@ -76,5 +77,6 @@ export default class IpcFunctions {
         ipcMain.handle("getDominantColor", (_, imgUrl: string) => nf.getDominantColor(imgUrl))
         ipcMain.handle("setPlatformPlaying", (_, value: boolean, darkTheme: boolean) => nf.setPlatformPlaying(value, darkTheme))
         ipcMain.handle("stopPlatformPlaying", (_) => nf.stopPlatformPlaying())
+        ipcMain.handle("getOutputDirectory", async (_) => await nf.getOutputDirectory())
     }
 }

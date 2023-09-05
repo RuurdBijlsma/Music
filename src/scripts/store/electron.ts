@@ -6,7 +6,7 @@ import anzip from 'anzip';
 import http from "http";
 import * as fs from "fs/promises";
 import path from 'path'
-import {ref} from "vue";
+import {ref, toRaw} from "vue";
 //@ts-ignore
 import fileNamify from 'filenamify';
 import {baseDb, useBaseStore} from "./base";
@@ -14,6 +14,7 @@ import type {IDBPDatabase} from "idb";
 import {usePlayerStore} from "./player";
 import type {AuthToken} from "./spotify-auth";
 import {useSpotifyAuthStore} from "./spotify-auth";
+import type {ExtendedPlaylistTrack} from "../types";
 
 
 const express = window.require('express')
@@ -100,10 +101,10 @@ export const usePlatformStore = defineStore('platform', () => {
         return {cacheKey: `PTI-${filename}`, filename, outPath, query}
     }
 
-    async function getTrackFile(track: SpotifyApi.TrackObjectFull) {
+    async function getTrackFile(track: SpotifyApi.TrackObjectFull, applyThemeColor = true) {
         const isYouTubeTrack = track.id.startsWith('yt-')
         let hasImage = track.hasOwnProperty('album') && track.album.images.length > 0;
-        if (hasImage) {
+        if (hasImage && applyThemeColor) {
             ipcRenderer.invoke('getDominantColor', track.album.images[0].url).then(c => {
                 console.log(c)
                 base.themeColorDark = c.dark
@@ -267,6 +268,64 @@ export const usePlatformStore = defineStore('platform', () => {
         maximized.value = await ipcRenderer.invoke('toggleMaximizeWindow')
     }
 
+    const exportMp3State = ref({
+        loading: false,
+        exported: 0,
+        total: 1,
+        canceled: false,
+    })
+
+    async function exportLikedTracks() {
+        let tracks = toRaw(library.tracks) as ExtendedPlaylistTrack[]
+        exportMp3State.value.total = tracks.length
+        exportMp3State.value.exported = 0
+        console.log(tracks)
+
+        let result = await ipcRenderer.invoke('getOutputDirectory')
+        if (result.canceled) {
+            exportMp3State.value.loading = false
+            return
+        }
+        exportMp3State.value.loading = true
+        exportMp3State.value.canceled = false
+
+        console.log(result)
+        let outputPath = result.filePaths[0]
+        console.log(outputPath)
+
+        let batchSize = 8
+        for (let i = 0; i < tracks.length; i += batchSize) {
+            exportMp3State.value.exported = i
+            let batch = tracks.slice(i, i + batchSize)
+            try {
+                let paths = await Promise.all(batch.map(
+                    ({track}) => getTrackFile(track as SpotifyApi.TrackObjectFull, false)
+                ))
+                console.log(paths)
+                for (let p of paths) {
+                    let copyTarget = path.join(outputPath, path.basename(p))
+                    if (!(await checkFileExists(copyTarget)))
+                        await fs.copyFile(p, copyTarget)
+                }
+                if (exportMp3State.value.canceled) {
+                    exportMp3State.value.canceled = false
+                    break
+                }
+            } catch (e: any) {
+                console.warn(e)
+                base.addSnack(`Couldn't export. ${e.message}`, 100000)
+                exportMp3State.value.loading = false
+                return
+            }
+        }
+        exportMp3State.value.loading = false
+    }
+
+    function cancelExport() {
+        exportMp3State.value.canceled = true
+        exportMp3State.value.loading = false
+    }
+
     return {
         firstLogin,
         searchYouTube,
@@ -280,5 +339,8 @@ export const usePlatformStore = defineStore('platform', () => {
         deleteFile,
         trackIsDownloaded,
         deleteTrack,
+        exportLikedTracks,
+        exportMp3State,
+        cancelExport,
     }
 })

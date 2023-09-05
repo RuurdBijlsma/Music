@@ -35,6 +35,7 @@
         "filenamify": "^6.0.0",
         "idb": "^7.1.1",
         "pinia": "^2.0.32",
+        "replace-special-characters": "^1.2.7",
         "spotify-web-api-js": "^1.5.2",
         "sqlite-electron": "^2.2.8",
         "vue": "^3.2.47",

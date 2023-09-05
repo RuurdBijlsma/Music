@@ -10,7 +10,8 @@
         }"></div>
         <div class="main">
             <top-menu class="top-menu"/>
-            <search-suggestions/>x
+            <search-suggestions/>
+            x
             <div class="fake-top-menu"/>
             <div class="left-nav">
                 <v-btn class="nav-1-btn nav-button"
@@ -112,6 +113,8 @@
 // possibly replace color thief with something without vulnerabilities
 // bug: when fast skipping through loaded tracks, the same trackbars get put on different songs? weird
 // radio
+// cache theme colors (image url -> color)
+// het is best weird dat de error event nu firet voor ytDownload via search, test even tracks die het horen te doen zie hoe dat gaat, zie hoe een echte error nu handled wordt
 
 import TopMenu from "./components/TopMenu.vue";
 import MusicPlayer from "./components/MusicPlayer.vue";

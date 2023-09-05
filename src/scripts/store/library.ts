@@ -125,6 +125,7 @@ export const useLibraryStore = defineStore('library', () => {
             avatar: me.images?.[0]?.url ?? '',
         }
         localStorage.userInfo = JSON.stringify(toRaw(userInfo.value))
+        console.log(toRaw((userInfo.value)))
     }
 
     async function refreshUserData(type: 'playlist' | 'artist' | 'album') {
