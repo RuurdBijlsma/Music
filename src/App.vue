@@ -100,9 +100,6 @@
 // paste youtube link in search balk
 // playlists, etc. in search functie
 // maak knop om ytdlp te updaten
-// alles kunnen liken
-// if file is downloading or post processing, dont download and post process when user clicks on the song again
-// maak knop: export liked mp3s to folder
 // browse page
 // edit information about yt track (change title, artist)
 // edit information about any track (start/end time, more?)
@@ -111,7 +108,6 @@
 // fix get dominant color for youtube tracks
 // if delete file thats currently playing, do something about it?
 // possibly replace color thief with something without vulnerabilities
-// bug: when fast skipping through loaded tracks, the same trackbars get put on different songs? weird
 // radio
 // cache theme colors (image url -> color)
 // het is best weird dat de error event nu firet voor ytDownload via search, test even tracks die het horen te doen zie hoe dat gaat, zie hoe een echte error nu handled wordt
