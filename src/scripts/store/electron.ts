@@ -104,18 +104,43 @@ export const usePlatformStore = defineStore('platform', () => {
     async function getTrackFile(track: SpotifyApi.TrackObjectFull, applyThemeColor = true) {
         const isYouTubeTrack = track.id.startsWith('yt-')
         let hasImage = track.hasOwnProperty('album') && track.album.images.length > 0;
+        let imgUrl = hasImage ? track.album.images[0].url : ''
+
+        let {cacheKey, filename, outPath} = trackToNames(track)
+        let [trackFileExists, dbColor] = await Promise.all([
+            checkFileExists(outPath),
+            db.get('imageColor', imgUrl)
+        ])
+        // only download the album art if the track file hasn't been created yet
+        // or if the dominant theme color hasn't been put in the DB
+        let imageDownloadRequired = !trackFileExists || (!dbColor && applyThemeColor)
+        let jpgFile = ''
+        if (hasImage && imageDownloadRequired) {
+            jpgFile = path.join(directories?.temp ?? '', Math.random().toString() + '.jpg')
+            let out = await ipcRenderer.invoke('imgToJpg', imgUrl, jpgFile)
+            console.log("imgToJpg", out)
+        }
+        console.log({jpgFile})
         if (hasImage && applyThemeColor) {
-            ipcRenderer.invoke('getDominantColor', track.album.images[0].url).then(c => {
+            const applyColor = (c: { dark: string, light: string }) => {
                 console.log(c)
                 base.themeColorDark = c.dark
                 base.themeColorLight = c.light
-                console.log(base.themeColorLight, base.themeColorDark)
-            })
+            }
+            if (dbColor) {
+                console.log("Using DB theme colors")
+                applyColor(dbColor)
+            } else {
+                console.log("Generate theme colors")
+                ipcRenderer.invoke('getDominantColor', jpgFile).then(c => {
+                    db.put('imageColor', c, imgUrl)
+                    applyColor(c)
+                })
+            }
         }
-        let {cacheKey, filename, outPath} = trackToNames(track)
         let cachedId = await db.get('nameToId', cacheKey)
         console.log("CACHED ID RESULT", cachedId)
-        if (!await checkFileExists(outPath)) {
+        if (!trackFileExists) {
             ipcRenderer.on(filename + 'progress', (_, progress) => {
                 console.log("PROGERSS", progress.percent)
                 base.events.emit(track.id + 'progress', progress)
@@ -125,7 +150,7 @@ export const usePlatformStore = defineStore('platform', () => {
                 artist: track.artists.map(a => a.name),
                 disc: track.disc_number,
                 track: track.track_number,
-                id: isYouTubeTrack ? track.id.split('-')[1] : undefined
+                id: isYouTubeTrack ? track.id.substring(3) : undefined
             };
             if (cachedId !== undefined && cachedId !== '') {
                 tags.id = cachedId
@@ -137,8 +162,8 @@ export const usePlatformStore = defineStore('platform', () => {
                     //@ts-ignore
                     tags.year = new Date(track.album.release_date).getFullYear();
             }
-            console.log("Sending payload", tags, hasImage ? track.album.images[0].url : '')
-            let {id} = await ipcRenderer.invoke('downloadYt', filename, tags, hasImage ? track.album.images[0].url : '')
+            console.log("Sending payload", tags, hasImage ? jpgFile : '')
+            let {id} = await ipcRenderer.invoke('downloadYt', filename, tags, hasImage ? jpgFile : '')
             console.log("ID", id)
             if (base.sourceDialog.tempTrackOverride.trackId === track.id) {
                 outPath = await makeTempTrack(track)
@@ -151,6 +176,11 @@ export const usePlatformStore = defineStore('platform', () => {
             }
         } else {
             console.log("Using cached file for track")
+        }
+        if (jpgFile !== '') {
+            // set timeout because getDominantColor runs in parallel, would never take more than a second
+            // other uses of the image are awaited before this so no issue
+            setTimeout(() => fs.unlink(jpgFile).then(), 1000)
         }
         return outPath
     }

@@ -12,6 +12,7 @@ import * as https from "https";
 import ColorThief from 'color-extr-thief'
 import {getContrastRatio, RGBToHex, RGBToHSL} from "./utils";
 import replaceSpecialCharacters from "replace-special-characters";
+import directories from "./Directories";
 
 
 const YTDlpWrap = require("yt-dlp-wrap").default
@@ -200,10 +201,19 @@ export default class NodeFunctions {
         }
     }
 
-    async getDominantColor(imgUrl: string) {
-        let imgId = Math.random().toString()
-        let imageFile = path.join(Directories.temp, `color-thief-${imgId}.jpg`);
-        await this.downloadFile(imgUrl, imageFile)
+    async imgToJpg(imgUrl: string, outFile: string) {
+        return new Promise<{ err: string, out: string }>((resolve, reject) => {
+            let command = `${this.ffmpegPath} -i ${imgUrl} ${outFile}`
+
+            child_process.exec(command, (error, stdout, stderr) => {
+                if (error)
+                    return reject(error);
+                resolve({err: stderr, out: stdout});
+            });
+        })
+    }
+
+    async getDominantColor(imageFile: string) {
         let rgbs = await ColorThief.getPalette(imageFile)
         let hsls = rgbs.map(([r, g, b]: number[]) => RGBToHSL(r, g, b))
         // let hexes = rgbs.map(([r, g, b]: number[]) => this.RGBToHex(r, g, b))

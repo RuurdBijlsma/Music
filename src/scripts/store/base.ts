@@ -15,6 +15,9 @@ export const baseDb = openDB("base", 1, {
     upgrade(db, oldVersion, newVersion, transaction, event) {
         db.createObjectStore('trackBars')
         db.createObjectStore('spotify')
+        db.createObjectStore('cache')
+        db.createObjectStore('nameToId')
+        db.createObjectStore('imageColor')
         const trackStore = db.createObjectStore('tracks', {keyPath: 'id'})
         trackStore.createIndex('searchString', 'searchString', {unique: false})
         trackStore.createIndex('title', 'title', {unique: false})
@@ -22,8 +25,6 @@ export const baseDb = openDB("base", 1, {
         trackStore.createIndex('oldToNew', 'added_at', {unique: false})
         trackStore.createIndex('newToOld', 'added_at_reverse', {unique: false})
         console.log('db upgrade', {oldVersion, newVersion, transaction, event});
-        db.createObjectStore('cache')
-        db.createObjectStore('nameToId')
     },
     blocked(currentVersion, blockedVersion, event) {
         console.log('db blocked', {currentVersion, blockedVersion, event});

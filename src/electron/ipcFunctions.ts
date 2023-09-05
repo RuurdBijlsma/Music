@@ -41,35 +41,28 @@ export default class IpcFunctions {
             }
         })
 
-        ipcMain.handle('downloadYt', async (_, filename: string, tags: any, image: string) => {
+        ipcMain.handle('downloadYt', async (_, filename: string, tags: any, imageFile: string) => {
             console.log({filename})
             const isYouTubeTrack = tags.id !== undefined
             const ytId = tags.id
             let time = performance.now()
             let artistsString = tags.artist.join(', ')
             let query = `${artistsString} - ${tags.title}`
-            let imageFile = path.join(Directories.temp, `image-${Math.random()}.jpg`);
-            // noinspection ES6MissingAwait
-            let promises = [isYouTubeTrack ? nf.downloadYtById(ytId, filename) : nf.downloadYtByQuery(query, filename)]
-            if (image !== '')
-                promises.push(nf.downloadFile(image, imageFile))
-            let outPaths = await Promise.all(promises)
+            let downloadResult = await (isYouTubeTrack ? nf.downloadYtById(ytId, filename) : nf.downloadYtByQuery(query, filename))
             let middleOut = path.join(Directories.temp, filename + '.mp3')
             let finalOut = path.join(Directories.music, filename + '.mp3')
 
             delete tags.id
             // convert to mp3 and add metadata
-            await nf.ffmpegMetadata(outPaths[0].outPath, middleOut, imageFile, tags)
+            await nf.ffmpegMetadata(downloadResult.outPath, middleOut, imageFile, tags)
             console.log(`Time cost: ${performance.now() - time}ms`)
 
             // clean up
             await fs.rename(middleOut, finalOut)
-            fs.unlink(outPaths[0].outPath).then()
-            if (image !== '')
-                fs.unlink(imageFile).then();
+            fs.unlink(downloadResult.outPath).then()
 
-            console.log("ID HERE IS", outPaths[0].id)
-            return {outPath: finalOut, id: outPaths[0].id}
+            console.log("ID HERE IS", downloadResult.id)
+            return {outPath: finalOut, id: downloadResult.id}
         })
 
         ipcMain.handle('searchYt', async (_, query: string, results: number = 3) => nf.searchYouTube(query, results))
@@ -78,5 +71,6 @@ export default class IpcFunctions {
         ipcMain.handle("setPlatformPlaying", (_, value: boolean, darkTheme: boolean) => nf.setPlatformPlaying(value, darkTheme))
         ipcMain.handle("stopPlatformPlaying", (_) => nf.stopPlatformPlaying())
         ipcMain.handle("getOutputDirectory", async (_) => await nf.getOutputDirectory())
+        ipcMain.handle("imgToJpg", async (_, imgUrl: string, outFile: string) => await nf.imgToJpg(imgUrl, outFile))
     }
 }

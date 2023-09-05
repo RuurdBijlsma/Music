@@ -85,7 +85,7 @@ export const useSearchStore = defineStore('search', () => {
 
         for (let track of tracks) {
             console.log(track, track.searchString)
-            if (track.searchString.includes(lowerQuery))
+            if (track.searchString && track.searchString.includes(lowerQuery))
                 result.push(track.track as SpotifyApi.TrackObjectFull)
         }
         console.log("Search result", result)
