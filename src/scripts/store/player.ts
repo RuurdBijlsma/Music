@@ -158,6 +158,7 @@ export const usePlayerStore = defineStore('player', () => {
         } finally {
             tracksLoading.delete(_trackId)
         }
+        console.log({outPath})
         // Check if user hasn't changed track while it was loading
         if (_collection.id === collection.value.id && track.value && _trackId === trackId.value)
             playerElement.src = outPath

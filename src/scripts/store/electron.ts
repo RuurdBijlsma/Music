@@ -35,7 +35,7 @@ export const usePlatformStore = defineStore('platform', () => {
     let server: any = null
 
     function musicFileNamify(file: string) {
-        return fileNamify(file).substring(0, 150)
+        return fileNamify(file).substring(0, 150).replaceAll('#', '!')
     }
 
     ipcRenderer.on('invoke', async (_, channel, data) => {
