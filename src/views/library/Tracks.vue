@@ -56,7 +56,7 @@ setTimeout(() => {
         console.log("Reloading tracks!")
         library.loadLikedTracks()
     } else {
-        console.log("No need to reload tracks, they were refreshed less than 10 minutes ago")
+        console.log("No need to reload tracks, they were refreshed less than 60 minutes ago")
     }
 }, 500)
 

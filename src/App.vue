@@ -95,6 +95,7 @@
     </v-app>
 </template>
 
+
 <script setup lang="ts">
 // todo
 // paste youtube link in search balk
@@ -109,8 +110,8 @@
 // if delete file thats currently playing, do something about it?
 // possibly replace color thief with something without vulnerabilities
 // radio
-// cache theme colors (image url -> color)
 // het is best weird dat de error event nu firet voor ytDownload via search, test even tracks die het horen te doen zie hoe dat gaat, zie hoe een echte error nu handled wordt
+// normalize track volume using track bars
 
 import TopMenu from "./components/TopMenu.vue";
 import MusicPlayer from "./components/MusicPlayer.vue";
@@ -120,7 +121,7 @@ import {useRoute} from "vue-router";
 import SearchSuggestions from "./components/SearchSuggestions.vue";
 import {useBaseStore} from "./scripts/store/base";
 import {usePlayerStore} from "./scripts/store/player";
-import {computed, ref, watch} from "vue";
+import {computed, onUnmounted, ref, watch} from "vue";
 import ItemContextMenu from "./components/ItemContextMenu.vue";
 import SourceDialog from "./components/SourceDialog.vue";
 
@@ -163,6 +164,8 @@ watch(blurBgSrc, () => {
         }, 50)
     }, 3000)
 })
+
+onUnmounted(() => player.unload())
 
 console.log('library.saved', library.saved);
 console.log('theme', theme);

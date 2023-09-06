@@ -66,25 +66,55 @@ export const useSpotifyApiStore = defineStore('spotify-api', () => {
         }
     }
 
-    async function withDb<T>(func: (...args: any[]) => T) {
-        await baseDb
-        return func()
+    const getPlaylist = async (id: string) => {
+        await baseDb;
+        return api.getPlaylist(id)
+    }
+    const getAlbum = async (id: string) => {
+        await baseDb;
+        return api.getAlbum(id)
+    }
+    const getArtist = async (id: string) => {
+        await baseDb;
+        return api.getArtist(id)
+    }
+    const getArtistAlbums = async (id: string) => {
+        await baseDb;
+        return api.getArtistAlbums(id)
+    }
+    const getArtistRelatedArtists = async (id: string) => {
+        await baseDb;
+        return api.getArtistRelatedArtists(id)
+    }
+    const getArtistTopTracks = async (id: string) => {
+        await baseDb;
+        return api.getArtistTopTracks(id, library.userInfo.country)
+    }
+    const getUser = async (id: string) => {
+        await baseDb;
+        return api.getUser(id)
+    }
+    const getUserPlaylists = async (id: string) => {
+        await baseDb;
+        return api.getUserPlaylists(id)
+    }
+    const getTrack = async (id: string) => {
+        await baseDb;
+        return api.getTrack(id)
+    }
+    const getMe = async () => {
+        await baseDb;
+        return api.getMe()
+    }
+    const getMySavedTracks = async (options: Object | undefined = undefined) => {
+        await baseDb;
+        return api.getMySavedTracks(options)
     }
 
-    const getPlaylist = async (id: string) => withDb(() => api.getPlaylist(id))
-    const getAlbum = async (id: string) => withDb(() => api.getAlbum(id))
-    const getArtist = async (id: string) => withDb(() => api.getArtist(id))
-    const getArtistAlbums = async (id: string) => withDb(() => api.getArtistAlbums(id))
-    const getArtistRelatedArtists = async (id: string) => withDb(() => api.getArtistRelatedArtists(id))
-    const getArtistTopTracks = async (id: string) => withDb(() => api.getArtistTopTracks(id, library.userInfo.country))
-    const getUser = async (id: string) => withDb(() => api.getUser(id))
-    const getUserPlaylists = async (id: string) => withDb(() => api.getUserPlaylists(id))
-    const getTrack = async (id: string) => withDb(() => api.getTrack(id))
-    const getMe = async () => withDb(() => api.getMe())
-    const getMySavedTracks = async (options: Object | undefined = undefined) => withDb(() => api.getMySavedTracks(options))
-
-    const search = async (query: string, types: ("playlist" | "album" | "artist" | "track")[], options: SpotifyApi.SearchForItemParameterObject | undefined = undefined) =>
-        withDb(() => api.search(query, types, options))
+    const search = async (query: string, types: ("playlist" | "album" | "artist" | "track")[], options: SpotifyApi.SearchForItemParameterObject | undefined = undefined) => {
+        await baseDb;
+        return api.search(query, types, options)
+    }
 
 
     return {

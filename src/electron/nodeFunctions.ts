@@ -12,7 +12,6 @@ import * as https from "https";
 import ColorThief from 'color-extr-thief'
 import {getContrastRatio, RGBToHex, RGBToHSL} from "./utils";
 import replaceSpecialCharacters from "replace-special-characters";
-import directories from "./Directories";
 
 
 const YTDlpWrap = require("yt-dlp-wrap").default

@@ -15,11 +15,19 @@
             </template>
             <v-list-item-title>Choose different source</v-list-item-title>
         </v-list-item>
-        <v-list-item v-if="item.type==='track' && isDownloaded" @click="deleteTrack">
+        <v-list-item v-if="item.type==='track' && isDownloaded"
+                     @click="deleteTrack">
             <template v-slot:prepend>
                 <v-icon icon="mdi-trash-can"/>
             </template>
             <v-list-item-title>Delete file</v-list-item-title>
+        </v-list-item>
+        <v-list-item v-if="item.type==='track' && isDownloaded && player.track.id === item.id"
+                     @click="player.reloadCurrentTrack">
+            <template v-slot:prepend>
+                <v-icon icon="mdi-reload"/>
+            </template>
+            <v-list-item-title>Reload track file</v-list-item-title>
         </v-list-item>
     </v-list>
 </template>
@@ -31,6 +39,7 @@ import {useBaseStore} from "../scripts/store/base";
 import {useLibraryStore} from "../scripts/store/library";
 import type {Item} from "../scripts/types";
 import {usePlatformStore} from "../scripts/store/electron";
+import {usePlayerStore} from "../scripts/store/player";
 
 const props = defineProps({
     item: {
@@ -45,6 +54,7 @@ const props = defineProps({
 const base = useBaseStore()
 const library = useLibraryStore()
 const platform = usePlatformStore()
+const player = usePlayerStore()
 const isDownloaded = ref(false)
 onMounted(() => {
     if (props.item.type === 'track')
@@ -55,7 +65,7 @@ onMounted(() => {
 })
 
 async function deleteTrack() {
-    await platform.deleteTrack(props.item as SpotifyApi.TrackObjectFull);
+    await player.deleteTrack(props.item as SpotifyApi.TrackObjectFull);
     isDownloaded.value = false
 }
 

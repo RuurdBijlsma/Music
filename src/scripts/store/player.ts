@@ -23,39 +23,51 @@ export const usePlayerStore = defineStore('player', () => {
         }
     })
 
-    let playerElement = createAudioElement()
+    let playerElement = addAudioEvents(document.createElement('audio'))
+    let backupPlayer = document.createElement('audio')
     let mouseHoverPercent = ref(0)
     let mouseActive = ref(false)
     let mouseHover = ref(false)
 
-    function createAudioElement() {
-        let element = document.createElement('audio')
-        element.addEventListener('play', () => {
+    function addAudioEvents(element: HTMLAudioElement) {
+        element.onplay = () => {
             playing.value = !element.paused
             platform.setPlatformPlaying(true)
-        })
-        element.addEventListener('pause', () => {
+        }
+        element.onpause = () => {
             playing.value = !element.paused
             platform.setPlatformPlaying(false)
-        })
-        element.addEventListener('durationchange', () => {
+        }
+        element.ondurationchange = () => {
             duration.value = element.duration
             console.log("audio duration change", duration.value)
-        })
-        element.addEventListener('canplay', () => {
+        }
+        element.oncanplay = () => {
             console.log("audio load")
             loading.value = false
-        })
-        element.addEventListener('timeupdate', () => {
+        }
+        element.ontimeupdate = () => {
             currentTime.value = element.currentTime
-        })
-        element.addEventListener('ended', async () => {
+        }
+        element.onended = async () => {
+            element.src = ''
             await skip(1)
-        })
-        element.addEventListener('volumechange', () => {
+        }
+        element.onvolumechange = () => {
             volume.value = element.volume
             localStorage.volume = volume.value
-        })
+        }
+        return element
+    }
+
+    function removeAudioEvents(element: HTMLAudioElement) {
+        element.onplay = () => 0
+        element.onpause = () => 0
+        element.ondurationchange = () => 0
+        element.oncanplay = () => 0
+        element.ontimeupdate = () => 0
+        element.onended = () => 0
+        element.onvolumechange = () => 0
         return element
     }
 
@@ -87,15 +99,27 @@ export const usePlayerStore = defineStore('player', () => {
     let tracksLoading = new Set()
 
     async function load(_collection: ItemCollection, _track: SpotifyApi.TrackObjectFull, autoplay = true) {
+        console.time('load')
+        console.timeLog('load', 1)
         const _trackId = _track.id
         let isLoading = tracksLoading.has(_trackId)
         tracksLoading.add(_trackId)
+        console.timeLog('load', 2)
+
+        // swap player element with backup element
+        // this causes the media session to stay alive while loading the new track
+        removeAudioEvents(playerElement)
+        playerElement.pause()
+        let temp = playerElement
+        playerElement = backupPlayer
+        backupPlayer = temp
+        addAudioEvents(playerElement)
+        console.timeLog('load', 3)
 
         console.log("Load", {_collection, track})
-        playerElement.src = ''
         playerElement.autoplay = autoplay
 
-        duration.value = 1
+        duration.value = _track.duration_ms / 1000
         currentTime.value = 1
         loading.value = true
         loadProgress.value = NaN
@@ -107,32 +131,13 @@ export const usePlayerStore = defineStore('player', () => {
         track.value = _track
         trackId.value = _trackId
         setMetadata(_track)
+        console.timeLog('load', 4)
 
         console.log("Playing item", _track, 'from collection', _collection)
-        await baseDb
-        db.put('cache', {
-            collection: _collection,
-            track: toRaw(_track),
-        }, 'nowPlaying').then(() => localStorage.hasTrackInMemory = 'true')
+        console.timeLog('load', 5)
 
-        // get track bars from db or create empty structure
-        const binWidth = 2
-        const barSpacing = 1
-        const canvasWidth = 300
-        const barCount = canvasWidth / (binWidth + barSpacing)
-        let dbTrackBars = await db.get('trackBars', _track.id)
-        console.log(dbTrackBars)
-        if (dbTrackBars !== undefined && _trackId === trackId.value) {
-            canvasBars = dbTrackBars
-        } else if (_trackId === trackId.value) {
-            canvasBars = {
-                binSize: 1,
-                binWidth,
-                barSpacing,
-                binPos: new Array<number>(barCount).fill(.05),
-                binNeg: new Array<number>(barCount).fill(-.05),
-            }
-        }
+        let dbTrackBarsPromise = showTrackBars(_track)
+        console.timeLog('load', 7)
 
         let onProgress: (p: { percent: number }) => void
         onProgress = (progress) => {
@@ -151,6 +156,7 @@ export const usePlayerStore = defineStore('player', () => {
             return
         }
         let outPath = ''
+        console.timeLog('load', 8)
         try {
             outPath = await platform.getTrackFile(_track)
         } catch (e: any) {
@@ -158,22 +164,68 @@ export const usePlayerStore = defineStore('player', () => {
         } finally {
             tracksLoading.delete(_trackId)
         }
+        console.timeLog('load', 8.5)
+        setTimeout(() => {
+            if (_collection.id === collection.value?.id && track.value && _trackId === trackId.value)
+                db.put('cache', {
+                    collection: _collection,
+                    track: toRaw(_track),
+                }, 'nowPlaying').then(() => localStorage.hasTrackInMemory = 'true')
+        }, 100)
+        console.timeLog('load', 9)
         console.log({outPath})
         // Check if user hasn't changed track while it was loading
         if (_collection.id === collection.value.id && track.value && _trackId === trackId.value)
             playerElement.src = outPath
         console.log(playerElement)
 
+        platform.setPlatformPlaying(autoplay)
+
         canvas = document.querySelector('.progress-canvas')
-
-
         if (canvas === null) return
+        const {dbTrackBars, canvasWidth, binWidth, barSpacing, barCount} = await dbTrackBarsPromise
         canvas.width = canvasWidth
         canvas.height = 100
         context = canvas.getContext('2d')
         if (context === null) return
         // only calculate track bars if they weren't retrieved from db cache
         if (dbTrackBars === undefined) calculateTrackBars(outPath, _trackId, barCount, binWidth, barSpacing).then()
+        console.timeEnd('load')
+    }
+
+    async function showTrackBars(_track: SpotifyApi.TrackObjectFull) {
+        // get track bars from db or create empty structure
+        const canvasWidth = 300
+        const binWidth = 2
+        const barSpacing = 1
+        const barCount = canvasWidth / (binWidth + barSpacing)
+        await baseDb
+        let dbTrackBars = await db.get('trackBars', _track.id)
+        console.log(dbTrackBars)
+        if (dbTrackBars !== undefined && _track.id === trackId.value) {
+            canvasBars = dbTrackBars
+        } else if (_track.id === trackId.value) {
+            canvasBars = {
+                binSize: 1,
+                binWidth,
+                barSpacing,
+                binPos: new Array<number>(barCount).fill(.02),
+                binNeg: new Array<number>(barCount).fill(-.02),
+            }
+        }
+        return {dbTrackBars, canvasWidth, binWidth, barSpacing, barCount}
+    }
+
+    async function deleteTrack(track: SpotifyApi.TrackObjectFull) {
+        if (track === null) return
+        await db.delete('trackBars', track.id)
+        await platform.deleteTrackCache(track)
+    }
+
+    async function reloadCurrentTrack() {
+        if (track.value === null || collection.value === null) return
+        await deleteTrack(track.value)
+        await load(collection.value, track.value)
     }
 
     async function unload() {
@@ -202,7 +254,7 @@ export const usePlayerStore = defineStore('player', () => {
             binPos: new Array<number>(barCount).fill(.05),
             binNeg: new Array<number>(barCount).fill(-.05),
         }
-        platform.setPlatformPlaying(true)
+        platform.stopPlatformPlaying()
     }
 
     async function calculateTrackBars(outPath: string, _trackId: string, barCount: number, binWidth: number, barSpacing: number) {
@@ -369,8 +421,9 @@ export const usePlayerStore = defineStore('player', () => {
         }
         if (repeatRequired && !repeat.value) {
             await unload()
+        } else {
+            await load(collection.value, queue.value[newIndex])
         }
-        await load(collection.value, queue.value[newIndex])
     }
 
     async function togglePlay() {
@@ -441,5 +494,7 @@ export const usePlayerStore = defineStore('player', () => {
         queue,
         playCollection,
         shuffleCollection,
+        reloadCurrentTrack,
+        deleteTrack,
     }
 })

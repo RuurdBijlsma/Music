@@ -26,18 +26,13 @@ export const usePlatformStore = defineStore('platform', () => {
 
     let db: IDBPDatabase
     baseDb.then(async r => db = r)
-
+    let server: any = null
     let directories: { music: string, temp: string } | null = null
+
     ipcRenderer.invoke('getDirectories').then((d: any) => {
         console.log("Got directories", d)
         directories = d
     })
-    let server: any = null
-
-    function musicFileNamify(file: string) {
-        return fileNamify(file).substring(0, 150).replaceAll('#', '!')
-    }
-
     ipcRenderer.on('invoke', async (_, channel, data) => {
         if (channel === 'toggleFavorite') {
             if (player.track !== null) {
@@ -53,7 +48,6 @@ export const usePlatformStore = defineStore('platform', () => {
             }
         }
     })
-
     ipcRenderer.on('play', () => player.play())
     ipcRenderer.on('pause', () => player.pause())
     ipcRenderer.on('skip', (_, n) => player.skip(n))
@@ -70,6 +64,10 @@ export const usePlatformStore = defineStore('platform', () => {
         return ipcRenderer.invoke('stopPlatformPlaying')
     }
 
+    function musicFileNamify(file: string) {
+        return fileNamify(file).substring(0, 150).replaceAll('#', '!')
+    }
+
     async function deleteFile(filename: string) {
         if (await checkFileExists(filename))
             await fs.unlink(filename)
@@ -78,11 +76,6 @@ export const usePlatformStore = defineStore('platform', () => {
     async function trackIsDownloaded(track: SpotifyApi.TrackObjectFull) {
         let {outPath} = trackToNames(track)
         return await checkFileExists(outPath)
-    }
-
-    async function deleteTrack(track: SpotifyApi.TrackObjectFull) {
-        let {outPath} = trackToNames(track)
-        await deleteFile(outPath)
     }
 
     async function makeTempTrack(track: SpotifyApi.TrackObjectFull) {
@@ -101,7 +94,19 @@ export const usePlatformStore = defineStore('platform', () => {
         return {cacheKey: `PTI-${filename}`, filename, outPath, query}
     }
 
+    async function deleteTrackCache(track: SpotifyApi.TrackObjectFull) {
+        let {outPath} = trackToNames(track)
+        if (await checkFileExists(outPath))
+            await fs.unlink(outPath)
+
+        let hasImage = track.hasOwnProperty('album') && track.album.images.length > 0;
+        let imgUrl = hasImage ? track.album.images[0].url : ''
+        if (hasImage)
+            await db.delete('imageColor', imgUrl)
+    }
+
     async function getTrackFile(track: SpotifyApi.TrackObjectFull, applyThemeColor = true) {
+        console.time('getTrack')
         const isYouTubeTrack = track.id.startsWith('yt-')
         let hasImage = track.hasOwnProperty('album') && track.album.images.length > 0;
         let imgUrl = hasImage ? track.album.images[0].url : ''
@@ -111,8 +116,7 @@ export const usePlatformStore = defineStore('platform', () => {
             checkFileExists(outPath),
             db.get('imageColor', imgUrl)
         ])
-        //temp for debug
-        dbColor = undefined
+        console.timeLog('getTrack', 1)
         // only download the album art if the track file hasn't been created yet
         // or if the dominant theme color hasn't been put in the DB
         let imageDownloadRequired = !trackFileExists || (!dbColor && applyThemeColor)
@@ -122,6 +126,7 @@ export const usePlatformStore = defineStore('platform', () => {
             let out = await ipcRenderer.invoke('imgToJpg', imgUrl, jpgFile)
             console.log("imgToJpg", out)
         }
+        console.timeLog('getTrack', 2)
         console.log({jpgFile})
         if (hasImage && applyThemeColor) {
             const applyColor = (c: { dark: string, light: string }) => {
@@ -141,6 +146,7 @@ export const usePlatformStore = defineStore('platform', () => {
             }
         }
         let cachedId = await db.get('nameToId', cacheKey)
+        console.timeLog('getTrack', 3)
         console.log("CACHED ID RESULT", cachedId)
         if (!trackFileExists) {
             ipcRenderer.on(filename + 'progress', (_, progress) => {
@@ -164,14 +170,17 @@ export const usePlatformStore = defineStore('platform', () => {
                     //@ts-ignore
                     tags.year = new Date(track.album.release_date).getFullYear();
             }
+            console.timeLog('getTrack', 4)
             console.log("Sending payload", tags, hasImage ? jpgFile : '')
             let {id} = await ipcRenderer.invoke('downloadYt', filename, tags, hasImage ? jpgFile : '')
             console.log("ID", id)
+            console.timeLog('getTrack', 5)
             if (base.sourceDialog.tempTrackOverride.trackId === track.id) {
                 outPath = await makeTempTrack(track)
                 console.log("TEMP TRACK OVERRIDE REQUESTED, new outPath=", outPath)
                 base.sourceDialog.tempTrackOverride.trackId = ''
             }
+            console.timeLog('getTrack', 6)
             if (id !== '') {
                 db.put('nameToId', id, cacheKey).then()
                 console.log("downloaded yt", {outPath, id})
@@ -184,6 +193,7 @@ export const usePlatformStore = defineStore('platform', () => {
             // other uses of the image are awaited before this so no issue
             setTimeout(() => fs.unlink(jpgFile).then(), 1000)
         }
+        console.timeEnd('getTrack')
         return outPath
     }
 
@@ -367,12 +377,13 @@ export const usePlatformStore = defineStore('platform', () => {
         toggleMaximize,
         minimize,
         setPlatformPlaying,
+        stopPlatformPlaying,
         trackToNames,
         deleteFile,
         trackIsDownloaded,
-        deleteTrack,
         exportLikedTracks,
         exportMp3State,
         cancelExport,
+        deleteTrackCache,
     }
 })
