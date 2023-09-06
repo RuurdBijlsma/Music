@@ -22,8 +22,8 @@
             </template>
             <v-list-item-title>Delete file</v-list-item-title>
         </v-list-item>
-        <v-list-item v-if="item.type==='track' && isDownloaded && player.track.id === item.id"
-                     @click="player.reloadCurrentTrack">
+        <v-list-item @click="player.reloadCurrentTrack"
+                     v-if="item.type==='track' && player.track !== null && isDownloaded && player.track.id === item.id">
             <template v-slot:prepend>
                 <v-icon icon="mdi-reload"/>
             </template>

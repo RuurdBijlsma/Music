@@ -25,6 +25,7 @@ export const usePlayerStore = defineStore('player', () => {
         db = r
         let lastPlaying = await db.get('cache', 'nowPlaying')
         if (lastPlaying !== undefined) {
+            console.log("Loading from now playing")
             let collection: ItemCollection = lastPlaying.collection
             let track: SpotifyApi.TrackObjectFull = lastPlaying.track
             load(collection, track, false).then()
