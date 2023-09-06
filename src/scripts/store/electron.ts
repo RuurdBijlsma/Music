@@ -111,6 +111,8 @@ export const usePlatformStore = defineStore('platform', () => {
             checkFileExists(outPath),
             db.get('imageColor', imgUrl)
         ])
+        //temp for debug
+        dbColor = undefined
         // only download the album art if the track file hasn't been created yet
         // or if the dominant theme color hasn't been put in the DB
         let imageDownloadRequired = !trackFileExists || (!dbColor && applyThemeColor)

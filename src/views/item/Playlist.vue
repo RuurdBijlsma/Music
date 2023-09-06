@@ -28,7 +28,6 @@ const playlist = ref(null as null | SpotifyApi.PlaylistObjectFull);
 const collection = computed(() => {
     if (playlist.value === null) return null
     let tracks = playlist.value.tracks.items.map(t => t.track as SpotifyApi.TrackObjectFull)
-    console.log("Playlist collection update", toRaw(tracks))
     return base.itemCollection(playlist.value, tracks)
 })
 

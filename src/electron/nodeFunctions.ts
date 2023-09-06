@@ -232,12 +232,11 @@ export default class NodeFunctions {
                 }
             }
             if (acceptableThemeColors.length === 0) {
-                console.log("No contrasting colors found in album art");
-                let clr = 255 - bgColor[0];
-                return [clr, clr, clr]
+                console.log("No contrasting colors found in album art")
+                let clr = 255 - bgColor[0]
+                return RGBToHex(clr, clr, clr)
             }
             acceptableThemeColors = acceptableThemeColors.sort((a, b) => b.hsl[1] - a.hsl[1])
-            // console.log(acceptableThemeColors.map(a => a.hsl))
             let rgbest = acceptableThemeColors[0].rgb
             return RGBToHex(rgbest[0], rgbest[1], rgbest[2])
         }
