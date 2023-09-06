@@ -96,6 +96,7 @@ export const usePlayerStore = defineStore('player', () => {
         currentTime.value = 1
         loading.value = true
         loadProgress.value = NaN
+        volumeNormalizer.value = 0.5
         _collection = toRaw(_collection)
         _collection.tracks = _collection.tracks.map(t => toRaw(t))
         _collection.context = toRaw(_collection.context)
