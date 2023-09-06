@@ -18,6 +18,7 @@ export const baseDb = openDB("base", 1, {
         db.createObjectStore('cache')
         db.createObjectStore('nameToId')
         db.createObjectStore('imageColor')
+        db.createObjectStore('trackVolumeStats')
         const trackStore = db.createObjectStore('tracks', {keyPath: 'id'})
         trackStore.createIndex('searchString', 'searchString', {unique: false})
         trackStore.createIndex('title', 'title', {unique: false})

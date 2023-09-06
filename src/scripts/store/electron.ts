@@ -103,6 +103,8 @@ export const usePlatformStore = defineStore('platform', () => {
         let imgUrl = hasImage ? track.album.images[0].url : ''
         if (hasImage)
             await db.delete('imageColor', imgUrl)
+
+        await db.delete('trackVolumeStats', track.id)
     }
 
     async function getTrackFile(track: SpotifyApi.TrackObjectFull, applyThemeColor = true) {
@@ -195,6 +197,27 @@ export const usePlatformStore = defineStore('platform', () => {
         }
         console.timeEnd('getTrack')
         return outPath
+    }
+
+    async function getVolumeStats(track: SpotifyApi.TrackObjectFull) {
+        let {outPath} = trackToNames(track)
+        let dbVolumeStats = await db.get('trackVolumeStats', track.id)
+        if (dbVolumeStats !== undefined) return dbVolumeStats as { mean: number, peak: number }
+
+        let {err} = await ipcRenderer.invoke('getVolumeStats', outPath)
+        let lines = err.split('\n') as string[]
+        let volumeLines = lines.filter(l => l.startsWith('[Parsed_volumedetect_0'))
+        console.log('trackVolumeStats', volumeLines)
+        let peakLine = volumeLines.find(l => l.includes('max_volume'))
+        let meanLine = volumeLines.find(l => l.includes('mean_volume'))
+        if (meanLine === undefined || peakLine === undefined) return {mean: -5, peak: 0}
+        let mean: number, peak: number
+        mean = +meanLine.split('mean_volume:')[1].split('dB')[0].trim()
+        peak = +peakLine.split('max_volume:')[1].split('dB')[0].trim()
+        let result = {mean, peak}
+        console.log(result)
+        db.put('trackVolumeStats', result, track.id).then()
+        return result
     }
 
     async function searchYouTube(query: string, limit = 5) {
@@ -385,5 +408,6 @@ export const usePlatformStore = defineStore('platform', () => {
         exportMp3State,
         cancelExport,
         deleteTrackCache,
+        getVolumeStats,
     }
 })

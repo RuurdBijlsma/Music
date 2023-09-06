@@ -72,5 +72,6 @@ export default class IpcFunctions {
         ipcMain.handle("stopPlatformPlaying", (_) => nf.stopPlatformPlaying())
         ipcMain.handle("getOutputDirectory", async (_) => await nf.getOutputDirectory())
         ipcMain.handle("imgToJpg", async (_, imgUrl: string, outFile: string) => await nf.imgToJpg(imgUrl, outFile))
+        ipcMain.handle("getVolumeStats", async (_, trackFile: string) => await nf.getVolumeStats(trackFile))
     }
 }

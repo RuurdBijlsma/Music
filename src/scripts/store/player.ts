@@ -138,6 +138,13 @@ export const usePlayerStore = defineStore('player', () => {
         } finally {
             tracksLoading.delete(_trackId)
         }
+        platform.getVolumeStats(_track).then(({mean, peak}) => {
+            // volume is normalized to where a track with max volume of >= 38000 gets normalizer 0.3
+            // a track with max volume of <= 15000 gets normalizer 1 (so full volume)
+            const maxVolumeToNormalizer = (x: number) => -0.06363636364 * (x + 7) + 0.3
+            volumeNormalizer.value = Math.max(Math.min(1, maxVolumeToNormalizer(mean)), .3)
+            console.log({volumeNormalizer: volumeNormalizer.value, meanVolume: mean})
+        })
         console.timeLog('load', 8.5)
         setTimeout(() => {
             if (_collection.id === collection.value?.id && track.value && _trackId === trackId.value)
@@ -154,26 +161,17 @@ export const usePlayerStore = defineStore('player', () => {
         console.log(playerElement)
 
         platform.setPlatformPlaying(autoplay)
-        const {dbTrackBars, canvasWidth, binWidth, barSpacing, barCount} = await dbTrackBarsPromise
-        const calculateNormalizer = (bars: TrackBars) => {
-            // volume is normalized to where a track with max volume of >= 38000 gets normalizer 0.3
-            // a track with max volume of <= 15000 gets normalizer 1 (so full volume)
-            const maxVolumeToNormalizer = (x: number) => (-0.00003043) * (x - 15000) + 1
-            volumeNormalizer.value = Math.max(Math.min(1, maxVolumeToNormalizer(bars.maxVolume)), .3)
-            console.log({volumeNormalizer: volumeNormalizer.value, maxVolume: bars.maxVolume})
-        }
-        if (dbTrackBars) calculateNormalizer(dbTrackBars)
 
         canvas = document.querySelector('.progress-canvas')
         if (canvas === null) return
+        const {dbTrackBars, canvasWidth, binWidth, barSpacing, barCount} = await dbTrackBarsPromise
         canvas.width = canvasWidth
         canvas.height = 100
         context = canvas.getContext('2d')
         if (context === null) return
         // only calculate track bars if they weren't retrieved from db cache
         if (dbTrackBars === undefined)
-            calculateTrackBars(outPath, _trackId, barCount, binWidth, barSpacing)
-                .then(bars => calculateNormalizer(bars))
+            calculateTrackBars(outPath, _trackId, barCount, binWidth, barSpacing).then()
         console.timeEnd('load')
     }
 
@@ -331,7 +329,7 @@ export const usePlayerStore = defineStore('player', () => {
         const defaultBarFill = theme.current.value.dark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.2)'
         let {binSize, binWidth, barSpacing} = canvasBars
         context.clearRect(0, 0, canvas.width, canvas.height)
-        let mapping = (x: number) => (10 / 7) * x + 4 / 7
+        let mapping = (x: number) => 2.14285714286 * x + 0.35714285714
         let normalizer = mapping(normalizeVolume.value ? volumeNormalizer.value : 0.3)
 
         for (let i = 0; i < canvasBars.binPos.length; i++) {

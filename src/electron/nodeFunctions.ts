@@ -212,6 +212,18 @@ export default class NodeFunctions {
         })
     }
 
+    async getVolumeStats(trackFile: string){
+        return new Promise<{ err: string, out: string }>((resolve, reject) => {
+            let command = `${this.ffmpegPath} -i "${trackFile}" -af "volumedetect" -vn -sn -dn -f null /dev/null`
+
+            child_process.exec(command, (error, stdout, stderr) => {
+                if (error)
+                    return reject(error);
+                resolve({err: stderr, out: stdout});
+            });
+        })
+    }
+
     async getDominantColor(imageFile: string) {
         let rgbs = await ColorThief.getPalette(imageFile)
         let hsls = rgbs.map(([r, g, b]: number[]) => RGBToHSL(r, g, b))
