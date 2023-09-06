@@ -111,7 +111,6 @@
 // possibly replace color thief with something without vulnerabilities
 // radio
 // het is best weird dat de error event nu firet voor ytDownload via search, test even tracks die het horen te doen zie hoe dat gaat, zie hoe een echte error nu handled wordt
-// normalize track volume using track bars
 
 import TopMenu from "./components/TopMenu.vue";
 import MusicPlayer from "./components/MusicPlayer.vue";

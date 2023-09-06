@@ -51,6 +51,10 @@
         <v-btn @click="platform.cancelExport" variant="tonal" color="error"
                prepend-icon="mdi-cancel" class="mt-2"
                v-if="platform.exportMp3State.loading">Cancel exporting</v-btn>
+        <v-divider class="mt-3 mb-3"/>
+        <h3>Audio settings</h3>
+        <p>Attempt to make loud tracks quieter to match closer with quiet tracks.</p>
+        <v-switch v-model="player.normalizeVolume" label="Normalize volume" :color="base.themeColor"/>
     </div>
 </template>
 
@@ -61,8 +65,10 @@ import {useSpotifyAuthStore} from "../scripts/store/spotify-auth";
 import {usePlatformStore} from "../scripts/store/electron";
 import {useBaseStore} from "../scripts/store/base";
 import ProgressBar from "../components/ProgressBar.vue";
+import {usePlayerStore} from "../scripts/store/player";
 
 const library = useLibraryStore()
+const player=usePlayerStore()
 const spotifyAuth = useSpotifyAuthStore()
 const platform = usePlatformStore()
 const base = useBaseStore()

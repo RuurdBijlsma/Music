@@ -101,9 +101,9 @@ function handleScroll(e: WheelEvent) {
 function toggleMute() {
     if (player.volume > 0) {
         volumeBeforeMute = player.volume
-        player.playerElement.volume = 0
+        player.volume = 0
     } else {
-        player.playerElement.volume = volumeBeforeMute
+        player.volume = volumeBeforeMute
     }
 }
 
