@@ -14,7 +14,7 @@ export const useSpotifyApiStore = defineStore('spotify-api', () => {
 
     function findPagination(object: any): Function | false {
         if (object === null)
-            return false;
+            return false
 
         let getKeyPath: Function;
         getKeyPath = ({keys: keyPath = [], o}: { keys: any, o: any }) => {

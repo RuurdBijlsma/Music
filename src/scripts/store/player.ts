@@ -331,7 +331,7 @@ export const usePlayerStore = defineStore('player', () => {
         let {binSize, binWidth, barSpacing} = canvasBars
         context.clearRect(0, 0, canvas.width, canvas.height)
         let mapping = (x: number) => 2.14285714286 * x + 0.35714285714
-        let normalizer = mapping(normalizeVolume.value ? volumeNormalizer.value : 0.3)
+        let normalizer = mapping(normalizeVolume.value ? volumeNormalizer.value : 0.3) * .7
 
         for (let i = 0; i < canvasBars.binPos.length; i++) {
             let timePercent = currentTime / duration
