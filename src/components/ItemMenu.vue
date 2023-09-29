@@ -29,6 +29,38 @@
             </template>
             <v-list-item-title>Reload track file</v-list-item-title>
         </v-list-item>
+
+        <v-menu location="left">
+            <template v-slot:activator="{ props }">
+                <v-list-item v-bind="props" v-if="item.type==='track'">
+                    <template v-slot:prepend>
+                        <v-progress-circular v-if="loadAddPlaylist" class="mr-8" indeterminate size="25" width="2"/>
+                        <v-icon v-else icon="mdi-playlist-plus"/>
+                    </template>
+                    <v-list-item-title>Add to playlist</v-list-item-title>
+                </v-list-item>
+            </template>
+            <v-list density="compact">
+                <v-list-item v-for="playlist in library.userPlaylists"
+                             @click="addToPlaylist(playlist.id, item)">
+                    <template v-slot:prepend>
+                        <v-avatar rounded>
+                            <v-img :src="base.itemImage(playlist)"/>
+                        </v-avatar>
+                    </template>
+                    <v-list-item-title>{{ playlist.name }}</v-list-item-title>
+                </v-list-item>
+            </v-list>
+        </v-menu>
+
+        <v-list-item v-if="library.viewedPlaylist !== null && item.type==='track' && isViewingPlaylistWithTrack(item.id)"
+                     @click="removeFromViewedPlaylist(item.uri)">
+            <template v-slot:prepend>
+                <v-progress-circular v-if="loadRemovePlaylist" class="mr-8" indeterminate size="25" width="2"/>
+                <v-icon v-else icon="mdi-playlist-minus"/>
+            </template>
+            <v-list-item-title>Remove from {{ library.viewedPlaylist.name }}</v-list-item-title>
+        </v-list-item>
     </v-list>
 </template>
 
@@ -40,6 +72,8 @@ import {useLibraryStore} from "../scripts/store/library";
 import type {Item} from "../scripts/types";
 import {usePlatformStore} from "../scripts/store/electron";
 import {usePlayerStore} from "../scripts/store/player";
+import {useSpotifyApiStore} from "../scripts/store/spotify-api";
+import {useRoute} from "vue-router";
 
 const props = defineProps({
     item: {
@@ -53,9 +87,13 @@ const props = defineProps({
 })
 const base = useBaseStore()
 const library = useLibraryStore()
+const spotify = useSpotifyApiStore()
 const platform = usePlatformStore()
 const player = usePlayerStore()
+const route = useRoute()
 const isDownloaded = ref(false)
+const loadAddPlaylist = ref(false)
+const loadRemovePlaylist = ref(false)
 onMounted(() => {
     if (props.item.type === 'track')
         platform.trackIsDownloaded(props.item as SpotifyApi.TrackObjectFull).then(v => {
@@ -63,6 +101,28 @@ onMounted(() => {
             isDownloaded.value = v
         })
 })
+
+function isViewingPlaylistWithTrack(trackId: string) {
+    if (library.viewedPlaylist === null) return false
+    const playlistId = library.viewedPlaylist.id
+    return playlistId === route.params.id && library.viewedPlaylist.tracks.items.find(t => t.track.id === trackId) !== undefined
+}
+
+async function removeFromViewedPlaylist(trackUri: string) {
+    if (library.viewedPlaylist === null) return
+    const playlistId = library.viewedPlaylist.id
+    loadRemovePlaylist.value = true
+    console.log("Remove ", {trackUri, playlistId})
+    await library.removeFromPlaylist(playlistId, trackUri)
+    loadRemovePlaylist.value = false
+}
+
+async function addToPlaylist(playlistId: string, track: Item) {
+    loadAddPlaylist.value = true
+    console.log("Add ", {track, playlistId})
+    await library.addToPlaylist(playlistId, track as SpotifyApi.TrackObjectFull)
+    loadAddPlaylist.value = false
+}
 
 async function deleteTrack() {
     await player.deleteTrack(props.item as SpotifyApi.TrackObjectFull);

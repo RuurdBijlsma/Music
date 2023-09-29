@@ -1,5 +1,5 @@
 <template>
-    <div class="playlist" v-if="playlist">
+    <div class="playlist pb-8" v-if="playlist">
         <track-list :collection="collection" v-if="collection && collection.tracks.length < 200">
             <playlist-header :collection="collection"/>
         </track-list>
@@ -18,12 +18,14 @@ import TrackListVirtual from "../../components/TrackListVirtual.vue";
 import TrackList from "../../components/TrackList.vue";
 import PlaylistHeader from "../../components/PlaylistHeader.vue";
 import {useSpotifyApiStore} from "../../scripts/store/spotify-api";
+import {storeToRefs} from "pinia";
 
 const route = useRoute()
 const base = useBaseStore()
 const library = useLibraryStore()
 const spotify = useSpotifyApiStore()
-const playlist = ref(null as null | SpotifyApi.PlaylistObjectFull);
+const playlist = ref(null as null | SpotifyApi.PlaylistObjectFull)
+const {viewedPlaylistRefreshRequired} = storeToRefs(library)
 
 const collection = computed(() => {
     if (playlist.value === null) return null
@@ -31,17 +33,26 @@ const collection = computed(() => {
     return base.itemCollection(playlist.value, tracks)
 })
 
+async function refresh() {
+    playlist.value = await spotify.getPlaylist(loadedId)
+    library.viewedPlaylist = playlist.value
+    console.log("Playlist", playlist.value)
+    viewedPlaylistRefreshRequired.value = false
+}
+
 let loadedId = route.params.id as string;
 watch(route, async () => {
     if (route.path.startsWith('/playlist') && typeof route.params.id === 'string' && route.params.id !== loadedId) {
-        loadedId = route.params.id;
-        playlist.value = await spotify.getPlaylist(loadedId);
+        loadedId = route.params.id
+        await refresh()
     }
 })
-spotify.getPlaylist(loadedId).then(r => {
-    playlist.value = r;
-    console.log("Playlist", r);
+watch(viewedPlaylistRefreshRequired, () => {
+    if (viewedPlaylistRefreshRequired.value)
+        refresh()
 })
+
+refresh()
 
 </script>
 

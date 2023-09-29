@@ -1,5 +1,5 @@
 import {defineStore} from 'pinia'
-import {ref, toRaw} from "vue";
+import {computed, ref, toRaw} from "vue";
 import {baseDb, useBaseStore} from './base'
 import {usePlatformStore} from "./electron";
 import type {IDBPDatabase} from "idb";
@@ -42,7 +42,12 @@ export const useLibraryStore = defineStore('library', () => {
     const ytTracks = ref([] as ExtendedPlaylistTrack[])
     const likedTracksTotal = ref(1)
     const likedTracksLoaded = ref(0)
+    const viewedPlaylist = ref(null as SpotifyApi.PlaylistObjectFull | null)
+    const viewedPlaylistRefreshRequired = ref(false)
 
+    const userPlaylists = computed(() =>
+        saved.value.playlist.filter(p => p.owner.id === userInfo.value.id || p.collaborative)
+    )
     const isRefreshing = ref({
         playlist: false,
         album: false,
@@ -430,7 +435,27 @@ export const useLibraryStore = defineStore('library', () => {
         }
     }
 
+    async function addToPlaylist(playlistId: string, track: SpotifyApi.TrackObjectFull) {
+        await baseDb;
+        await spotify.api.addTracksToPlaylist(playlistId, [track.uri])
+        if (viewedPlaylist.value === null) return
+        let trackInPlaylist = viewedPlaylist.value.tracks.items.find(t => t.track.id === track.id)
+        if (trackInPlaylist === undefined)
+            viewedPlaylistRefreshRequired.value = true
+    }
+
+    async function removeFromPlaylist(playlistId: string, trackUri: string) {
+        await baseDb;
+        await spotify.api.removeTracksFromPlaylist(playlistId, [trackUri])
+        if (viewedPlaylist.value === null) return
+        let trackIndex = viewedPlaylist.value.tracks.items.findIndex(t => t.track.uri === trackUri)
+        if (trackIndex === -1) return
+        viewedPlaylist.value.tracks.items.splice(trackIndex, 1)
+    }
+
     return {
+        addToPlaylist,
+        removeFromPlaylist,
         refreshHomePage,
         refreshUserData,
         userInfo,
@@ -447,5 +472,8 @@ export const useLibraryStore = defineStore('library', () => {
         saved,
         checkLiked,
         loadLikedTracks,
+        userPlaylists,
+        viewedPlaylist,
+        viewedPlaylistRefreshRequired,
     }
 })

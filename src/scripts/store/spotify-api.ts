@@ -110,7 +110,6 @@ export const useSpotifyApiStore = defineStore('spotify-api', () => {
         await baseDb;
         return api.getMySavedTracks(options)
     }
-
     const search = async (query: string, types: ("playlist" | "album" | "artist" | "track")[], options: SpotifyApi.SearchForItemParameterObject | undefined = undefined) => {
         await baseDb;
         return api.search(query, types, options)
