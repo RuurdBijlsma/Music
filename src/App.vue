@@ -16,12 +16,14 @@
             <div class="left-nav">
                 <v-btn class="nav-1-btn nav-button"
                        :icon="route.path === '/' ? 'mdi-play-box' : 'mdi-play-box-outline'"
+                       rounded
                        variant="text"
                        to="/"></v-btn>
                 <span class="button-text nav-1-text"
                       :class="{active: route.path === '/'}">Listen Now</span>
                 <v-btn class="nav-2-btn nav-button"
                        :icon="route.path === '/browse' ? 'mdi-library' : 'mdi-library-outline'"
+                       rounded
                        variant="text"
                        to="/browse"></v-btn>
                 <span class="button-text nav-2-text"
