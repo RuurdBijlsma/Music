@@ -1,7 +1,7 @@
 <template>
     <div class="mp" ref="musicContainer">
         <template v-if="player.track !== null">
-            <v-spacer></v-spacer>
+            <spacer></spacer>
             <glow-image class="album-art"
                         :src="base.itemImage(player.track)"
                         :height="elWidth / 2"
@@ -44,7 +44,7 @@
                     </v-btn>
                 </div>
             </div>
-            <v-spacer></v-spacer>
+            <spacer></spacer>
             <div class="extra-bar-buttons">
                 <like-button :item="player.track" variant="fill"/>
                 <queue-button/>
@@ -84,6 +84,7 @@ import ProgressBar from "./ProgressBar.vue";
 import LikeButton from "./LikeButton.vue";
 import QueueButton from "./QueueButton.vue";
 import ItemMenu from "./ItemMenu.vue";
+import Spacer from "./Spacer.vue";
 
 const player = usePlayerStore()
 const base = useBaseStore()

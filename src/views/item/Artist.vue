@@ -8,7 +8,7 @@
                 :height="250"
                 class="mb-4"
                 :src="artist.images[0].url"/>
-            <v-spacer/>
+            <spacer/>
             <h1>{{ artist.name }}</h1>
             <p>{{ followerString }}</p>
             <p class="genres">{{ artist.genres.join(' / ') }}</p>
@@ -60,6 +60,7 @@ import HorizontalScroller from "../../components/HorizontalScroller.vue";
 import TrackList from "../../components/TrackList.vue";
 import CollectionButtons from "../../components/CollectionButtons.vue";
 import {useSpotifyApiStore} from "../../scripts/store/spotify-api";
+import Spacer from "../../components/Spacer.vue";
 
 const route = useRoute()
 const base = useBaseStore();

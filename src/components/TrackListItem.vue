@@ -13,7 +13,7 @@
                 <artists-span :artists="track.artists"/>
             </div>
         </div>
-        <v-spacer/>
+        <spacer/>
         <div class="track-duration ml-2">
             {{ base.msToReadable(track.duration_ms) }}
         </div>
@@ -38,6 +38,7 @@ import ArtistsSpan from "./ArtistsSpan.vue";
 import {useLibraryStore} from "../scripts/store/library";
 import ItemMenu from "./ItemMenu.vue";
 import type {ItemCollection} from "../scripts/types";
+import Spacer from "./Spacer.vue";
 
 const props = defineProps({
     track: {

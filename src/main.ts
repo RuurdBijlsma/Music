@@ -14,7 +14,7 @@ const vuetify = createVuetify({
     icons: {
         defaultSet: "mdi",
         aliases,
-        sets: { mdi }
+        sets: { mdi },
     }
 } as VuetifyOptions);
 const app = createApp(App);
@@ -28,5 +28,4 @@ watch(router.currentRoute, () => {
 });
 router.replace(localStorage.getItem("lastRoute") === null ? "/" : localStorage.lastRoute).then();
 app.use(vuetify);
-alert("Mount app");
 app.mount("#app");

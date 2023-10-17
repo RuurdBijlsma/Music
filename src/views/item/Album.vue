@@ -8,7 +8,7 @@
                     :height="250"
                     class="mb-4"
                     :src="album.images[0].url"/>
-                <v-spacer/>
+                <spacer/>
                 <h1>{{ album.name }}</h1>
                 <h2 class="artist-names">
                     <template v-for="(artist, i) in album.artists">
@@ -42,6 +42,7 @@ import TrackList from "../../components/TrackList.vue";
 import CollectionButtons from "../../components/CollectionButtons.vue";
 import {usePlayerStore} from "../../scripts/store/player";
 import {useSpotifyApiStore} from "../../scripts/store/spotify-api";
+import Spacer from "../../components/Spacer.vue";
 
 const route = useRoute()
 const router = useRouter()

@@ -23,8 +23,6 @@ if (!app.requestSingleInstanceLock()) {
 }
 
 let win: BrowserWindow | null = null;
-const url = process.env.VITE_DEV_SERVER_URL;
-const indexHtml = join(process.env.DIST, "index.html#/");
 
 async function createWindow() {
     win = new BrowserWindow({
@@ -41,12 +39,14 @@ async function createWindow() {
         titleBarStyle: "hidden"
     });
 
+    const url = process.env.VITE_DEV_SERVER_URL;
+    const indexHtml = join(process.env.DIST, "index.html");
     if (process.env.VITE_DEV_SERVER_URL) { // electron-vite-vue#298
         win.loadURL(url ?? "http://127.0.0.1:3344/#/");
         // Open devTool if the app is not packaged
         win.webContents.openDevTools();
     } else {
-        win.loadURL("file:///" + indexHtml);
+        win.loadFile(indexHtml);
     }
 
     // Test actively push message to the Electron-Renderer

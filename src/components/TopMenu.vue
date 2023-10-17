@@ -4,7 +4,7 @@
             <v-img width="30" height="30" src="icon/new-dark-192.png"></v-img>
             <div>Ruurd Music</div>
         </div>
-        <v-spacer/>
+        <spacer/>
         <v-text-field
             no-drag
             spellcheck="false"
@@ -16,7 +16,7 @@
             :clearable="true"
             variant="solo">
         </v-text-field>
-        <v-spacer/>
+        <spacer/>
         <v-menu location="bottom" :close-on-content-click="false" v-model="dropdownOpen" close-on-back>
             <template v-slot:activator="{ props }">
                 <v-btn no-drag size="30" variant="tonal" v-bind="props"
@@ -76,7 +76,7 @@
                 </v-list-item>
             </v-list>
         </v-menu>
-        <v-spacer/>
+        <spacer/>
         <div class="app-buttons" no-drag>
             <v-btn class="minimize window-button" variant="plain" density="compact" @click="platform.minimize()">
                 <v-icon icon="mdi-window-minimize"/>
@@ -99,6 +99,7 @@ import {useTheme} from "vuetify";
 import {useBaseStore} from "../scripts/store/base";
 import {usePlatformStore} from "../scripts/store/electron";
 import {useSpotifyAuthStore} from "../scripts/store/spotify-auth";
+import Spacer from "./Spacer.vue";
 
 const route = useRoute()
 const theme = useTheme()

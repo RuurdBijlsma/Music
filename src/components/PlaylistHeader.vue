@@ -6,7 +6,7 @@
             :height="250"
             class="mb-4"
             :src="playlist.images[0].url"/>
-        <v-spacer/>
+        <spacer/>
         <h1>{{ playlist.name }}</h1>
         <p class="playlist-stats">
             Created by
@@ -30,6 +30,7 @@ import {computed} from "vue";
 import type {ItemCollection} from "../scripts/types";
 import GlowImage from "../components/GlowImage.vue";
 import CollectionButtons from "./CollectionButtons.vue";
+import Spacer from "./Spacer.vue";
 
 const props = defineProps({
     collection: {
