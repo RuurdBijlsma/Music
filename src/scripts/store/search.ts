@@ -1,10 +1,10 @@
 import {defineStore} from 'pinia'
 import {baseDb} from './base'
-import {useLibraryStore} from "./library";
-import type {IDBPDatabase} from "idb";
-import {usePlatformStore} from "./electron";
-import type {ExtendedPlaylistTrack, Item} from "../types";
-import {useSpotifyApiStore} from "./spotify-api";
+import {useLibraryStore} from "./library"
+import type {IDBPDatabase} from "idb"
+import {usePlatformStore} from "./electron"
+import type {ExtendedPlaylistTrack, Item} from "../types"
+import {useSpotifyApiStore} from "./spotify-api"
 
 export const useSearchStore = defineStore('search', () => {
     const platform = usePlatformStore()
@@ -63,15 +63,15 @@ export const useSearchStore = defineStore('search', () => {
         }
     }
 
-    let likedCache = {} as any;
+    let likedCache = {} as any
 
     async function searchLikedTracks(query: string) {
         if (likedCache.hasOwnProperty(query)) {
-            let res = likedCache[query];
+            let res = likedCache[query]
             if (res.expiryDate < Date.now())
                 delete likedCache[query]
             else
-                return likedCache[query].result;
+                return likedCache[query].result
         }
         let tracks: ExtendedPlaylistTrack[]
         if (library.tracks.length > 0) {
@@ -92,7 +92,7 @@ export const useSearchStore = defineStore('search', () => {
             result,
             // expiry date 5 minutes from now
             expiryDate: Date.now() + 1000 * 60 * 5
-        };
+        }
         return result
     }
 
@@ -108,7 +108,7 @@ export const useSearchStore = defineStore('search', () => {
             if (cache.expiryDate < Date.now())
                 db.delete('cache', key).then()
             else
-                return cache.result;
+                return cache.result
         }
         await baseDb
         let result = await spotify.search(query, ['album', 'artist', 'playlist', 'track'])

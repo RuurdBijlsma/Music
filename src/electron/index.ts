@@ -1,92 +1,93 @@
-import {app, BrowserWindow, ipcMain, shell} from 'electron'
-import {release} from 'node:os'
-import {join} from 'node:path'
-import IpcFunctions from './ipcFunctions'
+import { app, BrowserWindow, ipcMain, shell } from "electron";
+import { release } from "node:os";
+import { join } from "node:path";
+import IpcFunctions from "./ipcFunctions";
+import path from "path";
 
 
-process.env.DIST_ELECTRON = join(__dirname, '..')
-process.env.DIST = join(process.env.DIST_ELECTRON, '../dist')
+process.env.DIST_ELECTRON = join(__dirname, "..");
+process.env.DIST = join(process.env.DIST_ELECTRON, "../dist");
 process.env.PUBLIC = process.env.VITE_DEV_SERVER_URL
-    ? join(process.env.DIST_ELECTRON, '../public')
-    : process.env.DIST
+  ? join(process.env.DIST_ELECTRON, "../public")
+  : process.env.DIST;
 
 // Disable GPU Acceleration for Windows 7
-if (release().startsWith('6.1')) app.disableHardwareAcceleration()
+if (release().startsWith("6.1")) app.disableHardwareAcceleration();
 
 // Set application name for Windows 10+ notifications
-if (process.platform === 'win32') app.setAppUserModelId(app.getName())
+if (process.platform === "win32") app.setAppUserModelId(app.getName());
 
 if (!app.requestSingleInstanceLock()) {
-    app.quit()
-    process.exit(0)
+    app.quit();
+    process.exit(0);
 }
 
-let win: BrowserWindow | null = null
-const url = process.env.VITE_DEV_SERVER_URL
-const indexHtml = join(process.env.DIST, 'index.html')
+let win: BrowserWindow | null = null;
+const url = process.env.VITE_DEV_SERVER_URL;
+const indexHtml = join(process.env.DIST, "index.html#/");
 
 async function createWindow() {
     win = new BrowserWindow({
-        title: 'Ruurd Music',
-        icon: join(process.env.PUBLIC ?? './public', 'icon/new-dark-192.png'),
+        title: "Ruurd Music",
+        icon: join(process.env.PUBLIC ?? "./public", "icon/new-dark-192.png"),
         width: 1500,
         height: 1000,
         autoHideMenuBar: true,
         webPreferences: {
             nodeIntegration: true,
             contextIsolation: false,
-            webSecurity: false,
+            webSecurity: false
         },
-        titleBarStyle: "hidden",
-    })
+        titleBarStyle: "hidden"
+    });
 
     if (process.env.VITE_DEV_SERVER_URL) { // electron-vite-vue#298
-        win.loadURL(url ?? 'http://127.0.0.1:3344/')
+        win.loadURL(url ?? "http://127.0.0.1:3344/#/");
         // Open devTool if the app is not packaged
-        win.webContents.openDevTools()
+        win.webContents.openDevTools();
     } else {
-        win.loadFile(indexHtml)
+        win.loadURL("file:///" + indexHtml);
     }
 
     // Test actively push message to the Electron-Renderer
-    win.webContents.on('did-finish-load', () => {
-        win?.webContents.send('main-process-message', new Date().toLocaleString())
-    })
+    win.webContents.on("did-finish-load", () => {
+        win?.webContents.send("main-process-message", new Date().toLocaleString());
+    });
 
     // Make all links open with the browser, not with the application
-    win.webContents.setWindowOpenHandler(({url}) => {
-        if (url.startsWith('https:')) shell.openExternal(url)
-        return {action: 'deny'}
-    })
+    win.webContents.setWindowOpenHandler(({ url }) => {
+        if (url.startsWith("https:")) shell.openExternal(url);
+        return { action: "deny" };
+    });
 
-    let ipc = new IpcFunctions(ipcMain, win)
+    let ipc = new IpcFunctions(ipcMain, win);
 }
 
-app.whenReady().then(createWindow)
+app.whenReady().then(createWindow);
 
-app.on('window-all-closed', () => {
-    win = null
-    if (process.platform !== 'darwin') app.quit()
-})
+app.on("window-all-closed", () => {
+    win = null;
+    if (process.platform !== "darwin") app.quit();
+});
 
-app.on('second-instance', () => {
+app.on("second-instance", () => {
     if (win) {
         // Focus on the main window if the user tried to open another
-        if (win.isMinimized()) win.restore()
-        win.focus()
+        if (win.isMinimized()) win.restore();
+        win.focus();
     }
-})
+});
 
-app.on('activate', () => {
-    const allWindows = BrowserWindow.getAllWindows()
+app.on("activate", () => {
+    const allWindows = BrowserWindow.getAllWindows();
     if (allWindows.length) {
-        allWindows[0].focus()
+        allWindows[0].focus();
     } else {
-        createWindow()
+        createWindow();
     }
-})
+});
 
-ipcMain.on('focus-window', () => {
+ipcMain.on("focus-window", () => {
     if (win)
         win.focus();
-})
+});

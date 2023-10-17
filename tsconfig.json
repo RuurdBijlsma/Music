@@ -1,5 +1,5 @@
 {
-    "extends": "@vue/tsconfig/tsconfig.web.json",
+    "extends": "@vue/tsconfig/tsconfig.dom.json",
     "include": [
         "env.d.ts",
         "src",
@@ -16,7 +16,6 @@
         "strict": true,
         "jsx": "preserve",
         "resolveJsonModule": true,
-        "preserveValueImports": true,
         "isolatedModules": true,
         "esModuleInterop": true,
         "skipLibCheck": true,
