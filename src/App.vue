@@ -13,13 +13,16 @@
             <search-suggestions />
             <div class="fake-top-menu" />
             <left-navigation />
-            <bottom-music-player class="music-player" v-if="base.windowWidth < 930"></bottom-music-player>
+            <bottom-music-player class="music-player" v-if="base.windowWidth <= 930 && base.dbLoaded" :style="{
+                    transform: player.track === null ? 'translateX(-100%)' : 'translateX(0%)',
+                    transitionDuration: musicPlayerTransitionDuration,
+            }" />
             <music-player class="music-player" v-else :style="{
                     transform: player.track === null ? 'translateX(-100%)' : 'translateX(0%)',
                     transitionDuration: musicPlayerTransitionDuration,
             }" v-if="base.dbLoaded" />
             <div class="router-view" v-if="base.dbLoaded" :style="{
-                    width: player.track === null ? 'calc(100% - 90px)' : '50%',
+                    width: base.windowWidth <= 930 ? 'calc(100% - 70px)' : player.track === null ? 'calc(100% - 90px)' : '50%',
                     transitionDuration: musicPlayerTransitionDuration,
                 }">
                 <router-view v-slot="{ Component }">
@@ -72,10 +75,9 @@ import { useRoute } from "vue-router";
 import SearchSuggestions from "./components/SearchSuggestions.vue";
 import { useBaseStore } from "./scripts/store/base";
 import { usePlayerStore } from "./scripts/store/player";
-import { computed, onUnmounted, ref, toRaw, watch } from "vue";
+import { computed, ref, watch } from "vue";
 import ItemContextMenu from "./components/ItemContextMenu.vue";
 import SourceDialog from "./components/SourceDialog.vue";
-import { storeToRefs } from "pinia";
 import LeftNavigation from "./components/LeftNavigation.vue";
 import BottomMusicPlayer from "./components/BottomMusicPlayer.vue";
 
@@ -226,12 +228,12 @@ html, body {
 @media (max-width: 930px) {
     .router-view {
         width: calc(100% - 70px);
-        height: calc(100% - 250px);
+        height: calc(100% - 150px);
         left: 70px;
     }
 
     .music-player {
-        height: 250px;
+        height: 150px;
         width: calc(100% - 70px);
         left: 70px;
         bottom: 0;

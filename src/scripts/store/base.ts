@@ -284,6 +284,7 @@ export const useBaseStore = defineStore("base", () => {
         dbLoaded,
         events,
         waitFor,
-        addSnack
+        addSnack,
+        windowWidth,
     };
 });

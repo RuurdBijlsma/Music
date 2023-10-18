@@ -1,61 +1,51 @@
 <template>
     <div class="mp" ref="musicContainer" v-if="player.track !== null">
-<!--            <glow-image class="album-art"-->
-<!--                        :src="base.itemImage(player.track)"-->
-<!--                        :height="100"-->
-<!--                        :width="100"-->
-<!--                        rounding="10px" />-->
-            <div class="sheet">
-                <div class="music-info-text">
-                    <h2 class="music-title">{{ player.track.name }}</h2>
-                    <h3 class="music-artist">
-                        <artists-span :artists="player.track.artists"></artists-span>
-                    </h3>
-                </div>
-                <div class="music-progress">
-                    <div class="music-time-current">{{ base.msToReadable(player.currentTime * 1000) }}</div>
-                    <div class="progress-container">
-                        <progress-bar />
-                    </div>
-                    <div class="music-time-total">{{ base.msToReadable(player.duration * 1000) }}</div>
-                </div>
-                <div class="music-controls">
-                    <v-btn :variant="base.themeTooSimilarToFg && player.shuffle ? 'tonal' : 'text'"
-                           icon size="35"
-                           @click="player.toggleShuffle"
-                           :color="player.shuffle ? base.themeColor : 'default'">
-                        <v-icon size="20">mdi-shuffle</v-icon>
-                    </v-btn>
-                    <v-btn variant="text" icon="mdi-skip-previous" size="35" @click="player.skip(-1)"></v-btn>
-                    <v-btn variant="tonal" icon size="60" @click="player.togglePlay">
-                        <v-progress-circular :indeterminate="isNaN(player.loadProgress)"
-                                             :model-value="player.loadProgress"
-                                             size="40" v-if="player.loading"></v-progress-circular>
-                        <v-icon size="30" v-else-if="player.playing">mdi-pause</v-icon>
-                        <v-icon size="30" v-else>mdi-play</v-icon>
-                    </v-btn>
-                    <v-btn variant="text" icon="mdi-skip-next" size="35" @click="player.skip(1)"></v-btn>
-                    <v-btn :variant="base.themeTooSimilarToFg && player.repeat ? 'tonal' : 'text'" icon size="35"
-                           @click="player.toggleRepeat"
-                           :color="player.repeat ? base.themeColor : 'default'">
-                        <v-icon size="20">mdi-repeat</v-icon>
-                    </v-btn>
-                </div>
+        <glow-image class="first-section"
+                    :src="base.itemImage(player.track)"
+                    :height="100"
+                    :width="100"
+                    rounding="10px" />
+        <div class="second-section">
+            <div class="music-info-text">
+                <h2 class="music-title">{{ player.track.name }}</h2>
+                <h3 class="music-artist">
+                    <artists-span :artists="player.track.artists"></artists-span>
+                </h3>
             </div>
-            <spacer></spacer>
+            <div class="music-progress">
+                <div class="music-time-current">{{ base.msToReadable(player.currentTime * 1000) }}</div>
+                <div class="progress-container">
+                    <progress-bar />
+                </div>
+                <div class="music-time-total">{{ base.msToReadable(player.duration * 1000) }}</div>
+            </div>
+        </div>
+        <div class="third-section">
+            <div class="music-controls">
+                <v-btn :variant="base.themeTooSimilarToFg && player.shuffle ? 'tonal' : 'text'"
+                       icon size="30"
+                       @click="player.toggleShuffle"
+                       :color="player.shuffle ? base.themeColor : 'default'">
+                    <v-icon size="18">mdi-shuffle</v-icon>
+                </v-btn>
+                <v-btn variant="text" icon="mdi-skip-previous" size="30" @click="player.skip(-1)"></v-btn>
+                <v-btn variant="text" icon size="35" @click="player.togglePlay">
+                    <v-progress-circular :indeterminate="isNaN(player.loadProgress)"
+                                         :model-value="player.loadProgress"
+                                         size="30" v-if="player.loading"></v-progress-circular>
+                    <v-icon size="30" v-else-if="player.playing">mdi-pause</v-icon>
+                    <v-icon size="30" v-else>mdi-play</v-icon>
+                </v-btn>
+                <v-btn variant="text" icon="mdi-skip-next" size="30" @click="player.skip(1)"></v-btn>
+                <v-btn :variant="base.themeTooSimilarToFg && player.repeat ? 'tonal' : 'text'" icon size="30"
+                       @click="player.toggleRepeat"
+                       :color="player.repeat ? base.themeColor : 'default'">
+                    <v-icon size="18">mdi-repeat</v-icon>
+                </v-btn>
+            </div>
             <div class="extra-bar-buttons">
                 <like-button :item="player.track" variant="fill" />
                 <queue-button />
-                <div class="volume-slider">
-                    <v-slider v-model="player.volume"
-                              density="compact"
-                              @wheel="handleScroll"
-                              thumb-size="10"
-                              track-size="1"
-                              @click:prepend="toggleMute"
-                              :prepend-icon="player.volume < .2 ? 'mdi-volume-low' : player.volume < .7 ? 'mdi-volume-medium' : 'mdi-volume-high'"
-                              hide-details :min="0" :max="1"></v-slider>
-                </div>
                 <v-menu>
                     <template v-slot:activator="{ props }">
                         <v-btn class="track-options ml-2"
@@ -68,6 +58,7 @@
                     <item-menu :item="player.track" />
                 </v-menu>
             </div>
+        </div>
     </div>
 </template>
 
@@ -111,20 +102,20 @@ function toggleMute() {
     flex-direction: row;
     align-items: center;
     padding: 10px;
-    text-align: center;
+    justify-content: space-between;
 }
 
-.album-art {
+.first-section {
     box-shadow: 0 8px 20px -3px rgba(0, 0, 0, 0.3);
 }
 
-.sheet {
-    padding: 20px;
+.second-section {
+    padding: 10px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    width: 400px;
-    margin-top: 40px;
+    width: 100%;
+    height: 100%;
 }
 
 .music-info-text {
@@ -132,10 +123,9 @@ function toggleMute() {
     justify-content: center;
     flex-direction: column;
     align-items: center;
-    margin-bottom: 15px;
-    font-size: 20px;
+    font-size: 13px;
     font-weight: 300;
-    height: 127px;
+    margin-bottom: -20px;
 }
 
 .music-title {
@@ -182,15 +172,24 @@ function toggleMute() {
     margin-right: 10px;
 }
 
+.third-section {
+    display: flex;
+    flex-direction: column;
+    height:100%;
+    justify-content: space-evenly;
+}
+
 .extra-bar-buttons {
     display: flex;
+    flex-direction: row;
+    gap: 10px;
 }
 
 .music-controls {
-    width: 250px;
     justify-content: space-evenly;
     display: flex;
     align-items: center;
+    gap:10px;
 }
 
 .volume-slider {
