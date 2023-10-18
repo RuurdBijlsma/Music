@@ -35,10 +35,10 @@ export interface ExtendedPlaylistTrack extends SpotifyApi.PlaylistTrackObject {
 }
 
 export type Item =
-    SpotifyApi.PlaylistObjectFull
-    | SpotifyApi.TrackObjectFull
-    | SpotifyApi.AlbumObjectFull
-    | SpotifyApi.ArtistObjectFull
+  SpotifyApi.PlaylistObjectFull
+  | SpotifyApi.TrackObjectFull
+  | SpotifyApi.AlbumObjectFull
+  | SpotifyApi.ArtistObjectFull
 
 export interface ItemCollection {
     id: string,
@@ -52,5 +52,5 @@ export interface ItemCollection {
     to: string,
 }
 
-export type CollectionType = 'radio' | 'search' | 'liked' | 'artist' | 'playlist' | 'album' | 'category'
-export type ItemType = 'track' | 'playlist' | 'album' | 'artist' | 'category'
+export type CollectionType = "radio" | "search" | "liked" | "artist" | "playlist" | "album" | "category"
+export type ItemType = "track" | "playlist" | "album" | "artist" | "category"

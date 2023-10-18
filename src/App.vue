@@ -9,79 +9,28 @@
             backgroundImage: `linear-gradient(rgb(var(--v-theme-background), 0.5), rgb(var(--v-theme-background))), url('${transitionBgSrc}')`
         }"></div>
         <div class="main">
-            <top-menu class="top-menu"/>
-            <search-suggestions/>
-            x
-            <div class="fake-top-menu"/>
-            <div class="left-nav">
-                <v-btn class="nav-1-btn nav-button"
-                       :icon="route.path === '/' ? 'mdi-play-box' : 'mdi-play-box-outline'"
-                       rounded
-                       variant="text"
-                       to="/"></v-btn>
-                <span class="button-text nav-1-text"
-                      :class="{active: route.path === '/'}">Listen Now</span>
-                <v-btn class="nav-2-btn nav-button"
-                       :icon="route.path === '/browse' ? 'mdi-library' : 'mdi-library-outline'"
-                       rounded
-                       variant="text"
-                       to="/browse"></v-btn>
-                <span class="button-text nav-2-text"
-                      :class="{active: route.path === '/browse'}">Browse</span>
-                <v-btn class="nav-3-btn nav-button"
-                       variant="text"
-                       :icon="route.path === '/library' ? 'mdi-music-note' : 'mdi-music-note-outline'"
-                       rounded
-                       to="/library"/>
-                <span class="button-text nav-3-text"
-                      :class="{active: route.path === '/library'}">Library</span>
-                <v-btn class="nav-4-btn nav-button"
-                       :style="{
-                            transform: playlistsExpanded ? 'rotate(180deg)' : 'rotate(0deg)'
-                       }"
-                       variant="text"
-                       @click="playlistsExpanded = !playlistsExpanded"
-                       :icon="playlistsExpanded ? 'mdi-chevron-up' : 'mdi-playlist-play'"
-                       rounded/>
-                <span class="button-text nav-4-text"
-                      :class="{active: playlistsExpanded}">Playlists</span>
-                <div class="pinned-playlists" :style="{
-                    opacity: playlistsExpanded ? '1' : '0',
-                    transform: playlistsExpanded ? 'scaleY(1) translateY(0%)' : 'scaleY(.7)',
-                    pointerEvents: playlistsExpanded ? 'auto' : 'none'
-                }">
-                    <v-tooltip location="right" :text="playlist.name" v-for="playlist in library.saved.playlist">
-                        <template v-slot:activator="{ props }">
-                            <v-btn variant="text" v-bind="props" height="64" max-width="64">
-                                <router-link :to="base.itemUrl(playlist)">
-                                    <v-avatar rounded size="50">
-                                        <v-img :src="base.itemImage(playlist)"></v-img>
-                                    </v-avatar>
-                                </router-link>
-                            </v-btn>
-                        </template>
-                    </v-tooltip>
-                </div>
-            </div>
-            <music-player class="music-player" :style="{
+            <top-menu class="top-menu" />
+            <search-suggestions />
+            <div class="fake-top-menu" />
+            <left-navigation />
+            <bottom-music-player class="music-player" v-if="base.windowWidth < 930"></bottom-music-player>
+            <music-player class="music-player" v-else :style="{
                     transform: player.track === null ? 'translateX(-100%)' : 'translateX(0%)',
                     transitionDuration: musicPlayerTransitionDuration,
-            }" v-if="base.dbLoaded"/>
+            }" v-if="base.dbLoaded" />
             <div class="router-view" v-if="base.dbLoaded" :style="{
                     width: player.track === null ? 'calc(100% - 90px)' : '50%',
                     transitionDuration: musicPlayerTransitionDuration,
                 }">
                 <router-view v-slot="{ Component }">
                     <transition name="slide-fade" mode="out-in">
-                        <component :is="Component"/>
+                        <component :is="Component" />
                     </transition>
                 </router-view>
             </div>
         </div>
-        <source-dialog/>
-        <item-context-menu/>
-
-
+        <source-dialog />
+        <item-context-menu />
         <v-snackbar
             v-for="snack in base.snackbars"
             :timeout="snack.timeout"
@@ -100,6 +49,7 @@
 
 <script setup lang="ts">
 // todo
+// support smaller window
 // paste youtube link in search balk
 // playlists, etc. in search functie
 // maak knop om ytdlp te updaten
@@ -113,63 +63,63 @@
 // possibly replace color thief with something without vulnerabilities
 // radio
 // het is best weird dat de error event nu firet voor ytDownload via search, test even tracks die het horen te doen zie hoe dat gaat, zie hoe een echte error nu handled wordt
-// <App> is unmounted in the build version only at the very start for some reason
 
 import TopMenu from "./components/TopMenu.vue";
 import MusicPlayer from "./components/MusicPlayer.vue";
-import {useLibraryStore} from "./scripts/store/library";
-import {useTheme} from "vuetify";
-import {useRoute} from "vue-router";
+import { useLibraryStore } from "./scripts/store/library";
+import { useTheme } from "vuetify";
+import { useRoute } from "vue-router";
 import SearchSuggestions from "./components/SearchSuggestions.vue";
-import {useBaseStore} from "./scripts/store/base";
-import {usePlayerStore} from "./scripts/store/player";
-import {computed, onUnmounted, ref, watch} from "vue";
+import { useBaseStore } from "./scripts/store/base";
+import { usePlayerStore } from "./scripts/store/player";
+import { computed, onUnmounted, ref, toRaw, watch } from "vue";
 import ItemContextMenu from "./components/ItemContextMenu.vue";
 import SourceDialog from "./components/SourceDialog.vue";
-import {storeToRefs} from "pinia";
+import { storeToRefs } from "pinia";
+import LeftNavigation from "./components/LeftNavigation.vue";
+import BottomMusicPlayer from "./components/BottomMusicPlayer.vue";
 
-const theme = useTheme()
-const library = useLibraryStore()
-const route = useRoute()
-const base = useBaseStore()
-const player = usePlayerStore()
-const initialBg = localStorage.hasTrackInMemory === 'true' ? '' : 'img/cover2.jpg'
+const theme = useTheme();
+const library = useLibraryStore();
+const route = useRoute();
+const base = useBaseStore();
+const player = usePlayerStore();
+const initialBg = localStorage.hasTrackInMemory === "true" ? "" : "img/cover2.jpg";
 const blurBgSrc = computed(() => {
-    if (player.track === null) return initialBg
-    return base.itemImage(player.track)
-})
+    if (player.track === null) return initialBg;
+    return base.itemImage(player.track);
+});
 
-const playlistsExpanded = ref(false)
 
-const transitionBgSrc = ref(initialBg)
-const transitionDuration = ref("0s")
-const transitionBgOpacity = ref('1')
-const timeoutId = ref(-1)
-const musicPlayerTransitionDuration = ref('0s')
+const transitionBgSrc = ref(initialBg);
+const transitionDuration = ref("0s");
+const transitionBgOpacity = ref("1");
+const timeoutId = ref(-1);
+const musicPlayerTransitionDuration = ref("0s");
 setTimeout(() => {
-    musicPlayerTransitionDuration.value = '0.5s'
-    transitionDuration.value = '3s'
-}, 1500)
+    musicPlayerTransitionDuration.value = "0.5s";
+    transitionDuration.value = "3s";
+}, 1500);
 
 // Fade transition when switching blurry bg
 watch(blurBgSrc, () => {
-    clearTimeout(timeoutId.value)
-    console.log("Blur change", blurBgSrc.value)
-    transitionBgOpacity.value = '0'
+    clearTimeout(timeoutId.value);
+    console.log("Blur change", blurBgSrc.value);
+    transitionBgOpacity.value = "0";
     //@ts-ignore
     timeoutId.value = setTimeout(() => {
         transitionBgSrc.value = blurBgSrc.value;
-        transitionDuration.value = "0s"
-        transitionBgOpacity.value = '1'
+        transitionDuration.value = "0s";
+        transitionBgOpacity.value = "1";
         //@ts-ignore
         timeoutId.value = setTimeout(() => {
-            transitionDuration.value = "3s"
-        }, 50)
-    }, 3000)
-})
+            transitionDuration.value = "3s";
+        }, 50);
+    }, 3000);
+});
 
-console.log('library.saved', library.saved);
-console.log('theme', theme);
+console.log("library.saved", library.saved);
+console.log("theme", theme);
 
 </script>
 
@@ -247,89 +197,6 @@ html, body {
     box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.15);
 }
 
-.left-nav {
-    position: fixed;
-    left: 0;
-    top: 50px;
-    width: 70px;
-    height: calc(100% - 50px);
-    box-shadow: 1px 0 1px 0 rgba(0, 0, 0, 0.1);
-    align-items: center;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    padding-top: 20px;
-    z-index: 3;
-    backdrop-filter: blur(40px) saturate(150%);
-    background-color: rgba(var(--v-theme-background), 0.3);
-}
-
-.dark .left-nav {
-    background-color: rgba(var(--v-theme-background), 0.5);
-}
-
-
-.nav-button {
-    transform: translateY(0);
-}
-
-.nav-button:hover {
-    transform: translateY(-5px);
-}
-
-.nav-button.v-btn--active {
-    transform: translateY(-5px);
-}
-
-.button-text {
-    font-size: 11px;
-    font-weight: 400;
-    margin-top: -10px;
-    opacity: 0;
-    transform: translateY(-10px);
-    transition: .3s;
-    pointer-events: none;
-}
-
-.nav-1-btn:hover + .nav-1-text {
-    opacity: .6;
-    transform: translateY(0px);
-}
-
-.nav-2-btn:hover + .nav-2-text {
-    opacity: .6;
-    transform: translateY(0px);
-}
-
-.nav-3-btn:hover + .nav-3-text {
-    opacity: .6;
-    transform: translateY(0px);
-}
-
-.nav-4-btn:hover + .nav-4-text {
-    opacity: .6;
-    transform: translateY(0px);
-}
-
-.button-text.active {
-    opacity: .8;
-    transform: translateY(0px);
-}
-
-.pinned-playlists {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    align-items: center;
-    transform-origin: top center;
-    transition: transform 0.3s, opacity 0.2s;
-    overflow-y: auto;
-}
-
-.pinned-playlists::-webkit-scrollbar {
-    width: 0;
-}
-
 .router-view::-webkit-scrollbar-track {
     background: rgba(0, 0, 0, 0.1);
 }
@@ -354,6 +221,21 @@ html, body {
     left: 70px;
     transform: translateX(-100%);
     transition: transform 0.5s;
+}
+
+@media (max-width: 930px) {
+    .router-view {
+        width: calc(100% - 70px);
+        height: calc(100% - 250px);
+        left: 70px;
+    }
+
+    .music-player {
+        height: 250px;
+        width: calc(100% - 70px);
+        left: 70px;
+        bottom: 0;
+    }
 }
 
 a[no-style] {

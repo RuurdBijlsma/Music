@@ -1,7 +1,7 @@
 <template>
     <div class="track-list" v-if="collection !== null"
          :style="{paddingTop}">
-        <slot/>
+        <slot />
         <track-list-item
             v-for="(item, index) in realTracks"
             :collection="collection" :number="noImages ? item.track_number : undefined"
@@ -10,23 +10,23 @@
                     'odd-item': !isActive(item.id) && index % 2 === 0,
                     'active': isActive(item.id)
                 }"
-            class="track-list-item" :track="item"/>
+            class="track-list-item" :track="item" />
     </div>
 </template>
 
 <script setup lang="ts">
-import type {PropType} from "vue";
+import type { PropType } from "vue";
 import TrackListItem from "./TrackListItem.vue";
-import {useBaseStore} from "../scripts/store/base";
-import {usePlayerStore} from "../scripts/store/player";
-import {useTheme} from "vuetify";
-import type {ItemCollection} from "../scripts/types";
-import {storeToRefs} from "pinia";
-import {computed} from "vue";
+import { useBaseStore } from "../scripts/store/base";
+import { usePlayerStore } from "../scripts/store/player";
+import { useTheme } from "vuetify";
+import type { ItemCollection } from "../scripts/types";
+import { storeToRefs } from "pinia";
+import { computed } from "vue";
 
 const base = useBaseStore();
-const player = usePlayerStore()
-const theme = useTheme()
+const player = usePlayerStore();
+const theme = useTheme();
 
 const props = defineProps({
     collection: {
@@ -35,25 +35,25 @@ const props = defineProps({
     },
     tracks: {
         type: Object as PropType<SpotifyApi.TrackObjectFull[] | null>,
-        default: () => null,
+        default: () => null
     },
     noImages: {
         type: Boolean,
-        default: () => false,
+        default: () => false
     },
     paddingTop: {
         type: String,
-        default: () => '60px',
-    },
-})
+        default: () => "60px"
+    }
+});
 
-const {trackId} = storeToRefs(player)
-const isActive = (id: string) => player.trackId === id && (player.collection?.id ?? '') === props.collection?.id
+const { trackId } = storeToRefs(player);
+const isActive = (id: string) => player.trackId === id && (player.collection?.id ?? "") === props.collection?.id;
 
 const realTracks = computed(() => {
-    if (props.tracks !== null) return props.tracks
-    return props.collection?.tracks ?? []
-})
+    if (props.tracks !== null) return props.tracks;
+    return props.collection?.tracks ?? [];
+});
 </script>
 
 <style scoped lang="scss">

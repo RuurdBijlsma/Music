@@ -4,7 +4,7 @@
             <v-img width="30" height="30" src="icon/new-dark-192.png"></v-img>
             <div>Ruurd Music</div>
         </div>
-        <spacer/>
+        <spacer />
         <v-text-field
             no-drag
             spellcheck="false"
@@ -16,7 +16,7 @@
             :clearable="true"
             variant="solo">
         </v-text-field>
-        <spacer/>
+        <spacer />
         <v-menu location="bottom" :close-on-content-click="false" v-model="dropdownOpen" close-on-back>
             <template v-slot:activator="{ props }">
                 <v-btn no-drag size="30" variant="tonal" v-bind="props"
@@ -32,7 +32,7 @@
                     <div class="list-link">
                         <v-avatar variant="tonal" icon="mdi-account"
                                   :image="library.userInfo.avatar"
-                                  alt="User Avatar" class="mr-3"/>
+                                  alt="User Avatar" class="mr-3" />
                         <div>
                             <v-list-item-title>{{ library.userInfo.name }}</v-list-item-title>
                             <v-list-item-subtitle>{{ library.userInfo.mail }}</v-list-item-subtitle>
@@ -58,95 +58,95 @@
                 <v-divider class="mb-2"></v-divider>
                 <v-list-item to="/downloads">
                     <v-list-item-title class="small-item">
-                        <v-icon icon="mdi-download" class="mr-2"/>
+                        <v-icon icon="mdi-download" class="mr-2" />
                         Downloads
                     </v-list-item-title>
                 </v-list-item>
                 <v-list-item to="/settings">
                     <v-list-item-title class="small-item">
-                        <v-icon icon="mdi-cog" class="mr-2"/>
+                        <v-icon icon="mdi-cog" class="mr-2" />
                         Settings
                     </v-list-item-title>
                 </v-list-item>
                 <v-list-item to="/settings">
                     <v-list-item-title class="small-item">
-                        <v-icon icon="mdi-logout" class="mr-2"/>
+                        <v-icon icon="mdi-logout" class="mr-2" />
                         Logout
                     </v-list-item-title>
                 </v-list-item>
             </v-list>
         </v-menu>
-        <spacer/>
+        <spacer />
         <div class="app-buttons" no-drag>
             <v-btn class="minimize window-button" variant="plain" density="compact" @click="platform.minimize()">
-                <v-icon icon="mdi-window-minimize"/>
+                <v-icon icon="mdi-window-minimize" />
             </v-btn>
             <v-btn class="maximize window-button" variant="plain" density="compact" @click="platform.toggleMaximize()">
-                <v-icon icon="mdi-window-restore"/>
+                <v-icon icon="mdi-window-restore" />
             </v-btn>
             <v-btn class="close window-button" variant="plain" density="compact" @click="platform.close()">
-                <v-icon icon="mdi-window-close"/>
+                <v-icon icon="mdi-window-close" />
             </v-btn>
         </div>
     </div>
 </template>
 
 <script setup lang="ts">
-import {useLibraryStore} from "../scripts/store/library";
-import {ref, watch} from "vue";
-import {useRoute} from "vue-router";
-import {useTheme} from "vuetify";
-import {useBaseStore} from "../scripts/store/base";
-import {usePlatformStore} from "../scripts/store/electron";
-import {useSpotifyAuthStore} from "../scripts/store/spotify-auth";
+import { useLibraryStore } from "../scripts/store/library";
+import { ref, watch } from "vue";
+import { useRoute } from "vue-router";
+import { useTheme } from "vuetify";
+import { useBaseStore } from "../scripts/store/base";
+import { usePlatformStore } from "../scripts/store/electron";
+import { useSpotifyAuthStore } from "../scripts/store/spotify-auth";
 import Spacer from "./Spacer.vue";
 
-const route = useRoute()
-const theme = useTheme()
-const base = useBaseStore()
-const library = useLibraryStore()
-const spotifyAuth = useSpotifyAuthStore()
-const dropdownOpen = ref(false)
-const themeOptions = ['light', 'dark', 'system']
-const chosenTheme = ref(2)
-const platform = usePlatformStore()
+const route = useRoute();
+const theme = useTheme();
+const base = useBaseStore();
+const library = useLibraryStore();
+const spotifyAuth = useSpotifyAuthStore();
+const dropdownOpen = ref(false);
+const themeOptions = ["light", "dark", "system"];
+const chosenTheme = ref(2);
+const platform = usePlatformStore();
 watch(route, () => {
-    dropdownOpen.value = false
-})
+    dropdownOpen.value = false;
+});
 watch(chosenTheme, () => {
-    console.log('chosen theme changed', chosenTheme.value)
-    localStorage.theme = themeOptions[chosenTheme.value]
-    applyTheme()
-})
+    console.log("chosen theme changed", chosenTheme.value);
+    localStorage.theme = themeOptions[chosenTheme.value];
+    applyTheme();
+});
 
 function applyTheme() {
-    if (localStorage.getItem('theme') !== null)
-        chosenTheme.value = themeOptions.indexOf(localStorage.theme)
-    if (localStorage.getItem('theme') !== null && localStorage.theme !== 'system') {
+    if (localStorage.getItem("theme") !== null)
+        chosenTheme.value = themeOptions.indexOf(localStorage.theme);
+    if (localStorage.getItem("theme") !== null && localStorage.theme !== "system") {
         theme.global.name.value = localStorage.theme;
-        console.log(`Changing theme to ${theme.global.name.value} from localStorage`)
+        console.log(`Changing theme to ${theme.global.name.value} from localStorage`);
     } else {
-        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
             // dark mode
-            theme.global.name.value = 'dark'
+            theme.global.name.value = "dark";
         } else {
-            theme.global.name.value = 'light'
+            theme.global.name.value = "light";
         }
         console.log(`Setting theme to ${theme.global.name.value} from system preferences`);
     }
-    platform.setTheme(theme.global.name.value)
+    platform.setTheme(theme.global.name.value);
 }
 
 applyTheme();
 
-window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
-    if (localStorage.theme === 'system') {
+window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", e => {
+    if (localStorage.theme === "system") {
         if (e.matches) {
             // dark mode
-            theme.global.name.value = 'dark'
+            theme.global.name.value = "dark";
         } else {
             // light mode
-            theme.global.name.value = 'light'
+            theme.global.name.value = "light";
         }
         console.log(`Changing theme to ${theme.global.name.value} from watching system preference`);
     }
@@ -170,7 +170,7 @@ window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e =
     -webkit-app-region: no-drag;
 }
 
-.logo{
+.logo {
     display: flex;
     align-items: center;
     gap: 10px;

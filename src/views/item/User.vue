@@ -6,82 +6,82 @@
                 rounding="125px"
                 :width="250"
                 :height="250"
-                :src="userImage"/>
+                :src="userImage" />
             <h1 class="mt-14">{{ user.display_name }}</h1>
             <p>{{ followerString }}</p>
         </div>
         <div class="sub-header mt-6 mb-5">
-            <v-divider/>
+            <v-divider />
             <p class="top-tracks-text ml-4 mr-4">Saved Playlists</p>
-            <v-divider/>
+            <v-divider />
         </div>
         <div class="playlist-grid">
             <template v-for="playlist in playlists">
-                <item-card :item="playlist"/>
+                <item-card :item="playlist" />
             </template>
         </div>
     </div>
 </template>
 
 <script setup lang="ts">
-import {useLibraryStore} from "../../scripts/store/library";
-import {computed, ref, watch} from "vue";
-import {useRoute} from "vue-router";
-import {useBaseStore} from "../../scripts/store/base";
+import { useLibraryStore } from "../../scripts/store/library";
+import { computed, ref, watch } from "vue";
+import { useRoute } from "vue-router";
+import { useBaseStore } from "../../scripts/store/base";
 import GlowImage from "../../components/GlowImage.vue";
 import ItemCard from "../../components/ItemCard.vue";
-import {useSpotifyApiStore} from "../../scripts/store/spotify-api";
+import { useSpotifyApiStore } from "../../scripts/store/spotify-api";
 
-const route = useRoute()
+const route = useRoute();
 const base = useBaseStore();
-const library = useLibraryStore()
-const spotify = useSpotifyApiStore()
+const library = useLibraryStore();
+const spotify = useSpotifyApiStore();
 
-const user = ref(null as null | SpotifyApi.UserProfileResponse)
+const user = ref(null as null | SpotifyApi.UserProfileResponse);
 const playlists = ref(null as null | SpotifyApi.PlaylistObjectFull[]);
 
 let loadedId = route.params.id as string;
-reloadUser()
+reloadUser();
 
 watch(route, async () => {
-    if (route.path.startsWith('/user') && typeof route.params.id === 'string' && route.params.id !== loadedId) {
+    if (route.path.startsWith("/user") && typeof route.params.id === "string" && route.params.id !== loadedId) {
         loadedId = route.params.id;
         reloadUser();
-        let el = document.querySelector('.router-view');
+        let el = document.querySelector(".router-view");
         if (el !== null)
             el.scrollTop = 0;
     }
-})
+});
 
 const userImage = computed(() => {
     if (user.value !== null && user.value.images !== undefined && user.value.images.length > 0) {
         return user.value.images[0].url;
     }
-    return `img/user/${Math.ceil(Math.random() * 7)}.png`
-})
+    return `img/user/${Math.ceil(Math.random() * 7)}.png`;
+});
 
 function reloadUser() {
     let id = loadedId;
-    if (id === '')
-        id = library.userInfo.id
+    if (id === "")
+        id = library.userInfo.id;
     spotify.getUser(id).then(r => {
         user.value = r;
         console.log("User", r);
     });
     spotify.getUserPlaylists(id).then(r => {
-        playlists.value = r.items as SpotifyApi.PlaylistObjectFull[]
+        playlists.value = r.items as SpotifyApi.PlaylistObjectFull[];
         console.log("getUserPlaylists", r);
     });
 }
 
 const followerString = computed(() => {
-    if (user.value === null || user.value.followers === undefined) return '0 followers';
+    if (user.value === null || user.value.followers === undefined) return "0 followers";
     if (user.value.followers.total > 1000000) {
         let followerMillions = Math.round(user.value.followers.total / 1000000);
-        return followerMillions + 'M follower' + (followerMillions === 1 ? '' : 's');
+        return followerMillions + "M follower" + (followerMillions === 1 ? "" : "s");
     }
-    return user.value.followers.total.toLocaleString() + ' follower' + (user.value.followers.total === 1 ? '' : 's');
-})
+    return user.value.followers.total.toLocaleString() + " follower" + (user.value.followers.total === 1 ? "" : "s");
+});
 
 </script>
 

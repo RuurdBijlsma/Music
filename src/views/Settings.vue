@@ -12,7 +12,7 @@
             density="compact"
             hide-details
             v-model="spotifyAuth.clientId"
-            label="Spotify client ID"/>
+            label="Spotify client ID" />
         <v-text-field
             class="mt-5"
             variant="filled"
@@ -22,7 +22,7 @@
             v-model="spotifyAuth.secret"
             :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
             @click:append="showPassword = !showPassword"
-            label="Spotify secret"/>
+            label="Spotify secret" />
         <v-btn class="mt-4" v-if="spotifyAuth.hasCredentials && !spotifyAuth.isLoggedIn" variant="tonal" color="green"
                @click="spotifyAuth.login()">
             <v-icon class="mr-2" size="25" color="green">mdi-spotify</v-icon>
@@ -35,7 +35,7 @@
             </v-avatar>
             <span class="ml-2">You are logged in {{ library.userInfo.name }}</span>
         </div>
-        <v-divider class="mt-3 mb-3"/>
+        <v-divider class="mt-3 mb-3" />
         <h3>Export</h3>
         <v-btn prepend-icon="mdi-export"
                :loading="platform.exportMp3State.loading"
@@ -45,33 +45,35 @@
             Export liked track mp3s to folder
         </v-btn>
         <v-progress-linear class="mt-2" rounded v-if="platform.exportMp3State.loading"
-                           :model-value="100 * platform.exportMp3State.exported / platform.exportMp3State.total"/>
-        <span v-if="platform.exportMp3State.loading">Exported {{platform.exportMp3State.exported}} / {{platform.exportMp3State.total}}</span>
+                           :model-value="100 * platform.exportMp3State.exported / platform.exportMp3State.total" />
+        <span
+            v-if="platform.exportMp3State.loading">Exported {{ platform.exportMp3State.exported }} / {{ platform.exportMp3State.total }}</span>
         <br>
         <v-btn @click="platform.cancelExport" variant="tonal" color="error"
                prepend-icon="mdi-cancel" class="mt-2"
-               v-if="platform.exportMp3State.loading">Cancel exporting</v-btn>
-        <v-divider class="mt-3 mb-3"/>
+               v-if="platform.exportMp3State.loading">Cancel exporting
+        </v-btn>
+        <v-divider class="mt-3 mb-3" />
         <h3>Audio settings</h3>
         <p>Attempt to make loud tracks quieter to match closer with quiet tracks.</p>
-        <v-switch v-model="player.normalizeVolume" label="Normalize volume" :color="base.themeColor"/>
+        <v-switch v-model="player.normalizeVolume" label="Normalize volume" :color="base.themeColor" />
     </div>
 </template>
 
 <script setup lang="ts">
-import {useLibraryStore} from '../scripts/store/library'
-import {ref} from "vue";
-import {useSpotifyAuthStore} from "../scripts/store/spotify-auth";
-import {usePlatformStore} from "../scripts/store/electron";
-import {useBaseStore} from "../scripts/store/base";
+import { useLibraryStore } from "../scripts/store/library";
+import { ref } from "vue";
+import { useSpotifyAuthStore } from "../scripts/store/spotify-auth";
+import { usePlatformStore } from "../scripts/store/electron";
+import { useBaseStore } from "../scripts/store/base";
 import ProgressBar from "../components/ProgressBar.vue";
-import {usePlayerStore} from "../scripts/store/player";
+import { usePlayerStore } from "../scripts/store/player";
 
-const library = useLibraryStore()
-const player=usePlayerStore()
-const spotifyAuth = useSpotifyAuthStore()
-const platform = usePlatformStore()
-const base = useBaseStore()
+const library = useLibraryStore();
+const player = usePlayerStore();
+const spotifyAuth = useSpotifyAuthStore();
+const platform = usePlatformStore();
+const base = useBaseStore();
 const showPassword = ref(false);
 </script>
 

@@ -7,7 +7,7 @@
             <v-card-text class="card-content" :style="{
                 alignItems: base.sourceDialog.loading ? 'center' : 'left'
             }">
-                <v-progress-circular indeterminate size="100" v-if="base.sourceDialog.loading"/>
+                <v-progress-circular indeterminate size="100" v-if="base.sourceDialog.loading" />
                 <template v-else>
                     <div class="yt-card mb-5" v-for="item in base.sourceDialog.items">
                         <v-img class="image" height="200" min-width="355" max-width="355" :src="item.thumbnail">
@@ -43,56 +43,56 @@
 </template>
 
 <script setup lang="ts">
-import {useBaseStore} from "../scripts/store/base";
-import {useTheme} from "vuetify";
-import {useSearchStore} from "../scripts/store/search";
-import {usePlayerStore} from "../scripts/store/player";
-import {watch} from "vue";
-import {storeToRefs} from "pinia";
+import { useBaseStore } from "../scripts/store/base";
+import { useTheme } from "vuetify";
+import { useSearchStore } from "../scripts/store/search";
+import { usePlayerStore } from "../scripts/store/player";
+import { watch } from "vue";
+import { storeToRefs } from "pinia";
 import SimpleYtPlayer from "./SimpleYtPlayer.vue";
-import {useLibraryStore} from "../scripts/store/library";
+import { useLibraryStore } from "../scripts/store/library";
 
-const theme = useTheme()
-const search = useSearchStore()
-const base = useBaseStore()
-const player = usePlayerStore()
-const library = useLibraryStore()
-const {sourceSelectedId} = storeToRefs(base)
+const theme = useTheme();
+const search = useSearchStore();
+const base = useBaseStore();
+const player = usePlayerStore();
+const library = useLibraryStore();
+const { sourceSelectedId } = storeToRefs(base);
 
 function activate(item: any) {
-    sourceSelectedId.value = item.id
-    library.activateSource(item.id)
+    sourceSelectedId.value = item.id;
+    library.activateSource(item.id);
 }
 
-console.log('ssid', sourceSelectedId.value)
+console.log("ssid", sourceSelectedId.value);
 watch(sourceSelectedId, () => {
-    console.log('ssid', sourceSelectedId.value)
-})
+    console.log("ssid", sourceSelectedId.value);
+});
 
 const randomColor = (id: string) => {
-    let random = parseInt(id.substring(2, 6), 36) / 1679616
+    let random = parseInt(id.substring(2, 6), 36) / 1679616;
     if (theme.current.value.dark) {
-        return "hsl(" + 360 * random + ',' +
-            (25 + 70 * random) + '%,' +
-            (25 + 10 * random) + '%)'
+        return "hsl(" + 360 * random + "," +
+            (25 + 70 * random) + "%," +
+            (25 + 10 * random) + "%)";
     } else {
-        return "hsl(" + 360 * random + ',' +
-            (25 + 70 * random) + '%,' +
-            (75 + 10 * random) + '%)'
+        return "hsl(" + 360 * random + "," +
+            (25 + 70 * random) + "%," +
+            (75 + 10 * random) + "%)";
     }
-}
+};
 
 const viewCountString = (viewCount: number) => {
     if (viewCount > 1000000000) {
         let followerBillions = Math.round(viewCount / 1000000000);
-        return followerBillions + 'B view' + (followerBillions === 1 ? '' : 's');
+        return followerBillions + "B view" + (followerBillions === 1 ? "" : "s");
     }
     if (viewCount > 1000000) {
         let followerMillions = Math.round(viewCount / 1000000);
-        return followerMillions + 'M view' + (followerMillions === 1 ? '' : 's');
+        return followerMillions + "M view" + (followerMillions === 1 ? "" : "s");
     }
-    return viewCount.toLocaleString() + ' view' + (viewCount === 1 ? '' : 's');
-}
+    return viewCount.toLocaleString() + " view" + (viewCount === 1 ? "" : "s");
+};
 </script>
 
 <style scoped lang="scss">

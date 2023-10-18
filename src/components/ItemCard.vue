@@ -2,7 +2,7 @@
     <router-link no-style :to="base.itemUrl(item)" :class="{round: item.type === 'artist'}"
                  @click.right="base.setContextMenuItem($event, item)">
         <div class="image"
-             :style="{backgroundImage: `url(${base.itemImage(item)})`}"/>
+             :style="{backgroundImage: `url(${base.itemImage(item)})`}" />
         <div class="info mt-2">
             <p class="title" v-if="!hideName">{{ item.name }}</p>
             <p class="description" v-if="item.type === 'album'">{{ base.albumString(item) }}</p>
@@ -12,9 +12,9 @@
 </template>
 
 <script setup lang="ts">
-import {useBaseStore} from "../scripts/store/base"
-import type {Item} from "../scripts/types";
-import type {PropType} from "vue";
+import { useBaseStore } from "../scripts/store/base";
+import type { Item } from "../scripts/types";
+import type { PropType } from "vue";
 
 const base = useBaseStore();
 defineProps({
@@ -25,14 +25,14 @@ defineProps({
     size: {
         type: Number,
         required: false,
-        default: () => 200,
+        default: () => 200
     },
     hideName: {
         type: Boolean,
         required: false,
-        default: () => false,
-    },
-})
+        default: () => false
+    }
+});
 </script>
 
 <style scoped lang="scss">

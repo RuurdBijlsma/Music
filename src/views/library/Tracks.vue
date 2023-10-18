@@ -2,12 +2,12 @@
     <div class="playlist">
         <p class="tracks-info">
             {{ tracksAmount }}
-            Track{{ tracks.length === 1 ? '' : 's' }}
+            Track{{ tracks.length === 1 ? "" : "s" }}
             • {{ base.approximateDuration((totalDurationMs)) }}
             <v-btn v-show="trackLoadProgress === 100" @click="library.loadLikedTracks" icon="mdi-refresh"
-                   density="compact" variant="plain" size="25" class="refresh-button"/>
+                   density="compact" variant="plain" size="25" class="refresh-button" />
         </p>
-        <collection-buttons :collection="collection" show-filter/>
+        <collection-buttons :collection="collection" show-filter />
         <v-progress-linear :indeterminate="trackLoadProgress === 0"
                            :style="{opacity: trackLoadProgress === 100 ? 0 : 1}"
                            class="mb-2 progress"
@@ -16,49 +16,49 @@
         <track-list-virtual v-if="collection !== null" :collection="collection"
                             :tracks="collection.tracks"
                             :height="(base.pageHeight - 188).toString()"
-                            padding-top="0"/>
+                            padding-top="0" />
     </div>
 </template>
 
 <script setup lang="ts">
-import {useLibraryStore} from "../../scripts/store/library";
-import {useBaseStore} from "../../scripts/store/base";
-import {computed, toRaw} from "vue";
+import { useLibraryStore } from "../../scripts/store/library";
+import { useBaseStore } from "../../scripts/store/base";
+import { computed, toRaw } from "vue";
 import TrackListVirtual from "../../components/TrackListVirtual.vue";
-import {storeToRefs} from "pinia";
-import type {ItemCollection} from "../../scripts/types";
+import { storeToRefs } from "pinia";
+import type { ItemCollection } from "../../scripts/types";
 import CollectionButtons from "../../components/CollectionButtons.vue";
 
-const library = useLibraryStore()
-const {tracks} = storeToRefs(library)
-const base = useBaseStore()
+const library = useLibraryStore();
+const { tracks } = storeToRefs(library);
+const base = useBaseStore();
 
 const collection = computed(() => {
     if (tracks.value === null || tracks.value === undefined) {
-        return null
+        return null;
     }
     return {
         tracks: toRaw(tracks.value).map(t => t.track),
-        type: 'liked',
-        id: 'liked',
+        type: "liked",
+        id: "liked",
         loaded: library.likedTracksLoaded,
         total: library.likedTracksTotal,
         name: "Liked tracks",
         buttonText: "Library",
-        to: '/library',
-    } as ItemCollection
-})
+        to: "/library"
+    } as ItemCollection;
+});
 
 setTimeout(() => {
-    console.log("Checking for need to reload tracks")
+    console.log("Checking for need to reload tracks");
     // if last track reload is 60 or more minutes ago then reload tracks
-    if (localStorage.getItem('lastTracksLoad') === null || Date.now() - 1000 * 60 * 60 > +localStorage.lastTracksLoad) {
-        console.log("Reloading tracks!")
-        library.loadLikedTracks()
+    if (localStorage.getItem("lastTracksLoad") === null || Date.now() - 1000 * 60 * 60 > +localStorage.lastTracksLoad) {
+        console.log("Reloading tracks!");
+        library.loadLikedTracks();
     } else {
-        console.log("No need to reload tracks, they were refreshed less than 60 minutes ago")
+        console.log("No need to reload tracks, they were refreshed less than 60 minutes ago");
     }
-}, 500)
+}, 500);
 
 
 const totalDurationMs = computed(() => {
@@ -66,14 +66,14 @@ const totalDurationMs = computed(() => {
     return tracks.value.reduce((a, b) => a + b.track.duration_ms, 0);
 });
 // const trackLoadProgress = computed(() => 100)
-const trackLoadProgress = computed(() => 100 * library.likedTracksLoaded / library.likedTracksTotal)
+const trackLoadProgress = computed(() => 100 * library.likedTracksLoaded / library.likedTracksTotal);
 
 const tracksAmount = computed(() => {
     if (trackLoadProgress.value === 100) {
-        return tracks.value.length.toLocaleString()
+        return tracks.value.length.toLocaleString();
     }
-    return `${library.likedTracksLoaded.toLocaleString()} / ${library.likedTracksTotal.toLocaleString()}`
-})
+    return `${library.likedTracksLoaded.toLocaleString()} / ${library.likedTracksTotal.toLocaleString()}`;
+});
 </script>
 
 <style scoped lang="scss">

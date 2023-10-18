@@ -10,24 +10,24 @@
                     <template v-else>{{ base.albumString(item) }}</template>
                 </p>
             </div>
-            <spacer/>
+            <spacer />
             <div class="buttons mt-3">
-                <v-btn size="40" class="mr-3" icon="mdi-play" variant="tonal"/>
-                <v-btn size="40" icon="mdi-shuffle" variant="tonal"/>
+                <v-btn size="40" class="mr-3" icon="mdi-play" variant="tonal" />
+                <v-btn size="40" icon="mdi-shuffle" variant="tonal" />
             </div>
         </div>
         <spacer></spacer>
         <router-link :to="base.itemUrl(item)">
             <div class="card-image"
-                 :style="{backgroundImage: `url(${base.itemImage(item)})`}"/>
+                 :style="{backgroundImage: `url(${base.itemImage(item)})`}" />
         </router-link>
     </div>
 </template>
 
 <script setup lang="ts">
-import {useBaseStore} from "../scripts/store/base"
-import type {PropType} from "vue"
-import type {Item} from "../scripts/types";
+import { useBaseStore } from "../scripts/store/base";
+import type { PropType } from "vue";
+import type { Item } from "../scripts/types";
 import Spacer from "./Spacer.vue";
 
 const base = useBaseStore();
@@ -39,9 +39,9 @@ defineProps({
     size: {
         type: Number,
         required: false,
-        default: () => 200,
-    },
-})
+        default: () => 200
+    }
+});
 
 </script>
 

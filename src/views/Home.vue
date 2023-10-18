@@ -8,12 +8,12 @@
                 class="mr-4"
                 :size="250"
                 v-if="highlight"
-                :item="highlight"/>
+                :item="highlight" />
             <item-card class="mr-4"
                        :item="playlist"
                        :size="250"
                        hide-name
-                       v-for="playlist in otherPlaylists"/>
+                       v-for="playlist in otherPlaylists" />
         </horizontal-scroller>
 
         <template v-if="library.view.homePage.recent.length > 0">
@@ -24,7 +24,7 @@
             <horizontal-scroller class="mt-1">
                 <item-card class="mr-4"
                            v-for="item in library.view.homePage.recent"
-                           :item="item"/>
+                           :item="item" />
             </horizontal-scroller>
         </template>
 
@@ -37,7 +37,7 @@
                 <item-card class="mr-4"
                            v-for="item in library.view.homePage.personalized"
                            hide-name
-                           :item="item"/>
+                           :item="item" />
             </horizontal-scroller>
         </template>
 
@@ -50,29 +50,29 @@
                 <item-card class="mr-4"
                            v-for="item in library.view.homePage.newReleases"
                            :title="item.name"
-                           :item="item"/>
+                           :item="item" />
             </horizontal-scroller>
         </template>
     </div>
 </template>
 
 <script setup lang="ts">
-import {useLibraryStore} from "../scripts/store/library";
-import {computed} from "vue";
+import { useLibraryStore } from "../scripts/store/library";
+import { computed } from "vue";
 import HighlightCard from "../components/HighlightCard.vue";
 import ItemCard from "../components/ItemCard.vue";
 import HorizontalScroller from "../components/HorizontalScroller.vue";
 
-const library = useLibraryStore()
+const library = useLibraryStore();
 library.refreshHomePage();
 
-const highlight = computed(() => library.view.homePage.featured.playlists[0] as SpotifyApi.PlaylistObjectFull)
-const otherPlaylists = computed(() => library.view.homePage.featured.playlists.slice(1) as SpotifyApi.PlaylistObjectFull[])
+const highlight = computed(() => library.view.homePage.featured.playlists[0] as SpotifyApi.PlaylistObjectFull);
+const otherPlaylists = computed(() => library.view.homePage.featured.playlists.slice(1) as SpotifyApi.PlaylistObjectFull[]);
 </script>
 
 <style scoped lang="scss">
 .home {
-    padding-top:60px;
+    padding-top: 60px;
 }
 
 .home-title {

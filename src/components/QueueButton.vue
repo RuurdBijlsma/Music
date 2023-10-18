@@ -7,19 +7,19 @@
         </template>
         <div v-if="collection" class="card-bg">
             <v-card-title class="card-title">{{ collection.name }}</v-card-title>
-            <v-divider/>
+            <v-divider />
             <track-list v-if="player.queue.length < 200"
                         :collection="collection"
                         :tracks="player.queue"
                         class="list-container pb-2"
-                        padding-top="0"/>
+                        padding-top="0" />
             <track-list-virtual v-else
                                 :collection="collection"
                                 :tracks="player.queue"
                                 class="list-container"
                                 padding-top="10px"
                                 :scroll-into-view="focusTrack"
-                                height="500"/>
+                                height="500" />
             <v-card-actions v-if="collection.to !== ''">
                 <v-btn :disabled="route.path === collection.to" :to="collection.to" :color="base.themeColor">
                     Go to {{ collection.buttonText }}
@@ -35,37 +35,37 @@
 <script setup lang="ts">
 import TrackListVirtual from "./TrackListVirtual.vue";
 import TrackList from "./TrackList.vue";
-import {usePlayerStore} from "../scripts/store/player";
-import {storeToRefs} from "pinia";
-import {useBaseStore} from "../scripts/store/base";
-import {useRoute} from "vue-router";
-import {ref} from "vue";
-import {useTheme} from "vuetify";
+import { usePlayerStore } from "../scripts/store/player";
+import { storeToRefs } from "pinia";
+import { useBaseStore } from "../scripts/store/base";
+import { useRoute } from "vue-router";
+import { ref } from "vue";
+import { useTheme } from "vuetify";
 
-const player = usePlayerStore()
-const base = useBaseStore()
-const theme = useTheme()
-const route = useRoute()
-const {collection} = storeToRefs(player)
-const focusTrack = ref(null as SpotifyApi.TrackObjectFull | null)
+const player = usePlayerStore();
+const base = useBaseStore();
+const theme = useTheme();
+const route = useRoute();
+const { collection } = storeToRefs(player);
+const focusTrack = ref(null as SpotifyApi.TrackObjectFull | null);
 
 let smoothScroll = false;
 
 function delayedScrollToTrack() {
     smoothScroll = false;
     setTimeout(() => {
-        scrollToTrack()
-        smoothScroll = true
-    }, 100)
+        scrollToTrack();
+        smoothScroll = true;
+    }, 100);
 }
 
 function scrollToTrack() {
-    if (player.track === null) return
-    focusTrack.value = player.track
-    let index = player.queue.findIndex(t => t.id === player.trackId)
-    let container = document.querySelector('.list-container')
-    if (container === null) return
-    container.scrollTo({top: (index - 3) * 50, behavior: smoothScroll ? "smooth" : 'auto'})
+    if (player.track === null) return;
+    focusTrack.value = player.track;
+    let index = player.queue.findIndex(t => t.id === player.trackId);
+    let container = document.querySelector(".list-container");
+    if (container === null) return;
+    container.scrollTo({ top: (index - 3) * 50, behavior: smoothScroll ? "smooth" : "auto" });
 }
 </script>
 

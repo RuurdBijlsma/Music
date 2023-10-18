@@ -4,7 +4,7 @@ export function hexToRgb(hex: string) {
     }
 
     if (hex.length !== 7 || hex[0] !== "#") {
-        console.warn("Got invalid hex format", hex, 'returning rgb(0,0,0)')
+        console.warn("Got invalid hex format", hex, "returning rgb(0,0,0)");
         return [0, 0, 0]; // Invalid hex format
     }
 
@@ -13,7 +13,7 @@ export function hexToRgb(hex: string) {
     const b = parseInt(hex.slice(5, 7), 16);
 
     if (isNaN(r) || isNaN(g) || isNaN(b)) {
-        console.warn("Got invalid hex format", hex, 'returning rgb(0,0,0)')
+        console.warn("Got invalid hex format", hex, "returning rgb(0,0,0)");
         return [0, 0, 0]; // Invalid hex format
     }
 
@@ -51,7 +51,7 @@ export function rgb2lab(rgb: number[]) {
     x = (x > 0.008856) ? Math.pow(x, 1 / 3) : (7.787 * x) + 16 / 116;
     y = (y > 0.008856) ? Math.pow(y, 1 / 3) : (7.787 * y) + 16 / 116;
     z = (z > 0.008856) ? Math.pow(z, 1 / 3) : (7.787 * z) + 16 / 116;
-    return [(116 * y) - 16, 500 * (x - y), 200 * (y - z)]
+    return [(116 * y) - 16, 500 * (x - y), 200 * (y - z)];
 }
 
 export function shuffleArray<T>(array: T[]): T[] {

@@ -4,7 +4,7 @@
                @dblclick="scroll(-10)"
                v-show="canGoLeft"
                density="default" class="arrow left" variant="flat"
-               icon="mdi-chevron-left"/>
+               icon="mdi-chevron-left" />
 
         <div class="horizontal-scroller"
              ref="scrollContainer"
@@ -16,12 +16,12 @@
                @dblclick="scroll(10)"
                v-show="canGoRight"
                density="default" class="arrow right" variant="flat"
-               icon="mdi-chevron-right"/>
+               icon="mdi-chevron-right" />
     </div>
 </template>
 
 <script setup lang="ts">
-import {onMounted, onUnmounted, ref} from "vue";
+import { onMounted, onUnmounted, ref } from "vue";
 
 const canGoLeft = ref(false);
 const canGoRight = ref(false);
@@ -32,7 +32,7 @@ function scroll(direction: number) {
     if (el === null) return;
     el.scrollTo({
         left: el.scrollLeft + el.clientWidth * .85 * direction,
-        behavior: 'smooth',
+        behavior: "smooth"
     });
 }
 
@@ -43,17 +43,17 @@ function checkCanScroll() {
     canGoRight.value = el.scrollWidth - (el.scrollLeft + el.clientWidth) > 0;
 }
 
-let el: HTMLElement | null
+let el: HTMLElement | null;
 onMounted(() => {
     checkCanScroll();
     el = scrollContainer.value as HTMLElement | null;
     if (el === null) return;
-    el.addEventListener('scroll', checkCanScroll);
-})
+    el.addEventListener("scroll", checkCanScroll);
+});
 onUnmounted(() => {
     if (el === null) return;
-    el.removeEventListener('scroll', checkCanScroll);
-})
+    el.removeEventListener("scroll", checkCanScroll);
+});
 
 </script>
 

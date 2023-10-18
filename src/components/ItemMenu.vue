@@ -11,21 +11,21 @@
         </v-list-item>
         <v-list-item v-if="item.type==='track'" @click="library.chooseSource(item)">
             <template v-slot:prepend>
-                <v-icon icon="mdi-youtube"/>
+                <v-icon icon="mdi-youtube" />
             </template>
             <v-list-item-title>Choose different source</v-list-item-title>
         </v-list-item>
         <v-list-item v-if="item.type==='track' && isDownloaded"
                      @click="deleteTrack">
             <template v-slot:prepend>
-                <v-icon icon="mdi-trash-can"/>
+                <v-icon icon="mdi-trash-can" />
             </template>
             <v-list-item-title>Delete file</v-list-item-title>
         </v-list-item>
         <v-list-item @click="player.reloadCurrentTrack"
                      v-if="item.type==='track' && player.track !== null && isDownloaded && player.track.id === item.id">
             <template v-slot:prepend>
-                <v-icon icon="mdi-reload"/>
+                <v-icon icon="mdi-reload" />
             </template>
             <v-list-item-title>Reload track file</v-list-item-title>
         </v-list-item>
@@ -34,8 +34,8 @@
             <template v-slot:activator="{ props }">
                 <v-list-item v-bind="props" v-if="item.type==='track'">
                     <template v-slot:prepend>
-                        <v-progress-circular v-if="loadAddPlaylist" class="mr-8" indeterminate size="25" width="2"/>
-                        <v-icon v-else icon="mdi-playlist-plus"/>
+                        <v-progress-circular v-if="loadAddPlaylist" class="mr-8" indeterminate size="25" width="2" />
+                        <v-icon v-else icon="mdi-playlist-plus" />
                     </template>
                     <v-list-item-title>Add to playlist</v-list-item-title>
                 </v-list-item>
@@ -45,7 +45,7 @@
                              @click="addToPlaylist(playlist.id, item)">
                     <template v-slot:prepend>
                         <v-avatar rounded>
-                            <v-img :src="base.itemImage(playlist)"/>
+                            <v-img :src="base.itemImage(playlist)" />
                         </v-avatar>
                     </template>
                     <v-list-item-title>{{ playlist.name }}</v-list-item-title>
@@ -53,11 +53,12 @@
             </v-list>
         </v-menu>
 
-        <v-list-item v-if="library.viewedPlaylist !== null && item.type==='track' && isViewingPlaylistWithTrack(item.id)"
-                     @click="removeFromViewedPlaylist(item.uri)">
+        <v-list-item
+            v-if="library.viewedPlaylist !== null && item.type==='track' && isViewingPlaylistWithTrack(item.id)"
+            @click="removeFromViewedPlaylist(item.uri)">
             <template v-slot:prepend>
-                <v-progress-circular v-if="loadRemovePlaylist" class="mr-8" indeterminate size="25" width="2"/>
-                <v-icon v-else icon="mdi-playlist-minus"/>
+                <v-progress-circular v-if="loadRemovePlaylist" class="mr-8" indeterminate size="25" width="2" />
+                <v-icon v-else icon="mdi-playlist-minus" />
             </template>
             <v-list-item-title>Remove from {{ library.viewedPlaylist.name }}</v-list-item-title>
         </v-list-item>
@@ -65,80 +66,80 @@
 </template>
 
 <script setup lang="ts">
-import {computed, onMounted, ref} from "vue";
-import type {PropType} from "vue";
-import {useBaseStore} from "../scripts/store/base";
-import {useLibraryStore} from "../scripts/store/library";
-import type {Item} from "../scripts/types";
-import {usePlatformStore} from "../scripts/store/electron";
-import {usePlayerStore} from "../scripts/store/player";
-import {useSpotifyApiStore} from "../scripts/store/spotify-api";
-import {useRoute} from "vue-router";
+import { computed, onMounted, ref } from "vue";
+import type { PropType } from "vue";
+import { useBaseStore } from "../scripts/store/base";
+import { useLibraryStore } from "../scripts/store/library";
+import type { Item } from "../scripts/types";
+import { usePlatformStore } from "../scripts/store/electron";
+import { usePlayerStore } from "../scripts/store/player";
+import { useSpotifyApiStore } from "../scripts/store/spotify-api";
+import { useRoute } from "vue-router";
 
 const props = defineProps({
     item: {
         type: Object as PropType<Item>,
-        required: true,
+        required: true
     },
     showDescriptor: {
         type: Boolean,
-        default: false,
-    },
-})
-const base = useBaseStore()
-const library = useLibraryStore()
-const spotify = useSpotifyApiStore()
-const platform = usePlatformStore()
-const player = usePlayerStore()
-const route = useRoute()
-const isDownloaded = ref(false)
-const loadAddPlaylist = ref(false)
-const loadRemovePlaylist = ref(false)
+        default: false
+    }
+});
+const base = useBaseStore();
+const library = useLibraryStore();
+const spotify = useSpotifyApiStore();
+const platform = usePlatformStore();
+const player = usePlayerStore();
+const route = useRoute();
+const isDownloaded = ref(false);
+const loadAddPlaylist = ref(false);
+const loadRemovePlaylist = ref(false);
 onMounted(() => {
-    if (props.item.type === 'track')
+    if (props.item.type === "track")
         platform.trackIsDownloaded(props.item as SpotifyApi.TrackObjectFull).then(v => {
-            console.log("is downloaded", v)
-            isDownloaded.value = v
-        })
-})
+            console.log("is downloaded", v);
+            isDownloaded.value = v;
+        });
+});
 
 function isViewingPlaylistWithTrack(trackId: string) {
-    if (library.viewedPlaylist === null) return false
-    const playlistId = library.viewedPlaylist.id
-    return playlistId === route.params.id && library.viewedPlaylist.tracks.items.find(t => t.track.id === trackId) !== undefined
+    if (library.viewedPlaylist === null) return false;
+    const playlistId = library.viewedPlaylist.id;
+    return playlistId === route.params.id && library.viewedPlaylist.tracks.items.find(t => t.track.id === trackId) !== undefined;
 }
 
 async function removeFromViewedPlaylist(trackUri: string) {
-    if (library.viewedPlaylist === null) return
-    const playlistId = library.viewedPlaylist.id
-    loadRemovePlaylist.value = true
-    console.log("Remove ", {trackUri, playlistId})
-    await library.removeFromPlaylist(playlistId, trackUri)
-    loadRemovePlaylist.value = false
+    if (library.viewedPlaylist === null) return;
+    const playlistId = library.viewedPlaylist.id;
+    loadRemovePlaylist.value = true;
+    console.log("Remove ", { trackUri, playlistId });
+    await library.removeFromPlaylist(playlistId, trackUri);
+    loadRemovePlaylist.value = false;
 }
 
 async function addToPlaylist(playlistId: string, track: Item) {
-    loadAddPlaylist.value = true
-    console.log("Add ", {track, playlistId})
-    await library.addToPlaylist(playlistId, track as SpotifyApi.TrackObjectFull)
-    loadAddPlaylist.value = false
+    loadAddPlaylist.value = true;
+    console.log("Add ", { track, playlistId });
+    await library.addToPlaylist(playlistId, track as SpotifyApi.TrackObjectFull);
+    loadAddPlaylist.value = false;
 }
 
 async function deleteTrack() {
     await player.deleteTrack(props.item as SpotifyApi.TrackObjectFull);
-    isDownloaded.value = false
+    isDownloaded.value = false;
 }
 
 const descriptor = computed(() => {
-    const item = props.item
-    if (item.type === 'track') {
-        return `${item.name} - ${item.artists.map(a => a.name).join(', ')}`
+    const item = props.item;
+    if (item.type === "track") {
+        return `${item.name} - ${item.artists.map(a => a.name).join(", ")}`;
     }
-    if (item.type === 'playlist')
-        return item.name
-})
+    if (item.type === "playlist")
+        return item.name;
+});
 
-const isLiked = computed(() => library.checkLiked(props.item.type, props.item.id))
+const isLiked = computed(() => library.checkLiked(props.item.type, props.item.id));
 
 </script>
 

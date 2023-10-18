@@ -5,10 +5,12 @@
             left: searchX + 'px',
             top: searchY + 'px',
             width: width + 'px'}">
-        <search-suggestion-section type="Library" :id="'library' + searchValue" :tracks="likedResult" :loading="likedLoading">
+        <search-suggestion-section type="Library" :id="'library' + searchValue" :tracks="likedResult"
+                                   :loading="likedLoading">
             Library
         </search-suggestion-section>
-        <search-suggestion-section type="Spotify" :id="'spotify' + searchValue" :tracks="spotifyResult" :loading="spotifyLoading">
+        <search-suggestion-section type="Spotify" :id="'spotify' + searchValue" :tracks="spotifyResult"
+                                   :loading="spotifyLoading">
             <v-icon class="mr-2">mdi-spotify</v-icon>
             Spotify
         </search-suggestion-section>
@@ -20,34 +22,34 @@
 </template>
 
 <script setup lang="ts">
-import {onBeforeUnmount, onMounted, onUnmounted, ref, watch} from "vue";
-import {clearInterval} from "timers";
-import {useBaseStore} from "../scripts/store/base";
-import {storeToRefs} from "pinia";
-import {useLibraryStore} from "../scripts/store/library";
-import {useSearchStore} from "../scripts/store/search";
+import { onBeforeUnmount, onMounted, onUnmounted, ref, watch } from "vue";
+import { clearInterval } from "timers";
+import { useBaseStore } from "../scripts/store/base";
+import { storeToRefs } from "pinia";
+import { useLibraryStore } from "../scripts/store/library";
+import { useSearchStore } from "../scripts/store/search";
 import SearchSuggestionSection from "./SearchSuggestionSection.vue";
 
 
-const base = useBaseStore()
-const library = useLibraryStore()
-const search = useSearchStore()
-const showSuggestions = ref(false)
-document.addEventListener('mousedown', onClick, false);
-onUnmounted(() => document.removeEventListener('mousedown', onClick))
+const base = useBaseStore();
+const library = useLibraryStore();
+const search = useSearchStore();
+const showSuggestions = ref(false);
+document.addEventListener("mousedown", onClick, false);
+onUnmounted(() => document.removeEventListener("mousedown", onClick));
 
 function onClick(e: MouseEvent) {
-    let searchSuggestions = document.querySelector(".search-suggestions") as HTMLElement
-    let searchBox = document.querySelector('.search-field') as HTMLElement
-    let target = e.target as HTMLElement
+    let searchSuggestions = document.querySelector(".search-suggestions") as HTMLElement;
+    let searchBox = document.querySelector(".search-field") as HTMLElement;
+    let target = e.target as HTMLElement;
     showSuggestions.value = searchSuggestions.contains(target) || searchBox.contains(target);
 }
 
-const {searchValue} = storeToRefs(base)
+const { searchValue } = storeToRefs(base);
 
-let lastInputTime = performance.now()
+let lastInputTime = performance.now();
 watch(searchValue, () => {
-    lastInputTime = performance.now()
+    lastInputTime = performance.now();
 });
 
 let el = null as null | Element;
@@ -57,62 +59,62 @@ let width = ref(500);
 let lastSearchedQuery = "";
 
 onMounted(() => {
-    el = document.querySelector('.search-field')
-    console.log("Search field el: ", el)
-    updateSearchPos()
-})
+    el = document.querySelector(".search-field");
+    console.log("Search field el: ", el);
+    updateSearchPos();
+});
 let interval: number;
 interval = window.setInterval(() => {
-    updateSearchPos()
-    let now = performance.now()
+    updateSearchPos();
+    let now = performance.now();
     // als je 750 ms niks typt, start de auto search
     if (now - lastInputTime > 750 && searchValue.value !== lastSearchedQuery) {
-        lastInputTime = now
-        performSearch()
-        lastSearchedQuery = searchValue.value
+        lastInputTime = now;
+        performSearch();
+        lastSearchedQuery = searchValue.value;
     }
-}, 375)
+}, 375);
 onBeforeUnmount(() => clearInterval(interval));
 
-let ytResult = ref([] as SpotifyApi.TrackObjectFull[])
-let spotifyResult = ref([] as SpotifyApi.TrackObjectFull[])
-let likedResult = ref([] as SpotifyApi.TrackObjectFull[])
-let ytLoading = ref(false)
-let spotifyLoading = ref(false)
-let likedLoading = ref(false)
+let ytResult = ref([] as SpotifyApi.TrackObjectFull[]);
+let spotifyResult = ref([] as SpotifyApi.TrackObjectFull[]);
+let likedResult = ref([] as SpotifyApi.TrackObjectFull[]);
+let ytLoading = ref(false);
+let spotifyLoading = ref(false);
+let likedLoading = ref(false);
 
 async function performSearch() {
-    spotifyResult.value = []
-    ytResult.value = []
-    likedResult.value = []
-    if (searchValue.value === null || searchValue.value === '') {
-        return
+    spotifyResult.value = [];
+    ytResult.value = [];
+    likedResult.value = [];
+    if (searchValue.value === null || searchValue.value === "") {
+        return;
     }
-    ytLoading.value = true
-    spotifyLoading.value = true
-    likedLoading.value = true
+    ytLoading.value = true;
+    spotifyLoading.value = true;
+    likedLoading.value = true;
     let query = searchValue.value;
     console.log("Perform search for query: " + query);
-    search.addToRecentSearches(query)
+    search.addToRecentSearches(query);
     search.searchSpotify(query).then(res => {
         if (query === searchValue.value) {
-            spotifyLoading.value = false
+            spotifyLoading.value = false;
             if (res.tracks)
-                spotifyResult.value = res.tracks.items
+                spotifyResult.value = res.tracks.items;
         }
-    })
+    });
     search.searchYouTube(query).then(res => {
         if (query === searchValue.value) {
-            ytLoading.value = false
-            ytResult.value = res
+            ytLoading.value = false;
+            ytResult.value = res;
         }
-    })
+    });
     search.searchLikedTracks(query).then(res => {
         if (query === searchValue.value) {
-            likedLoading.value = false
-            likedResult.value = res
+            likedLoading.value = false;
+            likedResult.value = res;
         }
-    })
+    });
 }
 
 function updateSearchPos() {

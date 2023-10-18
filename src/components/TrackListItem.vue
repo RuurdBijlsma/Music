@@ -1,7 +1,7 @@
 <template>
     <div class="track-item" @dblclick="playItem" @click.right="base.setContextMenuItem($event, track)">
         <v-lazy v-if="number === undefined" class="lazy-img" width="70" transition="fade-transition">
-            <v-img :cover="true" v-if="track.album.images.length > 0" class="track-img" :src="base.itemImage(track)"/>
+            <v-img :cover="true" v-if="track.album.images.length > 0" class="track-img" :src="base.itemImage(track)" />
             <v-sheet v-else class="track-img"></v-sheet>
         </v-lazy>
         <div v-else class="track-number">
@@ -10,10 +10,10 @@
         <div class="track-info">
             <div class="track-name">{{ track.name }}</div>
             <div class="track-artist">
-                <artists-span :artists="track.artists"/>
+                <artists-span :artists="track.artists" />
             </div>
         </div>
-        <spacer/>
+        <spacer />
         <div class="track-duration ml-2">
             {{ base.msToReadable(track.duration_ms) }}
         </div>
@@ -23,48 +23,48 @@
                        v-bind="props"
                        variant="text" size="30"
                        density="compact"
-                       icon="mdi-dots-horizontal"/>
+                       icon="mdi-dots-horizontal" />
             </template>
-            <item-menu :item="track"/>
+            <item-menu :item="track" />
         </v-menu>
     </div>
 </template>
 
 <script setup lang="ts">
-import type {PropType} from "vue";
-import {useBaseStore} from "../scripts/store/base";
-import {usePlayerStore} from "../scripts/store/player";
+import type { PropType } from "vue";
+import { useBaseStore } from "../scripts/store/base";
+import { usePlayerStore } from "../scripts/store/player";
 import ArtistsSpan from "./ArtistsSpan.vue";
-import {useLibraryStore} from "../scripts/store/library";
+import { useLibraryStore } from "../scripts/store/library";
 import ItemMenu from "./ItemMenu.vue";
-import type {ItemCollection} from "../scripts/types";
+import type { ItemCollection } from "../scripts/types";
 import Spacer from "./Spacer.vue";
 
 const props = defineProps({
     track: {
         type: Object as PropType<SpotifyApi.TrackObjectFull>,
-        required: true,
+        required: true
     },
     index: {
         type: Number,
-        required: true,
+        required: true
     },
     collection: {
         type: Object as PropType<ItemCollection | null>,
-        required: true,
+        required: true
     },
     number: {
         type: Number,
-        required: false,
-    },
-})
-const base = useBaseStore()
-const player = usePlayerStore()
-const library = useLibraryStore()
+        required: false
+    }
+});
+const base = useBaseStore();
+const player = usePlayerStore();
+const library = useLibraryStore();
 
 function playItem() {
     if (props.collection !== null)
-        player.load(props.collection, props.track)
+        player.load(props.collection, props.track);
 }
 </script>
 

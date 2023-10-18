@@ -8,37 +8,37 @@
         </div>
         <v-window v-model="tab">
             <v-window-item value="tracks">
-                <tracks/>
+                <tracks />
             </v-window-item>
             <v-window-item value="albums">
-                <albums/>
+                <albums />
             </v-window-item>
             <v-window-item value="artists">
-                <artists/>
+                <artists />
             </v-window-item>
             <v-window-item value="playlists">
-                <playlists/>
+                <playlists />
             </v-window-item>
         </v-window>
     </div>
 </template>
 
 <script setup lang="ts">
-import {ref, watch} from "vue";
+import { ref, watch } from "vue";
 import Tracks from "./library/Tracks.vue";
 import Artists from "./library/Artists.vue";
 import Albums from "./library/Albums.vue";
-import {useRoute} from "vue-router";
+import { useRoute } from "vue-router";
 import Playlists from "./library/Playlists.vue";
 
-const tab = ref('tracks');
+const tab = ref("tracks");
 const route = useRoute();
 watch(route, () => {
     checkRoute();
-})
+});
 
 function checkRoute() {
-    if (route.path.startsWith('/library/')) {
+    if (route.path.startsWith("/library/")) {
         tab.value = route.path.slice(9);
         console.log(tab.value);
     }
@@ -48,9 +48,10 @@ checkRoute();
 </script>
 
 <style scoped lang="scss">
-.library{
-    padding-top:60px;
+.library {
+    padding-top: 60px;
 }
+
 .nav-buttons {
     display: flex;
     gap: 20px;

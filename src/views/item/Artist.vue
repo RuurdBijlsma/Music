@@ -7,41 +7,41 @@
                 :width="250"
                 :height="250"
                 class="mb-4"
-                :src="artist.images[0].url"/>
-            <spacer/>
+                :src="artist.images[0].url" />
+            <spacer />
             <h1>{{ artist.name }}</h1>
             <p>{{ followerString }}</p>
-            <p class="genres">{{ artist.genres.join(' / ') }}</p>
-            <collection-buttons :collection="collection" :like-item="artist"/>
+            <p class="genres">{{ artist.genres.join(" / ") }}</p>
+            <collection-buttons :collection="collection" :like-item="artist" />
         </div>
-        <track-list padding-top="0" :collection="collection"/>
+        <track-list padding-top="0" :collection="collection" />
         <div class="sub-header mt-6 mb-5">
-            <v-divider/>
+            <v-divider />
             <p class="top-tracks-text ml-4 mr-4">Albums</p>
-            <v-divider/>
+            <v-divider />
         </div>
         <div>
             <horizontal-scroller v-if="albums" class="mt-4 albums-grid">
                 <template v-for="(album, i) in albums">
                     <highlight-card :item="album"
                                     class="mr-4"
-                                    v-if="i === 0"/>
+                                    v-if="i === 0" />
                     <item-card :item="album"
                                class="mr-4"
-                               v-else/>
+                               v-else />
                 </template>
             </horizontal-scroller>
         </div>
         <div class="sub-header mt-6 mb-5">
-            <v-divider/>
+            <v-divider />
             <p class="top-tracks-text ml-4 mr-4">Related artists</p>
-            <v-divider/>
+            <v-divider />
         </div>
         <div>
             <horizontal-scroller v-if="relatedArtists" class="mt-4 albums-grid">
                 <template v-for="(relatedArtist, i) in relatedArtists">
                     <item-card :item="relatedArtist"
-                               class="mr-4"/>
+                               class="mr-4" />
                 </template>
             </horizontal-scroller>
         </div>
@@ -49,55 +49,55 @@
 </template>
 
 <script setup lang="ts">
-import {useLibraryStore} from "../../scripts/store/library";
-import {computed, ref, watch} from "vue";
-import {useRoute} from "vue-router";
-import {baseDb, useBaseStore} from "../../scripts/store/base";
+import { useLibraryStore } from "../../scripts/store/library";
+import { computed, ref, watch } from "vue";
+import { useRoute } from "vue-router";
+import { baseDb, useBaseStore } from "../../scripts/store/base";
 import GlowImage from "../../components/GlowImage.vue";
 import ItemCard from "../../components/ItemCard.vue";
 import HighlightCard from "../../components/HighlightCard.vue";
 import HorizontalScroller from "../../components/HorizontalScroller.vue";
 import TrackList from "../../components/TrackList.vue";
 import CollectionButtons from "../../components/CollectionButtons.vue";
-import {useSpotifyApiStore} from "../../scripts/store/spotify-api";
+import { useSpotifyApiStore } from "../../scripts/store/spotify-api";
 import Spacer from "../../components/Spacer.vue";
 
-const route = useRoute()
+const route = useRoute();
 const base = useBaseStore();
-const library = useLibraryStore()
-const spotify = useSpotifyApiStore()
+const library = useLibraryStore();
+const spotify = useSpotifyApiStore();
 
-const artist = ref(null as null | SpotifyApi.ArtistObjectFull)
-const albums = ref(null as null | SpotifyApi.AlbumObjectFull[])
-const relatedArtists = ref(null as null | SpotifyApi.ArtistObjectFull[])
-const topTracks = ref(null as null | SpotifyApi.TrackObjectFull[])
+const artist = ref(null as null | SpotifyApi.ArtistObjectFull);
+const albums = ref(null as null | SpotifyApi.AlbumObjectFull[]);
+const relatedArtists = ref(null as null | SpotifyApi.ArtistObjectFull[]);
+const topTracks = ref(null as null | SpotifyApi.TrackObjectFull[]);
 
 const collection = computed(() => {
-    if (artist.value === null) return null
-    return base.itemCollection(artist.value, topTracks.value)
-})
+    if (artist.value === null) return null;
+    return base.itemCollection(artist.value, topTracks.value);
+});
 
 let loadedId = route.params.id as string;
 reloadArtist(loadedId);
 
 watch(route, async () => {
-    if (route.path.startsWith('/artist') && typeof route.params.id === 'string' && route.params.id !== loadedId) {
+    if (route.path.startsWith("/artist") && typeof route.params.id === "string" && route.params.id !== loadedId) {
         loadedId = route.params.id;
-        reloadArtist(loadedId).then()
-        let el = document.querySelector('.router-view');
+        reloadArtist(loadedId).then();
+        let el = document.querySelector(".router-view");
         if (el !== null)
             el.scrollTop = 0;
     }
-})
+});
 
 async function reloadArtist(id: string) {
-    await baseDb
+    await baseDb;
     spotify.getArtist(id).then(r => {
         artist.value = r;
         console.log("Artist", r);
     });
     spotify.getArtistAlbums(id).then(r => {
-        albums.value = r.items as SpotifyApi.AlbumObjectFull[]
+        albums.value = r.items as SpotifyApi.AlbumObjectFull[];
         console.log("getArtistAlbums", r);
     });
     spotify.getArtistRelatedArtists(id).then(r => {
@@ -111,13 +111,13 @@ async function reloadArtist(id: string) {
 }
 
 const followerString = computed(() => {
-    if (artist.value === null) return '0 followers';
+    if (artist.value === null) return "0 followers";
     if (artist.value.followers.total > 1000000) {
         let followerMillions = Math.round(artist.value.followers.total / 1000000);
-        return followerMillions + 'M follower' + (followerMillions === 1 ? '' : 's');
+        return followerMillions + "M follower" + (followerMillions === 1 ? "" : "s");
     }
-    return artist.value.followers.total.toLocaleString() + ' follower' + (artist.value.followers.total === 1 ? '' : 's');
-})
+    return artist.value.followers.total.toLocaleString() + " follower" + (artist.value.followers.total === 1 ? "" : "s");
+});
 // const totalDurationMs = computed(() => {
 //     return tracks.value.reduce((a, b) => a + b.duration_ms, 0);
 // });

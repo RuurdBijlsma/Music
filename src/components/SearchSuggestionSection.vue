@@ -2,16 +2,16 @@
     <template v-if="!loading">
         <div class="sub-list" v-if="tracks.length > 0" ref="subList">
             <div class="sub-header">
-                <v-divider/>
+                <v-divider />
                 <div>
                     <slot></slot>
                 </div>
-                <v-divider/>
+                <v-divider />
             </div>
-            <track-list padding-top="0" :collection="collection" :tracks="collection.tracks"/>
+            <track-list padding-top="0" :collection="collection" :tracks="collection.tracks" />
         </div>
         <template v-if="tracks.length > 3">
-            <v-divider/>
+            <v-divider />
             <div class="list-expander">
                 <v-btn v-if="expanded" @click="smallify()" icon="mdi-chevron-up" size="small"
                        variant="text"></v-btn>
@@ -20,17 +20,17 @@
         </template>
     </template>
     <div v-else class="loading-circle">
-        <v-progress-circular size="40" indeterminate/>
+        <v-progress-circular size="40" indeterminate />
     </div>
 </template>
 
 <script setup lang="ts">
-import {computed, ref} from "vue";
-import type {PropType} from "vue";
-import {useBaseStore} from "../scripts/store/base";
-import {useLibraryStore} from "../scripts/store/library";
+import { computed, ref } from "vue";
+import type { PropType } from "vue";
+import { useBaseStore } from "../scripts/store/base";
+import { useLibraryStore } from "../scripts/store/library";
 import TrackList from "./TrackList.vue";
-import type {ItemCollection} from "../scripts/types";
+import type { ItemCollection } from "../scripts/types";
 
 const subList = ref<HTMLElement | null>(null);
 
@@ -41,45 +41,45 @@ const props = defineProps({
     },
     id: {
         type: String,
-        required: true,
+        required: true
     },
     loading: {
         type: Boolean,
         required: false,
-        default: () => false,
+        default: () => false
     },
     type: {
         type: String,
-        required: true,
-    },
-})
-const base = useBaseStore()
-const library = useLibraryStore()
+        required: true
+    }
+});
+const base = useBaseStore();
+const library = useLibraryStore();
 
-const query = base.searchValue
+const query = base.searchValue;
 const collection = computed(() => ({
     tracks: props.tracks,
-    type: 'search',
-    id: 'search' + props.id,
+    type: "search",
+    id: "search" + props.id,
     name: `${props.type} search results for "${query}"`,
-    buttonText: 'Search',
-    to: `/search?query=${query}`,
-} as ItemCollection))
+    buttonText: "Search",
+    to: `/search?query=${query}`
+} as ItemCollection));
 
 
-const expanded = ref(false)
+const expanded = ref(false);
 const subListHeight = 177;
 
 function expand() {
-    if (subList.value === null) return
-    subList.value.style.maxHeight = `${Math.max(subList.value.scrollHeight, subListHeight)}px`
-    expanded.value = true
+    if (subList.value === null) return;
+    subList.value.style.maxHeight = `${Math.max(subList.value.scrollHeight, subListHeight)}px`;
+    expanded.value = true;
 }
 
 function smallify() {
-    if (subList.value === null) return
-    subList.value.style.maxHeight = `${subListHeight}px`
-    expanded.value = false
+    if (subList.value === null) return;
+    subList.value.style.maxHeight = `${subListHeight}px`;
+    expanded.value = false;
 }
 
 </script>

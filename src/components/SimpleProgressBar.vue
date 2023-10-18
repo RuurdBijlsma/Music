@@ -14,8 +14,8 @@
 </template>
 
 <script setup lang="ts">
-import {useBaseStore} from "../scripts/store/base";
-import {computed, onMounted, onUnmounted} from "vue";
+import { useBaseStore } from "../scripts/store/base";
+import { computed, onMounted, onUnmounted } from "vue";
 
 const props = defineProps({
     duration: {
@@ -25,40 +25,40 @@ const props = defineProps({
     currentTime: {
         type: Number,
         required: true
-    },
-})
-const emit = defineEmits(['seek'])
-const base = useBaseStore()
+    }
+});
+const emit = defineEmits(["seek"]);
+const base = useBaseStore();
 
-const percent = computed(() => Math.round(10000 * props.currentTime / props.duration) / 100)
+const percent = computed(() => Math.round(10000 * props.currentTime / props.duration) / 100);
 
-let el: HTMLElement | null = null
-let seekDown = false
+let el: HTMLElement | null = null;
+let seekDown = false;
 const seek = (e: MouseEvent) => {
     if (seekDown) {
-        if (el === null) return
-        let bounds = el.getBoundingClientRect()
-        let x = e.pageX - bounds.left
-        let percent = x / bounds.width
+        if (el === null) return;
+        let bounds = el.getBoundingClientRect();
+        let x = e.pageX - bounds.left;
+        let percent = x / bounds.width;
 
-        emit('seek', percent * props.duration)
+        emit("seek", percent * props.duration);
     }
-}
+};
 const mouseDown = (e: MouseEvent) => {
-    seekDown = true
-    seek(e)
-}
-const mouseMove = (e: MouseEvent) => seek(e)
-const mouseUp = () => seekDown = false
+    seekDown = true;
+    seek(e);
+};
+const mouseMove = (e: MouseEvent) => seek(e);
+const mouseUp = () => seekDown = false;
 onMounted(() => {
-    el = document.querySelector('.container')
-    document.addEventListener('mousemove', mouseMove, false)
-    document.addEventListener('mouseup', mouseUp, false)
-})
+    el = document.querySelector(".container");
+    document.addEventListener("mousemove", mouseMove, false);
+    document.addEventListener("mouseup", mouseUp, false);
+});
 onUnmounted(() => {
-    document.removeEventListener('mousemove', mouseMove)
-    document.removeEventListener('mouseup', mouseUp)
-})
+    document.removeEventListener("mousemove", mouseMove);
+    document.removeEventListener("mouseup", mouseUp);
+});
 </script>
 
 <style scoped lang="scss">

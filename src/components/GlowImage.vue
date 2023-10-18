@@ -26,32 +26,32 @@
 </template>
 
 <script setup lang="ts">
-import {useTheme} from "vuetify";
+import { useTheme } from "vuetify";
 
 defineProps({
     src: {
         type: String,
-        default: undefined,
+        default: undefined
     },
     width: {
         type: Number,
-        default: 300,
+        default: 300
     },
     height: {
         type: Number,
-        default: 300,
+        default: 300
     },
     rounding: {
         type: String,
-        default: '0',
+        default: "0"
     },
     effectScale: {
         type: Number,
         default: () => 1,
-        required: false,
+        required: false
     }
-})
-const theme = useTheme()
+});
+const theme = useTheme();
 </script>
 
 <style scoped lang="scss">
