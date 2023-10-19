@@ -87,7 +87,6 @@ export const useSearchStore = defineStore("search", () => {
             if (track.searchString && track.searchString.includes(lowerQuery))
                 result.push(track.track as SpotifyApi.TrackObjectFull);
         }
-        console.log("Search result", result);
         likedCache[query] = {
             result,
             // expiry date 5 minutes from now

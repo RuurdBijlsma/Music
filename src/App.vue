@@ -106,7 +106,6 @@ setTimeout(() => {
 // Fade transition when switching blurry bg
 watch(blurBgSrc, () => {
     clearTimeout(timeoutId.value);
-    console.log("Blur change", blurBgSrc.value);
     transitionBgOpacity.value = "0";
     //@ts-ignore
     timeoutId.value = setTimeout(() => {
@@ -119,9 +118,6 @@ watch(blurBgSrc, () => {
         }, 50);
     }, 3000);
 });
-
-console.log("library.saved", library.saved);
-console.log("theme", theme);
 
 </script>
 

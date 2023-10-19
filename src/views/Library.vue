@@ -40,7 +40,6 @@ watch(route, () => {
 function checkRoute() {
     if (route.path.startsWith("/library/")) {
         tab.value = route.path.slice(9);
-        console.log(tab.value);
     }
 }
 

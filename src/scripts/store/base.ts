@@ -24,17 +24,7 @@ export const baseDb = openDB("base", 1, {
         trackStore.createIndex("artist", "artistString", { unique: false });
         trackStore.createIndex("oldToNew", "added_at", { unique: false });
         trackStore.createIndex("newToOld", "added_at_reverse", { unique: false });
-        console.log("db upgrade", { oldVersion, newVersion, transaction, event });
     },
-    blocked(currentVersion, blockedVersion, event) {
-        console.log("db blocked", { currentVersion, blockedVersion, event });
-    },
-    blocking(currentVersion, blockedVersion, event) {
-        console.log("db blocking", { currentVersion, blockedVersion, event });
-    },
-    terminated() {
-        console.log("db terminated");
-    }
 });
 
 export const useBaseStore = defineStore("base", () => {
@@ -55,7 +45,6 @@ export const useBaseStore = defineStore("base", () => {
         let fgRgb = hexToRgb(theme.current.value.colors["on-background"]);
 
         let colorDifference = deltaE(themeRgb, fgRgb);
-        console.log({ themeRgb, fgRgb, colorDifference });
         return colorDifference;
     });
     const themeTooSimilarToFg = computed(() => contrastToForeground.value < 17);
@@ -225,10 +214,8 @@ export const useBaseStore = defineStore("base", () => {
         if (url && url.includes("open.spotify.com/")) {
             let term = url.split("spotify.com/")[1].split("?")[0];
             let [type, id] = term.split("/");
-            console.log({ type, id });
             if (type === "track") {
                 let track = await spotify.getTrack(id);
-                console.log(track);
                 await router.push(`/album/${encodeUrlName(track.album.name)}/${track.album.id}?play=${id}`);
             } else {
                 await router.push(`/${type}/from-url/${id}`);

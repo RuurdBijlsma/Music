@@ -36,7 +36,6 @@ const collection = computed(() => {
 async function refresh() {
     playlist.value = await spotify.getPlaylist(loadedId);
     library.viewedPlaylist = playlist.value;
-    console.log("Playlist", playlist.value);
     viewedPlaylistRefreshRequired.value = false;
 }
 

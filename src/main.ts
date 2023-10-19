@@ -23,7 +23,6 @@ app.use(pinia);
 
 app.use(router);
 watch(router.currentRoute, () => {
-    console.log("ROUTE CHANGE", router.currentRoute.value.fullPath);
     localStorage.lastRoute = router.currentRoute.value.fullPath;
 });
 router.replace(localStorage.getItem("lastRoute") === null ? "/" : localStorage.lastRoute).then();

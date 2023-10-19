@@ -64,7 +64,6 @@ function activate(item: any) {
     library.activateSource(item.id);
 }
 
-console.log("ssid", sourceSelectedId.value);
 watch(sourceSelectedId, () => {
     console.log("ssid", sourceSelectedId.value);
 });

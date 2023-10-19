@@ -33,7 +33,6 @@ export const usePlayerStore = defineStore("player", () => {
         db = r;
         let lastPlaying = await db.get("cache", "nowPlaying");
         if (lastPlaying !== undefined) {
-            console.log("Loading from now playing");
             let collection: ItemCollection = lastPlaying.collection;
             let track: SpotifyApi.TrackObjectFull = lastPlaying.track;
             load(collection, track, false).then();
@@ -64,7 +63,6 @@ export const usePlayerStore = defineStore("player", () => {
     watch(realVolume, () => {
         playerElement.volume = realVolume.value;
         backupPlayer.volume = realVolume.value;
-        console.log("real volume update", realVolume.value);
         localStorage.volume = volume.value;
     });
     playerElement.volume = realVolume.value;
@@ -82,12 +80,9 @@ export const usePlayerStore = defineStore("player", () => {
     let dbTrackBarsPromise: Promise<MetaTrackBars> | null = null;
 
     async function load(_collection: ItemCollection, _track: SpotifyApi.TrackObjectFull, autoplay = true) {
-        console.time("load");
-        console.timeLog("load", 1);
         const _trackId = _track.id;
         let isLoading = tracksLoading.has(_trackId);
         tracksLoading.add(_trackId);
-        console.timeLog("load", 2);
 
         // swap player element with backup element
         // this causes the media session to stay alive while loading the new track
@@ -97,9 +92,7 @@ export const usePlayerStore = defineStore("player", () => {
         playerElement = backupPlayer;
         backupPlayer = temp;
         addAudioEvents(playerElement);
-        console.timeLog("load", 3);
 
-        console.log("Load", { _collection, track });
         playerElement.autoplay = autoplay;
 
         duration.value = _track.duration_ms / 1000;
@@ -115,20 +108,14 @@ export const usePlayerStore = defineStore("player", () => {
         track.value = _track;
         trackId.value = _trackId;
         setMetadata(_track);
-        console.timeLog("load", 4);
-
-        console.log("Playing item", _track, "from collection", _collection);
-        console.timeLog("load", 5);
 
         dbTrackBarsPromise = showTrackBars(_track);
-        console.timeLog("load", 7);
 
         let onProgress: (p: { percent: number }) => void;
         onProgress = (progress) => {
             // Check if user hasn't changed track while it was progressing
             if (_collection.id === collection.value?.id && track.value && _trackId === trackId.value) {
                 loadProgress.value = progress.percent;
-                console.log(progress, loadProgress.value);
                 if (progress.percent === 100) {
                     base.events.off(_trackId + "progress", onProgress);
                 }
@@ -136,11 +123,9 @@ export const usePlayerStore = defineStore("player", () => {
         };
         base.events.on(_trackId + "progress", onProgress);
         if (isLoading) {
-            console.warn("Track", track, "is already loading, So I stop");
             return;
         }
         let outPath = "";
-        console.timeLog("load", 8);
         try {
             outPath = await platform.getTrackFile(_track);
         } catch (e: any) {
@@ -153,9 +138,7 @@ export const usePlayerStore = defineStore("player", () => {
             // a track with max volume of <= 15000 gets normalizer 1 (so full volume)
             const maxVolumeToNormalizer = (x: number) => -0.06363636364 * (x + 7) + 0.3;
             volumeNormalizer.value = Math.max(Math.min(1, maxVolumeToNormalizer(mean)), .3);
-            console.log({ volumeNormalizer: volumeNormalizer.value, meanVolume: mean });
         });
-        console.timeLog("load", 8.5);
         setTimeout(() => {
             if (_collection.id === collection.value?.id && track.value && _trackId === trackId.value)
                 db.put("cache", {
@@ -166,7 +149,6 @@ export const usePlayerStore = defineStore("player", () => {
         // Check if user hasn't changed track while it was loading
         if (_collection.id === collection.value.id && track.value && _trackId === trackId.value)
             playerElement.src = outPath;
-        console.log(playerElement);
 
         platform.setPlatformPlaying(autoplay);
         await initTrackbars(outPath, _trackId);
@@ -238,10 +220,8 @@ export const usePlayerStore = defineStore("player", () => {
         };
         element.ondurationchange = () => {
             duration.value = element.duration;
-            console.log("audio duration change", duration.value);
         };
         element.oncanplay = () => {
-            console.log("audio load");
             loading.value = false;
         };
         element.ontimeupdate = () => {
@@ -273,7 +253,6 @@ export const usePlayerStore = defineStore("player", () => {
         const barCount = canvasWidth / (binWidth + barSpacing);
         await baseDb;
         let dbTrackBars = (await db.get("trackBars", _track.id)) as TrackBars;
-        console.log(dbTrackBars);
         if (dbTrackBars !== undefined && _track.id === trackId.value) {
             canvasBars = dbTrackBars;
         } else if (_track.id === trackId.value) {
@@ -323,7 +302,6 @@ export const usePlayerStore = defineStore("player", () => {
         }
         if (track.value !== null && trackId.value === _trackId)
             canvasBars = bars;
-        console.log("Putting track bars!", _trackId, bars.binSize, outPath);
         await db.put("trackBars", bars, _trackId).then();
         return bars;
     }
@@ -378,10 +356,6 @@ export const usePlayerStore = defineStore("player", () => {
             }
         }
     }
-
-    // setInterval(() => {
-    //     // console.log(`Current collection id: ${collection.value.id}, current index: ${collectionIndex.value}, current track: ${track.value?.name}`)
-    // }, 1000)
 
 
     function setMetadata(track: SpotifyApi.TrackObjectFull) {
@@ -453,7 +427,6 @@ export const usePlayerStore = defineStore("player", () => {
         let trackId = track.value?.id;
         if (collection.value === null || trackId === null) return;
 
-        console.log("Skip next song", n);
         let index = queue.value.findIndex(t => t.id === trackId);
         let newIndex = index + n;
         let repeatRequired = false;

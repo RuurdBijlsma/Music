@@ -66,11 +66,9 @@ function reloadUser() {
         id = library.userInfo.id;
     spotify.getUser(id).then(r => {
         user.value = r;
-        console.log("User", r);
     });
     spotify.getUserPlaylists(id).then(r => {
         playlists.value = r.items as SpotifyApi.PlaylistObjectFull[];
-        console.log("getUserPlaylists", r);
     });
 }
 

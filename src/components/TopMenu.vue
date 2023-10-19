@@ -114,7 +114,6 @@ watch(route, () => {
     dropdownOpen.value = false;
 });
 watch(chosenTheme, () => {
-    console.log("chosen theme changed", chosenTheme.value);
     localStorage.theme = themeOptions[chosenTheme.value];
     applyTheme();
 });
@@ -124,7 +123,6 @@ function applyTheme() {
         chosenTheme.value = themeOptions.indexOf(localStorage.theme);
     if (localStorage.getItem("theme") !== null && localStorage.theme !== "system") {
         theme.global.name.value = localStorage.theme;
-        console.log(`Changing theme to ${theme.global.name.value} from localStorage`);
     } else {
         if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
             // dark mode
@@ -132,7 +130,6 @@ function applyTheme() {
         } else {
             theme.global.name.value = "light";
         }
-        console.log(`Setting theme to ${theme.global.name.value} from system preferences`);
     }
     platform.setTheme(theme.global.name.value);
 }
@@ -148,7 +145,6 @@ window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", e =
             // light mode
             theme.global.name.value = "light";
         }
-        console.log(`Changing theme to ${theme.global.name.value} from watching system preference`);
     }
 });
 

@@ -60,7 +60,6 @@ let lastSearchedQuery = "";
 
 onMounted(() => {
     el = document.querySelector(".search-field");
-    console.log("Search field el: ", el);
     updateSearchPos();
 });
 let interval: number;
@@ -94,7 +93,6 @@ async function performSearch() {
     spotifyLoading.value = true;
     likedLoading.value = true;
     let query = searchValue.value;
-    console.log("Perform search for query: " + query);
     search.addToRecentSearches(query);
     search.searchSpotify(query).then(res => {
         if (query === searchValue.value) {

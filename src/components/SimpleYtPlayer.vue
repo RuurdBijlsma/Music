@@ -64,7 +64,6 @@ function createAudioElement() {
         loading.value = false;
     });
     element.addEventListener("timeupdate", () => {
-        // console.log("audio timeupdate")
         currentTime.value = element.currentTime;
     });
     return element;
@@ -79,15 +78,12 @@ async function load(track: SpotifyApi.TrackObjectFull) {
     let onProgress: (p: { percent: number }) => void;
     onProgress = progress => {
         loadProgress.value = progress.percent;
-        console.log({ percent: progress.percent });
-        console.error("TODO CHECK IF THIS PERCENT IS 1 or 100");
         if (progress.percent === 100) {
             base.events.off(id + "progress", onProgress);
         }
     };
     base.events.on(id + "progress", onProgress);
     playerElement.src = await platform.getTrackFile(track);
-    console.log(playerElement);
 }
 
 async function togglePlay() {

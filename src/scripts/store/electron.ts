@@ -30,7 +30,6 @@ export const usePlatformStore = defineStore("platform", () => {
     let directories: { music: string, temp: string } | null = null;
 
     ipcRenderer.invoke("getDirectories").then((d: any) => {
-        console.log("Got directories", d);
         directories = d;
     });
     ipcRenderer.on("invoke", async (_, channel, data) => {
@@ -108,7 +107,6 @@ export const usePlatformStore = defineStore("platform", () => {
     }
 
     async function getTrackFile(track: SpotifyApi.TrackObjectFull, applyThemeColor = true) {
-        console.time("getTrack");
         const isYouTubeTrack = track.id.startsWith("yt-");
         let hasImage = track.hasOwnProperty("album") && track.album.images.length > 0;
         let imgUrl = hasImage ? track.album.images[0].url : "";
@@ -118,7 +116,6 @@ export const usePlatformStore = defineStore("platform", () => {
             checkFileExists(outPath),
             db.get("imageColor", imgUrl)
         ]);
-        console.timeLog("getTrack", 1);
         // only download the album art if the track file hasn't been created yet
         // or if the dominant theme color hasn't been put in the DB
         let imageDownloadRequired = !trackFileExists || (!dbColor && applyThemeColor);
@@ -126,21 +123,15 @@ export const usePlatformStore = defineStore("platform", () => {
         if (hasImage && imageDownloadRequired) {
             jpgFile = path.join(directories?.temp ?? "", Math.random().toString() + ".jpg");
             let out = await ipcRenderer.invoke("imgToJpg", imgUrl, jpgFile);
-            console.log("imgToJpg", out);
         }
-        console.timeLog("getTrack", 2);
-        console.log({ jpgFile });
         if (hasImage && applyThemeColor) {
             const applyColor = (c: { dark: string, light: string }) => {
-                console.log(c);
                 base.themeColorDark = c.dark;
                 base.themeColorLight = c.light;
             };
             if (dbColor) {
-                console.log("Using DB theme colors");
                 applyColor(dbColor);
             } else {
-                console.log("Generate theme colors");
                 ipcRenderer.invoke("getDominantColor", jpgFile).then(c => {
                     db.put("imageColor", c, imgUrl);
                     applyColor(c);
@@ -148,11 +139,8 @@ export const usePlatformStore = defineStore("platform", () => {
             }
         }
         let cachedId = await db.get("nameToId", cacheKey);
-        console.timeLog("getTrack", 3);
-        console.log("CACHED ID RESULT", cachedId);
         if (!trackFileExists) {
             ipcRenderer.on(filename + "progress", (_, progress) => {
-                console.log("PROGERSS", progress.percent);
                 base.events.emit(track.id + "progress", progress);
             });
             let tags: any = {
@@ -172,30 +160,20 @@ export const usePlatformStore = defineStore("platform", () => {
                   //@ts-ignore
                     tags.year = new Date(track.album.release_date).getFullYear();
             }
-            console.timeLog("getTrack", 4);
-            console.log("Sending payload", tags, hasImage ? jpgFile : "");
             let { id } = await ipcRenderer.invoke("downloadYt", filename, tags, hasImage ? jpgFile : "");
-            console.log("ID", id);
-            console.timeLog("getTrack", 5);
             if (base.sourceDialog.tempTrackOverride.trackId === track.id) {
                 outPath = await makeTempTrack(track);
-                console.log("TEMP TRACK OVERRIDE REQUESTED, new outPath=", outPath);
                 base.sourceDialog.tempTrackOverride.trackId = "";
             }
-            console.timeLog("getTrack", 6);
             if (id !== "") {
                 db.put("nameToId", id, cacheKey).then();
-                console.log("downloaded yt", { outPath, id });
             }
-        } else {
-            console.log("Using cached file for track");
         }
         if (jpgFile !== "") {
             // set timeout because getDominantColor runs in parallel, would never take more than a second
             // other uses of the image are awaited before this so no issue
             setTimeout(() => fs.unlink(jpgFile).then(), 1000);
         }
-        console.timeEnd("getTrack");
         return outPath;
     }
 
@@ -207,7 +185,6 @@ export const usePlatformStore = defineStore("platform", () => {
         let { err } = await ipcRenderer.invoke("getVolumeStats", outPath);
         let lines = err.split("\n") as string[];
         let volumeLines = lines.filter(l => l.startsWith("[Parsed_volumedetect_0"));
-        console.log("trackVolumeStats", volumeLines);
         let peakLine = volumeLines.find(l => l.includes("max_volume"));
         let meanLine = volumeLines.find(l => l.includes("mean_volume"));
         if (meanLine === undefined || peakLine === undefined) return { mean: -5, peak: 0 };
@@ -215,7 +192,6 @@ export const usePlatformStore = defineStore("platform", () => {
         mean = +meanLine.split("mean_volume:")[1].split("dB")[0].trim();
         peak = +peakLine.split("max_volume:")[1].split("dB")[0].trim();
         let result = { mean, peak };
-        console.log(result);
         db.put("trackVolumeStats", result, track.id).then();
         return result;
     }
@@ -229,9 +205,7 @@ export const usePlatformStore = defineStore("platform", () => {
             else
                 return ytCache.result;
         }
-        console.log("INVOKE ELECTRON", query);
         let result = await ipcRenderer.invoke("searchYt", query, limit);
-        console.log("Full result", result);
         result = result.map((r: any) => ({
             duration: r.duration,
             description: r.description,
@@ -246,7 +220,6 @@ export const usePlatformStore = defineStore("platform", () => {
             viewCount: r.view_count,
             uploadDate: new Date(`${r.upload_date.substring(0, 4)}-${r.upload_date.substring(4, 6)}-${r.upload_date.substring(6, 8)}`)
         }));
-        console.log("Search youtube result: ", result);
         db.put("cache", {
             result,
             // expiry date 30 days from now
@@ -292,7 +265,6 @@ export const usePlatformStore = defineStore("platform", () => {
                 if (req.query.hasOwnProperty("code")) {
                     server.close();
                     server = null;
-                    console.log("Stopped listening on *:" + port);
                     let auth = await spotifyAuth.getAuthByCode(redirectUrl, req.query.code);
                     ipcRenderer.send("focus-window");
                     resolve(auth);
@@ -310,7 +282,6 @@ export const usePlatformStore = defineStore("platform", () => {
             });
 
             server.listen(port, () => {
-                console.log("listening on *:" + port);
             });
         });
     }
@@ -344,7 +315,6 @@ export const usePlatformStore = defineStore("platform", () => {
         let tracks = toRaw(library.tracks) as ExtendedPlaylistTrack[];
         exportMp3State.value.total = tracks.length;
         exportMp3State.value.exported = 0;
-        console.log(tracks);
 
         let result = await ipcRenderer.invoke("getOutputDirectory");
         if (result.canceled) {
@@ -354,9 +324,7 @@ export const usePlatformStore = defineStore("platform", () => {
         exportMp3State.value.loading = true;
         exportMp3State.value.canceled = false;
 
-        console.log(result);
         let outputPath = result.filePaths[0];
-        console.log(outputPath);
 
         let batchSize = 8;
         for (let i = 0; i < tracks.length; i += batchSize) {
@@ -366,7 +334,6 @@ export const usePlatformStore = defineStore("platform", () => {
                 let paths = await Promise.all(batch.map(
                   ({ track }) => getTrackFile(track as SpotifyApi.TrackObjectFull, false)
                 ));
-                console.log(paths);
                 for (let p of paths) {
                     let copyTarget = path.join(outputPath, path.basename(p));
                     if (!(await checkFileExists(copyTarget)))

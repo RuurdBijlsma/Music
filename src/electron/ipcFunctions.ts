@@ -8,12 +8,10 @@ import NodeFunctions from './nodeFunctions'
 
 export default class IpcFunctions {
     constructor(ipcMain: Electron.IpcMain, win: BrowserWindow) {
-        console.log("Registering handles")
         const nf = new NodeFunctions(win)
         // Main process
         ipcMain.handle('getDirectories', () => Directories)
         ipcMain.handle('enableDevTools', () => {
-            console.log("Open dev tools", win, win?.webContents);
             win?.webContents?.openDevTools()
         })
 
@@ -42,7 +40,6 @@ export default class IpcFunctions {
         })
 
         ipcMain.handle('downloadYt', async (_, filename: string, tags: any, imageFile: string) => {
-            console.log({filename})
             const isYouTubeTrack = tags.id !== undefined
             const ytId = tags.id
             let time = performance.now()
@@ -55,13 +52,11 @@ export default class IpcFunctions {
             delete tags.id
             // convert to mp3 and add metadata
             await nf.ffmpegMetadata(downloadResult.outPath, middleOut, imageFile, tags)
-            console.log(`Time cost: ${performance.now() - time}ms`)
 
             // clean up
             await fs.rename(middleOut, finalOut)
             fs.unlink(downloadResult.outPath).then()
 
-            console.log("ID HERE IS", downloadResult.id)
             return {outPath: finalOut, id: downloadResult.id}
         })
 

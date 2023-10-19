@@ -24,28 +24,22 @@ export const useSpotifyAuthStore = defineStore("spotify-auth", () => {
     baseDb.then(r => {
         db = r;
         loadValues().then(() => {
-            console.log("Loaded idb values into store", performance.now());
         });
     });
 
     // IndexedDB persistent storage
     async function loadValues() {
-        console.log("Loading db value start", performance.now());
 
         if (localStorage.getItem("secret") !== null) {
             secret.value = localStorage.secret;
-            console.log("[LOAD] secret.value = " + localStorage.secret);
         }
         if (localStorage.getItem("clientId") !== null) {
             clientId.value = localStorage.clientId;
-            console.log("[LOAD] clientId.value = " + localStorage.clientId);
         }
         if (localStorage.getItem("tokens") !== null) {
             tokens.value = JSON.parse(localStorage.tokens);
-            console.log("[LOAD] tokens.value = ", JSON.parse(localStorage.tokens));
             checkAuth().then();
         }
-        console.log("Loading db value end", performance.now());
     }
 
     const secret = ref("");
@@ -68,18 +62,15 @@ export const useSpotifyAuthStore = defineStore("spotify-auth", () => {
 
     watch(secret, async () => {
         localStorage.secret = secret.value;
-        console.log("[WATCH] localStorage.secret = " + secret.value);
     });
     watch(clientId, async () => {
         localStorage.clientId = clientId.value;
-        console.log("[WATCH] localStorage.clientId = " + clientId.value);
     });
 
     // Spotify API Stuff
     const requestedScopes = "ugc-image-upload user-read-email user-read-private playlist-read-collaborative playlist-modify-public playlist-read-private playlist-modify-private user-library-modify user-library-read user-top-read user-read-recently-played user-follow-read user-follow-modify";
 
     async function getAuthByRefreshToken(refreshToken: string): Promise<AuthToken> {
-        console.log("Refresh using refreshToken", refreshToken);
         let result = await (await fetch("https://accounts.spotify.com/api/token", {
             method: "post",
             body: `grant_type=refresh_token&refresh_token=${refreshToken}&client_id=${clientId.value}&client_secret=${secret.value}`,
@@ -87,7 +78,6 @@ export const useSpotifyAuthStore = defineStore("spotify-auth", () => {
         })).text();
         try {
             let parsed = JSON.parse(result);
-            console.log(parsed);
             return {
                 access: parsed.access_token,
                 expiryDate: (+new Date) + parsed.expires_in * 1000
@@ -99,7 +89,6 @@ export const useSpotifyAuthStore = defineStore("spotify-auth", () => {
     }
 
     async function getAuthByCode(redirectUrl: string, code: string): Promise<AuthToken> {
-        console.log("Getting auth using code", { redirectUrl, code });
         let result = await (await fetch(`https://accounts.spotify.com/api/token`, {
             method: "post",
             body: `grant_type=authorization_code&code=${code}&redirect_uri=${redirectUrl}&client_id=` +
@@ -107,7 +96,6 @@ export const useSpotifyAuthStore = defineStore("spotify-auth", () => {
             headers: { "Content-Type": "application/x-www-form-urlencoded" }
         })).text();
         try {
-            console.log(result);
             let parsed = JSON.parse(result);
             if (parsed.error) {
                 console.warn("Get auth by code error", parsed);
@@ -127,8 +115,6 @@ export const useSpotifyAuthStore = defineStore("spotify-auth", () => {
 
     async function login() {
         tokens.value = await platform.firstLogin();
-        console.log("Auth result from 'firstLogin'", tokens);
-        // await dispatch('cacheState')
         await checkAuth();
     }
 
@@ -175,14 +161,11 @@ export const useSpotifyAuthStore = defineStore("spotify-auth", () => {
         await baseDb;
 
         let now = Date.now();
-        console.log("yea", tokens.value.expiryDate, now);
         if (tokens.value.expiryDate !== null && tokens.value.expiryDate > now) {
-            console.log("WE HAVE AN EXPIRY DATE");
             spotify.api.setAccessToken(tokens.value.access);
             base.events.emit("accessToken");
 
             let msUntilExpire = tokens.value.expiryDate - now;
-            console.log("msUntilExpire", msUntilExpire);
             clearTimeout(tokenTimeout);
             tokenTimeout = window.setTimeout(async () => {
                 await loginByRefreshToken();
@@ -198,7 +181,6 @@ export const useSpotifyAuthStore = defineStore("spotify-auth", () => {
     }
 
     const awaitAuth = async () => {
-        console.log("Await auth");
         if (isLoggedIn && spotify.api.getAccessToken() !== null) return;
         return await base.waitFor("accessToken");
     };

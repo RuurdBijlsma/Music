@@ -60,10 +60,8 @@ const collection = computed(() => {
 const loadTrackId = computed(() => route.query.play);
 
 const checkForLoadTrackId = () => {
-    console.log("CHECK 1", loadTrackId.value);
     if (loadTrackId.value && album.value !== null) {
         let albumTrack = album.value.tracks.items.find(t => t.id === loadTrackId.value) as SpotifyApi.TrackObjectFull | undefined;
-        console.log("CHECK FOR LOAD TRACK ID", loadTrackId.value, toRaw(album.value.tracks.items));
         if (albumTrack && collection.value !== null) {
             player.load(collection.value, albumTrack);
             router.replace({ query: {} });
@@ -71,7 +69,6 @@ const checkForLoadTrackId = () => {
     }
 };
 const updateAlbum = async () => {
-    console.warn("Getting album from SPOTIFY");
     let responseAlbum = await spotify.getAlbum(loadedId);
     for (let item of responseAlbum.tracks.items) {
         //@ts-ignore
@@ -80,7 +77,6 @@ const updateAlbum = async () => {
         };
     }
     album.value = responseAlbum;
-    console.log(responseAlbum);
     checkForLoadTrackId();
 };
 watch(route, async () => {

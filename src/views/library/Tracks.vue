@@ -54,13 +54,9 @@ const collection = computed(() => {
 });
 
 setTimeout(() => {
-    console.log("Checking for need to reload tracks");
     // if last track reload is 24 or more hours ago then reload tracks
     if (localStorage.getItem("lastTracksLoad") === null || Date.now() - 1000 * 60 * 60 * 24 > +localStorage.lastTracksLoad) {
-        console.log("Reloading tracks!");
         library.loadLikedTracks();
-    } else {
-        console.log("No need to reload tracks, they were refreshed less than 24 hours ago");
     }
 }, 500);
 

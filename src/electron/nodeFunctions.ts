@@ -42,9 +42,7 @@ export default class NodeFunctions {
 
     async downloadYtByQuery(query: string, filename: string, destinationFolder = Directories.temp) {
         return new Promise<{ outPath: string, id: string }>((resolve, reject) => {
-            console.log("SEARCH QUERY", query)
             query = replaceSpecialCharacters(query)
-            console.log("SEARCH QUERY", query)
             let args = [
                 `ytsearch15:"${query.replace(/"/gi, "\"")}"`,
                 `--max-downloads`, `1`,
@@ -55,21 +53,17 @@ export default class NodeFunctions {
                 `-o`,
                 `${path.join(destinationFolder, filename + '.temp.%(ext)s')}`,
             ];
-            console.log(args)
             let id: string = ''
             this.ytdlp.exec(args)
                 .on('progress', (progress: Progress) => {
                     this.win?.webContents.send(filename + 'progress', progress)
                 })
                 .on('ytDlpEvent', (a: string, b: string) => {
-                    console.log(a, b)
                     if (id === '' && b.includes('watch?v=')) {
-                        console.log("ID FOUND", id)
                         id = b.split('watch?v=')[1]
                     }
                 })
                 .on('error', (error: Error) => {
-                    console.log("IS DIT WEL EEN ERROR", error.message)
                     resolve({outPath: path.join(destinationFolder, filename + '.temp.mp3'), id})
                 })
                 .on('close', () => resolve({outPath: path.join(destinationFolder, filename + '.temp.mp3'), id}));
@@ -87,7 +81,6 @@ export default class NodeFunctions {
                 '--audio-format', 'mp3',
                 '--audio-quality', '1',//second-best audio quality
             ];
-            console.log(args)
             this.ytdlp.exec(args)
                 .on('progress', (progress: Progress) => {
                     this.win?.webContents.send(filename + 'progress', progress)
@@ -150,11 +143,9 @@ export default class NodeFunctions {
 
     async getBinaries() {
         if (await this.checkFileExists(this.ytdlpPath)) {
-            console.log("YTDLP ALREADY EXISTS!", this.ytdlpPath)
             this.ytdlp.setBinaryPath(this.ytdlpPath)
         } else {
             YTDlpWrap.downloadFromGithub(this.ytdlpPath).then(() => {
-                console.log("Downloaded YTDLP!", this.ytdlpPath)
                 this.ytdlp.setBinaryPath(this.ytdlpPath)
             })
         }
@@ -163,10 +154,9 @@ export default class NodeFunctions {
         this.ffmpegPath = path.join(Directories.files, 'ffmpeg' + ext)
         let ffprobePath = path.join(Directories.files, 'ffprobe' + ext)
         if (await this.checkFileExists(this.ffmpegPath) && await this.checkFileExists(ffprobePath)) {
-            console.log("FFMPEG/FFPROBE ALREADY EXISTS!", this.ffmpegPath, ffprobePath)
         } else {
             ffbinaries.downloadBinaries(['ffmpeg', 'ffprobe'], {quiet: true, destination: Directories.files}, () => {
-                console.log('Downloaded ffplay and ffprobe binaries to ' + Directories.files + '.');
+
             });
         }
     }
@@ -190,7 +180,6 @@ export default class NodeFunctions {
             `--match-filter`, `!is_live & !post_live & !was_live`,
             `--dump-json`,
         ];
-        console.log({query, args})
         let stdout = await this.ytdlp.execPromise(args);
         try {
             // return stdout;
@@ -228,13 +217,11 @@ export default class NodeFunctions {
         let rgbs = await ColorThief.getPalette(imageFile)
         let hsls = rgbs.map(([r, g, b]: number[]) => RGBToHSL(r, g, b))
         // let hexes = rgbs.map(([r, g, b]: number[]) => this.RGBToHex(r, g, b))
-        // console.log("Thief color: ", rgbs)
 
         let bgColorDark = [45, 45, 45] // for dark theme
         let bgColorLight = [240, 240, 240] // for dark theme
         let pickColor = (bgColor: number[]) => {
             let contrasts = rgbs.map(([r, g, b]: number[]) => getContrastRatio([r, g, b], bgColor))
-            // console.log(contrasts)
             let minimumContrast = 4
             let acceptableThemeColors: { rgb: number[], hsl: number[] }[] = []
             for (let i = 0; i < contrasts.length; i++) {
@@ -243,7 +230,6 @@ export default class NodeFunctions {
                 }
             }
             if (acceptableThemeColors.length === 0) {
-                console.log("No contrasting colors found in album art")
                 let clr = 255 - bgColor[0]
                 return RGBToHex(clr, clr, clr)
             }
@@ -261,7 +247,6 @@ export default class NodeFunctions {
         return new Promise<any>((resolve) => {
             this.win.webContents.send("invoke", channel, data)
             ipcMain.once("reply", (_event, channel, value) => {
-                console.log("Received", channel, value)
                 if (channel === channel)
                     resolve(value)
             })
@@ -277,9 +262,7 @@ export default class NodeFunctions {
         let regResult = globalShortcut.register(likeShortcut, async () => {
             await this.webInvoke('toggleFavorite')
         });
-        if (regResult)
-            console.log("Registered global shortcut ✔")
-        else
+        if (!regResult)
             console.log("Failed to register global shortcut ❌")
 
 

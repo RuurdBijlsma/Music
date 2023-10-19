@@ -98,7 +98,6 @@ const loadRemovePlaylist = ref(false);
 onMounted(() => {
     if (props.item.type === "track")
         platform.trackIsDownloaded(props.item as SpotifyApi.TrackObjectFull).then(v => {
-            console.log("is downloaded", v);
             isDownloaded.value = v;
         });
 });
@@ -113,14 +112,12 @@ async function removeFromViewedPlaylist(trackUri: string) {
     if (library.viewedPlaylist === null) return;
     const playlistId = library.viewedPlaylist.id;
     loadRemovePlaylist.value = true;
-    console.log("Remove ", { trackUri, playlistId });
     await library.removeFromPlaylist(playlistId, trackUri);
     loadRemovePlaylist.value = false;
 }
 
 async function addToPlaylist(playlistId: string, track: Item) {
     loadAddPlaylist.value = true;
-    console.log("Add ", { track, playlistId });
     await library.addToPlaylist(playlistId, track as SpotifyApi.TrackObjectFull);
     loadAddPlaylist.value = false;
 }
