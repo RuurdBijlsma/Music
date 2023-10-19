@@ -52,7 +52,7 @@
 
 <script setup lang="ts">
 // todo
-// paste youtube link in search balk
+// search page
 // playlists, etc. in search functie
 // maak knop om ytdlp te updaten
 // browse page

@@ -9,6 +9,8 @@ import type { ItemCollection } from "../types";
 import { useRouter } from "vue-router";
 import { useSpotifyApiStore } from "./spotify-api";
 import { EventEmitter } from "events";
+import { useSearchStore } from "./search";
+import { usePlayerStore } from "./player";
 
 export const baseDb = openDB("base", 1, {
     upgrade(db, oldVersion, newVersion, transaction, event) {
@@ -24,13 +26,15 @@ export const baseDb = openDB("base", 1, {
         trackStore.createIndex("artist", "artistString", { unique: false });
         trackStore.createIndex("oldToNew", "added_at", { unique: false });
         trackStore.createIndex("newToOld", "added_at_reverse", { unique: false });
-    },
+    }
 });
 
 export const useBaseStore = defineStore("base", () => {
     const theme = useTheme();
     const spotify = useSpotifyApiStore();
     const dbLoaded = ref(false);
+    const player = usePlayerStore();
+    const search = useSearchStore();
     const events = new EventEmitter();
     let db: IDBPDatabase;
     baseDb.then(r => {
@@ -223,6 +227,23 @@ export const useBaseStore = defineStore("base", () => {
             addSnack("Navigated to Spotify™ link");
             searchValue.value = "";
         }
+        let match = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+
+        if (match !== null && !!match[1] && match[1].length === 11) {
+            addSnack("Locating YouTube™ track... Please wait.");
+            //https://youtu.be/PeAMGlDBB7c
+            let id = match[1];
+            searchValue.value = "";
+            let track = await search.ytIdToTrack(id);
+            player.load({
+                tracks: [track],
+                type: "youtube",
+                id: track.id,
+                name: `From YouTube URL`,
+                buttonText: "",
+                to: `/`
+            } as ItemCollection, track);
+        }
     });
 
     const setContextMenuItem = (e: MouseEvent, item: any) => {
@@ -272,6 +293,6 @@ export const useBaseStore = defineStore("base", () => {
         waitFor,
         addSnack,
         windowHeight,
-        windowWidth,
+        windowWidth
     };
 });

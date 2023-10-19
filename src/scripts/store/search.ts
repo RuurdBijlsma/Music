@@ -5,6 +5,7 @@ import type { IDBPDatabase } from "idb";
 import { usePlatformStore } from "./electron";
 import type { ExtendedPlaylistTrack, Item } from "../types";
 import { useSpotifyApiStore } from "./spotify-api";
+import { executeCached } from "../../electron/utils";
 
 export const useSearchStore = defineStore("search", () => {
     const platform = usePlatformStore();
@@ -100,24 +101,17 @@ export const useSearchStore = defineStore("search", () => {
         return rawResult.map(ytResultToTrack);
     }
 
-    async function searchSpotify(query: string) {
-        let key = "sp" + query;
-        let cache = await db.get("cache", key);
-        if (cache) {
-            if (cache.expiryDate < Date.now())
-                db.delete("cache", key).then();
-            else
-                return cache.result;
-        }
-        await baseDb;
-        let result = await spotify.search(query, ["album", "artist", "playlist", "track"]);
-        db.put("cache", {
-            result,
-            // expiry date 5 minutes from now
-            expiryDate: Date.now() + 1000 * 60 * 5
-        }, key).then();
-        return result;
+    async function ytIdToTrack(id: string) {
+        let rawResult = await platform.youTubeInfoById(id);
+        return ytResultToTrack(rawResult);
     }
 
-    return { addToRecentSearches, searchLikedTracks, searchYouTube, searchSpotify, ytResultToTrack };
+    async function searchSpotify(query: string) {
+        return await executeCached(db, async () => {
+            await baseDb;
+            return await spotify.search(query, ["album", "artist", "playlist", "track"]);
+        }, "sp" + query, 1000 * 60 * 5);
+    }
+
+    return { addToRecentSearches, searchLikedTracks, searchYouTube, searchSpotify, ytResultToTrack, ytIdToTrack };
 });

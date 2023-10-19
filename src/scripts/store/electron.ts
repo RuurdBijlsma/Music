@@ -15,6 +15,7 @@ import { usePlayerStore } from "./player";
 import type { AuthToken } from "./spotify-auth";
 import { useSpotifyAuthStore } from "./spotify-auth";
 import type { ExtendedPlaylistTrack } from "../types";
+import { executeCached } from "../../electron/utils";
 
 
 const express = window.require("express");
@@ -29,9 +30,7 @@ export const usePlatformStore = defineStore("platform", () => {
     let server: any = null;
     let directories: { music: string, temp: string } | null = null;
 
-    ipcRenderer.invoke("getDirectories").then((d: any) => {
-        directories = d;
-    });
+    ipcRenderer.invoke("getDirectories").then((d: any) => directories = d);
     ipcRenderer.on("invoke", async (_, channel, data) => {
         if (channel === "toggleFavorite") {
             if (player.track !== null) {
@@ -122,7 +121,7 @@ export const usePlatformStore = defineStore("platform", () => {
         let jpgFile = "";
         if (hasImage && imageDownloadRequired) {
             jpgFile = path.join(directories?.temp ?? "", Math.random().toString() + ".jpg");
-            let out = await ipcRenderer.invoke("imgToJpg", imgUrl, jpgFile);
+            await ipcRenderer.invoke("imgToJpg", imgUrl, jpgFile);
         }
         if (hasImage && applyThemeColor) {
             const applyColor = (c: { dark: string, light: string }) => {
@@ -196,37 +195,45 @@ export const usePlatformStore = defineStore("platform", () => {
         return result;
     }
 
-    async function searchYouTube(query: string, limit = 5) {
-        let key = "yt" + query + "|" + limit;
-        let ytCache = await db.get("cache", key);
-        if (ytCache) {
-            if (ytCache.expiryDate < Date.now())
-                db.delete("cache", key).then();
-            else
-                return ytCache.result;
-        }
-        let result = await ipcRenderer.invoke("searchYt", query, limit);
-        result = result.map((r: any) => ({
-            duration: r.duration,
-            description: r.description,
-            channel: r.channel,
-            title: r.title,
-            thumbnail: r.thumbnail,
-            id: r.id,
-            channelUrl: r.channel_url,
-            channelId: r.channel_id,
-            playlist: r.playlist,
-            playlistId: r.playlist_id,
-            viewCount: r.view_count,
-            uploadDate: new Date(`${r.upload_date.substring(0, 4)}-${r.upload_date.substring(4, 6)}-${r.upload_date.substring(6, 8)}`)
-        }));
-        db.put("cache", {
-            result,
-            // expiry date 30 days from now
-            expiryDate: Date.now() + 1000 * 60 * 60 * 24 * 30
-        }, key).then();
+    async function youTubeInfoById(id: string) {
+        return await executeCached(db, async () => {
+            let ytr = await ipcRenderer.invoke("ytInfoById", id);
+            let r = ytr[0];
+            return {
+                duration: r.duration,
+                description: r.description,
+                channel: r.channel,
+                title: r.title,
+                thumbnail: r.thumbnail,
+                id: r.id,
+                channelUrl: r.channel_url,
+                channelId: r.channel_id,
+                playlist: r.playlist,
+                playlistId: r.playlist_id,
+                viewCount: r.view_count,
+                uploadDate: new Date(`${r.upload_date.substring(0, 4)}-${r.upload_date.substring(4, 6)}-${r.upload_date.substring(6, 8)}`)
+            };
+        }, "ytId" + id, 1000 * 60 * 60 * 24 * 365);
+    }
 
-        return result;
+    async function searchYouTube(query: string, limit = 5) {
+        return await executeCached(db, async () => {
+            let result = await ipcRenderer.invoke("searchYt", query, limit);
+            return result.map((r: any) => ({
+                duration: r.duration,
+                description: r.description,
+                channel: r.channel,
+                title: r.title,
+                thumbnail: r.thumbnail,
+                id: r.id,
+                channelUrl: r.channel_url,
+                channelId: r.channel_id,
+                playlist: r.playlist,
+                playlistId: r.playlist_id,
+                viewCount: r.view_count,
+                uploadDate: new Date(`${r.upload_date.substring(0, 4)}-${r.upload_date.substring(4, 6)}-${r.upload_date.substring(6, 8)}`)
+            }));
+        }, "yt" + query + "|" + limit, 1000 * 60 * 60 * 24 * 30);
     }
 
     function resetSpotifyLogin() {
@@ -375,6 +382,7 @@ export const usePlatformStore = defineStore("platform", () => {
         exportMp3State,
         cancelExport,
         deleteTrackCache,
-        getVolumeStats
+        getVolumeStats,
+        youTubeInfoById
     };
 });

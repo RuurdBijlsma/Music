@@ -43,3 +43,20 @@ export function getContrastRatio(rgb1: number[], rgb2: number[]): number {
     // Return the ratio of the larger luminance to the smaller luminance
     return (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05);
 }
+
+export async function executeCached(db, fun, cacheKey, expireTime){
+        let ytCache = await db.get("cache", cacheKey);
+        if (ytCache) {
+            if (ytCache.expiryDate < Date.now())
+                db.delete("cache", cacheKey).then();
+            else
+                return ytCache.result;
+        }
+        let result = await fun();
+        db.put("cache", {
+            result,
+            expiryDate: Date.now() + expireTime
+        }, cacheKey).then();
+
+        return result;
+}

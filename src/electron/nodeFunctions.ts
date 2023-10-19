@@ -189,6 +189,20 @@ export default class NodeFunctions {
         }
     }
 
+    async youTubeInfoById(id:string){
+        let args = [
+            `${id}`,
+            `--dump-json`,
+        ];
+        let stdout = await this.ytdlp.execPromise(args);
+        try {
+            // return stdout;
+            return stdout.split('\n').filter((l: string) => l.length > 0).map((l: string) => JSON.parse(l));
+        } catch (e: any) {
+            console.error("YTDL PARSE ERROR", e, stdout)
+        }
+    }
+
     async imgToJpg(imgUrl: string, outFile: string) {
         return new Promise<{ err: string, out: string }>((resolve, reject) => {
             let command = `${this.ffmpegPath} -i ${imgUrl} ${outFile}`
