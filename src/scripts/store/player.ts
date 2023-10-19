@@ -156,14 +156,15 @@ export const usePlayerStore = defineStore("player", () => {
 
     async function initTrackbars(outPath: string, _trackId: string) {
         canvas = document.querySelector(".progress-canvas");
-        const { dbTrackBars, canvasWidth, binWidth, barSpacing, barCount } = await dbTrackBarsPromise;
-        if (canvas !== null){
+        if (dbTrackBarsPromise === null) return;
+        const { trackBars, canvasWidth, binWidth, barSpacing, barCount } = await dbTrackBarsPromise;
+        if (canvas !== null) {
             canvas.width = canvasWidth;
             canvas.height = 100;
             context = canvas.getContext("2d");
         }
         // only calculate track bars if they weren't retrieved from db cache
-        if (dbTrackBars === undefined)
+        if (trackBars === undefined)
             calculateTrackBars(outPath, _trackId, barCount, binWidth, barSpacing).then();
     }
 
@@ -252,9 +253,9 @@ export const usePlayerStore = defineStore("player", () => {
         const barSpacing = 1;
         const barCount = canvasWidth / (binWidth + barSpacing);
         await baseDb;
-        let dbTrackBars = (await db.get("trackBars", _track.id)) as TrackBars;
-        if (dbTrackBars !== undefined && _track.id === trackId.value) {
-            canvasBars = dbTrackBars;
+        let trackBars = (await db.get("trackBars", _track.id)) as TrackBars;
+        if (trackBars !== undefined && _track.id === trackId.value) {
+            canvasBars = trackBars;
         } else if (_track.id === trackId.value) {
             canvasBars = {
                 binSize: 1,
@@ -265,7 +266,7 @@ export const usePlayerStore = defineStore("player", () => {
                 maxVolume: 1
             };
         }
-        return { dbTrackBars, canvasWidth, binWidth, barSpacing, barCount } as MetaTrackBars;
+        return { trackBars, canvasWidth, binWidth, barSpacing, barCount } as MetaTrackBars;
     }
 
     async function calculateTrackBars(outPath: string, _trackId: string, barCount: number, binWidth: number, barSpacing: number) {
