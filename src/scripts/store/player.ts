@@ -16,6 +16,14 @@ interface TrackBars {
     maxVolume: number
 }
 
+interface MetaTrackBars {
+    trackBars: TrackBars,
+    canvasWidth: number,
+    binWidth: number,
+    barSpacing: number,
+    barCount: number,
+}
+
 export const usePlayerStore = defineStore("player", () => {
     const base = useBaseStore();
     const theme = useTheme();
@@ -71,6 +79,7 @@ export const usePlayerStore = defineStore("player", () => {
     let context: CanvasRenderingContext2D | null = null;
     requestAnimationFrame(renderProgress);
     let tracksLoading = new Set();
+    let dbTrackBarsPromise: Promise<MetaTrackBars> | null = null;
 
     async function load(_collection: ItemCollection, _track: SpotifyApi.TrackObjectFull, autoplay = true) {
         console.time("load");
@@ -111,7 +120,7 @@ export const usePlayerStore = defineStore("player", () => {
         console.log("Playing item", _track, "from collection", _collection);
         console.timeLog("load", 5);
 
-        let dbTrackBarsPromise = showTrackBars(_track);
+        dbTrackBarsPromise = showTrackBars(_track);
         console.timeLog("load", 7);
 
         let onProgress: (p: { percent: number }) => void;
@@ -154,26 +163,26 @@ export const usePlayerStore = defineStore("player", () => {
                     track: toRaw(_track)
                 }, "nowPlaying").then(() => localStorage.hasTrackInMemory = "true");
         }, 100);
-        console.timeLog("load", 9);
-        console.log({ outPath });
         // Check if user hasn't changed track while it was loading
         if (_collection.id === collection.value.id && track.value && _trackId === trackId.value)
             playerElement.src = outPath;
         console.log(playerElement);
 
         platform.setPlatformPlaying(autoplay);
+        await initTrackbars(outPath, _trackId);
+    }
 
+    async function initTrackbars(outPath: string, _trackId: string) {
         canvas = document.querySelector(".progress-canvas");
-        if (canvas === null) return;
         const { dbTrackBars, canvasWidth, binWidth, barSpacing, barCount } = await dbTrackBarsPromise;
-        canvas.width = canvasWidth;
-        canvas.height = 100;
-        context = canvas.getContext("2d");
-        if (context === null) return;
+        if (canvas !== null){
+            canvas.width = canvasWidth;
+            canvas.height = 100;
+            context = canvas.getContext("2d");
+        }
         // only calculate track bars if they weren't retrieved from db cache
         if (dbTrackBars === undefined)
             calculateTrackBars(outPath, _trackId, barCount, binWidth, barSpacing).then();
-        console.timeEnd("load");
     }
 
     async function deleteTrack(track: SpotifyApi.TrackObjectFull) {
@@ -256,7 +265,7 @@ export const usePlayerStore = defineStore("player", () => {
         return element;
     }
 
-    async function showTrackBars(_track: SpotifyApi.TrackObjectFull) {
+    async function showTrackBars(_track: SpotifyApi.TrackObjectFull): Promise<MetaTrackBars> {
         // get track bars from db or create empty structure
         const canvasWidth = 300;
         const binWidth = 2;
@@ -277,7 +286,7 @@ export const usePlayerStore = defineStore("player", () => {
                 maxVolume: 1
             };
         }
-        return { dbTrackBars, canvasWidth, binWidth, barSpacing, barCount };
+        return { dbTrackBars, canvasWidth, binWidth, barSpacing, barCount } as MetaTrackBars;
     }
 
     async function calculateTrackBars(outPath: string, _trackId: string, barCount: number, binWidth: number, barSpacing: number) {
@@ -533,6 +542,7 @@ export const usePlayerStore = defineStore("player", () => {
         shuffleCollection,
         reloadCurrentTrack,
         deleteTrack,
-        normalizeVolume
+        normalizeVolume,
+        initTrackbars
     };
 });

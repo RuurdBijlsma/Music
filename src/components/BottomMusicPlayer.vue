@@ -15,7 +15,7 @@
             <div class="music-progress">
                 <div class="music-time-current">{{ base.msToReadable(player.currentTime * 1000) }}</div>
                 <div class="progress-container">
-                    <progress-bar />
+                    <compact-progress-bar class="progress-bar" />
                 </div>
                 <div class="music-time-total">{{ base.msToReadable(player.duration * 1000) }}</div>
             </div>
@@ -23,24 +23,25 @@
         <div class="third-section">
             <div class="music-controls">
                 <v-btn :variant="base.themeTooSimilarToFg && player.shuffle ? 'tonal' : 'text'"
-                       icon size="30"
+                       icon size="20"
                        @click="player.toggleShuffle"
                        :color="player.shuffle ? base.themeColor : 'default'">
-                    <v-icon size="18">mdi-shuffle</v-icon>
+                    <v-icon size="14">mdi-shuffle</v-icon>
                 </v-btn>
-                <v-btn variant="text" icon="mdi-skip-previous" size="30" @click="player.skip(-1)"></v-btn>
-                <v-btn variant="text" icon size="35" @click="player.togglePlay">
+                <v-btn variant="text" icon="mdi-skip-previous" size="25" @click="player.skip(-1)"></v-btn>
+                <v-btn variant="text" icon size="30" @click="player.togglePlay">
                     <v-progress-circular :indeterminate="isNaN(player.loadProgress)"
                                          :model-value="player.loadProgress"
-                                         size="30" v-if="player.loading"></v-progress-circular>
+                                         size="25" v-if="player.loading"></v-progress-circular>
                     <v-icon size="30" v-else-if="player.playing">mdi-pause</v-icon>
                     <v-icon size="30" v-else>mdi-play</v-icon>
                 </v-btn>
-                <v-btn variant="text" icon="mdi-skip-next" size="30" @click="player.skip(1)"></v-btn>
-                <v-btn :variant="base.themeTooSimilarToFg && player.repeat ? 'tonal' : 'text'" icon size="30"
+                <v-btn variant="text" icon="mdi-skip-next" size="25" @click="player.skip(1)"></v-btn>
+                <v-btn :variant="base.themeTooSimilarToFg && player.repeat ? 'tonal' : 'text'"
+                       icon size="20"
                        @click="player.toggleRepeat"
                        :color="player.repeat ? base.themeColor : 'default'">
-                    <v-icon size="18">mdi-repeat</v-icon>
+                    <v-icon size="14">mdi-repeat</v-icon>
                 </v-btn>
             </div>
             <div class="extra-bar-buttons">
@@ -73,6 +74,7 @@ import LikeButton from "./LikeButton.vue";
 import QueueButton from "./QueueButton.vue";
 import ItemMenu from "./ItemMenu.vue";
 import Spacer from "./Spacer.vue";
+import CompactProgressBar from "./CompactProgressBar.vue";
 
 const player = usePlayerStore();
 const base = useBaseStore();
@@ -116,6 +118,9 @@ function toggleMute() {
     align-items: center;
     width: 100%;
     height: 100%;
+    flex-grow: 1;
+    margin-right: -25px;
+    overflow: hidden;
 }
 
 .music-info-text {
@@ -125,18 +130,16 @@ function toggleMute() {
     align-items: center;
     font-size: 13px;
     font-weight: 300;
-    margin-bottom: -20px;
+    width: 100%;
 }
 
 .music-title {
-    overflow-y: hidden;
     font-weight: 400;
     text-align: center;
+    overflow: hidden;
+    white-space: nowrap;
     text-overflow: ellipsis;
-    display: -webkit-box;
-    -webkit-line-clamp: 2; /* number of lines to show */
-    line-clamp: 2;
-    -webkit-box-orient: vertical;
+    max-width: 100%;
 }
 
 .music-artist {
@@ -155,6 +158,11 @@ function toggleMute() {
 .music-progress {
     display: flex;
     font-size: 13px;
+    width: 100%;
+    padding-left: 10px;
+    padding-right: 10px;
+    justify-content: space-between;
+    margin-top: 20px;
 }
 
 .music-time-current, .music-time-total {
@@ -162,42 +170,42 @@ function toggleMute() {
     font-weight: 600;
     width: 35px;
     text-align: left;
-    padding-top: 38px;
 }
 
 .progress-container {
-    width: 300px;
-    height: 100px;
+    width:100%;
     margin-left: 10px;
     margin-right: 10px;
+}
+
+.progress-bar {
+    flex-grow: 1;
+    margin-top:1px;
 }
 
 .third-section {
     display: flex;
     flex-direction: column;
-    height:100%;
-    justify-content: space-evenly;
+    height: calc(100% - 10px);
+    justify-content: center;
+    gap:20px;
+    margin-top:10px;
 }
 
 .extra-bar-buttons {
     display: flex;
     flex-direction: row;
-    gap: 10px;
+    gap: 2px;
+    justify-content: right;
+    transform: scale(0.85);
+    margin-right: -10px;
 }
 
 .music-controls {
-    justify-content: space-evenly;
+    justify-content: right;
+    margin-right: 20px;
     display: flex;
     align-items: center;
-    gap:10px;
-}
-
-.volume-slider {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    height: 100%;
-    justify-content: space-between;
-    width: 150px;
+    gap: 6px;
 }
 </style>

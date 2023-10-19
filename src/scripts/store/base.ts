@@ -81,8 +81,12 @@ export const useBaseStore = defineStore("base", () => {
     });
     const sourceSelectedId = ref("");
 
-    const windowWidth = ref(0);
-    const onWindowResize = () => windowWidth.value = window.innerWidth;
+    const windowWidth = ref(window.innerWidth);
+    const windowHeight = ref(window.innerHeight);
+    const onWindowResize = () => {
+        windowWidth.value = window.innerWidth;
+        windowHeight.value = window.innerHeight;
+    };
     window.addEventListener("resize", onWindowResize, false);
 
     function approximateDuration(millis: number) {
@@ -241,10 +245,6 @@ export const useBaseStore = defineStore("base", () => {
         contextMenu.value.y = e.pageY;
     };
 
-    const handleWindowResize = () => pageHeight.value = window.innerHeight;
-    const pageHeight = ref(window.innerHeight);
-    window.addEventListener("resize", handleWindowResize);
-
     function addSnack(text: string, timeout = 4000) {
         let snack = {
             text,
@@ -278,13 +278,13 @@ export const useBaseStore = defineStore("base", () => {
         sourceSelectedId,
         contrastToForeground,
         themeTooSimilarToFg,
-        pageHeight,
         itemCollection,
         snackbars,
         dbLoaded,
         events,
         waitFor,
         addSnack,
+        windowHeight,
         windowWidth,
     };
 });

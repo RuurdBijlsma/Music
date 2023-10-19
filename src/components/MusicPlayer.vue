@@ -3,8 +3,8 @@
         <spacer></spacer>
         <glow-image class="album-art"
                     :src="base.itemImage(player.track)"
-                    :height="elWidth / 2"
-                    :width="elWidth / 2"
+                    :height="lowWindow ? elWidth / 2.5 : elWidth / 2"
+                    :width="lowWindow ? elWidth / 2.5 : elWidth / 2"
                     rounding="10px" />
         <div class="sheet">
             <div class="music-info-text">
@@ -73,7 +73,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref } from "vue";
+import { computed, onMounted, onUnmounted, ref } from "vue";
 import GlowImage from "./GlowImage.vue";
 import { usePlayerStore } from "../scripts/store/player";
 import { useBaseStore } from "../scripts/store/base";
@@ -91,6 +91,7 @@ const elWidth = ref(0);
 const musicContainer = ref(null);
 
 let volumeBeforeMute = 1;
+const lowWindow = computed(() => base.windowHeight < 820);
 
 function handleScroll(e: WheelEvent) {
     let newVolume = player.volume - e.deltaY / 3000;
@@ -166,6 +167,19 @@ onUnmounted(() => {
     -webkit-line-clamp: 2; /* number of lines to show */
     line-clamp: 2;
     -webkit-box-orient: vertical;
+}
+
+@media (max-height: 820px) {
+    .sheet {
+        margin-top: 10px !important;
+    }
+    .music-info-text, {
+        font-size: 15px;
+        margin-bottom: 0;
+    }
+    .music-artist {
+        font-size: 16px !important;
+    }
 }
 
 .music-artist {

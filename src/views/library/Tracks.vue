@@ -15,7 +15,7 @@
                            :model-value="trackLoadProgress"></v-progress-linear>
         <track-list-virtual v-if="collection !== null" :collection="collection"
                             :tracks="collection.tracks"
-                            :height="(base.pageHeight - 188).toString()"
+                            :height="(base.windowHeight - subtractFromHeight).toString()"
                             padding-top="0" />
     </div>
 </template>
@@ -32,6 +32,10 @@ import CollectionButtons from "../../components/CollectionButtons.vue";
 const library = useLibraryStore();
 const { tracks } = storeToRefs(library);
 const base = useBaseStore();
+
+const subtractFromHeight = computed(()=>{
+    return base.windowWidth <= 930 ? 358 : 188;
+})
 
 const collection = computed(() => {
     if (tracks.value === null || tracks.value === undefined) {
@@ -51,12 +55,12 @@ const collection = computed(() => {
 
 setTimeout(() => {
     console.log("Checking for need to reload tracks");
-    // if last track reload is 60 or more minutes ago then reload tracks
-    if (localStorage.getItem("lastTracksLoad") === null || Date.now() - 1000 * 60 * 60 > +localStorage.lastTracksLoad) {
+    // if last track reload is 24 or more hours ago then reload tracks
+    if (localStorage.getItem("lastTracksLoad") === null || Date.now() - 1000 * 60 * 60 * 24 > +localStorage.lastTracksLoad) {
         console.log("Reloading tracks!");
         library.loadLikedTracks();
     } else {
-        console.log("No need to reload tracks, they were refreshed less than 60 minutes ago");
+        console.log("No need to reload tracks, they were refreshed less than 24 hours ago");
     }
 }, 500);
 

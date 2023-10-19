@@ -3,7 +3,7 @@
         <track-list :collection="collection" v-if="collection && collection.tracks.length < 200">
             <playlist-header :collection="collection" />
         </track-list>
-        <track-list-virtual v-else :collection="collection" :height="base.pageHeight.toString()">
+        <track-list-virtual v-else :collection="collection" :height="base.windowHeight.toString()">
             <playlist-header :collection="collection" />
         </track-list-virtual>
     </div>

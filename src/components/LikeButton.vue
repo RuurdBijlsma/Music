@@ -26,8 +26,8 @@ const props = defineProps({
     },
     iconButton: {
         type: Boolean,
-        defalt: false
-    }
+        default: false
+    },
 });
 
 const isLiked = computed(() => library.checkLiked(props.item.type, props.item.id));

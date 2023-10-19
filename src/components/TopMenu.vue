@@ -21,7 +21,7 @@
             <template v-slot:activator="{ props }">
                 <v-btn no-drag size="30" variant="tonal" v-bind="props"
                        density="compact" rounded
-                       class="account-button">
+                       class="account-button ml-2 mr-2">
                     <v-img :image="library.userInfo.avatar"></v-img>
                     <v-icon size="20">mdi-account</v-icon>
                 </v-btn>
@@ -168,6 +168,13 @@ window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", e =
 
 .menu *[no-drag] {
     -webkit-app-region: no-drag;
+}
+
+
+@media (max-width: 930px) {
+    .logo, {
+        display: none !important;
+    }
 }
 
 .logo {

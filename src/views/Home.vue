@@ -75,6 +75,12 @@ const otherPlaylists = computed(() => library.view.homePage.featured.playlists.s
     padding-top: 60px;
 }
 
+@media (max-width: 930px) {
+    .home {
+        padding-left: 20px;
+    }
+}
+
 .home-title {
     width: 100%;
     text-align: center;

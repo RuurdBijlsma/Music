@@ -30,6 +30,8 @@ async function createWindow() {
         icon: join(process.env.PUBLIC ?? "./public", "icon/new-dark-192.png"),
         width: 1500,
         height: 1000,
+        minWidth:521,
+        minHeight:640,
         autoHideMenuBar: true,
         webPreferences: {
             nodeIntegration: true,
