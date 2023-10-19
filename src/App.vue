@@ -52,7 +52,6 @@
 
 <script setup lang="ts">
 // todo
-// support smaller window
 // paste youtube link in search balk
 // playlists, etc. in search functie
 // maak knop om ytdlp te updaten
