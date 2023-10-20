@@ -10,7 +10,8 @@ const routes = [
     { path: "/album/:name/:id", component: () => import("../views/item/Album.vue") },
     { path: "/user/:name?/:id?", component: () => import("../views/item/User.vue") },
     { path: "/artist/:name/:id", component: () => import("../views/item/Artist.vue") },
-    { path: "/library/:lib?", component: () => import("../views/Library.vue") }
+    { path: "/library/:lib?", component: () => import("../views/Library.vue") },
+    { path: "/search", component: () => import("../views/Search.vue") },
 ];
 
 export default createRouter({

@@ -31,6 +31,7 @@ import { useBaseStore } from "../scripts/store/base";
 import { useLibraryStore } from "../scripts/store/library";
 import TrackList from "./TrackList.vue";
 import type { ItemCollection } from "../scripts/types";
+import { useSearchStore } from "../scripts/store/search";
 
 const subList = ref<HTMLElement | null>(null);
 
@@ -53,10 +54,11 @@ const props = defineProps({
         required: true
     }
 });
-const base = useBaseStore();
-const library = useLibraryStore();
 
-const query = base.searchValue;
+const search = useSearchStore();
+const library = useLibraryStore();
+const query = search.searchValue;
+
 const collection = computed(() => ({
     tracks: props.tracks,
     type: "search",
@@ -65,7 +67,6 @@ const collection = computed(() => ({
     buttonText: "Search",
     to: `/search?query=${query}`
 } as ItemCollection));
-
 
 const expanded = ref(false);
 const subListHeight = 177;

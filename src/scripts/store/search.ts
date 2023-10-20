@@ -1,22 +1,106 @@
 import { defineStore } from "pinia";
-import { baseDb } from "./base";
+import { baseDb, useBaseStore } from "./base";
 import { useLibraryStore } from "./library";
 import type { IDBPDatabase } from "idb";
 import { usePlatformStore } from "./electron";
-import type { ExtendedPlaylistTrack, Item } from "../types";
+import type { ExtendedPlaylistTrack } from "../types";
 import { useSpotifyApiStore } from "./spotify-api";
 import { executeCached } from "../../electron/utils";
+import { useRouter } from "vue-router";
+import type { ItemCollection } from "../types";
+import { ref, watch } from "vue";
 
 export const useSearchStore = defineStore("search", () => {
     const platform = usePlatformStore();
     const library = useLibraryStore();
     const spotify = useSpotifyApiStore();
+    const router = useRouter();
+    const base = useBaseStore();
 
     let recentSearches: string[] = localStorage.getItem("recentSearch") === null ?
       [] : JSON.parse(localStorage.recentSearch);
 
     let db: IDBPDatabase;
     baseDb.then(r => db = r);
+
+
+    const ytResult = ref([] as SpotifyApi.TrackObjectFull[]);
+    const spotifyResult = ref([] as SpotifyApi.TrackObjectFull[]);
+    const likedResult = ref([] as SpotifyApi.TrackObjectFull[]);
+    const ytLoading = ref(false);
+    const spotifyLoading = ref(false);
+    const likedLoading = ref(false);
+    const queryLoading = ref("");
+    const searchValue = ref("");
+
+    watch(searchValue, async () => {
+        let url = searchValue.value;
+        if (url === null || url === "") return;
+        if (url.includes("open.spotify.com/")) {
+            let term = url.split("spotify.com/")[1].split("?")[0];
+            let [type, id] = term.split("/");
+            if (type === "track") {
+                let track = await spotify.getTrack(id);
+                await router.push(`/album/${base.encodeUrlName(track.album.name)}/${track.album.id}?play=${id}`);
+            } else {
+                await router.push(`/${type}/from-url/${id}`);
+            }
+            base.addSnack("Navigated to Spotify™ link");
+            searchValue.value = "";
+        }
+
+        let match = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+        if (match !== null && !!match[1] && match[1].length === 11) {
+            base.addSnack("Locating YouTube™ track... Please wait.");
+            //https://youtu.be/PeAMGlDBB7c
+            let id = match[1];
+            searchValue.value = "";
+            let track = await ytIdToTrack(id);
+            player.load({
+                tracks: [track],
+                type: "youtube",
+                id: track.id,
+                name: `From YouTube URL`,
+                buttonText: "",
+                to: `/`
+            } as ItemCollection, track);
+        }
+    });
+
+    async function performSearch() {
+        spotifyResult.value = [];
+        ytResult.value = [];
+        likedResult.value = [];
+        if (searchValue.value === null || searchValue.value === "")
+            return;
+
+        let query = searchValue.value;
+        ytLoading.value = true;
+        spotifyLoading.value = true;
+        likedLoading.value = true;
+        queryLoading.value = query;
+
+        addToRecentSearches(query);
+        searchSpotify(query).then(res => {
+            if (query === searchValue.value) {
+                spotifyLoading.value = false;
+                if (res.tracks)
+                    spotifyResult.value = res.tracks.items;
+            }
+        });
+        searchYouTube(query).then(res => {
+            if (query === searchValue.value) {
+                ytLoading.value = false;
+                ytResult.value = res;
+            }
+        });
+        searchLikedTracks(query).then(res => {
+            if (query === searchValue.value) {
+                likedLoading.value = false;
+                likedResult.value = res;
+            }
+        });
+    }
 
     function addToRecentSearches(query: string) {
         if (recentSearches.includes(query))
@@ -113,5 +197,20 @@ export const useSearchStore = defineStore("search", () => {
         }, "sp" + query, 1000 * 60 * 5);
     }
 
-    return { addToRecentSearches, searchLikedTracks, searchYouTube, searchSpotify, ytResultToTrack, ytIdToTrack };
+    return {
+        addToRecentSearches,
+        searchLikedTracks,
+        searchYouTube,
+        searchSpotify,
+        ytResultToTrack,
+        performSearch,
+        ytResult,
+        spotifyResult,
+        likedResult,
+        ytLoading,
+        spotifyLoading,
+        likedLoading,
+        queryLoading,
+        searchValue
+    };
 });

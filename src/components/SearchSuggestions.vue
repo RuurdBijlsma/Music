@@ -35,6 +35,17 @@ const base = useBaseStore();
 const library = useLibraryStore();
 const search = useSearchStore();
 const showSuggestions = ref(false);
+
+const {
+    likedResult,
+    ytResult,
+    spotifyResult,
+    likedLoading,
+    ytLoading,
+    spotifyLoading,
+    searchValue,
+} = storeToRefs(search);
+
 document.addEventListener("mousedown", onClick, false);
 onUnmounted(() => document.removeEventListener("mousedown", onClick));
 
@@ -44,8 +55,6 @@ function onClick(e: MouseEvent) {
     let target = e.target as HTMLElement;
     showSuggestions.value = searchSuggestions.contains(target) || searchBox.contains(target);
 }
-
-const { searchValue } = storeToRefs(base);
 
 let lastInputTime = performance.now();
 watch(searchValue, () => {
@@ -69,51 +78,12 @@ interval = window.setInterval(() => {
     // als je 750 ms niks typt, start de auto search
     if (now - lastInputTime > 750 && searchValue.value !== lastSearchedQuery) {
         lastInputTime = now;
-        performSearch();
+        search.performSearch();
         lastSearchedQuery = searchValue.value;
     }
 }, 375);
 onBeforeUnmount(() => clearInterval(interval));
 
-let ytResult = ref([] as SpotifyApi.TrackObjectFull[]);
-let spotifyResult = ref([] as SpotifyApi.TrackObjectFull[]);
-let likedResult = ref([] as SpotifyApi.TrackObjectFull[]);
-let ytLoading = ref(false);
-let spotifyLoading = ref(false);
-let likedLoading = ref(false);
-
-async function performSearch() {
-    spotifyResult.value = [];
-    ytResult.value = [];
-    likedResult.value = [];
-    if (searchValue.value === null || searchValue.value === "") {
-        return;
-    }
-    ytLoading.value = true;
-    spotifyLoading.value = true;
-    likedLoading.value = true;
-    let query = searchValue.value;
-    search.addToRecentSearches(query);
-    search.searchSpotify(query).then(res => {
-        if (query === searchValue.value) {
-            spotifyLoading.value = false;
-            if (res.tracks)
-                spotifyResult.value = res.tracks.items;
-        }
-    });
-    search.searchYouTube(query).then(res => {
-        if (query === searchValue.value) {
-            ytLoading.value = false;
-            ytResult.value = res;
-        }
-    });
-    search.searchLikedTracks(query).then(res => {
-        if (query === searchValue.value) {
-            likedLoading.value = false;
-            likedResult.value = res;
-        }
-    });
-}
 
 function updateSearchPos() {
     if (el === null) return;

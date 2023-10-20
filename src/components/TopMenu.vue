@@ -5,17 +5,7 @@
             <div>Ruurd Music</div>
         </div>
         <spacer />
-        <v-text-field
-            no-drag
-            spellcheck="false"
-            class="search-field"
-            hide-details density="compact"
-            v-model="base.searchValue"
-            append-inner-icon="mdi-magnify"
-            placeholder="Search tracks, artists, playlists, and more"
-            :clearable="true"
-            variant="solo">
-        </v-text-field>
+        <search-bar></search-bar>
         <spacer />
         <v-menu location="bottom" :close-on-content-click="false" v-model="dropdownOpen" close-on-back>
             <template v-slot:activator="{ props }">
@@ -100,6 +90,7 @@ import { useBaseStore } from "../scripts/store/base";
 import { usePlatformStore } from "../scripts/store/electron";
 import { useSpotifyAuthStore } from "../scripts/store/spotify-auth";
 import Spacer from "./Spacer.vue";
+import SearchBar from "./SearchBar.vue";
 
 const route = useRoute();
 const theme = useTheme();
@@ -189,23 +180,6 @@ window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", e =
 
 .list-link {
     display: flex;
-}
-
-.search-field {
-    -webkit-app-region: no-drag;
-    width: 300px;
-    flex-grow: 2;
-    position: relative;
-}
-
-.search-field:deep(.v-field--variant-solo) {
-    background-color: rgba(255, 255, 255, 0.9);
-    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.2);
-}
-
-.dark .search-field:deep(.v-field--variant-solo) {
-    background-color: rgba(0, 0, 0, 0.3);
-    box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.15);
 }
 
 .chip-group {

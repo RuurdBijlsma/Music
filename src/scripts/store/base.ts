@@ -1,12 +1,10 @@
 import { defineStore } from "pinia";
-import { openDB } from "idb";
 import type { IDBPDatabase } from "idb";
-import { computed, ref, watch } from "vue";
+import { openDB } from "idb";
+import { computed, ref } from "vue";
 import { useTheme } from "vuetify";
-import type { Item } from "../types";
+import type { Item, ItemCollection } from "../types";
 import { deltaE, hexToRgb } from "../utils";
-import type { ItemCollection } from "../types";
-import { useRouter } from "vue-router";
 import { useSpotifyApiStore } from "./spotify-api";
 import { EventEmitter } from "events";
 import { useSearchStore } from "./search";
@@ -31,10 +29,7 @@ export const baseDb = openDB("base", 1, {
 
 export const useBaseStore = defineStore("base", () => {
     const theme = useTheme();
-    const spotify = useSpotifyApiStore();
     const dbLoaded = ref(false);
-    const player = usePlayerStore();
-    const search = useSearchStore();
     const events = new EventEmitter();
     let db: IDBPDatabase;
     baseDb.then(r => {
@@ -48,8 +43,7 @@ export const useBaseStore = defineStore("base", () => {
         let themeRgb = hexToRgb(themeColor.value);
         let fgRgb = hexToRgb(theme.current.value.colors["on-background"]);
 
-        let colorDifference = deltaE(themeRgb, fgRgb);
-        return colorDifference;
+        return deltaE(themeRgb, fgRgb);
     });
     const themeTooSimilarToFg = computed(() => contrastToForeground.value < 17);
 
@@ -211,41 +205,6 @@ export const useBaseStore = defineStore("base", () => {
         return `img/notfound/${i}.png`;
     };
 
-    const searchValue = ref("");
-    const router = useRouter();
-    watch(searchValue, async () => {
-        let url = searchValue.value;
-        if (url && url.includes("open.spotify.com/")) {
-            let term = url.split("spotify.com/")[1].split("?")[0];
-            let [type, id] = term.split("/");
-            if (type === "track") {
-                let track = await spotify.getTrack(id);
-                await router.push(`/album/${encodeUrlName(track.album.name)}/${track.album.id}?play=${id}`);
-            } else {
-                await router.push(`/${type}/from-url/${id}`);
-            }
-            addSnack("Navigated to Spotify™ link");
-            searchValue.value = "";
-        }
-        let match = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
-
-        if (match !== null && !!match[1] && match[1].length === 11) {
-            addSnack("Locating YouTube™ track... Please wait.");
-            //https://youtu.be/PeAMGlDBB7c
-            let id = match[1];
-            searchValue.value = "";
-            let track = await search.ytIdToTrack(id);
-            player.load({
-                tracks: [track],
-                type: "youtube",
-                id: track.id,
-                name: `From YouTube URL`,
-                buttonText: "",
-                to: `/`
-            } as ItemCollection, track);
-        }
-    });
-
     const setContextMenuItem = (e: MouseEvent, item: any) => {
         contextMenu.value.item = item;
         contextMenu.value.show = true;
@@ -276,7 +235,6 @@ export const useBaseStore = defineStore("base", () => {
         approximateDuration,
         albumString,
         notFoundImage,
-        searchValue,
         themeColor,
         themeColorDark,
         themeColorLight,
@@ -293,6 +251,7 @@ export const useBaseStore = defineStore("base", () => {
         waitFor,
         addSnack,
         windowHeight,
-        windowWidth
+        windowWidth,
+        encodeUrlName,
     };
 });
