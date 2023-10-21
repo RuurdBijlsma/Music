@@ -6,7 +6,7 @@ import { usePlatformStore } from "./electron";
 import { useSpotifyApiStore } from "./spotify-api";
 import { useRouter } from "vue-router";
 import type { ItemCollection, ExtendedPlaylistTrack, YouTubeTrackInfo, SearchResult } from "../scripts/types";
-import { Ref, ref, watch } from "vue";
+import { Ref, ref, toRaw, watch } from "vue";
 import { usePlayerStore } from "./player";
 import { executeCached } from "../scripts/utils";
 
@@ -64,6 +64,28 @@ export const useSearchStore = defineStore("search", () => {
         }
     });
 
+    function clearSuggestions() {
+        suggestionResults.value = {
+            youtube: {
+                tracks: [],
+                loading: true
+            },
+            spotify: {
+                data: {
+                    tracks: [],
+                    albums: [],
+                    artists: [],
+                    playlists: []
+                },
+                loading: true
+            },
+            liked: {
+                tracks: [],
+                loading: true
+            }
+        } as SearchResult;
+    }
+
     function cachedSearch(query: string): Ref<SearchResult> {
         if (!searchResults.has(query)) {
             return performSearch(query);
@@ -92,8 +114,9 @@ export const useSearchStore = defineStore("search", () => {
             }
         } as SearchResult);
         searchResults.set(query, result);
-        if (query !== "")
-            addToRecentSearches(query);
+        if (query === null) return result;
+        query = query.trim();
+        addToRecentSearches(query);
 
         console.log("Performing search for ", query);
         searchSpotify(query).then(res => {
@@ -106,22 +129,22 @@ export const useSearchStore = defineStore("search", () => {
                 result.value.spotify.data.albums = res.albums.items;
             if (res.artists)
                 result.value.spotify.data.artists = res.artists.items;
-            console.log("spotify", result.value.spotify.data);
+            console.log(toRaw(result.value.spotify));
         });
         searchYouTube(query).then(res => {
             result.value.youtube.loading = false;
             result.value.youtube.tracks = res;
-            console.log("youtube", res);
         });
         searchLikedTracks(query).then(res => {
             result.value.liked.loading = false;
             result.value.liked.tracks = res;
-            console.log("liked", res);
         });
         return result;
     }
 
     function addToRecentSearches(query: string) {
+        if (query === null || query === undefined || query.trim() === "")
+            return;
         if (recentSearches.value.includes(query))
             recentSearches.value.splice(recentSearches.value.indexOf(query), 1);
         recentSearches.value.unshift(query);
@@ -225,6 +248,7 @@ export const useSearchStore = defineStore("search", () => {
         showSuggestions,
         recentSearches,
         cachedSearch,
-        suggestionResults
+        suggestionResults,
+        clearSuggestions
     };
 });

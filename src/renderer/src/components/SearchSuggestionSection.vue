@@ -40,7 +40,7 @@ const collection = computed(() => ({
     id: "search" + props.id,
     name: `${props.type} search results for "${query}"`,
     buttonText: "Search",
-    to: `/search?q=${query}`
+    to: `/search/${query}`
 } as ItemCollection));
 
 

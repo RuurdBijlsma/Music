@@ -134,6 +134,8 @@ export const useBaseStore = defineStore("base", () => {
     }
 
     const encodeUrlName = (name: string) => {
+        if (name.trim() === "")
+            return "_";
         let toEncode = name.toLowerCase().replace(/ /gi, "-").slice(0, 36);
         let encoded: string;
         try {
@@ -251,6 +253,6 @@ export const useBaseStore = defineStore("base", () => {
         windowHeight,
         windowWidth,
         encodeUrlName,
-        userImage,
+        userImage
     };
 });

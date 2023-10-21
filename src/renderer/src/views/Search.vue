@@ -112,7 +112,7 @@ const spotifyCollection = computed(() => ({
     id: "searchSpotify" + query.value,
     name: `Spotify search results for "${query.value}"`,
     buttonText: "Search",
-    to: `/search?q=${query.value}`
+    to: `/search/${query.value}`
 } as ItemCollection));
 const youtubeCollection = computed(() => ({
     tracks: r.value === null ? [] : r.value.youtube.tracks,
@@ -120,7 +120,7 @@ const youtubeCollection = computed(() => ({
     id: "searchYouTube" + query.value,
     name: `YouTube search results for "${query.value}"`,
     buttonText: "Search",
-    to: `/search?q=${query.value}`
+    to: `/search/${query.value}`
 } as ItemCollection));
 const likedCollection = computed(() => ({
     tracks: r.value === null ? [] : r.value.liked.tracks,
@@ -128,18 +128,20 @@ const likedCollection = computed(() => ({
     id: "searchLiked" + query.value,
     name: `Filtered liked tracks for "${query.value}"`,
     buttonText: "Search",
-    to: `/search?q=${query.value}`
+    to: `/search/${query.value}`
 } as ItemCollection));
 
 function init() {
     if (query.value === undefined || query.value === null) {
         return;
     }
-    console.log("Search query", query.value);
     r.value = search.cachedSearch(query.value).value;
+    let el = document.querySelector(".router-view");
+    if (el !== null)
+        el.scrollTop = 0;
 }
 
-const query = computed(() => route.query.q?.toString());
+const query = computed(() => route.params.query?.toString());
 
 watch(route, () => init());
 init();
@@ -147,8 +149,7 @@ init();
 
 <style scoped lang="less">
 .search {
-    padding: 10px;
-    padding-bottom: 50px;
+    padding: 10px 0 50px 10px;
 }
 
 .add-margin {

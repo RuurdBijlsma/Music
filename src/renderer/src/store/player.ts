@@ -115,7 +115,6 @@ export const usePlayerStore = defineStore("player", () => {
         onProgress = (percent) => {
             // Check if user hasn't changed track while it was progressing
             if (_collection.id === collection.value?.id && track.value && _trackId === trackId.value) {
-                console.log(percent);
                 loadProgress.value = percent;
                 if (percent === 100) {
                     base.events.off(_trackId + "progress", onProgress);

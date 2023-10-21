@@ -20,7 +20,6 @@ export default class SpotifyAuth {
 
     resetSpotifyLogin() {
         if (this.server !== null) {
-            console.log("DESTROYING SERVER");
             this.server.close();
             this.server = null;
         }

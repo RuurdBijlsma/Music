@@ -11,7 +11,7 @@
 
 <script setup lang="ts">
 import { useLibraryStore } from "../../store/library";
-import { computed, ref, watch } from "vue";
+import { computed, ref, toRaw, watch } from "vue";
 import { useRoute } from "vue-router";
 import { useBaseStore } from "../../store/base";
 import TrackListVirtual from "../../components/TrackListVirtual.vue";
@@ -29,12 +29,16 @@ const { viewedPlaylistRefreshRequired } = storeToRefs(library);
 
 const collection = computed(() => {
     if (playlist.value === null) return null;
-    let tracks = playlist.value.tracks.items.map(t => t.track as SpotifyApi.TrackObjectFull);
+    let tracks = playlist.value.tracks.items
+        .filter(t => t.track !== null)
+        .map(t => t.track as SpotifyApi.TrackObjectFull);
+    console.log(tracks.map(t => toRaw(t)));
     return base.itemCollection(playlist.value, tracks);
 });
 
 async function refresh() {
     playlist.value = await spotify.getPlaylist(loadedId);
+    console.log("playlist", toRaw(playlist.value));
     library.viewedPlaylist = playlist.value;
     viewedPlaylistRefreshRequired.value = false;
 }

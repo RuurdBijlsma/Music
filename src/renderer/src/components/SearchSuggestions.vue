@@ -1,15 +1,17 @@
 <template>
     <div class="search-suggestions"
-         v-show="showSuggestions && searchValue !== null && r !== null && (r.liked.tracks.length > 0 || r.spotify.data.tracks.length> 0 || r.youtube.tracks.length > 0)"
+         v-show="showSuggestions"
          :style="{
             left: searchX + 'px',
             top: searchY + 'px',
             width: width + 'px'}">
-        <div class="recent-searches" v-if="searchValue === ''">
-            <v-list-subheader>Recent searches</v-list-subheader>
-            <v-list-item rounded :to="`/search?q=${recent}`" v-for="recent in search.recentSearches">
-                <v-list-item-title>{{ recent }}</v-list-item-title>
-            </v-list-item>
+        <div class="recent-searches" v-if="!hasValidSearch">
+            <template v-if="search.recentSearches.length !== 0">
+                <v-list-subheader>Recent searches</v-list-subheader>
+                <v-list-item :exact="true" rounded :to="`/search/${recent}`" v-for="recent in search.recentSearches">
+                    <v-list-item-title>{{ recent }}</v-list-item-title>
+                </v-list-item>
+            </template>
         </div>
         <template v-else-if="r !== null">
             <search-suggestion-section type="Library" :id="'library' + searchValue" :tracks="r.liked.tracks"
@@ -35,6 +37,7 @@ import { computed, onBeforeUnmount, onMounted, onUnmounted, ref, watch } from "v
 import { storeToRefs } from "pinia";
 import { useSearchStore } from "../store/search";
 import SearchSuggestionSection from "./SearchSuggestionSection.vue";
+import { useRoute } from "vue-router";
 
 const search = useSearchStore();
 
@@ -45,6 +48,12 @@ const {
 } = storeToRefs(search);
 
 const r = computed(() => suggestionResults.value);
+
+const hasValidSearch = computed(() => {
+    if (r.value === null) return false;
+    if (searchValue.value === null) return false;
+    return searchValue.value.trim().length >= 3;
+});
 
 document.addEventListener("mousedown", onClick, false);
 onUnmounted(() => document.removeEventListener("mousedown", onClick));
@@ -58,8 +67,12 @@ function onClick(e: MouseEvent) {
 
 let lastInputTime = performance.now();
 watch(searchValue, () => {
+    search.clearSuggestions();
     lastInputTime = performance.now();
 });
+
+const route = useRoute();
+watch(route, () => showSuggestions.value = false);
 
 let el = null as null | Element;
 let searchX = ref(200);

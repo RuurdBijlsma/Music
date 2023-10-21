@@ -21,12 +21,10 @@ const router = useRouter();
 const search = useSearchStore();
 
 function goToSearch() {
-    router.push(`/search?q=${search.searchValue}`);
+    router.push(`/search/${search.searchValue}`);
     let input = document.querySelector(".search-field input") as HTMLInputElement | null;
     if (input === null) return;
     input.blur();
-    search.showSuggestions = false;
-
 }
 </script>
 

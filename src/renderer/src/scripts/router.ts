@@ -11,7 +11,7 @@ const routes = [
     { path: "/user/:name?/:id?", component: () => import("../views/item/User.vue") },
     { path: "/artist/:name/:id", component: () => import("../views/item/Artist.vue") },
     { path: "/library/:lib?", component: () => import("../views/Library.vue") },
-    { path: "/search", component: () => import("../views/Search.vue") }
+    { path: "/search/:query", component: () => import("../views/Search.vue") }
 ];
 
 export default createRouter({

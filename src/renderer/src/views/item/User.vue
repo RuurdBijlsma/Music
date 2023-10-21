@@ -55,7 +55,7 @@ const userImage = computed(() => {
     if (user.value !== null && user.value.images !== undefined && user.value.images.length > 0) {
         return user.value.images[0].url;
     }
-    return `img/user/${Math.ceil(Math.random() * 7)}.png`;
+    return `/src/assets/user/${Math.ceil(Math.random() * 7)}.png`;
 });
 
 function reloadUser() {

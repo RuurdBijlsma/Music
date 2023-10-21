@@ -126,7 +126,6 @@ export const usePlatformStore = defineStore("platform", () => {
         if (!trackFileExists) {
             let fun: (p: number) => void;
             fun = (percent: number) => {
-                console.log(percent);
                 base.events.emit(track.id + "progress", percent);
                 if (percent === 100) {
                     window.events.off(filename + "progress", fun);

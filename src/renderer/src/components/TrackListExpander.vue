@@ -65,7 +65,6 @@ let sublistMaxHeight = ref(collapsedHeight.value);
 
 function expand() {
     if (subList.value === null) return;
-    console.log("expand", subList.value.scrollHeight);
     sublistMaxHeight.value = Math.max(subList.value.scrollHeight, collapsedHeight.value);
     expanded.value = true;
 }
