@@ -9,8 +9,8 @@ function createWindow(): void {
     const mainWindow = new BrowserWindow({
         title: "Ruurd Music",
         icon,
-        width: 1750,
-        height: 900,
+        width: 1400,
+        height: 930,
         minWidth: 521,
         minHeight: 640,
         autoHideMenuBar: true,
