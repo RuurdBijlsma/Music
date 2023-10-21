@@ -1,33 +1,36 @@
 {
     "name": "ruurd-music",
-    "version": "6.0.0",
-    "description": "Streaming music player",
+    "version": "6.1.0",
+    "description": "A streaming music player",
+    "main": "./out/main/index.js",
     "keywords": [
         "Music",
         "Streaming",
         "Spotify"
     ],
-    "private": true,
     "author": {
         "email": "ruurd@bijlsma.dev",
         "name": "Ruurd Bijlsma",
         "url": "ruurd.dev"
     },
-    "repository": "https://github.com/ruurdbijlsma/ruurd-music",
-    "main": "dist-electron/main/index.js",
+    "repository": "https://github.com/ruurdbijlsma/Music",
+    "homepage": "https://github.com/ruurdbijlsma/Music",
     "scripts": {
-        "dev": "vite",
-        "build": "vue-tsc --noEmit && vite build && electron-builder",
-        "preview": "vite preview",
-        "format": "prettier --write src/"
-    },
-    "debug": {
-        "env": {
-            "VITE_DEV_SERVER_URL": "http://127.0.0.1:3344/"
-        }
+        "typecheck:node": "tsc --noEmit -p tsconfig.node.json --composite false",
+        "typecheck:web": "vue-tsc --noEmit -p tsconfig.web.json --composite false",
+        "typecheck": "npm run typecheck:node && npm run typecheck:web",
+        "start": "electron-vite preview",
+        "dev": "electron-vite dev",
+        "build": "npm run typecheck && electron-vite build",
+        "postinstall": "electron-builder install-app-deps",
+        "build:win": "npm run build && electron-builder --win --config",
+        "build:mac": "npm run build && electron-builder --mac --config",
+        "build:linux": "npm run build && electron-builder --linux --config",
+        "publish:win": "npm run build && electron-builder --win --config --publish always"
     },
     "dependencies": {
-        "anzip": "^0.2.0",
+        "@electron-toolkit/preload": "^2.0.0",
+        "@electron-toolkit/utils": "^2.0.1",
         "color-extr-thief": "^2.3.4",
         "events": "^3.3.0",
         "express": "^4.18.2",
@@ -37,31 +40,23 @@
         "pinia": "^2.1.7",
         "replace-special-characters": "^1.2.7",
         "spotify-web-api-js": "^1.5.2",
-        "vue": "^3.3.4",
+        "vite-plugin-vuetify": "^1.0.2",
         "vue-router": "^4.2.5",
-        "vuetify": "^3.3.21",
+        "vuetify": "^3.3.22",
         "yt-dlp-wrap": "^2.3.12"
     },
     "devDependencies": {
-        "@mdi/font": "^7.1.96",
-        "@types/contrast-color": "^1.0.0",
-        "@types/events": "^3.0.0",
-        "@types/express": "^4.17.17",
-        "@types/ffbinaries": "^1.1.2",
-        "@types/node": "^18.14.2",
+        "@electron-toolkit/tsconfig": "^1.0.1",
+        "@mdi/font": "^7.3.67",
+        "@types/node": "^18.17.1",
         "@vitejs/plugin-vue": "^4.4.0",
-        "@vitejs/plugin-vue-jsx": "^3.0.2",
-        "@vue/tsconfig": "^0.4.0",
-        "electron": "^27.0.0",
+        "electron": "^27.0.1",
         "electron-builder": "^24.6.4",
-        "prettier": "^3.0.3",
-        "sass": "^1.69.3",
+        "electron-vite": "^1.0.28",
+        "less": "^4.2.0",
         "typescript": "^5.2.2",
-        "vite": "^4.4.11",
-        "vite-plugin-vuetify": "^1.0.2",
-        "vite-plugin-electron": "^0.14.1",
-        "vite-plugin-electron-renderer": "^0.14.5",
-        "vite-plugin-top-level-await": "^1.3.1",
+        "vite": "^4.5.0",
+        "vue": "^3.3.6",
         "vue-tsc": "^1.8.19"
     }
 }

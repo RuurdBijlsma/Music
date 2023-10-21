@@ -1,34 +1,11 @@
 {
-    "extends": "@vue/tsconfig/tsconfig.dom.json",
-    "include": [
-        "env.d.ts",
-        "src",
-        "package.json"
-    ],
-    "exclude": [
-        "src/electron"
-    ],
-    "compilerOptions": {
-        "target": "ESNext",
-        "useDefineForClassFields": true,
-        "module": "ESNext",
-        "moduleResolution": "Node",
-        "strict": true,
-        "jsx": "preserve",
-        "resolveJsonModule": true,
-        "isolatedModules": true,
-        "esModuleInterop": true,
-        "skipLibCheck": true,
-        "noEmit": true,
-        "lib": [
-            "DOM",
-            "ScriptHost",
-            "ESNext"
-        ]
-    },
+    "files": [],
     "references": [
         {
             "path": "./tsconfig.node.json"
+        },
+        {
+            "path": "./tsconfig.web.json"
         }
     ]
 }
