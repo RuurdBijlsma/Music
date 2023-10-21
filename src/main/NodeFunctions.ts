@@ -358,8 +358,6 @@ export default class NodeFunctions {
 
     setTheme(theme: "dark" | "light") {
         this.win.setIcon(theme === "dark" ? darkIcon : lightIcon);
-        if (this.thumbButtons.show)
-            this.setPlatformPlaying(this.thumbButtons.playing, theme === "dark");
     }
 
     toggleMaximize() {

@@ -81,7 +81,7 @@ import BottomMusicPlayer from "./components/BottomMusicPlayer.vue";
 const theme = useTheme();
 const base = useBaseStore();
 const player = usePlayerStore();
-const initialBg = localStorage.hasTrackInMemory === "true" ? "" : "img/cover2.jpg";
+const initialBg = localStorage.hasTrackInMemory === "true" ? "" : "/src/assets/cover.jpg";
 const blurBgSrc = computed(() => {
     if (player.track === null) return initialBg;
     return base.itemImage(player.track);

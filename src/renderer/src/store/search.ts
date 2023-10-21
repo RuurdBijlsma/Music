@@ -124,9 +124,9 @@ export const useSearchStore = defineStore("search", () => {
             if (res.tracks)
                 result.value.spotify.data.tracks = res.tracks.items;
             if (res.playlists)
-                result.value.spotify.data.playlists = res.playlists.items;
+                result.value.spotify.data.playlists = res.playlists.items as SpotifyApi.PlaylistObjectFull[];
             if (res.albums)
-                result.value.spotify.data.albums = res.albums.items;
+                result.value.spotify.data.albums = res.albums.items as SpotifyApi.AlbumObjectFull[];
             if (res.artists)
                 result.value.spotify.data.artists = res.artists.items;
             console.log(toRaw(result.value.spotify));

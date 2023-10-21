@@ -39,6 +39,7 @@ export const usePlatformStore = defineStore("platform", () => {
 
     window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => {
         window.api.setTheme(window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+        setPlatformPlaying(player.playing);
     });
 
     function setPlatformPlaying(playing: boolean) {

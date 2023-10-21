@@ -21,8 +21,8 @@ export interface SearchResult {
     spotify: {
         data: {
             tracks: SpotifyApi.TrackObjectFull[],
-            playlists: SpotifyApi.PlaylistObjectSimplified[],
-            albums: SpotifyApi.AlbumObjectSimplified[],
+            playlists: SpotifyApi.PlaylistObjectFull[],
+            albums: SpotifyApi.AlbumObjectFull[],
             artists: SpotifyApi.ArtistObjectFull[],
         },
         loading: boolean,
