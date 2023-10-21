@@ -49,6 +49,7 @@ onMounted(() => {
     el = scrollContainer.value as HTMLElement | null;
     if (el === null) return;
     el.addEventListener("scroll", checkCanScroll);
+    setTimeout(() => checkCanScroll(), 100);
 });
 onUnmounted(() => {
     if (el === null) return;

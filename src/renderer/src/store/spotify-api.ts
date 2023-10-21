@@ -2,9 +2,11 @@ import { defineStore } from "pinia";
 import { baseDb } from "./base";
 import SpotifyWebApi from "spotify-web-api-js";
 import { useLibraryStore } from "./library";
+import { useSpotifyAuthStore } from "./spotify-auth";
 
 export const useSpotifyApiStore = defineStore("spotify-api", () => {
     const library = useLibraryStore();
+    const spotifyAuth = useSpotifyAuthStore();
 
     // Spotify API Stuff
     const api = new SpotifyWebApi();
@@ -64,7 +66,7 @@ export const useSpotifyApiStore = defineStore("spotify-api", () => {
     }
 
     const getPlaylist = async (id: string) => {
-        await baseDb;
+        await spotifyAuth.awaitAuth();
         return api.getPlaylist(id);
     };
     const getAlbum = async (id: string) => {
@@ -107,7 +109,7 @@ export const useSpotifyApiStore = defineStore("spotify-api", () => {
         await baseDb;
         return api.getMySavedTracks(options);
     };
-    const search = async (query: string, types: ("playlist" | "album" | "artist" | "track")[], options: SpotifyApi.SearchForItemParameterObject | undefined = undefined):Promise<SpotifyApi.SearchResponse> => {
+    const search = async (query: string, types: ("playlist" | "album" | "artist" | "track")[], options: SpotifyApi.SearchForItemParameterObject | undefined = undefined): Promise<SpotifyApi.SearchResponse> => {
         await baseDb;
         return api.search(query, types, options);
     };
