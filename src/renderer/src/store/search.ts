@@ -6,7 +6,7 @@ import { usePlatformStore } from "./electron";
 import { useSpotifyApiStore } from "./spotify-api";
 import { useRouter } from "vue-router";
 import type { ItemCollection, ExtendedPlaylistTrack, YouTubeTrackInfo, SearchResult } from "../scripts/types";
-import { Ref, ref, toRaw, watch } from "vue";
+import { Ref, ref, watch } from "vue";
 import { usePlayerStore } from "./player";
 import { executeCached } from "../scripts/utils";
 
@@ -129,11 +129,12 @@ export const useSearchStore = defineStore("search", () => {
                 result.value.spotify.data.albums = res.albums.items as SpotifyApi.AlbumObjectFull[];
             if (res.artists)
                 result.value.spotify.data.artists = res.artists.items;
-            console.log(toRaw(result.value.spotify));
+            // console.log(toRaw(result.value.spotify));
         });
         searchYouTube(query).then(res => {
             result.value.youtube.loading = false;
             result.value.youtube.tracks = res;
+            console.log(res);
         });
         searchLikedTracks(query).then(res => {
             result.value.liked.loading = false;

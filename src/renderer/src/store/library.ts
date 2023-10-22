@@ -29,7 +29,7 @@ export const useLibraryStore = defineStore("library", () => {
         mail: "",
         country: "",
         followers: 0,
-        avatar: base.userImage(),
+        avatar: base.userImage()
     });
 
     const saved = ref({
@@ -38,14 +38,13 @@ export const useLibraryStore = defineStore("library", () => {
         album: [] as SpotifyApi.AlbumObjectFull[]
     });
     const tracks = ref([] as ExtendedPlaylistTrack[]);
-    // const ytTracks = ref([] as ExtendedPlaylistTrack[]);
     const likedTracksTotal = ref(1);
     const likedTracksLoaded = ref(0);
     const viewedPlaylist = ref(null as SpotifyApi.PlaylistObjectFull | null);
     const viewedPlaylistRefreshRequired = ref(false);
 
     const userPlaylists = computed(() =>
-      saved.value.playlist.filter(p => p.owner.id === userInfo.value.id || p.collaborative)
+        saved.value.playlist.filter(p => p.owner.id === userInfo.value.id || p.collaborative)
     );
     const isRefreshing = ref({
         playlist: false,
@@ -206,16 +205,25 @@ export const useLibraryStore = defineStore("library", () => {
     function enhancePlaylistObject(item: SpotifyApi.PlaylistTrackObject) {
         let track = item.track as SpotifyApi.TrackObjectFull;
         let artistString = track.artists
-          .map((a: SpotifyApi.ArtistObjectSimplified) => a.name)
-          .join(", ")
-          .toLowerCase();
+            .map((a: SpotifyApi.ArtistObjectSimplified) => a.name)
+            .join(", ")
+            .toLowerCase();
 
         let searchString = track.name.toLowerCase() + " " + artistString;
         let id = track.id;
         let title = track.name;
         let added_at_reverse = 10000000000000 - +(new Date(item.added_at));
 
-        return { ...item, artistString, searchString, id, title, added_at_reverse } as ExtendedPlaylistTrack;
+        return {
+            ...item,
+            artistString,
+            searchString,
+            id,
+            title,
+            added_at_reverse,
+            originalName: track.name
+
+        } as ExtendedPlaylistTrack;
     }
 
     async function loadLikedTracks() {
@@ -234,11 +242,30 @@ export const useLibraryStore = defineStore("library", () => {
         likedTracksLoaded.value = 0;
         likedTracksTotal.value = 1;
 
+        let ytTracks = (await db.getAllFromIndex("yt-tracks", "newToOld")) as ExtendedPlaylistTrack[];
+        let newestYtTrack = ytTracks.shift();
+
+        let once = true;
         for await(let batch of await spotify.retrieveArray(() => spotify.api.getMySavedTracks({ limit: 50 }))) {
-            likedTracksTotal.value = batch.total;
-            for (let item of batch.items) {
+            if (once) {
+                likedTracksTotal.value = batch.total;
+                once = false;
+            }
+            for (let spotifyItem of batch.items) {
                 likedTracksLoaded.value++;
-                if (!item.track.is_local) {
+                if (!spotifyItem.track.is_local) {
+                    let item = enhancePlaylistObject(spotifyItem);
+
+                    while (newestYtTrack !== undefined && newestYtTrack.added_at_reverse < item.added_at_reverse) {
+                        // yt track is newer than this spotify track
+                        items.push(newestYtTrack);
+                        if (isInitial) {
+                            tracks.value.push(newestYtTrack);
+                        }
+                        likedTracksLoaded.value++;
+                        likedTracksTotal.value++;
+                        newestYtTrack = ytTracks.shift();
+                    }
                     items.push(item);
                     if (isInitial) {
                         tracks.value.push(item);
@@ -255,7 +282,7 @@ export const useLibraryStore = defineStore("library", () => {
             const tx = db.transaction("tracks", "readwrite");
             let promises: Promise<any>[] = [db.clear("tracks")];
             for (let item of items) {
-                promises.push(db.add("tracks", enhancePlaylistObject(item)));
+                promises.push(db.add("tracks", item));
             }
             await Promise.all([...promises, tx.done]);
             localStorage.lastTracksLoad = Date.now();
@@ -284,8 +311,8 @@ export const useLibraryStore = defineStore("library", () => {
         const discoverNames = ["Discover Weekly", "Release Radar", ...[...Array(10)].map((_, i) => "Daily Mix " + (i + 1))];
 
         personalized = toRaw(saved.value).playlist.filter(playlist => discoverNames
-            .findIndex(name => playlist.name.includes(name)) !== -1 &&
-          playlist.owner.display_name === "Spotify"
+                .findIndex(name => playlist.name.includes(name)) !== -1 &&
+            playlist.owner.display_name === "Spotify"
         );
         personalized.sort((a, b) => {
             let aI = discoverNames.findIndex(name => a.name.includes(name));
@@ -320,26 +347,37 @@ export const useLibraryStore = defineStore("library", () => {
         let liked = checkLiked(type, id);
         if (type === "track") {
             if (liked) {
-                await spotify.api.removeFromMySavedTracks([id]);
+                if (item.id.startsWith("yt-")) { // YouTube
+                    db.delete("yt-tracks", id).then();
+                } else { // Spotify
+                    await spotify.api.removeFromMySavedTracks([id]);
+                }
+
                 db.delete("tracks", id).then();
                 tracks.value.splice(tracks.value.findIndex((t) => t.track.id === id), 1);
                 if (!isRefreshing.value["track"]) {
-                    likedTracksTotal.value++;
-                    likedTracksLoaded.value++;
+                    likedTracksTotal.value--;
+                    likedTracksLoaded.value--;
                 }
                 return false;
             } else {
-                await spotify.api.addToMySavedTracks([id]);
                 let date = (new Date()).toISOString();
                 let playlistObject = enhancePlaylistObject({
                     track: toRaw(item) as SpotifyApi.TrackObjectFull,
                     added_at: date
                 } as SpotifyApi.PlaylistTrackObject);
-                tracks.value.unshift(playlistObject);
+
+                if (item.id.startsWith("yt-")) { // YouTube
+                    db.add("yt-tracks", playlistObject).then();
+                } else { // Spotify
+                    await spotify.api.addToMySavedTracks([id]);
+                }
+
                 db.add("tracks", playlistObject).then();
+                tracks.value.unshift(playlistObject);
                 if (!isRefreshing.value["track"]) {
-                    likedTracksTotal.value--;
-                    likedTracksLoaded.value--;
+                    likedTracksTotal.value++;
+                    likedTracksLoaded.value++;
                 }
                 return true;
             }

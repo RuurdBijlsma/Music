@@ -14,12 +14,16 @@ export const baseDb = openDB("base", 1, {
         db.createObjectStore("nameToId");
         db.createObjectStore("imageColor");
         db.createObjectStore("trackVolumeStats");
+
         const trackStore = db.createObjectStore("tracks", { keyPath: "id" });
         trackStore.createIndex("searchString", "searchString", { unique: false });
         trackStore.createIndex("title", "title", { unique: false });
         trackStore.createIndex("artist", "artistString", { unique: false });
         trackStore.createIndex("oldToNew", "added_at", { unique: false });
         trackStore.createIndex("newToOld", "added_at_reverse", { unique: false });
+
+        const ytTrackStore = db.createObjectStore("yt-tracks", { keyPath: "id" });
+        ytTrackStore.createIndex("newToOld", "added_at_reverse", { unique: false });
     }
 });
 
