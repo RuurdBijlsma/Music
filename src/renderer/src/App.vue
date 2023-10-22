@@ -52,19 +52,18 @@
 
 <script setup lang="ts">
 // todo
-// yt tracks in liked
 // bug: remove from playlist is optie in item menu on playlist i dont own (discover weekly)
 // maak knop om ytdlp te updaten
 // browse page
+// support yt artist page
 // edit information about yt track (change title, artist)
 // edit information about any track (start/end time, more?)
 // get to album from item menu
 // maak knop: export database naar file of cloud?
-// in die database kan dan: track customizations (start/end time, etc), spotify api keys, yt liked tracks
-// fix get dominant color for youtube tracks
+// in die database kan dan: track customizations (start/end time, etc), spotify api keys, yt liked tracks, spotify tokens, trackbars, alles in idb basically, localStorage ook
 // if delete file thats currently playing, do something about it?
-// possibly replace color thief with something without vulnerabilities
 // radio
+// possibly replace color thief with something without vulnerabilities
 // het is best weird dat de error event nu firet voor ytDownload via search, test even tracks die het horen te doen zie hoe dat gaat, zie hoe een echte error nu handled wordt
 
 import TopMenu from "./components/TopMenu.vue";
