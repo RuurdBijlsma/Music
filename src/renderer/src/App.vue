@@ -53,6 +53,7 @@
 <script setup lang="ts">
 // todo
 // yt tracks in liked
+// bug: remove from playlist is optie in item menu on playlist i dont own (discover weekly)
 // maak knop om ytdlp te updaten
 // browse page
 // edit information about yt track (change title, artist)
