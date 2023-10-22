@@ -187,9 +187,11 @@ export const useBaseStore = defineStore("base", () => {
                 to: itemUrl(item)
             } as ItemCollection;
         } else if (item.type === "album") {
+            if (tracks === null && item.tracks !== undefined)
+                tracks = item.tracks.items as SpotifyApi.TrackObjectFull[];
             return {
                 id: item.id ?? "album",
-                tracks: item.tracks.items ?? [],
+                tracks: tracks ?? [],
                 type: "album",
                 context: item,
                 name: item.name ?? "Album",

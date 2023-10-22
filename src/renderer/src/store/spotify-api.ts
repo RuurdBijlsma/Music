@@ -3,10 +3,31 @@ import { baseDb } from "./base";
 import SpotifyWebApi from "spotify-web-api-js";
 import { useLibraryStore } from "./library";
 import { useSpotifyAuthStore } from "./spotify-auth";
+import { Item } from "../scripts/types";
 
 export const useSpotifyApiStore = defineStore("spotify-api", () => {
     const library = useLibraryStore();
     const spotifyAuth = useSpotifyAuthStore();
+    const getItemTracks = async (item: Item): Promise<SpotifyApi.TrackObjectFull[]> => {
+        if (item.type === "playlist") {
+            if (item.tracks.items === undefined) {
+                item = await getPlaylist(item.id);
+            }
+            return item.tracks.items.map(t => t.track as SpotifyApi.TrackObjectFull);
+        } else if (item.type === "artist") {
+            let result = await getArtistTopTracks(item.id);
+            return result.tracks;
+        } else if (item.type === "album") {
+            if (item.tracks === undefined) {
+                item = await getAlbum(item.id);
+            }
+            let tracks = item.tracks.items as SpotifyApi.TrackObjectFull[];
+            tracks.forEach(t => t.album = item as SpotifyApi.AlbumObjectFull);
+            return tracks;
+        }
+        console.warn("Didn't upgrade item to full, type not supported", item);
+        return [];
+    };
 
     // Spotify API Stuff
     const api = new SpotifyWebApi();
@@ -129,6 +150,7 @@ export const useSpotifyApiStore = defineStore("spotify-api", () => {
         getMe,
         api,
         retrieveArray,
-        getMySavedTracks
+        getMySavedTracks,
+        getItemTracks
     };
 });

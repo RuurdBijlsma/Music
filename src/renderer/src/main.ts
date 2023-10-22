@@ -1,4 +1,4 @@
-import { createApp, watch } from "vue";
+import { createApp } from "vue";
 import App from "./App.vue";
 import "@mdi/font/css/materialdesignicons.css";
 import "vuetify/styles";
@@ -20,10 +20,5 @@ const app = createApp(App);
 app.use(createPinia());
 app.use(router);
 app.use(vuetify);
-
-watch(router.currentRoute, () => {
-    localStorage.lastRoute = router.currentRoute.value.fullPath;
-});
-router.replace(localStorage.getItem("lastRoute") === null ? "/" : localStorage.lastRoute).then();
 
 app.mount("#app");

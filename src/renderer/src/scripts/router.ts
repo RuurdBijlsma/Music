@@ -1,5 +1,8 @@
 import { createRouter, createWebHashHistory } from "vue-router";
 import Home from "../views/Home.vue";
+import { watch } from "vue";
+import { useSpotifyAuthStore } from "../store/spotify-auth";
+import { baseDb } from "../store/base";
 
 const routes = [
     { path: "/", component: Home },
@@ -11,10 +14,28 @@ const routes = [
     { path: "/user/:name?/:id?", component: () => import("../views/item/User.vue") },
     { path: "/artist/:name/:id", component: () => import("../views/item/Artist.vue") },
     { path: "/library/:lib?", component: () => import("../views/Library.vue") },
-    { path: "/search/:query", component: () => import("../views/Search.vue") }
+    { path: "/search/:query", component: () => import("../views/Search.vue") },
+    { path: "/login", component: () => import("../views/Login.vue") }
 ];
 
-export default createRouter({
+const router = createRouter({
     history: createWebHashHistory(),
     routes
 });
+
+watch(router.currentRoute, () => {
+    localStorage.lastRoute = router.currentRoute.value.fullPath;
+});
+router.replace(localStorage.getItem("lastRoute") === null ? "/" : localStorage.lastRoute).then();
+
+router.beforeEach(async (to) => {
+    const spotifyAuth = useSpotifyAuthStore();
+    await baseDb;
+
+    if (!spotifyAuth.isLoggedIn && to.path !== "/login") {
+        return { path: "/login" };
+    }
+    return true;
+});
+
+export default router;

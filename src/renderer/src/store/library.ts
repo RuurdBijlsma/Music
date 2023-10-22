@@ -15,11 +15,11 @@ export const useLibraryStore = defineStore("library", () => {
     const player = usePlayerStore();
     const spotify = useSpotifyApiStore();
     const spotifyAuth = useSpotifyAuthStore();
+
     let db: IDBPDatabase;
     baseDb.then(r => {
         db = r;
-        loadValues().then(() => {
-        });
+        loadValues().then();
     });
 
     // Spotify UI variables

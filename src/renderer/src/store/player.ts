@@ -516,6 +516,7 @@ export const usePlayerStore = defineStore("player", () => {
         reloadCurrentTrack,
         deleteTrack,
         normalizeVolume,
-        initTrackbars
+        initTrackbars,
+        unload,
     };
 });

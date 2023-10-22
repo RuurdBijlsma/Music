@@ -1,4 +1,4 @@
-import { app, shell, BrowserWindow, ipcMain } from "electron";
+import { app, BrowserWindow, ipcMain } from "electron";
 import { join } from "path";
 import { electronApp, optimizer, is } from "@electron-toolkit/utils";
 import icon from "../../resources/app-icon/dark-500.png?asset";
@@ -27,19 +27,18 @@ function createWindow(): void {
         mainWindow.show();
     });
 
-    mainWindow.webContents.setWindowOpenHandler((details) => {
-        shell.openExternal(details.url);
-        return { action: "deny" };
-    });
+    mainWindow.webContents.setWindowOpenHandler(() => ({ action: "deny" }));
+
+    let isDev = is.dev && process.env["ELECTRON_RENDERER_URL"];
+    const url = isDev ?
+        process.env["ELECTRON_RENDERER_URL"] ?? "" :
+        "file:///" + join(__dirname, "../renderer/index.html");
 
     // HMR for renderer base on electron-vite cli.
     // Load the remote URL for development or the local html file for production.
-    if (is.dev && process.env["ELECTRON_RENDERER_URL"]) {
-        mainWindow.loadURL(process.env["ELECTRON_RENDERER_URL"]);
+    mainWindow.loadURL(url);
+    if (isDev)
         mainWindow.webContents.openDevTools();
-    } else {
-        mainWindow.loadFile(join(__dirname, "../renderer/index.html"));
-    }
 
     handleIpc(ipcMain, mainWindow);
 }

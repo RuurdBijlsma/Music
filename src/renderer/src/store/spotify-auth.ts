@@ -6,6 +6,8 @@ import type { Ref } from "vue";
 import { usePlatformStore } from "./electron";
 import { useLibraryStore } from "./library";
 import { useSpotifyApiStore } from "./spotify-api";
+import { useRouter } from "vue-router";
+import { usePlayerStore } from "./player";
 
 export interface AuthToken {
     code: null | string,
@@ -19,6 +21,8 @@ export const useSpotifyAuthStore = defineStore("spotify-auth", () => {
     const library = useLibraryStore();
     const spotify = useSpotifyApiStore();
     const base = useBaseStore();
+    const router = useRouter();
+    const player = usePlayerStore();
 
     let db: IDBPDatabase;
     baseDb.then(r => {
@@ -109,6 +113,7 @@ export const useSpotifyAuthStore = defineStore("spotify-auth", () => {
 
     async function logout() {
         await baseDb;
+        player.unload();
 
         tokens.value = {
             code: null,
@@ -131,6 +136,7 @@ export const useSpotifyAuthStore = defineStore("spotify-auth", () => {
 
         clearTimeout(tokenTimeout);
         platform.resetSpotifyLogin();
+        await router.push("/login");
     }
 
     async function checkAuth() {

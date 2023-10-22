@@ -3,7 +3,7 @@
         <div class="card-info">
             <div class="card-text">
                 <router-link no-style :to="base.itemUrl(item)">
-                    <h2 class="card-title">{{ item.name }}</h2>
+                    <h2 class="card-title">{{ itemName }}</h2>
                 </router-link>
                 <p class="card-description mt-3">
                     <template v-if="item.type !== 'album'">{{ base.itemDescription(item) }}</template>
@@ -12,8 +12,8 @@
             </div>
             <spacer />
             <div class="buttons mt-3">
-                <v-btn size="40" class="mr-3" icon="mdi-play" variant="tonal" />
-                <v-btn size="40" icon="mdi-shuffle" variant="tonal" />
+                <item-play-button :item="item" class="mr-3" />
+                <item-play-button :item="item" :shuffle="true" />
             </div>
         </div>
         <spacer></spacer>
@@ -29,9 +29,11 @@ import { useBaseStore } from "../store/base";
 import type { PropType } from "vue";
 import type { Item } from "../scripts/types";
 import Spacer from "./Spacer.vue";
+import ItemPlayButton from "./ItemPlayButton.vue";
+import { computed } from "vue";
 
 const base = useBaseStore();
-defineProps({
+const props = defineProps({
     item: {
         type: Object as PropType<Item>,
         required: true
@@ -42,6 +44,7 @@ defineProps({
         default: () => 200
     }
 });
+const itemName = computed(() => props.item.name);
 
 </script>
 

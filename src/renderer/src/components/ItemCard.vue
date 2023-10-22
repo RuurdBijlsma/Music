@@ -2,9 +2,12 @@
     <router-link no-style :to="base.itemUrl(item)" :class="{round: item.type === 'artist'}"
                  @click.right="base.setContextMenuItem($event, item)">
         <div class="image"
-             :style="{backgroundImage: `url(${base.itemImage(item)})`}" />
+             :style="{backgroundImage: `url(${base.itemImage(item)})`}">
+            <item-play-button :color="base.themeColor" variant="elevated"
+                              class="play-button" @click.prevent :item="item" />
+        </div>
         <div class="info mt-2">
-            <p class="title" v-if="!hideName">{{ item.name }}</p>
+            <p class="title" v-if="!hideName">{{ itemName }}</p>
             <p class="description" v-if="item.type === 'album'">{{ base.albumString(item) }}</p>
             <p class="description" v-else v-html="base.itemDescription(item)"></p>
         </div>
@@ -15,9 +18,11 @@
 import { useBaseStore } from "../store/base";
 import type { Item } from "../scripts/types";
 import type { PropType } from "vue";
+import ItemPlayButton from "./ItemPlayButton.vue";
+import { computed } from "vue";
 
 const base = useBaseStore();
-defineProps({
+const props = defineProps({
     item: {
         type: Object as PropType<Item>,
         required: true
@@ -33,6 +38,7 @@ defineProps({
         default: () => false
     }
 });
+const itemName = computed(() => props.item.name);
 </script>
 
 <style scoped lang="less">
@@ -42,6 +48,19 @@ defineProps({
     height: 12vw;
     aspect-ratio: 1;
     background-size: cover;
+    position: relative;
+}
+
+.image:hover .play-button {
+    opacity: 1;
+}
+
+.play-button {
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    opacity: 0;
+    transition: opacity .15s !important;
 }
 
 .round .image {

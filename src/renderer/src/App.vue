@@ -52,12 +52,12 @@
 
 <script setup lang="ts">
 // todo
-// search page
-// playlists, etc. in search functie
+// yt tracks in liked
 // maak knop om ytdlp te updaten
 // browse page
 // edit information about yt track (change title, artist)
 // edit information about any track (start/end time, more?)
+// get to album from item menu
 // maak knop: export database naar file of cloud?
 // in die database kan dan: track customizations (start/end time, etc), spotify api keys, yt liked tracks
 // fix get dominant color for youtube tracks

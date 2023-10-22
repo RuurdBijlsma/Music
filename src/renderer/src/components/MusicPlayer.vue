@@ -31,7 +31,7 @@
                 <v-btn variant="tonal" icon size="60" @click="player.togglePlay">
                     <v-progress-circular :indeterminate="isNaN(player.loadProgress)"
                                          :model-value="player.loadProgress"
-                                         size="40" v-if="player.loading"></v-progress-circular>
+                                         size="40" v-if="player.loading"/>
                     <v-icon size="30" v-else-if="player.playing">mdi-pause</v-icon>
                     <v-icon size="30" v-else>mdi-play</v-icon>
                 </v-btn>
