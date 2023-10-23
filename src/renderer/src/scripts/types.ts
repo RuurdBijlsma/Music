@@ -59,5 +59,12 @@ export interface ItemCollection {
     to: string,
 }
 
+export interface DownloadState {
+    total: number,
+    downloaded: number,
+    canceled: boolean,
+    loading: boolean,
+}
+
 export type CollectionType = "radio" | "search" | "liked" | "artist" | "playlist" | "album" | "category" | "youtube"
 export type ItemType = "track" | "playlist" | "album" | "artist" | "category"

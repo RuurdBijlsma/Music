@@ -122,18 +122,6 @@ const followerString = computed(() => {
     opacity: .7;
 }
 
-.play-buttons {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-    gap: 5px;
-}
-
-.top-tracks {
-
-}
-
 .top-tracks-text {
     text-align: center;
     opacity: .7;

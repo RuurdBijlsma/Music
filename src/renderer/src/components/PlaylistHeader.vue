@@ -19,7 +19,7 @@
             {{ base.approximateDuration(totalDurationMs) }} • {{ followerString }}
         </p>
         <collection-buttons :collection="collection" :like-item="playlist" />
-        <p>{{ playlist.description }}</p>
+        <p class="text-center">{{ playlist.description }}</p>
     </div>
 </template>
 
@@ -86,13 +86,5 @@ const totalDurationMs: ComputedRef<number> = computed(() => {
     font-size: 13px;
     font-weight: 400;
     opacity: .7;
-}
-
-.play-buttons {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-    gap: 5px;
 }
 </style>

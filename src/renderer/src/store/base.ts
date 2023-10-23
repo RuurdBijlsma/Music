@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import { openDB } from "idb";
-import { computed, ref, toRaw } from "vue";
+import { computed, ref } from "vue";
 import { useTheme } from "vuetify";
 import type { Item, ItemCollection } from "../scripts/types";
 import { deltaE, hexToRgb } from "../scripts/utils";
@@ -82,7 +82,6 @@ export const useBaseStore = defineStore("base", () => {
     }
 
     function albumString(item: SpotifyApi.AlbumObjectFull | any) {
-        console.log("ITEM STRING ITEM", toRaw(item));
         return `${item.total_tracks} track${item.total_tracks === 1 ? "" : "s"} • ${item.artists.map(a => a.name).join(", ")} • ${item.release_date.substring(0, 4)} • ${caps(item.album_type)}`;
     }
 

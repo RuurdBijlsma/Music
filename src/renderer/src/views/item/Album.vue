@@ -123,14 +123,6 @@ const totalDurationMs = computed(() => tracks.value.reduce((a, b) => a + b.durat
     opacity: .7;
 }
 
-.play-buttons {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-    gap: 5px;
-}
-
 .artist-names {
     font-weight: 300;
 }

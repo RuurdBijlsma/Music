@@ -1,11 +1,11 @@
 import { defineStore } from "pinia";
 import { useLibraryStore } from "./library";
-import { ref, toRaw } from "vue";
+import { Ref, ref, toRaw } from "vue";
 import fileNamify from "filenamify";
 import { baseDb, useBaseStore } from "./base";
 import type { IDBPDatabase } from "idb";
 import { usePlayerStore } from "./player";
-import type { ExtendedPlaylistTrack, YouTubeTrackInfo } from "../scripts/types";
+import type { DownloadState, YouTubeTrackInfo } from "../scripts/types";
 import { executeCached } from "../scripts/utils";
 import { useSpotifyAuthStore } from "./spotify-auth";
 
@@ -258,48 +258,17 @@ export const usePlatformStore = defineStore("platform", () => {
     });
 
     async function exportLikedTracks() {
-        let tracks = toRaw(library.tracks) as ExtendedPlaylistTrack[];
-        exportMp3State.value.total = tracks.length;
-        exportMp3State.value.exported = 0;
-
+        let tracks = toRaw(library.tracks).map(t => t.track as SpotifyApi.TrackObjectFull);
         let result = await window.api.getOutputDirectory();
         if (result.canceled) {
-            exportMp3State.value.loading = false;
-            return;
+            return null;
         }
-        exportMp3State.value.loading = true;
-        exportMp3State.value.canceled = false;
-
         let outputPath = result.filePaths[0];
-
-        let batchSize = 8;
-        for (let i = 0; i < tracks.length; i += batchSize) {
-            exportMp3State.value.exported = i;
-            let batch = tracks.slice(i, i + batchSize);
-            try {
-                let paths = await Promise.all(batch.map(
-                    ({ track }) => getTrackFile(track as SpotifyApi.TrackObjectFull, false)
-                ));
-                for (let p of paths) {
-                    await window.api.copyIfExists(p, outputPath);
-                }
-                if (exportMp3State.value.canceled) {
-                    exportMp3State.value.canceled = false;
-                    break;
-                }
-            } catch (e: any) {
-                console.warn(e);
-                base.addSnack(`Couldn't export. ${e.message}`, 100000);
-                exportMp3State.value.loading = false;
-                return;
+        return downloadTracks("liked", tracks, async paths => {
+            for (let p of paths) {
+                await window.api.copyIfExists(p, outputPath);
             }
-        }
-        exportMp3State.value.loading = false;
-    }
-
-    function cancelExport() {
-        exportMp3State.value.canceled = true;
-        exportMp3State.value.loading = false;
+        });
     }
 
     function firstLogin() {
@@ -319,6 +288,53 @@ export const usePlatformStore = defineStore("platform", () => {
         return window.api.updateYtdlp();
     }
 
+    const downloadState = ref(new Map<string, Ref<DownloadState>>());
+
+    function downloadTracks(
+        key: string,
+        tracks: SpotifyApi.TrackObjectFull[],
+        processFunc: (t: string[]) => Promise<any> = async () => 0
+    ) {
+        if (downloadState.value.has(key)) {
+            let state = downloadState.value.get(key);
+            if (state && state.value.loading)
+                return state;
+        }
+        let state = ref({
+            total: tracks.length,
+            downloaded: 0,
+            canceled: false,
+            loading: true
+        } as DownloadState);
+        downloadState.value.set(key, state);
+        (async () => {
+            let batchSize = 8;
+            for (let i = 0; i < tracks.length; i += batchSize) {
+                state.value.downloaded = i;
+                let batch = tracks.slice(i, i + batchSize);
+                try {
+                    let tracks = await Promise.all(batch.map(
+                        (track) => getTrackFile(track as SpotifyApi.TrackObjectFull, false)
+                    ));
+                    await processFunc(tracks);
+                    if (state.value.canceled) {
+                        downloadState.value.delete(key);
+                        break;
+                    }
+                } catch (e: any) {
+                    console.warn(e);
+                    base.addSnack(`Couldn't download. ${e.message}`, 100000);
+                    state.value.loading = false;
+                    return;
+                }
+            }
+            state.value.downloaded = tracks.length;
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            state.value.loading = false;
+        })().then();
+        return state;
+    }
+
     return {
         searchYouTube,
         getTrackFile,
@@ -333,12 +349,13 @@ export const usePlatformStore = defineStore("platform", () => {
         trackIsDownloaded,
         exportLikedTracks,
         exportMp3State,
-        cancelExport,
         deleteTrackCache,
         getVolumeStats,
         youTubeInfoById,
         resetSpotifyLogin,
         firstLogin,
-        updateYtdlp
+        updateYtdlp,
+        downloadTracks,
+        downloadState
     };
 });
