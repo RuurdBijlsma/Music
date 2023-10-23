@@ -54,13 +54,27 @@
         </v-menu>
 
         <v-list-item
-            v-if="library.viewedPlaylist !== null && item.type==='track' && isViewingPlaylistWithTrack(item.id)"
+            v-if="library.viewedPlaylist !== null && item.type==='track' && canRemoveTrackFromPlaylist(item.id)"
             @click="removeFromViewedPlaylist(item.uri)">
             <template v-slot:prepend>
                 <v-progress-circular v-if="loadRemovePlaylist" class="mr-8" indeterminate size="25" width="2" />
                 <v-icon v-else icon="mdi-playlist-minus" />
             </template>
             <v-list-item-title>Remove from {{ library.viewedPlaylist.name }}</v-list-item-title>
+        </v-list-item>
+
+        <v-list-item :exact="true" v-if="item.type === 'track'" :to="`/radio?id=${base.radioId()}&seed_tracks=${item.id}`">
+            <template v-slot:prepend>
+                <v-icon icon="mdi-radio-tower" />
+            </template>
+            <v-list-item-title>Go to track radio</v-list-item-title>
+        </v-list-item>
+
+        <v-list-item :exact="true" v-if="item.type === 'artist'" :to="`/radio?id=${base.radioId()}&seed_artists=${item.id}`">
+            <template v-slot:prepend>
+                <v-icon icon="mdi-radio-tower" />
+            </template>
+            <v-list-item-title>Go to artist radio</v-list-item-title>
         </v-list-item>
     </v-list>
 </template>
@@ -100,9 +114,12 @@ onMounted(() => {
         });
 });
 
-function isViewingPlaylistWithTrack(trackId: string) {
+function canRemoveTrackFromPlaylist(trackId: string) {
     if (library.viewedPlaylist === null) return false;
     const playlistId = library.viewedPlaylist.id;
+    // if I can't edit playlist, I can't remove from playlist
+    if(!library.viewedPlaylist.collaborative && library.viewedPlaylist.owner.id !== library.userInfo.id)
+        return false;
     return playlistId === route.params.id && library.viewedPlaylist.tracks.items.find(t => t.track.id === trackId) !== undefined;
 }
 

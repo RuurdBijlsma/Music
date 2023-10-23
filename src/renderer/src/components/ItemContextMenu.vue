@@ -2,7 +2,7 @@
     <v-menu :style="{
             transform: `translate(${contextMenu.x}px, ${contextMenu.y}px)`,
         }" :model-value="contextMenu.show" @update:modelValue="contextMenu.show=$event">
-        <item-menu :key="contextMenu.x" :show-descriptor="true" :item="contextMenu.item" />
+        <item-menu :key="contextMenu.x" :show-descriptor="contextMenu.item.type === 'track'" :item="contextMenu.item" />
     </v-menu>
 </template>
 

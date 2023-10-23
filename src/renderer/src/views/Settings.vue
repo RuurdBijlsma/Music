@@ -6,8 +6,9 @@
             <v-icon :color="spotifyAuth.hasCredentials ? 'green' : 'default'">mdi-spotify</v-icon>
             Spotify
         </h3>
-        <authentication/>
+        <authentication />
         <v-divider class="mt-3 mb-3" />
+
         <h3>Export</h3>
         <v-btn prepend-icon="mdi-export"
                :loading="platform.exportMp3State.loading"
@@ -30,6 +31,10 @@
         <h3>Audio settings</h3>
         <p>Attempt to make loud tracks quieter to match closer with quiet tracks.</p>
         <v-switch v-model="player.normalizeVolume" label="Normalize volume" :color="base.themeColor" />
+        <v-btn variant="tonal" :loading="updateLoading" @click="updateYtdlp">Update YT-DLP</v-btn>
+        <v-sheet :color="base.themeColor" rounded class="update-result" v-if="updateResult !== ''">
+            {{ updateResult }}
+        </v-sheet>
     </div>
 </template>
 
@@ -39,15 +44,32 @@ import { useBaseStore } from "../store/base";
 import { usePlayerStore } from "../store/player";
 import { useSpotifyAuthStore } from "../store/spotify-auth";
 import Authentication from "../components/Authentication.vue";
+import { ref } from "vue";
 
 const player = usePlayerStore();
 const platform = usePlatformStore();
 const base = useBaseStore();
 const spotifyAuth = useSpotifyAuthStore();
+
+const updateLoading = ref(false);
+const updateResult = ref("");
+
+async function updateYtdlp() {
+    updateLoading.value = true;
+    updateResult.value = await platform.updateYtdlp();
+    updateLoading.value = false;
+}
 </script>
 
 <style scoped lang="less">
 .settings {
     padding: 30px;
+}
+
+.update-result {
+    font-family: monospace;
+    margin-top: 20px;
+    word-wrap: break-word;
+    padding:10px;
 }
 </style>

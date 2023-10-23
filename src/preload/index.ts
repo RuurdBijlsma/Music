@@ -17,6 +17,7 @@ const api = {
     toggleMaximize: () => ipcRenderer.invoke("toggleMaximize"),
     closeWindow: () => ipcRenderer.invoke("closeWindow"),
     downloadYt: (filename: string, tags: any, imageFile: string) => ipcRenderer.invoke("downloadYt", filename, tags, imageFile),
+    updateYtdlp: () => ipcRenderer.invoke("updateYtdlp"),
 
     checkFileExists: (filename: string) => ipcRenderer.invoke("checkFileExists", filename),
     deleteFile: (filename: string) => ipcRenderer.invoke("deleteFile", filename),

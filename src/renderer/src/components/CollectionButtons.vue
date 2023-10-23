@@ -5,6 +5,15 @@
         <v-btn icon="mdi-shuffle" variant="text" @click="player.shuffleCollection(collection)" />
         <v-btn v-if="showFilter" icon="mdi-filter-outline" variant="text" />
         <like-button icon-button v-if="likeItem" variant="no-theme" :item="likeItem" />
+        <v-tooltip text="Go to artist radio" location="top">
+            <template v-slot:activator="{ props }">
+                <v-btn v-bind="props"
+                       variant="text"
+                       icon="mdi-radio-tower"
+                       v-if="collection.context && collection.type === 'artist'"
+                       :to="`/radio?id=${base.radioId()}&seed_artists=${collection.context.id}`" />
+            </template>
+        </v-tooltip>
         <v-divider />
     </div>
 </template>
@@ -14,7 +23,9 @@ import { usePlayerStore } from "../store/player";
 import type { PropType } from "vue";
 import type { Item, ItemCollection } from "../scripts/types";
 import LikeButton from "./LikeButton.vue";
+import { useBaseStore } from "../store/base";
 
+const base = useBaseStore();
 defineProps({
     collection: {
         type: Object as PropType<ItemCollection | null>,

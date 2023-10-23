@@ -52,10 +52,10 @@
 
 <script setup lang="ts">
 // todo
-// bug: remove from playlist is optie in item menu on playlist i dont own (discover weekly)
-// maak knop om ytdlp te updaten
 // browse page
 // support yt artist page
+// recent shit op homepage (inclusief radio)
+// option to download entire playlist/album?
 // edit information about yt track (change title, artist)
 // edit information about any track (start/end time, more?)
 // get to album from item menu
@@ -229,6 +229,11 @@ html, body {
         left: 70px;
         bottom: 0;
     }
+}
+
+h1, h2, h3, h4 {
+    font-weight: 400;
+    text-align: center;
 }
 
 a[no-style] {

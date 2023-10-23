@@ -27,6 +27,7 @@ export function handleIpc(ipcMain: Electron.IpcMain, win: BrowserWindow) {
         () => Directories);
     ipcMain.handle("setTheme",
         (_, theme: "dark" | "light") => nf.setTheme(theme));
+    ipcMain.handle("updateYtdlp", () => nf.updateYtdlp());
     ipcMain.handle("minimizeWindow", () => win.minimize());
     ipcMain.handle("closeWindow", () => win.close());
     ipcMain.handle("toggleMaximize", () => nf.toggleMaximize());

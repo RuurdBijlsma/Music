@@ -157,7 +157,7 @@ export const useBaseStore = defineStore("base", () => {
         let name = type === "user" ? item.display_name : item.name;
         name ??= "";
         if (type === "category")
-            return `${type}/${item.id}`;
+            return `${type}/${encodeUrlName(name)}/${item.id}`;
         if (type === "radio")
             return "";
         if (type === "search")
@@ -232,8 +232,10 @@ export const useBaseStore = defineStore("base", () => {
     }
 
     const waitFor = (name: string) => new Promise(resolve => events.once(name, resolve));
+    const radioId = ()=>Math.random().toString().replace(".", "");
 
     return {
+        radioId,
         itemUrl,
         itemImage,
         itemDescription,
@@ -259,6 +261,7 @@ export const useBaseStore = defineStore("base", () => {
         windowHeight,
         windowWidth,
         encodeUrlName,
-        userImage
+        userImage,
+        caps,
     };
 });

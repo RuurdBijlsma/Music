@@ -4,6 +4,8 @@ import SpotifyWebApi from "spotify-web-api-js";
 import { useLibraryStore } from "./library";
 import { useSpotifyAuthStore } from "./spotify-auth";
 import { Item } from "../scripts/types";
+import { executeCached } from "../scripts/utils";
+import AvailableGenreSeedsResponse = SpotifyApi.AvailableGenreSeedsResponse;
 
 export const useSpotifyApiStore = defineStore("spotify-api", () => {
     const library = useLibraryStore();
@@ -135,6 +137,80 @@ export const useSpotifyApiStore = defineStore("spotify-api", () => {
         return api.search(query, types, options);
     };
 
+    const getBrowsePage = async () => {
+        await baseDb;
+
+        let [categories, genresResponse] = await Promise.all([
+            api.getCategories({ limit: 50 }),
+            getCachedGenres()
+        ]);
+
+        let genres: string[] = genresResponse.genres.map(genre =>
+            genre.split("-")
+                .map(w => w
+                        .substring(0, 1)
+                        .toUpperCase() +
+                    w.substring(1))
+                .join(" "));
+        return { categories: categories.categories.items, genres };
+    };
+
+    const getCategory = async (id: string) => {
+        await baseDb;
+        let playlists = await api.getCategoryPlaylists(id, { limit: 50 });
+        return {
+            category: await api.getCategory(id),
+            playlists: playlists.playlists.items as SpotifyApi.PlaylistObjectFull[]
+        };
+    };
+
+    const getCachedGenres = async () => {
+        return await executeCached<AvailableGenreSeedsResponse>((await baseDb), async () => {
+            return await api.getAvailableGenreSeeds();
+        }, "seed-genres", 1000 * 60 * 60 * 24);
+    };
+
+    const getGenres = async () => {
+        await baseDb;
+        return (await getCachedGenres()).genres.map(genre =>
+            genre.split("-")
+                .map(w => w
+                        .substring(0, 1)
+                        .toUpperCase() +
+                    w.substring(1))
+                .join(" "));
+    };
+
+    const getRadioTracks = async (options: any) => {
+        const db = await baseDb;
+        let dbKey = "radio" + JSON.stringify(options);
+        if (options.id) {
+            let dbResult = await db.get("cache", dbKey);
+            if (dbResult) return dbResult as SpotifyApi.RecommendationsObject;
+        }
+        let firstTrack = null as null | SpotifyApi.TrackObjectFull;
+        if (options.hasOwnProperty("seed_tracks")) {
+            let tracks = options["seed_tracks"].split(",");
+            if (tracks.length === 1)
+                firstTrack = await api.getTrack(tracks[0]);
+        }
+        options = { ...options, limit: firstTrack ? 99 : 100 };
+        let radio = await api.getRecommendations(options);
+        if (firstTrack)
+            radio.tracks.unshift(firstTrack);
+
+        if (options.id)
+            db.put("cache", radio, dbKey).then();
+
+        return radio as SpotifyApi.RecommendationsObject;
+    };
+
+    const getCachedArtists = async (ids: string[]) => {
+        return await executeCached<SpotifyApi.ArtistObjectFull[]>((await baseDb), async () => {
+            return (await api.getArtists(ids)).artists;
+        }, "artists" + JSON.stringify(ids), 1000 * 60 * 60 * 24 * 31);
+    };
+
 
     return {
         getPlaylist,
@@ -151,6 +227,11 @@ export const useSpotifyApiStore = defineStore("spotify-api", () => {
         api,
         retrieveArray,
         getMySavedTracks,
-        getItemTracks
+        getItemTracks,
+        getBrowsePage,
+        getCategory,
+        getGenres,
+        getRadioTracks,
+        getCachedArtists
     };
 });

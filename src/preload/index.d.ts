@@ -21,6 +21,7 @@ declare global {
             toggleMaximize: () => Promise<any>,
             closeWindow: () => Promise<any>,
             downloadYt: (filename: string, tags: any, imageFile: string) => Promise<any>,
+            updateYtdlp: () => Promise<string>,
 
             checkFileExists: (filename: string) => Promise<any>,
             deleteFile: (filename: string) => Promise<any>,

@@ -160,11 +160,6 @@ init();
     font-weight: 300;
 }
 
-h1, h2, h3, h4 {
-    font-weight: 400;
-    text-align: center;
-}
-
 .query {
     font-weight: bold;
 }

@@ -12,8 +12,8 @@
             </div>
             <spacer />
             <div class="buttons mt-3">
-                <item-play-button :item="item" class="mr-3" />
-                <item-play-button :item="item" :shuffle="true" />
+                <item-play-button :color="base.themeColor" :item="item" class="mr-3" />
+                <item-play-button :color="base.themeColor" :item="item" :shuffle="true" />
             </div>
         </div>
         <spacer></spacer>
@@ -64,6 +64,11 @@ const itemName = computed(() => props.item.name);
 
 .dark .highlight-featured {
     background-color: rgba(0, 0, 0, 0.4);
+}
+
+h2 {
+    font-weight: bolder;
+    text-align: left;
 }
 
 .card-image {

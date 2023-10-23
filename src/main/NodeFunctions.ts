@@ -389,4 +389,16 @@ export default class NodeFunctions {
     deleteFile(filename: string) {
         return fs.unlink(filename);
     }
+
+    async updateYtdlp(): Promise<string> {
+        return new Promise<string>((resolve, reject) => {
+            let command = `${this.ytdlpPath} -U`;
+
+            child_process.exec(command, (error, stdout) => {
+                if (error)
+                    return reject(error);
+                resolve(stdout);
+            });
+        });
+    }
 }

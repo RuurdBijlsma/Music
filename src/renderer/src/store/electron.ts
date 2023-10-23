@@ -315,6 +315,10 @@ export const usePlatformStore = defineStore("platform", () => {
         window.api.resetSpotifyLogin();
     }
 
+    async function updateYtdlp() {
+        return window.api.updateYtdlp();
+    }
+
     return {
         searchYouTube,
         getTrackFile,
@@ -334,6 +338,7 @@ export const usePlatformStore = defineStore("platform", () => {
         getVolumeStats,
         youTubeInfoById,
         resetSpotifyLogin,
-        firstLogin
+        firstLogin,
+        updateYtdlp
     };
 });

@@ -2,6 +2,7 @@
     <div class="artist" v-if="artist">
         <div class="mb-2 artist-info">
             <glow-image
+                @click.right="base.setContextMenuItem($event, artist)"
                 :effect-scale="1.3"
                 rounding="125px"
                 :width="250"
@@ -49,7 +50,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, toRaw, watch } from "vue";
+import { computed, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import { baseDb, useBaseStore } from "../../store/base";
 import GlowImage from "../../components/GlowImage.vue";
@@ -95,7 +96,6 @@ async function reloadArtist(id: string) {
     });
     spotify.getArtistAlbums(id).then(r => {
         albums.value = r.items as SpotifyApi.AlbumObjectFull[];
-        console.log(toRaw(albums.value));
     });
     spotify.getArtistRelatedArtists(id).then(r => {
         relatedArtists.value = r.artists;

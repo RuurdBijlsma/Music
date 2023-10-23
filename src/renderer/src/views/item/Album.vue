@@ -90,9 +90,7 @@ const tracks = computed((): SpotifyApi.TrackObjectFull[] => {
     if (album.value === null) return [];
     return album.value.tracks.items as SpotifyApi.TrackObjectFull[];
 });
-const totalDurationMs = computed(() => {
-    return tracks.value.reduce((a, b) => a + b.duration_ms, 0);
-});
+const totalDurationMs = computed(() => tracks.value.reduce((a, b) => a + b.duration_ms, 0));
 
 </script>
 
