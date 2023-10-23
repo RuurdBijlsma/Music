@@ -3,7 +3,7 @@ import { computed, ref, toRaw } from "vue";
 import { baseDb, useBaseStore } from "./base";
 import { usePlatformStore } from "./electron";
 import type { IDBPDatabase } from "idb";
-import type { ExtendedPlaylistTrack, Item, ItemType } from "../scripts/types";
+import type { ExtendedPlaylistTrack, Item, ItemCollection, ItemType } from "../scripts/types";
 import { usePlayerStore } from "./player";
 import { useSpotifyApiStore } from "./spotify-api";
 import { useSpotifyAuthStore } from "./spotify-auth";
@@ -60,7 +60,7 @@ export const useLibraryStore = defineStore("library", () => {
             },
             newReleases: [] as any[],
             personalized: [] as any[],
-            recent: [] as any
+            recent: [] as ItemCollection[],
         },
         playlist: {},
         album: {},

@@ -6,6 +6,7 @@ import type { IDBPDatabase } from "idb";
 import { useTheme } from "vuetify";
 import type { ItemCollection } from "../scripts/types";
 import { shuffleArray } from "../scripts/utils";
+import { useLibraryStore } from "./library";
 
 interface TrackBars {
     binSize: number,
@@ -28,6 +29,8 @@ export const usePlayerStore = defineStore("player", () => {
     const base = useBaseStore();
     const theme = useTheme();
     const platform = usePlatformStore();
+    const library = useLibraryStore();
+
     let db: IDBPDatabase;
     baseDb.then(async r => {
         db = r;
@@ -103,6 +106,16 @@ export const usePlayerStore = defineStore("player", () => {
         _collection = toRaw(_collection);
         _collection.tracks = _collection.tracks.map(t => toRaw(t));
         _collection.context = toRaw(_collection.context);
+
+        if (collection.value?.id !== _collection.id) {
+            let recentIndex = library.view.homePage.recent.findIndex(r => r.id === _collection.id);
+            if (recentIndex !== -1) {
+                library.view.homePage.recent.splice(recentIndex, 1);
+            }
+            library.view.homePage.recent.unshift(_collection);
+            db.put("spotify", toRaw(library.view), "view").then()
+        }
+
         collection.value = _collection;
         _track = toRaw(_track);
         track.value = _track;
@@ -517,6 +530,6 @@ export const usePlayerStore = defineStore("player", () => {
         deleteTrack,
         normalizeVolume,
         initTrackbars,
-        unload,
+        unload
     };
 });

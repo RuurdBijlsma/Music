@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import { openDB } from "idb";
-import { computed, ref } from "vue";
+import { computed, ref, toRaw } from "vue";
 import { useTheme } from "vuetify";
 import type { Item, ItemCollection } from "../scripts/types";
 import { deltaE, hexToRgb } from "../scripts/utils";
@@ -82,7 +82,7 @@ export const useBaseStore = defineStore("base", () => {
     }
 
     function albumString(item: SpotifyApi.AlbumObjectFull | any) {
-        // @ts-ignore
+        console.log("ITEM STRING ITEM", toRaw(item));
         return `${item.total_tracks} track${item.total_tracks === 1 ? "" : "s"} • ${item.artists.map(a => a.name).join(", ")} • ${item.release_date.substring(0, 4)} • ${caps(item.album_type)}`;
     }
 
@@ -152,6 +152,9 @@ export const useBaseStore = defineStore("base", () => {
     };
 
     const itemUrl = (item: Item | any) => {
+        if ("buttonText" in item) {
+            return item.to;
+        }
         if (item === null) return "";
         let type = item.type || "category";
         let name = type === "user" ? item.display_name : item.name;
@@ -232,7 +235,7 @@ export const useBaseStore = defineStore("base", () => {
     }
 
     const waitFor = (name: string) => new Promise(resolve => events.once(name, resolve));
-    const radioId = ()=>Math.random().toString().replace(".", "");
+    const radioId = () => Math.random().toString().replace(".", "");
 
     return {
         radioId,
@@ -262,6 +265,6 @@ export const useBaseStore = defineStore("base", () => {
         windowWidth,
         encodeUrlName,
         userImage,
-        caps,
+        caps
     };
 });

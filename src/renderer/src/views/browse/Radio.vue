@@ -4,7 +4,8 @@
             <h1 class="page-title">{{ radioName }}</h1>
 
             <h4 class="radio-params" v-if="radioGenres !== ''">{{ radioGenres }}</h4>
-            <h4 class="radio-params" v-if="artists.length >0">
+            <h4 class="radio-params" v-if="radioName === 'Artist radio'">
+                <span v-if="artists.length === 0">Loading artists...</span>
                 <artists-span :artists="artists" />
             </h4>
 
@@ -30,7 +31,7 @@
 import { computed, ref, toRaw, watch } from "vue";
 import { useBaseStore } from "../../store/base";
 import { useRoute } from "vue-router";
-import { ItemCollection } from "../../scripts/types";
+import { Item, ItemCollection } from "../../scripts/types";
 import TrackList from "../../components/TrackList.vue";
 import { useSpotifyApiStore } from "../../store/spotify-api";
 import CollectionButtons from "../../components/CollectionButtons.vue";
@@ -69,12 +70,12 @@ async function refresh() {
     tracks.value = radio.tracks as SpotifyApi.TrackObjectFull[];
     loading.value = false;
 
-    spotify.getCachedArtists(
-        radio.seeds.filter(s => s.type.toLowerCase() === "artist").map(s => s.id)
-    ).then(r => {
-        artists.value = r;
-        console.log(toRaw(r));
-    });
+    let artistsIds = radio.seeds.filter(s => s.type.toLowerCase() === "artist").map(s => s.id);
+    if (artistsIds.length > 0)
+        spotify.getCachedArtists(artistsIds).then(r => {
+            artists.value = r;
+            console.log(toRaw(r));
+        });
 }
 
 const radioName = computed(() => {
@@ -85,17 +86,34 @@ const radioName = computed(() => {
         radioName = "Song radio";
     if (route.query.hasOwnProperty("seed_artists"))
         radioName = "Artist radio";
+    console.log(route.query, radioName);
     return radioName;
 });
 
 const totalDurationMs = computed(() => tracks.value.reduce((a, b) => a + b.duration_ms, 0));
 
 const collection = computed(() => {
+    let context: Item | undefined;
+    if (radioName.value === "Artist radio") {
+        context = artists.value.length === 0 ? undefined : artists.value[0];
+    } else if (radioName.value === "Song radio") {
+        context = tracks.value.length === 0 ? undefined : tracks.value[0];
+    }
+    let prefixName: string = "";
+    if (radioName.value === "Artist radio") {
+        prefixName = (artists.value.length === 0 ? "" : "\"" + artists.value[0].name + "\" ");
+    } else if (radioName.value === "Song radio") {
+        prefixName = (tracks.value.length === 0 ? "" : "\"" + tracks.value[0].name + "\" ");
+    } else if (radioName.value === "Genre radio") {
+        prefixName = "\"" + radioGenres.value + "\" ";
+    }
+
     return {
         id: "radio" + JSON.stringify(route.query),
         tracks: tracks.value ?? [],
         type: "radio",
-        name: radioName.value,
+        context,
+        name: prefixName + radioName.value,
         buttonText: radioName.value,
         to: route.fullPath
     } as ItemCollection;

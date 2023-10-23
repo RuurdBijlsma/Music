@@ -23,8 +23,8 @@
 
             <horizontal-scroller class="mt-1">
                 <item-card class="mr-4"
-                           v-for="item in library.view.homePage.recent"
-                           :item="item" />
+                           v-for="itemCollection in library.view.homePage.recent"
+                           :item="itemCollection" />
             </horizontal-scroller>
         </template>
 

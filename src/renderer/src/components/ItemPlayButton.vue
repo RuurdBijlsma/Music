@@ -16,7 +16,7 @@
 <script setup lang="ts">
 import { usePlayerStore } from "../store/player";
 import { useSpotifyApiStore } from "../store/spotify-api";
-import { Item } from "../scripts/types";
+import { Item, ItemCollection } from "../scripts/types";
 import { computed, PropType, ref } from "vue";
 import { useBaseStore } from "../store/base";
 
@@ -26,7 +26,7 @@ const base = useBaseStore();
 
 const props = defineProps({
     item: {
-        type: Object as PropType<Item>,
+        type: Object as PropType<Item | ItemCollection>,
         required: true
     },
     shuffle: {
@@ -59,10 +59,15 @@ function togglePlay() {
 async function playItem(shuffle = false) {
     playLoading.value = true;
 
-    let tracks = await spotify.getItemTracks(props.item);
-    let collection = base.itemCollection(props.item, tracks);
-    console.log({ collection, tracks });
-    if (collection === null) return;
+    let collection: ItemCollection;
+    if ("buttonText" in props.item) {
+        collection = props.item;
+    } else {
+        let tracks = await spotify.getItemTracks(props.item);
+        let c = base.itemCollection(props.item, tracks);
+        if (c === null) return;
+        collection = c;
+    }
 
     playLoading.value = false;
 

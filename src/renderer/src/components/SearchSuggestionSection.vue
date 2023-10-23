@@ -38,7 +38,7 @@ const collection = computed(() => ({
     tracks: props.tracks,
     type: "search",
     id: "search" + props.id,
-    name: `${props.type} search results for "${query}"`,
+    name: `${props.type} search "${query}"`,
     buttonText: "Search",
     to: `/search/${query}`
 } as ItemCollection));

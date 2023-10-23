@@ -110,7 +110,7 @@ const spotifyCollection = computed(() => ({
     tracks: r.value === null ? [] : r.value.spotify.data.tracks,
     type: "search",
     id: "searchSpotify" + query.value,
-    name: `Spotify search results for "${query.value}"`,
+    name: `Spotify search "${query.value}"`,
     buttonText: "Search",
     to: `/search/${query.value}`
 } as ItemCollection));
@@ -118,7 +118,7 @@ const youtubeCollection = computed(() => ({
     tracks: r.value === null ? [] : r.value.youtube.tracks,
     type: "search",
     id: "searchYouTube" + query.value,
-    name: `YouTube search results for "${query.value}"`,
+    name: `YouTube search "${query.value}"`,
     buttonText: "Search",
     to: `/search/${query.value}`
 } as ItemCollection));
