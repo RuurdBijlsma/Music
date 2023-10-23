@@ -5,7 +5,7 @@
                 <v-icon>mdi-playlist-play</v-icon>
             </v-btn>
         </template>
-        <div v-if="collection" class="card-bg">
+        <v-card v-if="collection" class="card-bg">
             <v-card-title class="card-title">{{ collection.name }}</v-card-title>
             <v-divider />
             <track-list v-if="player.queue.length < 200"
@@ -28,7 +28,7 @@
                     Scroll to track
                 </v-btn>
             </v-card-actions>
-        </div>
+        </v-card>
     </v-menu>
 </template>
 

@@ -55,7 +55,7 @@
 // browse page
 // support yt artist page
 // go to album button
-// recent shit op homepage (inclusief radio)
+// bug: asset images don't load in build
 // option to download entire playlist/album?
 // edit information about yt track (change title, artist)
 // edit information about any track (start/end time, more?)
