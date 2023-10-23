@@ -19,7 +19,7 @@
                 <template v-slot:activator="{ props }">
                     <v-btn v-bind="props"
                            variant="text"
-                           icon="mdi-cloud-arrow-down-outline"
+                           :icon="library.offlineCollections.has(collection.id) ? 'mdi-cloud' : 'mdi-cloud-arrow-down-outline'"
                            v-if="collection.type === 'playlist' || collection.type === 'album'"
                            @click="downloadTracks" />
                 </template>
@@ -32,7 +32,8 @@
                 <v-btn @click="cancelDownload" class="cancel-button" variant="text" density="compact" size="16"
                        icon="mdi-close"></v-btn>
             </div>
-            <v-progress-linear rounded class="progress-bar mb-3 mt-2" :model-value="100 * (downloadState.downloaded / downloadState.total)"/>
+            <v-progress-linear rounded class="progress-bar mb-3 mt-2"
+                               :model-value="100 * (downloadState.downloaded / downloadState.total)" />
         </div>
     </div>
 </template>
@@ -45,8 +46,10 @@ import LikeButton from "./LikeButton.vue";
 import { useBaseStore } from "../store/base";
 import { usePlatformStore } from "../store/electron";
 import { computed } from "vue";
+import { useLibraryStore } from "../store/library";
 
 const base = useBaseStore();
+const library = useLibraryStore();
 const props = defineProps({
     collection: {
         type: Object as PropType<ItemCollection | null>,

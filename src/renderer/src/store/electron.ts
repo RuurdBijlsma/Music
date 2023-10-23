@@ -306,7 +306,11 @@ export const usePlatformStore = defineStore("platform", () => {
             canceled: false,
             loading: true
         } as DownloadState);
+
+        library.offlineCollections.delete(key);
+        db.put("spotify", toRaw(library.offlineCollections), "offlineCollections").then();
         downloadState.value.set(key, state);
+
         (async () => {
             let batchSize = 8;
             for (let i = 0; i < tracks.length; i += batchSize) {
@@ -319,7 +323,7 @@ export const usePlatformStore = defineStore("platform", () => {
                     await processFunc(tracks);
                     if (state.value.canceled) {
                         downloadState.value.delete(key);
-                        break;
+                        return;
                     }
                 } catch (e: any) {
                     console.warn(e);
@@ -328,8 +332,12 @@ export const usePlatformStore = defineStore("platform", () => {
                     return;
                 }
             }
+
+            library.offlineCollections.add(key);
+            db.put("spotify", toRaw(library.offlineCollections), "offlineCollections").then();
+
             state.value.downloaded = tracks.length;
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            await new Promise(resolve => setTimeout(resolve, 100));
             state.value.loading = false;
         })().then();
         return state;

@@ -60,7 +60,7 @@ export const useLibraryStore = defineStore("library", () => {
             },
             newReleases: [] as any[],
             personalized: [] as any[],
-            recent: [] as ItemCollection[],
+            recent: [] as ItemCollection[]
         },
         playlist: {},
         album: {},
@@ -68,14 +68,18 @@ export const useLibraryStore = defineStore("library", () => {
         category: {},
         user: {}
     });
+    const offlineCollections = ref(new Set<string>([]));
 
     // IndexedDB persistent storage
     async function loadValues() {
-        let [dbSaved, dbView] = await Promise.all([
+        let [dbSaved, dbView, dbOfflineCollections] = await Promise.all([
             db.get("spotify", "saved"),
-            db.get("spotify", "view")
+            db.get("spotify", "view"),
+            db.get("spotify", "offlineCollections")
         ]);
 
+        if (dbOfflineCollections)
+            offlineCollections.value = dbOfflineCollections;
         if (dbSaved)
             saved.value = dbSaved;
         if (dbView)
@@ -491,6 +495,7 @@ export const useLibraryStore = defineStore("library", () => {
         loadLikedTracks,
         userPlaylists,
         viewedPlaylist,
-        viewedPlaylistRefreshRequired
+        viewedPlaylistRefreshRequired,
+        offlineCollections
     };
 });

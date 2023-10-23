@@ -43,6 +43,7 @@ const base = useBaseStore();
 const followerString = computed(() => {
     if (playlist.value === null) return "0 followers";
     let followers = playlist.value.followers;
+    if (followers.total === 0) return "No followers";
     if (followers.total > 1000000) {
         let followerMillions = Math.round(followers.total / 1000000);
         return followerMillions + "M follower" + (followerMillions === 1 ? "" : "s");

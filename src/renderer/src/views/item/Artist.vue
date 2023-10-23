@@ -108,6 +108,7 @@ async function reloadArtist(id: string) {
 
 const followerString = computed(() => {
     if (artist.value === null) return "0 followers";
+    if (artist.value.followers.total === 0) return "No followers";
     if (artist.value.followers.total > 1000000) {
         let followerMillions = Math.round(artist.value.followers.total / 1000000);
         return followerMillions + "M follower" + (followerMillions === 1 ? "" : "s");

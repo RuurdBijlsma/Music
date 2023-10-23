@@ -71,7 +71,8 @@ function reloadUser() {
 }
 
 const followerString = computed(() => {
-    if (user.value === null || user.value.followers === undefined) return "0 followers";
+    if (user.value === null || user.value.followers === undefined || user.value.followers.total === 0)
+        return "No followers";
     if (user.value.followers.total > 1000000) {
         let followerMillions = Math.round(user.value.followers.total / 1000000);
         return followerMillions + "M follower" + (followerMillions === 1 ? "" : "s");
