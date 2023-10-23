@@ -54,6 +54,7 @@
 // todo
 // browse page
 // support yt artist page
+// go to album button
 // recent shit op homepage (inclusief radio)
 // option to download entire playlist/album?
 // edit information about yt track (change title, artist)
