@@ -7,7 +7,7 @@
                     :width="250"
                     :height="250"
                     class="mb-4"
-                    :src="album.images[0].url" />
+                    :src="base.itemImage(album)" />
                 <spacer />
                 <h1>{{ album.name }}</h1>
                 <h2 class="artist-names">

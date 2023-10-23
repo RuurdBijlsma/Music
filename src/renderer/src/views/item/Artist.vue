@@ -8,7 +8,7 @@
                 :width="250"
                 :height="250"
                 class="mb-4"
-                :src="artist.images[0].url" />
+                :src="base.itemImage(artist)" />
             <spacer />
             <h1>{{ artist.name }}</h1>
             <p>{{ followerString }}</p>
@@ -93,6 +93,7 @@ async function reloadArtist(id: string) {
     await baseDb;
     spotify.getArtist(id).then(r => {
         artist.value = r;
+        console.log(r);
     });
     spotify.getArtistAlbums(id).then(r => {
         albums.value = r.items as SpotifyApi.AlbumObjectFull[];
