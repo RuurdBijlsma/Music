@@ -52,18 +52,15 @@
 
 <script setup lang="ts">
 // todo
-// browse page
 // support yt artist page
 // go to album button
 // bug: asset images don't load in build
-// option to download entire playlist/album?
 // edit information about yt track (change title, artist)
 // edit information about any track (start/end time, more?)
 // get to album from item menu
 // maak knop: export database naar file of cloud?
 // in die database kan dan: track customizations (start/end time, etc), spotify api keys, yt liked tracks, spotify tokens, trackbars, alles in idb basically, localStorage ook
 // if delete file thats currently playing, do something about it?
-// radio
 // possibly replace color thief with something without vulnerabilities
 // het is best weird dat de error event nu firet voor ytDownload via search, test even tracks die het horen te doen zie hoe dat gaat, zie hoe een echte error nu handled wordt
 
@@ -267,5 +264,9 @@ a[no-style]:hover {
 
 .v-btn--icon {
     transition: transform 0.3s, color 1s, caret-color 1s !important;
+}
+
+*[no-drag] {
+    -webkit-app-region: no-drag;
 }
 </style>

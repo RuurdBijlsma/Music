@@ -5,7 +5,7 @@
                 <v-icon class="mr-4" size="30" icon="mdi-radio-tower"></v-icon>
                 Want to create your own radio?
             </h2>
-            <v-btn :color="base.themeColor" class="generate-button" variant="tonal" to="/tune">Generate Custom Radio
+            <v-btn :color="base.themeColor" class="generate-button mt-3" variant="tonal" to="/tune">Generate Custom Radio
             </v-btn>
         </div>
         <div class="categories">
@@ -77,7 +77,7 @@ refresh();
 
 .generate-radio {
     width: 100%;
-    height: 150px;
+    height: 160px;
     position: relative;
     padding: 20px 40px;
     margin-bottom: 30px;
