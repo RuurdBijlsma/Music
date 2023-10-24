@@ -7,6 +7,7 @@ import { useTheme } from "vuetify";
 import type { ItemCollection } from "../scripts/types";
 import { shuffleArray } from "../scripts/utils";
 import { useLibraryStore } from "./library";
+import { randomNotFound } from "../scripts/imageSources";
 
 interface TrackBars {
     binSize: number,
@@ -380,7 +381,7 @@ export const usePlayerStore = defineStore("player", () => {
             return;
 
         let artwork = [{
-            src: base.notFoundImage(),
+            src: randomNotFound(),
             type: "image/png",
             sizes: "512x512"
         }];

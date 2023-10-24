@@ -7,6 +7,7 @@ import type { ExtendedPlaylistTrack, Item, ItemCollection, ItemType } from "../s
 import { usePlayerStore } from "./player";
 import { useSpotifyApiStore } from "./spotify-api";
 import { useSpotifyAuthStore } from "./spotify-auth";
+import { randomUser } from "../scripts/imageSources";
 
 
 export const useLibraryStore = defineStore("library", () => {
@@ -29,7 +30,7 @@ export const useLibraryStore = defineStore("library", () => {
         mail: "",
         country: "",
         followers: 0,
-        avatar: base.userImage()
+        avatar: randomUser(),
     });
 
     const saved = ref({

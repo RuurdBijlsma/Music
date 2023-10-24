@@ -1,7 +1,7 @@
 <template>
     <div class="menu">
         <div class="logo">
-            <v-img width="30" height="30" src="/src/assets/app-icon/dark-500.png"></v-img>
+            <v-img width="30" height="30" :src="base.isDark ? iconUrlDark : iconUrlLight"></v-img>
             <div>Ruurd Music</div>
         </div>
         <spacer />
@@ -28,7 +28,13 @@ import Spacer from "./Spacer.vue";
 import SearchBar from "./SearchBar.vue";
 import UserMenu from "./UserMenu.vue";
 import { usePlatformStore } from "../store/electron";
+//@ts-ignore
+import iconUrlDark from "../../assets/app-icon/dark-500.png?asset";
+//@ts-ignore
+import iconUrlLight from "../../assets/app-icon/light-500.png?asset";
+import { useBaseStore } from "../store/base";
 
+const base = useBaseStore();
 const platform = usePlatformStore();
 </script>
 

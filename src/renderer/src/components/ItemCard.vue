@@ -20,6 +20,7 @@ import type { Item, ItemCollection } from "../scripts/types";
 import type { PropType } from "vue";
 import ItemPlayButton from "./ItemPlayButton.vue";
 import { computed } from "vue";
+import { randomLiked, randomNotFound } from "../scripts/imageSources";
 
 const base = useBaseStore();
 const props = defineProps({
@@ -60,12 +61,12 @@ function itemImage(item: Item | ItemCollection) {
             case "radio":
                 if ("context" in item && item.context)
                     return base.itemImage(item.context);
-                if (item.tracks.length === 0) return base.notFoundImage();
+                if (item.tracks.length === 0) return randomNotFound();
                 return base.itemImage(item.tracks[0]);
             case "liked":
-                return `/src/assets/liked/${Math.ceil(Math.random() * 7)}.png`;
+                return randomLiked();
             default:
-                if (item.tracks.length === 0) return base.notFoundImage();
+                if (item.tracks.length === 0) return randomNotFound();
                 return base.itemImage(item.tracks[0]);
         }
     }

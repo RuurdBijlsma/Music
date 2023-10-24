@@ -5,6 +5,7 @@ import { useTheme } from "vuetify";
 import type { Item, ItemCollection } from "../scripts/types";
 import { deltaE, hexToRgb } from "../scripts/utils";
 import { EventEmitter } from "events";
+import { randomNotFound } from "../scripts/imageSources";
 
 export const baseDb = openDB("base", 1, {
     upgrade(db) {
@@ -46,6 +47,7 @@ export const useBaseStore = defineStore("base", () => {
     const themeTooSimilarToFg = computed(() => contrastToForeground.value < 17);
 
     const snackbars = ref([] as { open: boolean, text: string, timeout: number }[]);
+    const isDark = computed(() => theme.current.value.dark);
 
     const contextMenu = ref({
         x: 0,
@@ -127,13 +129,9 @@ export const useBaseStore = defineStore("base", () => {
             image = item.images?.[0]?.url;
         }
         if (image === null || image === undefined) {
-            return "/src/assets/notfound/" + (1 + Math.floor(Math.random() * 7)) + ".png";
+            return randomNotFound();
         }
         return image;
-    }
-
-    function userImage() {
-        return "/src/assets/user/" + (1 + Math.floor(Math.random() * 7)) + ".png";
     }
 
     const encodeUrlName = (name: string) => {
@@ -208,11 +206,6 @@ export const useBaseStore = defineStore("base", () => {
         return null;
     };
 
-    const notFoundImage = () => {
-        let i = Math.floor(Math.random() * 7) + 1;
-        return `img/notfound/${i}.png`;
-    };
-
     const setContextMenuItem = (e: MouseEvent, item: any) => {
         contextMenu.value.item = item;
         contextMenu.value.show = true;
@@ -244,7 +237,6 @@ export const useBaseStore = defineStore("base", () => {
         msToReadable,
         approximateDuration,
         albumString,
-        notFoundImage,
         themeColor,
         themeColorDark,
         themeColorLight,
@@ -263,7 +255,7 @@ export const useBaseStore = defineStore("base", () => {
         windowHeight,
         windowWidth,
         encodeUrlName,
-        userImage,
-        caps
+        caps,
+        isDark
     };
 });

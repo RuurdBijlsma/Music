@@ -30,6 +30,7 @@ import { useRoute } from "vue-router";
 import GlowImage from "../../components/GlowImage.vue";
 import ItemCard from "../../components/ItemCard.vue";
 import { useSpotifyApiStore } from "../../store/spotify-api";
+import { randomUser } from "../../scripts/imageSources";
 
 const route = useRoute();
 const library = useLibraryStore();
@@ -55,7 +56,7 @@ const userImage = computed(() => {
     if (user.value !== null && user.value.images !== undefined && user.value.images.length > 0) {
         return user.value.images[0].url;
     }
-    return `/src/assets/user/${Math.ceil(Math.random() * 7)}.png`;
+    return randomUser();
 });
 
 function reloadUser() {

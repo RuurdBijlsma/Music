@@ -75,11 +75,13 @@ import ItemContextMenu from "./components/ItemContextMenu.vue";
 import SourceDialog from "./components/SourceDialog.vue";
 import LeftNavigation from "./components/LeftNavigation.vue";
 import BottomMusicPlayer from "./components/BottomMusicPlayer.vue";
+//@ts-ignore
+import coverImage from "../assets/cover.jpg?asset";
 
 const theme = useTheme();
 const base = useBaseStore();
 const player = usePlayerStore();
-const initialBg = localStorage.hasTrackInMemory === "true" ? "" : "/src/assets/cover.jpg";
+const initialBg = localStorage.hasTrackInMemory === "true" ? "" : coverImage;
 const blurBgSrc = computed(() => {
     if (player.track === null) return initialBg;
     return base.itemImage(player.track);

@@ -8,6 +8,7 @@ import { useLibraryStore } from "./library";
 import { useSpotifyApiStore } from "./spotify-api";
 import { useRouter } from "vue-router";
 import { usePlayerStore } from "./player";
+import { randomUser } from "../scripts/imageSources";
 
 export interface AuthToken {
     code: null | string,
@@ -127,7 +128,7 @@ export const useSpotifyAuthStore = defineStore("spotify-auth", () => {
             mail: "",
             country: "",
             followers: 0,
-            avatar: base.userImage()
+            avatar: randomUser(),
         };
         localStorage.userInfo = JSON.stringify(toRaw(library.userInfo));
         localStorage.tokens = JSON.stringify(toRaw(tokens.value));

@@ -13,7 +13,7 @@
             <v-list-item two-line v-if="spotifyAuth.isLoggedIn" to="/user">
                 <div class="list-link">
                     <v-avatar variant="tonal" icon="mdi-account"
-                              :image="library.userInfo.avatar"
+                              :image="library.userInfo.avatar || randomUser()"
                               alt="User Avatar" class="mr-3" />
                     <div>
                         <v-list-item-title>{{ library.userInfo.name }}</v-list-item-title>
@@ -67,6 +67,7 @@ import { ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import { useTheme } from "vuetify";
 import { usePlatformStore } from "../store/electron";
+import { randomUser } from "../scripts/imageSources";
 
 const library = useLibraryStore();
 const spotifyAuth = useSpotifyAuthStore();
