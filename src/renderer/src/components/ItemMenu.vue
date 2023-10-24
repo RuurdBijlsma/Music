@@ -76,6 +76,13 @@
             </template>
             <v-list-item-title>Go to artist radio</v-list-item-title>
         </v-list-item>
+
+        <v-list-item :exact="true" v-if="item.type === 'track' && !route.path.startsWith('/album')" :to="base.itemUrl(item.album)">
+            <template v-slot:prepend>
+                <v-icon icon="mdi-album" />
+            </template>
+            <v-list-item-title>Go to album</v-list-item-title>
+        </v-list-item>
     </v-list>
 </template>
 

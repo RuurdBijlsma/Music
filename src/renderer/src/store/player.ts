@@ -182,10 +182,13 @@ export const usePlayerStore = defineStore("player", () => {
             calculateTrackBars(outPath, _trackId, barCount, binWidth, barSpacing).then();
     }
 
-    async function deleteTrack(track: SpotifyApi.TrackObjectFull) {
-        if (track === null) return;
-        await db.delete("trackBars", track.id);
-        await platform.deleteTrackCache(track);
+    async function deleteTrack(deleteTrack: SpotifyApi.TrackObjectFull) {
+        if (deleteTrack === null) return;
+        await db.delete("trackBars", deleteTrack.id);
+        await platform.deleteTrackCache(deleteTrack);
+        if(track.value.id === deleteTrack.id){
+            await unload();
+        }
     }
 
     async function reloadCurrentTrack() {
