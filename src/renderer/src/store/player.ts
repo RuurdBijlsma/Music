@@ -54,7 +54,13 @@ export const usePlayerStore = defineStore("player", () => {
     const duration = ref(0);
     const currentTime = ref(0);
     const loadProgress = ref(NaN);
-    const track = ref(null as null | SpotifyApi.TrackObjectFull);
+    const track = ref(
+        (localStorage.getItem("trackInMemory") === null
+            ? null
+            : JSON.parse(
+                  localStorage.trackInMemory,
+              )) as null | SpotifyApi.TrackObjectFull,
+    );
     const trackId = ref("");
     const repeat = ref(
         localStorage.getItem("repeat") === null
@@ -205,7 +211,10 @@ export const usePlayerStore = defineStore("player", () => {
                         track: toRaw(_track),
                     },
                     "nowPlaying",
-                ).then(() => (localStorage.hasTrackInMemory = "true"));
+                ).then(() => {
+                    localStorage.hasTrackInMemory = "true";
+                });
+            localStorage.trackInMemory = JSON.stringify(toRaw(_track));
         }, 100);
         // Check if user hasn't changed track while it was loading
         if (
@@ -257,9 +266,10 @@ export const usePlayerStore = defineStore("player", () => {
 
     async function unload() {
         localStorage.hasTrackInMemory = "false";
-        db.delete("cache", "nowPlaying").then(() =>
-            localStorage.removeItem("hasTrackInMemory"),
-        );
+        db.delete("cache", "nowPlaying").then(() => {
+            localStorage.removeItem("hasTrackInMemory");
+            localStorage.removeItem("trackInMemory");
+        });
 
         base.themeColorDark = "#FFFFFF";
         base.themeColorLight = "#000000";
