@@ -31,21 +31,21 @@
                         variant="tonal"
                     />
                     <div>
-                        <v-list-item-title>{{
-                            library.userInfo.name
-                        }}</v-list-item-title>
-                        <v-list-item-subtitle>{{
-                            library.userInfo.mail
-                        }}</v-list-item-subtitle>
+                        <v-list-item-title
+                            >{{ library.userInfo.name }}
+                        </v-list-item-title>
+                        <v-list-item-subtitle
+                            >{{ library.userInfo.mail }}
+                        </v-list-item-subtitle>
                     </div>
                 </div>
             </v-list-item>
             <v-divider class="mt-2"></v-divider>
             <v-list-item>
                 <div class="theme-flex">
-                    <v-list-item-title class="theme-title"
-                        >Theme</v-list-item-title
-                    >
+                    <v-list-item-title class="theme-title">
+                        Theme
+                    </v-list-item-title>
 
                     <v-chip-group
                         v-model="chosenTheme"
@@ -61,10 +61,10 @@
                 </div>
             </v-list-item>
             <v-divider class="mb-2"></v-divider>
-            <v-list-item to="/downloads">
+            <v-list-item to="/stats">
                 <v-list-item-title class="small-item">
-                    <v-icon class="mr-2" icon="mdi-download" />
-                    Downloads
+                    <v-icon class="mr-2" icon="mdi-chart-timeline-variant" />
+                    Statistics
                 </v-list-item-title>
             </v-list-item>
             <v-list-item to="/settings">
