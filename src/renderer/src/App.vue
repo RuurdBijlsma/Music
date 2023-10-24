@@ -81,7 +81,6 @@
 
 <script lang="ts" setup>
 // todo
-// Startup is niet meer zo smooth, animatie gaat terwijl het niet hoort en het is layout shiftig
 // support yt artist page
 // edit information about yt track (change title, artist)
 // edit information about any track (start/end time, more?)
@@ -100,6 +99,7 @@
 // - skip rate voor alle liedjes laten zien
 // - track popularity running average grafiek laten zien
 // maak knop: export database naar file of cloud?
+// when visit page (ex. discover weekly) check if all songs are cached and update the offline cloud icon
 // in die database kan dan: track customizations (start/end time, etc), spotify api keys, yt liked tracks, spotify tokens, trackbars, alles in idb basically, localStorage ook
 // possibly replace color thief with something without vulnerabilities
 // het is best weird dat de error event nu firet voor ytDownload via search, test even tracks die het horen te doen zie hoe dat gaat, zie hoe een echte error nu handled wordt
