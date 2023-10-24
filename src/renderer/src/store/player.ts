@@ -97,6 +97,7 @@ export const usePlayerStore = defineStore("player", () => {
         localStorage.volume = volume.value;
     });
     playerElement.volume = realVolume.value;
+    backupPlayer.volume = realVolume.value;
 
     const collection = ref(null as ItemCollection | null);
     const tracks = computed(
@@ -156,6 +157,9 @@ export const usePlayerStore = defineStore("player", () => {
 
         collection.value = _collection;
         _track = toRaw(_track);
+        if (trackId.value !== _trackId) {
+            collectTrackStat().then();
+        }
         track.value = _track;
         trackId.value = _trackId;
         setMetadata(_track);
@@ -226,6 +230,152 @@ export const usePlayerStore = defineStore("player", () => {
 
         platform.setPlatformPlaying(autoplay);
         await initTrackbars(outPath, _trackId);
+    }
+
+    let statsInterval = 0;
+    let intervalSeconds = 30;
+    const collectStatsPeriod = 10;
+
+    function createStatsInterval() {
+        if (!playing.value) return;
+        // @ts-ignore
+        statsInterval = setInterval(() => {
+            if (intervalSeconds++ % collectStatsPeriod === 0) {
+                collectMinuteStats().then();
+            }
+        }, 1000);
+    }
+
+    watch(playing, () => {
+        if (playing.value) {
+            createStatsInterval();
+        } else {
+            clearInterval(statsInterval);
+        }
+    });
+
+    const emptyTrackStats = () => ({
+        track: toRaw(track.value),
+        skips: 0,
+        listenMinutes: 0,
+        listenCount: 0,
+    });
+    const emptyArtistStats = (name: string) => ({
+        name,
+        skips: 0,
+        listenMinutes: 0,
+        history: {},
+    });
+    const emptyCollectionStats = (name: string) => ({
+        name,
+        skips: 0,
+        listenMinutes: 0,
+    });
+
+    async function collectTrackStat() {
+        let currentTrack = track.value;
+
+        let listenCount = await db.get("statistics", "listenCount");
+        if (listenCount === undefined) listenCount = 0;
+        await db.put("statistics", ++listenCount, "listenCount");
+        console.log({ listenCount });
+
+        let today = new Date().toISOString().substring(0, 10);
+        let popularityHistory = await db.get("statistics", "popularityHistory");
+        if (popularityHistory === undefined) popularityHistory = {};
+        popularityHistory[today] = (popularityHistory[today] ?? 0) + 1;
+        await db.put("statistics", popularityHistory, "popularityHistory");
+        console.log({ popularityHistory });
+
+        if (currentTrack === null) return;
+
+        let trackStats = await db.get("trackStats", currentTrack.id);
+        if (!trackStats) trackStats = emptyTrackStats();
+        trackStats.listenCount++;
+        await db.put("trackStats", trackStats, currentTrack.id);
+        console.log({ trackStats });
+    }
+
+    async function collectSkipStat(
+        track: SpotifyApi.TrackObjectFull,
+        collection: ItemCollection,
+    ) {
+        // gets called after every 60 seconds of audio play is elapsed
+        if (track === null || collection === null) return;
+
+        let skips = await db.get("statistics", "skips");
+        if (skips === undefined) skips = 0;
+        await db.put("statistics", ++skips, "skips");
+        console.log({ skips });
+
+        let trackStats = await db.get("trackStats", track.id);
+        if (!trackStats) trackStats = emptyTrackStats();
+        trackStats.skips++;
+        await db.put("trackStats", trackStats, track.id);
+        console.log({ trackStats });
+
+        for (let artist of track.artists) {
+            let artistStats = await db.get("artistStats", artist.id);
+            if (!artistStats) artistStats = emptyArtistStats(artist.name);
+            artistStats.skips++;
+            await db.put("artistStats", artistStats, artist.id);
+            console.log({ artistStats });
+        }
+
+        let collectionStats = await db.get("collectionStats", collection.id);
+        if (!collectionStats)
+            collectionStats = emptyCollectionStats(collection.name);
+        collectionStats.skips++;
+        await db.put("collectionStats", collectionStats, collection.id);
+        console.log({ collectionStats });
+    }
+
+    async function collectMinuteStats() {
+        // gets called after every 60 seconds of audio play is elapsed
+        if (track.value === null) return;
+        let today = new Date().toISOString().substring(0, 10);
+
+        let listenMinutes = await db.get("statistics", "listenMinutes");
+        if (listenMinutes === undefined) listenMinutes = 0;
+        await db.put("statistics", ++listenMinutes, "listenMinutes");
+        console.log({ listenMinutes });
+
+        let history = await db.get("statistics", "history");
+        if (history === undefined) history = {};
+        history[today] = (history[today] ?? 0) + 1;
+        await db.put("statistics", history, "history");
+        console.log({ history });
+
+        let trackStats = await db.get("trackStats", track.value.id);
+        if (!trackStats) trackStats = emptyTrackStats();
+        trackStats.listenMinutes++;
+        await db.put("trackStats", trackStats, track.value.id);
+        console.log({ trackStats });
+
+        for (let artist of track.value.artists) {
+            let artistStats = await db.get("artistStats", artist.id);
+            if (!artistStats) artistStats = emptyArtistStats(artist.name);
+            artistStats.history[today] = (artistStats.history[today] ?? 0) + 1;
+            artistStats.listenMinutes++;
+            await db.put("artistStats", artistStats, artist.id);
+            console.log({ artistStats });
+        }
+
+        if (collection.value !== null) {
+            let collectionStats = await db.get(
+                "collectionStats",
+                collection.value.id,
+            );
+            if (!collectionStats)
+                collectionStats = emptyCollectionStats(collection.value.name);
+            collectionStats.listenMinutes++;
+            await db.put(
+                "collectionStats",
+                collectionStats,
+                collection.value.id,
+            );
+            console.log({ collectionStats });
+        }
     }
 
     async function initTrackbars(outPath: string, _trackId: string) {
@@ -549,6 +699,10 @@ export const usePlayerStore = defineStore("player", () => {
         }
         let trackId = track.value?.id;
         if (collection.value === null || trackId === null) return;
+        if (n > 0 && currentTime.value / duration.value < 0.9) {
+            if (track.value !== null)
+                collectSkipStat(track.value, collection.value).then();
+        }
 
         let index = queue.value.findIndex((t) => t.id === trackId);
         let newIndex = index + n;

@@ -16,9 +16,9 @@ export const baseDb = openDB("base", 1, {
         db.createObjectStore("imageColor");
         db.createObjectStore("trackVolumeStats");
 
-        db.createObjectStore("artistStats", { keyPath: "id" });
-        db.createObjectStore("trackStats", { keyPath: "id" });
-        db.createObjectStore("collectionStats", { keyPath: "id" });
+        db.createObjectStore("artistStats");
+        db.createObjectStore("trackStats");
+        db.createObjectStore("collectionStats");
         db.createObjectStore("statistics");
 
         const trackStore = db.createObjectStore("tracks", { keyPath: "id" });
