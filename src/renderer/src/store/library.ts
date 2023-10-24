@@ -1,13 +1,13 @@
-import { defineStore } from "pinia";
-import { computed, ref, toRaw } from "vue";
-import { baseDb, useBaseStore } from "./base";
-import { usePlatformStore } from "./electron";
-import type { IDBPDatabase } from "idb";
-import type { ExtendedPlaylistTrack, Item, ItemCollection, ItemType } from "../scripts/types";
-import { usePlayerStore } from "./player";
-import { useSpotifyApiStore } from "./spotify-api";
-import { useSpotifyAuthStore } from "./spotify-auth";
-import { randomUser } from "../scripts/imageSources";
+import {defineStore} from "pinia";
+import {computed, ref, toRaw} from "vue";
+import {baseDb, useBaseStore} from "./base";
+import {usePlatformStore} from "./electron";
+import type {IDBPDatabase} from "idb";
+import type {ExtendedPlaylistTrack, Item, ItemCollection, ItemType} from "../scripts/types";
+import {usePlayerStore} from "./player";
+import {useSpotifyApiStore} from "./spotify-api";
+import {useSpotifyAuthStore} from "./spotify-auth";
+import {randomUser} from "../scripts/imageSources";
 
 
 export const useLibraryStore = defineStore("library", () => {
@@ -17,10 +17,11 @@ export const useLibraryStore = defineStore("library", () => {
     const spotify = useSpotifyApiStore();
     const spotifyAuth = useSpotifyAuthStore();
 
+    let valuesLoaded = ref(false);
     let db: IDBPDatabase;
     baseDb.then(r => {
         db = r;
-        loadValues().then();
+        loadValues().then(() => valuesLoaded.value = true);
     });
 
     // Spotify UI variables
@@ -30,7 +31,7 @@ export const useLibraryStore = defineStore("library", () => {
         mail: "",
         country: "",
         followers: 0,
-        avatar: randomUser(),
+        avatar: randomUser()
     });
 
     const saved = ref({
@@ -60,8 +61,7 @@ export const useLibraryStore = defineStore("library", () => {
                 playlists: [] as SpotifyApi.PlaylistObjectSimplified[]
             },
             newReleases: [] as any[],
-            personalized: [] as any[],
-            recent: [] as ItemCollection[]
+            personalized: [] as any[]
         },
         playlist: {},
         album: {},
@@ -70,15 +70,19 @@ export const useLibraryStore = defineStore("library", () => {
         user: {}
     });
     const offlineCollections = ref(new Set<string>([]));
+    const recentPlays = ref([] as ItemCollection[]);
 
     // IndexedDB persistent storage
     async function loadValues() {
-        let [dbSaved, dbView, dbOfflineCollections] = await Promise.all([
+        let [dbSaved, dbView, dbOfflineCollections, dbRecentPlays] = await Promise.all([
             db.get("spotify", "saved"),
             db.get("spotify", "view"),
-            db.get("spotify", "offlineCollections")
+            db.get("spotify", "offlineCollections"),
+            db.get("spotify", "recentPlays")
         ]);
 
+        if (dbRecentPlays)
+            recentPlays.value = dbRecentPlays;
         if (dbOfflineCollections)
             offlineCollections.value = dbOfflineCollections;
         if (dbSaved)
@@ -151,7 +155,7 @@ export const useLibraryStore = defineStore("library", () => {
         let retrieval: Function, page = (r: any) => r;
         switch (type) {
             case "playlist":
-                retrieval = () => spotify.api.getUserPlaylists(userInfo.value.id, { limit: 50 });
+                retrieval = () => spotify.api.getUserPlaylists(userInfo.value.id, {limit: 50});
                 break;
             case "album":
                 retrieval = () => spotify.api.getMySavedAlbums();
@@ -251,7 +255,7 @@ export const useLibraryStore = defineStore("library", () => {
         let newestYtTrack = ytTracks.shift();
 
         let once = true;
-        for await(let batch of await spotify.retrieveArray(() => spotify.api.getMySavedTracks({ limit: 50 }))) {
+        for await(let batch of await spotify.retrieveArray(() => spotify.api.getMySavedTracks({limit: 50}))) {
             if (once) {
                 likedTracksTotal.value = batch.total;
                 once = false;
@@ -302,7 +306,7 @@ export const useLibraryStore = defineStore("library", () => {
         await spotifyAuth.awaitAuth();
 
         //Featured playlists
-        let featured = await spotify.api.getFeaturedPlaylists({ limit: 50 });
+        let featured = await spotify.api.getFeaturedPlaylists({limit: 50});
         view.value.homePage.featured = {
             title: featured.message,
             playlists: featured.playlists.items
@@ -329,7 +333,7 @@ export const useLibraryStore = defineStore("library", () => {
         }
 
         //New releases
-        let newReleases = await spotify.api.getNewReleases({ limit: 50 });
+        let newReleases = await spotify.api.getNewReleases({limit: 50});
         view.value.homePage.newReleases = newReleases.albums.items;
         await db.put("spotify", toRaw(view.value), "view");
     }
@@ -345,12 +349,19 @@ export const useLibraryStore = defineStore("library", () => {
         return result !== undefined;
     }
 
-    async function toggleLike(item: Item) {
+    async function toggleLike(item: Item | ItemCollection) {
         await baseDb;
-        const type = item.type;
         const id = item.id;
-        let liked = checkLiked(type, id);
-        if (type === "track") {
+        if ('buttonText' in item) {
+            if (item.type === 'liked' || item.type === 'radio' || item.type === 'search' || item.type === "youtube")
+                return false;
+            if (!item.context)
+                return false;
+            item = item.context;
+        }
+        // if ('buttonText' in item) return false;
+        let liked = checkLiked(item.type, id);
+        if (item.type === "track") {
             if (liked) {
                 if (item.id.startsWith("yt-")) { // YouTube
                     db.delete("yt-tracks", id).then();
@@ -386,7 +397,7 @@ export const useLibraryStore = defineStore("library", () => {
                 }
                 return true;
             }
-        } else if (type === "playlist") {
+        } else if (item.type === "playlist") {
             if (liked) {
                 await spotify.api.unfollowPlaylist(id);
                 saved.value.playlist.splice(saved.value.playlist.findIndex(t => t.id === id), 1);
@@ -396,7 +407,7 @@ export const useLibraryStore = defineStore("library", () => {
                 saved.value.playlist.unshift(item);
                 return true;
             }
-        } else if (type === "album") {
+        } else if (item.type === "album") {
             if (liked) {
                 await spotify.api.removeFromMySavedAlbums([id]);
                 saved.value.album.splice(saved.value.album.findIndex(t => t.id === id), 1);
@@ -406,7 +417,7 @@ export const useLibraryStore = defineStore("library", () => {
                 saved.value.album.unshift(item);
                 return true;
             }
-        } else if (type === "artist") {
+        } else if (item.type === "artist") {
             if (liked) {
                 await spotify.api.unfollowArtists([id]);
                 saved.value.artist.splice(saved.value.artist.findIndex(t => t.id === id), 1);
@@ -427,7 +438,7 @@ export const useLibraryStore = defineStore("library", () => {
         base.sourceDialog.loading = true;
         base.sourceDialog.spotifyTrack = track;
 
-        const { cacheKey, query } = platform.trackToNames(track);
+        const {cacheKey, query} = platform.trackToNames(track);
         let [options, selectedId] = await Promise.all([
             platform.searchYouTube(query, 6),
             db.get("nameToId", cacheKey)
@@ -442,7 +453,7 @@ export const useLibraryStore = defineStore("library", () => {
         let spotifyTrack = base.sourceDialog.spotifyTrack;
         if (spotifyTrack === null) return;
         const trackId = spotifyTrack.id;
-        const { cacheKey, outPath } = platform.trackToNames(spotifyTrack);
+        const {cacheKey, outPath} = platform.trackToNames(spotifyTrack);
         await db.put("nameToId", id, cacheKey);
         await platform.deleteFile(outPath);
         await db.delete("trackBars", spotifyTrack.id);
@@ -497,6 +508,8 @@ export const useLibraryStore = defineStore("library", () => {
         userPlaylists,
         viewedPlaylist,
         viewedPlaylistRefreshRequired,
-        offlineCollections
+        offlineCollections,
+        recentPlays,
+        valuesLoaded
     };
 });

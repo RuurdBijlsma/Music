@@ -16,14 +16,14 @@
                        v-for="playlist in otherPlaylists" />
         </horizontal-scroller>
 
-        <template v-if="library.view.homePage.recent.length > 0">
+        <template v-if="library.recentPlays.length > 0">
             <div class="home-title mt-4">
                 <h2 class="other-title mb-5">Recently Played</h2>
             </div>
 
             <horizontal-scroller class="mt-1">
                 <item-card class="mr-4"
-                           v-for="itemCollection in library.view.homePage.recent"
+                           v-for="itemCollection in library.recentPlays"
                            :item="itemCollection" />
             </horizontal-scroller>
         </template>

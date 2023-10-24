@@ -1,7 +1,10 @@
 <template>
     <v-list density="compact">
         <v-list-subheader v-if="showDescriptor" class="descriptor">{{ descriptor }}</v-list-subheader>
-        <v-list-item @click="library.toggleLike(item)">
+
+        <v-divider v-if="showDescriptor"/>
+
+        <v-list-item v-if="canLike" @click="library.toggleLike(item)">
             <template v-slot:prepend>
                 <v-icon v-if="isLiked" icon="mdi-heart"></v-icon>
                 <v-icon v-else icon="mdi-heart-outline"></v-icon>
@@ -9,23 +12,10 @@
             <v-list-item-title v-if="isLiked">Remove from library</v-list-item-title>
             <v-list-item-title v-else>Add to library</v-list-item-title>
         </v-list-item>
-        <v-list-item v-if="item.type==='track'" @click="library.chooseSource(item)">
-            <template v-slot:prepend>
-                <v-icon icon="mdi-youtube" />
-            </template>
-            <v-list-item-title>Choose different source</v-list-item-title>
-        </v-list-item>
-        <v-list-item v-if="item.type==='track' && isDownloaded"
-                     @click="deleteTrack">
-            <template v-slot:prepend>
-                <v-icon icon="mdi-trash-can" />
-            </template>
-            <v-list-item-title>Delete file</v-list-item-title>
-        </v-list-item>
         <v-list-item @click="player.reloadCurrentTrack"
                      v-if="item.type==='track' && player.track !== null && isDownloaded && player.track.id === item.id">
             <template v-slot:prepend>
-                <v-icon icon="mdi-reload" />
+                <v-icon icon="mdi-reload"/>
             </template>
             <v-list-item-title>Reload track file</v-list-item-title>
         </v-list-item>
@@ -34,18 +24,18 @@
             <template v-slot:activator="{ props }">
                 <v-list-item v-bind="props" v-if="item.type==='track'">
                     <template v-slot:prepend>
-                        <v-progress-circular v-if="loadAddPlaylist" class="mr-8" indeterminate size="25" width="2" />
-                        <v-icon v-else icon="mdi-playlist-plus" />
+                        <v-progress-circular v-if="loadAddPlaylist" class="mr-8" indeterminate size="25" width="2"/>
+                        <v-icon v-else icon="mdi-playlist-plus"/>
                     </template>
                     <v-list-item-title>Add to playlist</v-list-item-title>
                 </v-list-item>
             </template>
             <v-list density="compact">
                 <v-list-item v-for="playlist in library.userPlaylists"
-                             @click="addToPlaylist(playlist.id, item)">
+                             @click="addToPlaylist(playlist.id, item as Item)">
                     <template v-slot:prepend>
                         <v-avatar rounded>
-                            <v-img :src="base.itemImage(playlist)" />
+                            <v-img :src="base.itemImage(playlist)"/>
                         </v-avatar>
                     </template>
                     <v-list-item-title>{{ playlist.name }}</v-list-item-title>
@@ -57,48 +47,62 @@
             v-if="library.viewedPlaylist !== null && item.type==='track' && canRemoveTrackFromPlaylist(item.id)"
             @click="removeFromViewedPlaylist(item.uri)">
             <template v-slot:prepend>
-                <v-progress-circular v-if="loadRemovePlaylist" class="mr-8" indeterminate size="25" width="2" />
-                <v-icon v-else icon="mdi-playlist-minus" />
+                <v-progress-circular v-if="loadRemovePlaylist" class="mr-8" indeterminate size="25" width="2"/>
+                <v-icon v-else icon="mdi-playlist-minus"/>
             </template>
             <v-list-item-title>Remove from {{ library.viewedPlaylist.name }}</v-list-item-title>
         </v-list-item>
 
-        <v-list-item :exact="true" v-if="item.type === 'track'" :to="`/radio?id=${base.radioId()}&seed_tracks=${item.id}`">
+        <v-list-item :exact="true" v-if="item.type === 'track'"
+                     :to="`/radio?id=${base.radioId()}&seed_tracks=${item.id}`">
             <template v-slot:prepend>
-                <v-icon icon="mdi-radio-tower" />
+                <v-icon icon="mdi-radio-tower"/>
             </template>
             <v-list-item-title>Go to track radio</v-list-item-title>
         </v-list-item>
 
-        <v-list-item :exact="true" v-if="item.type === 'artist'" :to="`/radio?id=${base.radioId()}&seed_artists=${item.id}`">
+        <v-list-item :exact="true" v-if="item.type === 'artist'"
+                     :to="`/radio?id=${base.radioId()}&seed_artists=${item.id}`">
             <template v-slot:prepend>
-                <v-icon icon="mdi-radio-tower" />
+                <v-icon icon="mdi-radio-tower"/>
             </template>
             <v-list-item-title>Go to artist radio</v-list-item-title>
         </v-list-item>
 
-        <v-list-item :exact="true" v-if="item.type === 'track' && !route.path.startsWith('/album')" :to="base.itemUrl(item.album)">
+        <v-list-item :exact="true" v-if="item.type === 'track' && !route.path.startsWith('/album')"
+                     :to="base.itemUrl(item.album)">
             <template v-slot:prepend>
-                <v-icon icon="mdi-album" />
+                <v-icon icon="mdi-album"/>
             </template>
             <v-list-item-title>Go to album</v-list-item-title>
+        </v-list-item>
+
+        <v-divider v-if="item.type==='track'"/>
+
+        <v-list-item class="small-item" density="compact" v-if="item.type==='track'"
+                     @click="library.chooseSource(item)">
+            <v-list-item-title class="small-title">Change source</v-list-item-title>
+        </v-list-item>
+        <v-list-item class="small-item" density="compact" v-if="item.type==='track' && isDownloaded"
+                     @click="deleteTrack">
+            <v-list-item-title class="small-title">Delete file</v-list-item-title>
         </v-list-item>
     </v-list>
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from "vue";
-import type { PropType } from "vue";
-import { useBaseStore } from "../store/base";
-import { useLibraryStore } from "../store/library";
-import type { Item } from "../scripts/types";
-import { usePlatformStore } from "../store/electron";
-import { usePlayerStore } from "../store/player";
-import { useRoute } from "vue-router";
+import {computed, onMounted, ref, toRaw} from "vue";
+import type {PropType} from "vue";
+import {useBaseStore} from "../store/base";
+import {useLibraryStore} from "../store/library";
+import type {Item, ItemCollection} from "../scripts/types";
+import {usePlatformStore} from "../store/electron";
+import {usePlayerStore} from "../store/player";
+import {useRoute} from "vue-router";
 
 const props = defineProps({
     item: {
-        type: Object as PropType<Item>,
+        type: Object as PropType<Item | ItemCollection>,
         required: true
     },
     showDescriptor: {
@@ -114,7 +118,13 @@ const route = useRoute();
 const isDownloaded = ref(false);
 const loadAddPlaylist = ref(false);
 const loadRemovePlaylist = ref(false);
+
+const canLike = computed(() => {
+    return "type" in props.item && props.item.type !== "liked";
+});
+
 onMounted(() => {
+    console.log("ITEMMENU", toRaw(props.item));
     if (props.item.type === "track")
         platform.trackIsDownloaded(props.item as SpotifyApi.TrackObjectFull).then(v => {
             isDownloaded.value = v;
@@ -125,7 +135,7 @@ function canRemoveTrackFromPlaylist(trackId: string) {
     if (library.viewedPlaylist === null) return false;
     const playlistId = library.viewedPlaylist.id;
     // if I can't edit playlist, I can't remove from playlist
-    if(!library.viewedPlaylist.collaborative && library.viewedPlaylist.owner.id !== library.userInfo.id)
+    if (!library.viewedPlaylist.collaborative && library.viewedPlaylist.owner.id !== library.userInfo.id)
         return false;
     return playlistId === route.params.id && library.viewedPlaylist.tracks.items.find(t => t.track.id === trackId) !== undefined;
 }
@@ -159,7 +169,10 @@ const descriptor = computed(() => {
     return "";
 });
 
-const isLiked = computed(() => library.checkLiked(props.item.type, props.item.id));
+const isLiked = computed(() => {
+    let type = props.item.type as "playlist" | "artist" | "album" | "track" | "category";
+    return library.checkLiked(type, props.item.id);
+});
 
 </script>
 
@@ -169,5 +182,14 @@ const isLiked = computed(() => library.checkLiked(props.item.type, props.item.id
     overflow-x: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+}
+
+.small-item {
+    opacity: .7;
+}
+
+.small-title {
+    font-weight: 500;
+    font-size: 12px;
 }
 </style>

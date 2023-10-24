@@ -55,6 +55,20 @@
 // support yt artist page
 // edit information about yt track (change title, artist)
 // edit information about any track (start/end time, more?)
+// listen stats
+// - per song listen count
+// - minuten geluistered optellen
+//      - per artiest
+//      - collection? (discover weekly, liked, etc)
+//      - grafiek / bar graph maken van luister minuten over time
+// - Wrapped maken
+//      - Top artiesten in jaar
+//      - Top songs in jaar
+//      - Meest geskipte liedjes, skip percentage en absoluut nummer
+//      - Meest geskipte artiesten
+// - Download's tellen in megabytes
+// - skip rate voor alle liedjes laten zien
+// - track popularity running average grafiek laten zien
 // maak knop: export database naar file of cloud?
 // in die database kan dan: track customizations (start/end time, etc), spotify api keys, yt liked tracks, spotify tokens, trackbars, alles in idb basically, localStorage ook
 // possibly replace color thief with something without vulnerabilities

@@ -10,20 +10,20 @@ import { useLibraryStore } from "./library";
 import { randomNotFound } from "../scripts/imageSources";
 
 interface TrackBars {
-    binSize: number,
-    binWidth: number,
-    barSpacing: number,
-    binPos: number[],
-    binNeg: number[],
-    maxVolume: number
+    binSize: number;
+    binWidth: number;
+    barSpacing: number;
+    binPos: number[];
+    binNeg: number[];
+    maxVolume: number;
 }
 
 interface MetaTrackBars {
-    trackBars: TrackBars,
-    canvasWidth: number,
-    binWidth: number,
-    barSpacing: number,
-    barCount: number,
+    trackBars: TrackBars;
+    canvasWidth: number;
+    binWidth: number;
+    barSpacing: number;
+    barCount: number;
 }
 
 export const usePlayerStore = defineStore("player", () => {
@@ -33,7 +33,7 @@ export const usePlayerStore = defineStore("player", () => {
     const library = useLibraryStore();
 
     let db: IDBPDatabase;
-    baseDb.then(async r => {
+    baseDb.then(async (r) => {
         db = r;
         let lastPlaying = await db.get("cache", "nowPlaying");
         if (lastPlaying !== undefined) {
@@ -56,14 +56,35 @@ export const usePlayerStore = defineStore("player", () => {
     const loadProgress = ref(NaN);
     const track = ref(null as null | SpotifyApi.TrackObjectFull);
     const trackId = ref("");
-    const repeat = ref(localStorage.getItem("repeat") === null ? true : localStorage.repeat === "true");
-    const shuffle = ref(localStorage.getItem("shuffle") === null ? false : localStorage.shuffle === "true");
-    const volume = ref(localStorage.getItem("volume") === null ? 1 : +localStorage.volume);
+    const repeat = ref(
+        localStorage.getItem("repeat") === null
+            ? true
+            : localStorage.repeat === "true",
+    );
+    const shuffle = ref(
+        localStorage.getItem("shuffle") === null
+            ? false
+            : localStorage.shuffle === "true",
+    );
+    const volume = ref(
+        localStorage.getItem("volume") === null ? 1 : +localStorage.volume,
+    );
     const volumeNormalizer = ref(0.7);
-    const normalizeVolume = ref(localStorage.getItem("normalizeVolume") === null ? false : localStorage.normalizeVolume === "true");
-    const realVolume = computed(() => normalizeVolume.value ? volume.value * volumeNormalizer.value : volume.value);
+    const normalizeVolume = ref(
+        localStorage.getItem("normalizeVolume") === null
+            ? false
+            : localStorage.normalizeVolume === "true",
+    );
+    const realVolume = computed(() =>
+        normalizeVolume.value
+            ? volume.value * volumeNormalizer.value
+            : volume.value,
+    );
 
-    watch(normalizeVolume, () => localStorage.normalizeVolume = normalizeVolume.value);
+    watch(
+        normalizeVolume,
+        () => (localStorage.normalizeVolume = normalizeVolume.value),
+    );
     watch(realVolume, () => {
         playerElement.volume = realVolume.value;
         backupPlayer.volume = realVolume.value;
@@ -72,9 +93,13 @@ export const usePlayerStore = defineStore("player", () => {
     playerElement.volume = realVolume.value;
 
     const collection = ref(null as ItemCollection | null);
-    const tracks = computed(() => collection.value?.tracks ?? [] as SpotifyApi.TrackObjectFull[]);
+    const tracks = computed(
+        () => collection.value?.tracks ?? ([] as SpotifyApi.TrackObjectFull[]),
+    );
     const shuffledTracks = computed(() => shuffleArray(tracks.value));
-    const queue = computed(() => shuffle.value ? shuffledTracks.value : tracks.value);
+    const queue = computed(() =>
+        shuffle.value ? shuffledTracks.value : tracks.value,
+    );
 
     let canvasBars: TrackBars | null = null;
     let canvas: HTMLCanvasElement | null = null;
@@ -83,7 +108,11 @@ export const usePlayerStore = defineStore("player", () => {
     let tracksLoading = new Set();
     let dbTrackBarsPromise: Promise<MetaTrackBars> | null = null;
 
-    async function load(_collection: ItemCollection, _track: SpotifyApi.TrackObjectFull, autoplay = true) {
+    async function load(
+        _collection: ItemCollection,
+        _track: SpotifyApi.TrackObjectFull,
+        autoplay = true,
+    ) {
         const _trackId = _track.id;
         let isLoading = tracksLoading.has(_trackId);
         tracksLoading.add(_trackId);
@@ -105,16 +134,18 @@ export const usePlayerStore = defineStore("player", () => {
         loadProgress.value = NaN;
         volumeNormalizer.value = 0.5;
         _collection = toRaw(_collection);
-        _collection.tracks = _collection.tracks.map(t => toRaw(t));
+        _collection.tracks = _collection.tracks.map((t) => toRaw(t));
         _collection.context = toRaw(_collection.context);
 
-        if (collection.value?.id !== _collection.id) {
-            let recentIndex = library.view.homePage.recent.findIndex(r => r.id === _collection.id);
+        if (collection.value?.id !== _collection.id && library.valuesLoaded) {
+            let recentIndex = library.recentPlays.findIndex(
+                (r) => r.id === _collection.id,
+            );
             if (recentIndex !== -1) {
-                library.view.homePage.recent.splice(recentIndex, 1);
+                library.recentPlays.splice(recentIndex, 1);
             }
-            library.view.homePage.recent.unshift(_collection);
-            db.put("spotify", toRaw(library.view), "view").then()
+            library.recentPlays.unshift(_collection);
+            db.put("spotify", toRaw(library.recentPlays), "recentPlays").then();
         }
 
         collection.value = _collection;
@@ -128,7 +159,11 @@ export const usePlayerStore = defineStore("player", () => {
         let onProgress: (p: number) => void;
         onProgress = (percent) => {
             // Check if user hasn't changed track while it was progressing
-            if (_collection.id === collection.value?.id && track.value && _trackId === trackId.value) {
+            if (
+                _collection.id === collection.value?.id &&
+                track.value &&
+                _trackId === trackId.value
+            ) {
                 loadProgress.value = percent;
                 if (percent === 100) {
                     base.events.off(_trackId + "progress", onProgress);
@@ -150,18 +185,34 @@ export const usePlayerStore = defineStore("player", () => {
         platform.getVolumeStats(_track).then(({ mean }) => {
             // volume is normalized to where a track with max volume of >= 38000 gets normalizer 0.3
             // a track with max volume of <= 15000 gets normalizer 1 (so full volume)
-            const maxVolumeToNormalizer = (x: number) => -0.06363636364 * (x + 7) + 0.3;
-            volumeNormalizer.value = Math.max(Math.min(1, maxVolumeToNormalizer(mean)), .3);
+            const maxVolumeToNormalizer = (x: number) =>
+                -0.06363636364 * (x + 7) + 0.3;
+            volumeNormalizer.value = Math.max(
+                Math.min(1, maxVolumeToNormalizer(mean)),
+                0.3,
+            );
         });
         setTimeout(() => {
-            if (_collection.id === collection.value?.id && track.value && _trackId === trackId.value)
-                db.put("cache", {
-                    collection: _collection,
-                    track: toRaw(_track)
-                }, "nowPlaying").then(() => localStorage.hasTrackInMemory = "true");
+            if (
+                _collection.id === collection.value?.id &&
+                track.value &&
+                _trackId === trackId.value
+            )
+                db.put(
+                    "cache",
+                    {
+                        collection: _collection,
+                        track: toRaw(_track),
+                    },
+                    "nowPlaying",
+                ).then(() => (localStorage.hasTrackInMemory = "true"));
         }, 100);
         // Check if user hasn't changed track while it was loading
-        if (_collection.id === collection.value.id && track.value && _trackId === trackId.value)
+        if (
+            _collection.id === collection.value.id &&
+            track.value &&
+            _trackId === trackId.value
+        )
             playerElement.src = outPath;
 
         platform.setPlatformPlaying(autoplay);
@@ -171,7 +222,8 @@ export const usePlayerStore = defineStore("player", () => {
     async function initTrackbars(outPath: string, _trackId: string) {
         canvas = document.querySelector(".progress-canvas");
         if (dbTrackBarsPromise === null) return;
-        const { trackBars, canvasWidth, binWidth, barSpacing, barCount } = await dbTrackBarsPromise;
+        const { trackBars, canvasWidth, binWidth, barSpacing, barCount } =
+            await dbTrackBarsPromise;
         if (canvas !== null) {
             canvas.width = canvasWidth;
             canvas.height = 100;
@@ -179,14 +231,20 @@ export const usePlayerStore = defineStore("player", () => {
         }
         // only calculate track bars if they weren't retrieved from db cache
         if (trackBars === undefined)
-            calculateTrackBars(outPath, _trackId, barCount, binWidth, barSpacing).then();
+            calculateTrackBars(
+                outPath,
+                _trackId,
+                barCount,
+                binWidth,
+                barSpacing,
+            ).then();
     }
 
     async function deleteTrack(deleteTrack: SpotifyApi.TrackObjectFull) {
         if (deleteTrack === null) return;
         await db.delete("trackBars", deleteTrack.id);
         await platform.deleteTrackCache(deleteTrack);
-        if(track.value.id === deleteTrack.id){
+        if (track.value?.id === deleteTrack.id) {
             await unload();
         }
     }
@@ -199,7 +257,9 @@ export const usePlayerStore = defineStore("player", () => {
 
     async function unload() {
         localStorage.hasTrackInMemory = "false";
-        db.delete("cache", "nowPlaying").then(() => localStorage.removeItem("hasTrackInMemory"));
+        db.delete("cache", "nowPlaying").then(() =>
+            localStorage.removeItem("hasTrackInMemory"),
+        );
 
         base.themeColorDark = "#FFFFFF";
         base.themeColorLight = "#000000";
@@ -220,9 +280,9 @@ export const usePlayerStore = defineStore("player", () => {
             binSize: 1,
             binWidth,
             barSpacing,
-            binPos: new Array<number>(barCount).fill(.02),
-            binNeg: new Array<number>(barCount).fill(-.02),
-            maxVolume: 1
+            binPos: new Array<number>(barCount).fill(0.02),
+            binNeg: new Array<number>(barCount).fill(-0.02),
+            maxVolume: 1,
         };
         platform.stopPlatformPlaying();
     }
@@ -263,7 +323,9 @@ export const usePlayerStore = defineStore("player", () => {
         return element;
     }
 
-    async function showTrackBars(_track: SpotifyApi.TrackObjectFull): Promise<MetaTrackBars> {
+    async function showTrackBars(
+        _track: SpotifyApi.TrackObjectFull,
+    ): Promise<MetaTrackBars> {
         // get track bars from db or create empty structure
         const canvasWidth = 300;
         const binWidth = 2;
@@ -278,21 +340,35 @@ export const usePlayerStore = defineStore("player", () => {
                 binSize: 1,
                 binWidth,
                 barSpacing,
-                binPos: new Array<number>(barCount).fill(.02),
-                binNeg: new Array<number>(barCount).fill(-.02),
-                maxVolume: 1
+                binPos: new Array<number>(barCount).fill(0.02),
+                binNeg: new Array<number>(barCount).fill(-0.02),
+                maxVolume: 1,
             };
         }
-        return { trackBars, canvasWidth, binWidth, barSpacing, barCount } as MetaTrackBars;
+        return {
+            trackBars,
+            canvasWidth,
+            binWidth,
+            barSpacing,
+            barCount,
+        } as MetaTrackBars;
     }
 
-    async function calculateTrackBars(outPath: string, _trackId: string, barCount: number, binWidth: number, barSpacing: number) {
+    async function calculateTrackBars(
+        outPath: string,
+        _trackId: string,
+        barCount: number,
+        binWidth: number,
+        barSpacing: number,
+    ) {
         let audioContext = new AudioContext();
         let response = await fetch(outPath);
-        let decoded = await audioContext.decodeAudioData(await response.arrayBuffer());
+        let decoded = await audioContext.decodeAudioData(
+            await response.arrayBuffer(),
+        );
         let channelData = decoded.getChannelData(0);
 
-        let binSize = (channelData.length / barCount | 0);
+        let binSize = (channelData.length / barCount) | 0;
         let binPos = 0;
         let binNeg = 0;
         //only set canvasBars if the playing track is still the one being calculated
@@ -302,13 +378,11 @@ export const usePlayerStore = defineStore("player", () => {
             barSpacing,
             binPos: [] as number[],
             binNeg: [] as number[],
-            maxVolume: 0
+            maxVolume: 0,
         } as TrackBars;
         for (let i = 0; i < channelData.length; i++) {
-            if (channelData[i] > 0)
-                binPos += channelData[i];
-            else
-                binNeg += channelData[i];
+            if (channelData[i] > 0) binPos += channelData[i];
+            else binNeg += channelData[i];
             if (i % binSize === binSize - 1) {
                 if (Math.abs(binPos - binNeg) > bars.maxVolume)
                     bars.maxVolume = binPos - binNeg;
@@ -327,28 +401,31 @@ export const usePlayerStore = defineStore("player", () => {
     function renderProgress() {
         requestAnimationFrame(renderProgress);
         if (context === null || canvasBars === null || canvas === null) return;
-        let duration = 1, currentTime = playerElement.currentTime;
-        if (playerElement.duration)
-            duration = playerElement.duration;
+        let duration = 1,
+            currentTime = playerElement.currentTime;
+        if (playerElement.duration) duration = playerElement.duration;
 
         let mouseHoverBar = canvasBars.binPos.length * mouseHoverPercent.value;
-        const defaultBarFill = theme.current.value.dark ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.2)";
+        const defaultBarFill = theme.current.value.dark
+            ? "rgba(255,255,255,0.4)"
+            : "rgba(0,0,0,0.2)";
         let { binSize, binWidth, barSpacing } = canvasBars;
         context.clearRect(0, 0, canvas.width, canvas.height);
         let mapping = (x: number) => 2.14285714286 * x + 0.35714285714;
-        let normalizer = mapping(normalizeVolume.value ? volumeNormalizer.value : 0.3) * .7;
+        let normalizer =
+            mapping(normalizeVolume.value ? volumeNormalizer.value : 0.3) * 0.7;
 
         for (let i = 0; i < canvasBars.binPos.length; i++) {
             let timePercent = currentTime / duration;
-            let isActiveBar = (canvasBars.binPos.length * timePercent | 0) === i;
-            let barPartFill = canvasBars.binPos.length * timePercent % 1;
-
+            let isActiveBar =
+                ((canvasBars.binPos.length * timePercent) | 0) === i;
+            let barPartFill = (canvasBars.binPos.length * timePercent) % 1;
 
             let binPos = canvasBars.binPos[i] * normalizer;
             let binNeg = canvasBars.binNeg[i] * normalizer;
-            let posHeight = binPos / binSize * canvas.height;
-            let negHeight = -binNeg / binSize * canvas.height;
-            let x = (binWidth + barSpacing) * i | 0;
+            let posHeight = (binPos / binSize) * canvas.height;
+            let negHeight = (-binNeg / binSize) * canvas.height;
+            let x = ((binWidth + barSpacing) * i) | 0;
 
             context.fillStyle = defaultBarFill;
             if (x / canvas.width < currentTime / duration)
@@ -358,7 +435,9 @@ export const usePlayerStore = defineStore("player", () => {
             let y = (canvas.height / 2 - negHeight) | 0;
             if (mouseActive.value || mouseHover.value) {
                 let mouseDistanceToBar = Math.abs(mouseHoverBar - i);
-                let addedHeight = mouseActive.value ? 10 - mouseDistanceToBar * 2 : 7 - mouseDistanceToBar / 1.7;
+                let addedHeight = mouseActive.value
+                    ? 10 - mouseDistanceToBar * 2
+                    : 7 - mouseDistanceToBar / 1.7;
                 if (addedHeight > 0) {
                     y -= addedHeight / 2;
                     h += addedHeight;
@@ -368,52 +447,65 @@ export const usePlayerStore = defineStore("player", () => {
             if (isActiveBar) {
                 context.fillRect(x, y, binWidth * barPartFill, h);
                 context.fillStyle = defaultBarFill;
-                context.fillRect(x + (binWidth * barPartFill), y, binWidth * (1 - barPartFill), h);
+                context.fillRect(
+                    x + binWidth * barPartFill,
+                    y,
+                    binWidth * (1 - barPartFill),
+                    h,
+                );
             } else {
                 context.fillRect(x, y, binWidth, h);
             }
         }
     }
 
-
     function setMetadata(track: SpotifyApi.TrackObjectFull) {
-        let artistsString = track.artists.map(a => a.name).join(", ");
+        let artistsString = track.artists.map((a) => a.name).join(", ");
         document.title = track.name + " - " + artistsString;
 
-        if (!("mediaSession" in navigator))
-            return;
+        if (!("mediaSession" in navigator)) return;
 
-        let artwork = [{
-            src: randomNotFound(),
-            type: "image/png",
-            sizes: "512x512"
-        }];
+        let artwork = [
+            {
+                src: randomNotFound(),
+                type: "image/png",
+                sizes: "512x512",
+            },
+        ];
         if (track.album.images.length > 0)
-            artwork = track.album.images.map(i => ({
+            artwork = track.album.images.map((i) => ({
                 src: i.url,
                 type: "image/png",
-                sizes: `${i.width}x${i.height}`
+                sizes: `${i.width}x${i.height}`,
             }));
 
         navigator.mediaSession.metadata = new MediaMetadata({
             title: track.name,
             artist: artistsString,
             album: track.album.name,
-            artwork
+            artwork,
         });
 
-        navigator.mediaSession.setActionHandler("previoustrack", () => skip(-1));
+        navigator.mediaSession.setActionHandler("previoustrack", () =>
+            skip(-1),
+        );
         navigator.mediaSession.setActionHandler("nexttrack", () => skip(1));
 
         let defaultSkipTime = 10;
         navigator.mediaSession.setActionHandler("seekbackward", (event) => {
             const skipTime = event.seekOffset || defaultSkipTime;
-            playerElement.currentTime = Math.max(playerElement.currentTime - skipTime, 0);
+            playerElement.currentTime = Math.max(
+                playerElement.currentTime - skipTime,
+                0,
+            );
         });
 
         navigator.mediaSession.setActionHandler("seekforward", (event) => {
             const skipTime = event.seekOffset || defaultSkipTime;
-            playerElement.currentTime = Math.min(playerElement.currentTime + skipTime, playerElement.duration);
+            playerElement.currentTime = Math.min(
+                playerElement.currentTime + skipTime,
+                playerElement.duration,
+            );
         });
 
         navigator.mediaSession.setActionHandler("play", () => play());
@@ -423,7 +515,9 @@ export const usePlayerStore = defineStore("player", () => {
         try {
             navigator.mediaSession.setActionHandler("stop", () => pause());
         } catch (error) {
-            console.warn("Warning! The \"stop\" media session action is not supported.");
+            console.warn(
+                'Warning! The "stop" media session action is not supported.',
+            );
         }
 
         try {
@@ -432,10 +526,11 @@ export const usePlayerStore = defineStore("player", () => {
                     playerElement.currentTime = event.seekTime;
             });
         } catch (error) {
-            console.warn("Warning! The \"seekto\" media session action is not supported.");
+            console.warn(
+                'Warning! The "seekto" media session action is not supported.',
+            );
         }
     }
-
 
     async function skip(n = 1) {
         if (n === -1 && currentTime.value > 5) {
@@ -445,7 +540,7 @@ export const usePlayerStore = defineStore("player", () => {
         let trackId = track.value?.id;
         if (collection.value === null || trackId === null) return;
 
-        let index = queue.value.findIndex(t => t.id === trackId);
+        let index = queue.value.findIndex((t) => t.id === trackId);
         let newIndex = index + n;
         let repeatRequired = false;
         if (newIndex >= queue.value.length) {
@@ -500,7 +595,12 @@ export const usePlayerStore = defineStore("player", () => {
 
     async function shuffleCollection(collection: ItemCollection) {
         shuffle.value = true;
-        await load(collection, collection.tracks[Math.floor(Math.random() * collection.tracks.length)]);
+        await load(
+            collection,
+            collection.tracks[
+                Math.floor(Math.random() * collection.tracks.length)
+            ],
+        );
     }
 
     return {
@@ -534,6 +634,6 @@ export const usePlayerStore = defineStore("player", () => {
         deleteTrack,
         normalizeVolume,
         initTrackbars,
-        unload
+        unload,
     };
 });
