@@ -234,7 +234,7 @@ export const usePlayerStore = defineStore("player", () => {
 
     let statsInterval = 0;
     let intervalSeconds = 30;
-    const collectStatsPeriod = 10;
+    const collectStatsPeriod = 60;
 
     function createStatsInterval() {
         if (!playing.value) return;
