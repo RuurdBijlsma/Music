@@ -280,14 +280,21 @@ export const usePlayerStore = defineStore("player", () => {
         await db.put("statistics", ++listenCount, "listenCount");
         console.log({ listenCount });
 
+        if (currentTrack === null) return;
+
         let today = new Date().toISOString().substring(0, 10);
         let popularityHistory = await db.get("statistics", "popularityHistory");
         if (popularityHistory === undefined) popularityHistory = {};
-        popularityHistory[today] = (popularityHistory[today] ?? 0) + 1;
+        if(!popularityHistory.hasOwnProperty(today)){
+            popularityHistory[today]={
+                popularitySum: 0,
+                listenCount:0
+            }
+        }
+        popularityHistory[today].popularitySum+=currentTrack.popularity;
+        popularityHistory[today].listenCount++;
         await db.put("statistics", popularityHistory, "popularityHistory");
         console.log({ popularityHistory });
-
-        if (currentTrack === null) return;
 
         let trackStats = await db.get("trackStats", currentTrack.id);
         if (!trackStats) trackStats = emptyTrackStats();
@@ -340,11 +347,11 @@ export const usePlayerStore = defineStore("player", () => {
         await db.put("statistics", ++listenMinutes, "listenMinutes");
         console.log({ listenMinutes });
 
-        let history = await db.get("statistics", "history");
-        if (history === undefined) history = {};
-        history[today] = (history[today] ?? 0) + 1;
-        await db.put("statistics", history, "history");
-        console.log({ history });
+        let historyMinutes = await db.get("statistics", "historyMinutes");
+        if (historyMinutes === undefined) historyMinutes = {};
+        historyMinutes[today] = (historyMinutes[today] ?? 0) + 1;
+        await db.put("statistics", historyMinutes, "historyMinutes");
+        console.log({ historyMinutes });
 
         let trackStats = await db.get("trackStats", track.value.id);
         if (!trackStats) trackStats = emptyTrackStats();
