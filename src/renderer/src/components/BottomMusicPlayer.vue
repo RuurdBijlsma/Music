@@ -1,46 +1,83 @@
 <template>
-    <div class="mp" ref="musicContainer" v-if="player.track !== null">
-        <glow-image class="first-section"
-                    :src="base.itemImage(player.track)"
-                    :height="100"
-                    :width="100"
-                    rounding="10px" />
+    <div v-if="player.track !== null" ref="musicContainer" class="mp">
+        <glow-image
+            :height="100"
+            :src="base.itemImage(player.track)"
+            :width="100"
+            class="first-section"
+            rounding="10px"
+        />
         <div class="second-section">
             <div class="music-info-text">
                 <h2 class="music-title">{{ player.track.name }}</h2>
                 <h3 class="music-artist">
-                    <artists-span :artists="player.track.artists"></artists-span>
+                    <artists-span
+                        :artists="player.track.artists"
+                    ></artists-span>
                 </h3>
             </div>
             <div class="music-progress">
-                <div class="music-time-current">{{ base.msToReadable(player.currentTime * 1000) }}</div>
+                <div class="music-time-current">
+                    {{ base.msToReadable(player.currentTime * 1000) }}
+                </div>
                 <div class="progress-container">
                     <compact-progress-bar class="progress-bar" />
                 </div>
-                <div class="music-time-total">{{ base.msToReadable(player.duration * 1000) }}</div>
+                <div class="music-time-total">
+                    {{ base.msToReadable(player.duration * 1000) }}
+                </div>
             </div>
         </div>
         <div class="third-section">
             <div class="music-controls">
-                <v-btn :variant="base.themeTooSimilarToFg && player.shuffle ? 'tonal' : 'text'"
-                       icon size="20"
-                       @click="player.toggleShuffle"
-                       :color="player.shuffle ? base.themeColor : 'default'">
+                <v-btn
+                    :color="player.shuffle ? base.themeColor : 'default'"
+                    :variant="
+                        base.themeTooSimilarToFg && player.shuffle
+                            ? 'tonal'
+                            : 'text'
+                    "
+                    icon
+                    size="20"
+                    @click="player.toggleShuffle"
+                >
                     <v-icon size="14">mdi-shuffle</v-icon>
                 </v-btn>
-                <v-btn variant="text" icon="mdi-skip-previous" size="25" @click="player.skip(-1)"></v-btn>
-                <v-btn variant="text" icon size="30" @click="player.togglePlay">
-                    <v-progress-circular :indeterminate="isNaN(player.loadProgress)"
-                                         :model-value="player.loadProgress"
-                                         size="25" v-if="player.loading"></v-progress-circular>
-                    <v-icon size="30" v-else-if="player.playing">mdi-pause</v-icon>
-                    <v-icon size="30" v-else>mdi-play</v-icon>
+                <v-btn
+                    icon="mdi-skip-previous"
+                    size="25"
+                    variant="text"
+                    @click="player.skip(-1)"
+                ></v-btn>
+                <v-btn icon size="30" variant="text" @click="player.togglePlay">
+                    <v-progress-circular
+                        v-if="player.loading"
+                        :indeterminate="isNaN(player.loadProgress)"
+                        :model-value="player.loadProgress"
+                        size="25"
+                    ></v-progress-circular>
+                    <v-icon v-else-if="player.playing" size="30"
+                        >mdi-pause</v-icon
+                    >
+                    <v-icon v-else size="30">mdi-play</v-icon>
                 </v-btn>
-                <v-btn variant="text" icon="mdi-skip-next" size="25" @click="player.skip(1)"></v-btn>
-                <v-btn :variant="base.themeTooSimilarToFg && player.repeat ? 'tonal' : 'text'"
-                       icon size="20"
-                       @click="player.toggleRepeat"
-                       :color="player.repeat ? base.themeColor : 'default'">
+                <v-btn
+                    icon="mdi-skip-next"
+                    size="25"
+                    variant="text"
+                    @click="player.skip(1)"
+                ></v-btn>
+                <v-btn
+                    :color="player.repeat ? base.themeColor : 'default'"
+                    :variant="
+                        base.themeTooSimilarToFg && player.repeat
+                            ? 'tonal'
+                            : 'text'
+                    "
+                    icon
+                    size="20"
+                    @click="player.toggleRepeat"
+                >
                     <v-icon size="14">mdi-repeat</v-icon>
                 </v-btn>
             </div>
@@ -49,10 +86,12 @@
                 <queue-button />
                 <v-menu>
                     <template v-slot:activator="{ props }">
-                        <v-btn class="track-options ml-2"
-                               v-bind="props"
-                               rounded
-                               variant="text">
+                        <v-btn
+                            class="track-options ml-2"
+                            rounded
+                            v-bind="props"
+                            variant="text"
+                        >
                             <v-icon>mdi-dots-horizontal</v-icon>
                         </v-btn>
                     </template>
@@ -63,7 +102,7 @@
     </div>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import { ref } from "vue";
 import GlowImage from "./GlowImage.vue";
 import { usePlayerStore } from "../store/player";
@@ -79,7 +118,7 @@ const base = useBaseStore();
 const musicContainer = ref(null);
 </script>
 
-<style scoped lang="less">
+<style lang="less" scoped>
 .mp {
     display: flex;
     flex-direction: row;
@@ -146,7 +185,8 @@ const musicContainer = ref(null);
     margin-top: 20px;
 }
 
-.music-time-current, .music-time-total {
+.music-time-current,
+.music-time-total {
     opacity: 0.7;
     font-weight: 600;
     width: 35px;
@@ -154,14 +194,14 @@ const musicContainer = ref(null);
 }
 
 .progress-container {
-    width:100%;
+    width: 100%;
     margin-left: 10px;
     margin-right: 10px;
 }
 
 .progress-bar {
     flex-grow: 1;
-    margin-top:1px;
+    margin-top: 1px;
 }
 
 .third-section {
@@ -169,8 +209,8 @@ const musicContainer = ref(null);
     flex-direction: column;
     height: calc(100% - 10px);
     justify-content: center;
-    gap:20px;
-    margin-top:10px;
+    gap: 20px;
+    margin-top: 10px;
 }
 
 .extra-bar-buttons {

@@ -1,15 +1,22 @@
 <template>
-    <div class="playlist pb-8" v-if="playlist">
-        <track-list :collection="collection" v-if="collection && collection.tracks.length < 200">
+    <div v-if="playlist" class="playlist pb-8">
+        <track-list
+            v-if="collection && collection.tracks.length < 200"
+            :collection="collection"
+        >
             <playlist-header :collection="collection" />
         </track-list>
-        <track-list-virtual v-else :collection="collection" :height="base.windowHeight.toString()">
+        <track-list-virtual
+            v-else
+            :collection="collection"
+            :height="base.windowHeight.toString()"
+        >
             <playlist-header :collection="collection" />
         </track-list-virtual>
     </div>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import { useLibraryStore } from "../../store/library";
 import { computed, ref, toRaw, watch } from "vue";
 import { useRoute } from "vue-router";
@@ -30,9 +37,9 @@ const { viewedPlaylistRefreshRequired } = storeToRefs(library);
 const collection = computed(() => {
     if (playlist.value === null) return null;
     let tracks = playlist.value.tracks.items
-        .filter(t => t.track !== null)
-        .map(t => t.track as SpotifyApi.TrackObjectFull);
-    console.log(tracks.map(t => toRaw(t)));
+        .filter((t) => t.track !== null)
+        .map((t) => t.track as SpotifyApi.TrackObjectFull);
+    console.log(tracks.map((t) => toRaw(t)));
     return base.itemCollection(playlist.value, tracks);
 });
 
@@ -44,19 +51,20 @@ async function refresh() {
 
 let loadedId = route.params.id as string;
 watch(route, async () => {
-    if (route.path.startsWith("/playlist") && typeof route.params.id === "string" && route.params.id !== loadedId) {
+    if (
+        route.path.startsWith("/playlist") &&
+        typeof route.params.id === "string" &&
+        route.params.id !== loadedId
+    ) {
         loadedId = route.params.id;
         await refresh();
     }
 });
 watch(viewedPlaylistRefreshRequired, () => {
-    if (viewedPlaylistRefreshRequired.value)
-        refresh();
+    if (viewedPlaylistRefreshRequired.value) refresh();
 });
 
 refresh();
-
 </script>
 
-<style scoped lang="less">
-</style>
+<style lang="less" scoped></style>

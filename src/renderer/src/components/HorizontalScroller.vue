@@ -1,26 +1,40 @@
 <template>
     <div class="container">
-        <v-btn @click="scroll(-1)"
-               @dblclick="scroll(-10)"
-               v-show="canGoLeft"
-               density="default" class="arrow left" variant="flat"
-               icon="mdi-chevron-left" />
+        <v-btn
+            v-show="canGoLeft"
+            class="arrow left"
+            density="default"
+            icon="mdi-chevron-left"
+            variant="flat"
+            @click="scroll(-1)"
+            @dblclick="scroll(-10)"
+        />
 
-        <div class="horizontal-scroller"
-             ref="scrollContainer"
-             :style="{'-webkit-mask-image': canGoLeft ? 'linear-gradient(to right, transparent 0%, white 5%)' : 'none'}">
+        <div
+            ref="scrollContainer"
+            :style="{
+                '-webkit-mask-image': canGoLeft
+                    ? 'linear-gradient(to right, transparent 0%, white 5%)'
+                    : 'none',
+            }"
+            class="horizontal-scroller"
+        >
             <slot></slot>
         </div>
 
-        <v-btn @click="scroll(1)"
-               @dblclick="scroll(10)"
-               v-show="canGoRight"
-               density="default" class="arrow right" variant="flat"
-               icon="mdi-chevron-right" />
+        <v-btn
+            v-show="canGoRight"
+            class="arrow right"
+            density="default"
+            icon="mdi-chevron-right"
+            variant="flat"
+            @click="scroll(1)"
+            @dblclick="scroll(10)"
+        />
     </div>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import { onMounted, onUnmounted, ref } from "vue";
 
 const canGoLeft = ref(false);
@@ -31,8 +45,8 @@ function scroll(direction: number) {
     let el = scrollContainer.value as HTMLElement | null;
     if (el === null) return;
     el.scrollTo({
-        left: el.scrollLeft + el.clientWidth * .85 * direction,
-        behavior: "smooth"
+        left: el.scrollLeft + el.clientWidth * 0.85 * direction,
+        behavior: "smooth",
     });
 }
 
@@ -55,10 +69,9 @@ onUnmounted(() => {
     if (el === null) return;
     el.removeEventListener("scroll", checkCanScroll);
 });
-
 </script>
 
-<style scoped lang="less">
+<style lang="less" scoped>
 .container {
     position: relative;
 }

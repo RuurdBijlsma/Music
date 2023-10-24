@@ -1,19 +1,21 @@
 <template>
     <v-text-field
-        no-drag
-        spellcheck="false"
-        class="search-field"
-        hide-details density="compact"
         v-model="search.searchValue"
-        append-inner-icon="mdi-magnify"
-        placeholder="Search tracks, artists, playlists, and more"
-        @keydown.enter="goToSearch"
         :clearable="true"
-        variant="solo">
+        append-inner-icon="mdi-magnify"
+        class="search-field"
+        density="compact"
+        hide-details
+        no-drag
+        placeholder="Search tracks, artists, playlists, and more"
+        spellcheck="false"
+        variant="solo"
+        @keydown.enter="goToSearch"
+    >
     </v-text-field>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import { useRouter } from "vue-router";
 import { useSearchStore } from "../store/search";
 
@@ -22,21 +24,24 @@ const search = useSearchStore();
 
 function goToSearch() {
     router.push(`/search/${search.searchValue}`);
-    let input = document.querySelector(".search-field input") as HTMLInputElement | null;
+    let input = document.querySelector(
+        ".search-field input",
+    ) as HTMLInputElement | null;
     if (input === null) return;
     input.blur();
 }
 </script>
 
-<style scoped lang="less">
+<style lang="less" scoped>
 .search-field {
-    height:40px;
+    height: 40px;
     -webkit-app-region: no-drag;
     width: 300px;
     flex-grow: 2;
     position: relative;
 }
-.search-field:deep(input){
+
+.search-field:deep(input) {
     height: 40px;
 }
 

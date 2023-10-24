@@ -1,15 +1,21 @@
 <template>
-    <v-btn :icon="iconButton" rounded variant="text" :loading="likedLoading" :color="color"
-           @click="toggleLike()">
+    <v-btn
+        :color="color"
+        :icon="iconButton"
+        :loading="likedLoading"
+        rounded
+        variant="text"
+        @click="toggleLike()"
+    >
         <v-icon>{{ fill ? "mdi-heart" : "mdi-heart-outline" }}</v-icon>
     </v-btn>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import { useBaseStore } from "../store/base";
+import type { PropType } from "vue";
 import { computed, ref } from "vue";
 import type { Item } from "../scripts/types";
-import type { PropType } from "vue";
 import { useLibraryStore } from "../store/library";
 
 const base = useBaseStore();
@@ -18,21 +24,31 @@ const library = useLibraryStore();
 const props = defineProps({
     item: {
         type: Object as PropType<Item>,
-        required: true
+        required: true,
     },
     variant: {
         type: String as PropType<"color" | "fill" | "no-theme">,
-        default: "color"
+        default: "color",
     },
     iconButton: {
         type: Boolean,
-        default: false
+        default: false,
     },
 });
 
-const isLiked = computed(() => library.checkLiked(props.item.type, props.item.id));
-const color = computed(() => props.variant !== "no-theme" && (props.variant === "fill" || isLiked.value) ? base.themeColor : "default");
-const fill = computed(() => isLiked.value && (props.variant !== "color" || base.themeTooSimilarToFg));
+const isLiked = computed(() =>
+    library.checkLiked(props.item.type, props.item.id),
+);
+const color = computed(() =>
+    props.variant !== "no-theme" && (props.variant === "fill" || isLiked.value)
+        ? base.themeColor
+        : "default",
+);
+const fill = computed(
+    () =>
+        isLiked.value &&
+        (props.variant !== "color" || base.themeTooSimilarToFg),
+);
 
 let likedLoading = ref(false);
 
@@ -43,5 +59,4 @@ async function toggleLike() {
 }
 </script>
 
-<style scoped lang="less">
-</style>
+<style lang="less" scoped></style>

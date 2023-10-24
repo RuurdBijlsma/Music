@@ -1,19 +1,25 @@
 <template>
     <div class="grab-area">
-        <v-sheet rounded class="progress-bg">
-            <div :style="{
-                backgroundColor: base.themeColor,
-                width: fillPercent + '%',
-            }" class="progress-filled"></div>
-            <div class="progress-thumb" :style="{
-                left: `calc(${fillPercent}% - 5px)`,
-                backgroundColor: base.themeColor,
-            }"></div>
+        <v-sheet class="progress-bg" rounded>
+            <div
+                :style="{
+                    backgroundColor: base.themeColor,
+                    width: fillPercent + '%',
+                }"
+                class="progress-filled"
+            ></div>
+            <div
+                :style="{
+                    left: `calc(${fillPercent}% - 5px)`,
+                    backgroundColor: base.themeColor,
+                }"
+                class="progress-thumb"
+            ></div>
         </v-sheet>
     </div>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import { usePlayerStore } from "../store/player";
 import { computed, onMounted, onUnmounted } from "vue";
 import { useBaseStore } from "../store/base";
@@ -22,7 +28,9 @@ const player = usePlayerStore();
 const base = useBaseStore();
 let seekDown = false;
 
-const fillPercent = computed(() => Math.round(10000 * player.currentTime / player.duration) / 100);
+const fillPercent = computed(
+    () => Math.round((10000 * player.currentTime) / player.duration) / 100,
+);
 
 function seek(e: MouseEvent) {
     let grab = document.querySelector(".grab-area") as HTMLElement | null;
@@ -53,12 +61,10 @@ onMounted(() => {
     if (grab === null) return;
     grab.addEventListener("mousedown", onDown, false);
 });
-onUnmounted(() => {
-
-});
+onUnmounted(() => {});
 </script>
 
-<style scoped lang="less">
+<style lang="less" scoped>
 .grab-area {
     height: 20px;
     display: flex;
@@ -93,5 +99,4 @@ onUnmounted(() => {
     top: -7px;
     position: relative;
 }
-
 </style>

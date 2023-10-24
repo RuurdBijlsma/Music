@@ -1,10 +1,30 @@
 <template>
     <div class="library">
         <div class="nav-buttons mt-2 mb-2">
-            <v-btn variant="text" :active="tab === 'tracks'" @click="tab='tracks'">Tracks</v-btn>
-            <v-btn variant="text" :active="tab === 'albums'" @click="tab='albums'">Albums</v-btn>
-            <v-btn variant="text" :active="tab === 'artists'" @click="tab='artists'">Artists</v-btn>
-            <v-btn variant="text" :active="tab === 'playlists'" @click="tab='playlists'">Playlists</v-btn>
+            <v-btn
+                :active="tab === 'tracks'"
+                variant="text"
+                @click="tab = 'tracks'"
+                >Tracks</v-btn
+            >
+            <v-btn
+                :active="tab === 'albums'"
+                variant="text"
+                @click="tab = 'albums'"
+                >Albums</v-btn
+            >
+            <v-btn
+                :active="tab === 'artists'"
+                variant="text"
+                @click="tab = 'artists'"
+                >Artists</v-btn
+            >
+            <v-btn
+                :active="tab === 'playlists'"
+                variant="text"
+                @click="tab = 'playlists'"
+                >Playlists</v-btn
+            >
         </div>
         <v-window v-model="tab">
             <v-window-item value="tracks">
@@ -23,7 +43,7 @@
     </div>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import { ref, watch } from "vue";
 import Tracks from "./library/Tracks.vue";
 import Artists from "./library/Artists.vue";
@@ -46,7 +66,7 @@ function checkRoute() {
 checkRoute();
 </script>
 
-<style scoped lang="less">
+<style lang="less" scoped>
 .library {
     padding-top: 60px;
 }

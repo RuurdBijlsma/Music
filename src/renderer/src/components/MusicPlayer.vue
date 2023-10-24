@@ -1,44 +1,87 @@
 <template>
-    <div class="mp" ref="musicContainer" v-if="player.track !== null">
+    <div v-if="player.track !== null" ref="musicContainer" class="mp">
         <spacer></spacer>
-        <glow-image class="album-art"
-                    :src="base.itemImage(player.track)"
-                    :height="lowWindow ? elWidth / 2.5 : elWidth / 2"
-                    :width="lowWindow ? elWidth / 2.5 : elWidth / 2"
-                    rounding="10px" />
+        <glow-image
+            :height="lowWindow ? elWidth / 2.5 : elWidth / 2"
+            :src="base.itemImage(player.track)"
+            :width="lowWindow ? elWidth / 2.5 : elWidth / 2"
+            class="album-art"
+            rounding="10px"
+        />
         <div class="sheet">
             <div class="music-info-text">
                 <h2 class="music-title">{{ player.track.name }}</h2>
                 <h3 class="music-artist">
-                    <artists-span :artists="player.track.artists"></artists-span>
+                    <artists-span
+                        :artists="player.track.artists"
+                    ></artists-span>
                 </h3>
             </div>
             <div class="music-progress">
-                <div class="music-time-current">{{ base.msToReadable(player.currentTime * 1000) }}</div>
+                <div class="music-time-current">
+                    {{ base.msToReadable(player.currentTime * 1000) }}
+                </div>
                 <div class="progress-container">
                     <progress-bar />
                 </div>
-                <div class="music-time-total">{{ base.msToReadable(player.duration * 1000) }}</div>
+                <div class="music-time-total">
+                    {{ base.msToReadable(player.duration * 1000) }}
+                </div>
             </div>
             <div class="music-controls">
-                <v-btn :variant="base.themeTooSimilarToFg && player.shuffle ? 'tonal' : 'text'"
-                       icon size="35"
-                       @click="player.toggleShuffle"
-                       :color="player.shuffle ? base.themeColor : 'default'">
+                <v-btn
+                    :color="player.shuffle ? base.themeColor : 'default'"
+                    :variant="
+                        base.themeTooSimilarToFg && player.shuffle
+                            ? 'tonal'
+                            : 'text'
+                    "
+                    icon
+                    size="35"
+                    @click="player.toggleShuffle"
+                >
                     <v-icon size="20">mdi-shuffle</v-icon>
                 </v-btn>
-                <v-btn variant="text" icon="mdi-skip-previous" size="35" @click="player.skip(-1)"></v-btn>
-                <v-btn variant="tonal" icon size="60" @click="player.togglePlay">
-                    <v-progress-circular :indeterminate="isNaN(player.loadProgress)"
-                                         :model-value="player.loadProgress"
-                                         size="40" v-if="player.loading"/>
-                    <v-icon size="30" v-else-if="player.playing">mdi-pause</v-icon>
-                    <v-icon size="30" v-else>mdi-play</v-icon>
+                <v-btn
+                    icon="mdi-skip-previous"
+                    size="35"
+                    variant="text"
+                    @click="player.skip(-1)"
+                ></v-btn>
+                <v-btn
+                    icon
+                    size="60"
+                    variant="tonal"
+                    @click="player.togglePlay"
+                >
+                    <v-progress-circular
+                        v-if="player.loading"
+                        :indeterminate="isNaN(player.loadProgress)"
+                        :model-value="player.loadProgress"
+                        size="40"
+                    />
+                    <v-icon v-else-if="player.playing" size="30"
+                        >mdi-pause</v-icon
+                    >
+                    <v-icon v-else size="30">mdi-play</v-icon>
                 </v-btn>
-                <v-btn variant="text" icon="mdi-skip-next" size="35" @click="player.skip(1)"></v-btn>
-                <v-btn :variant="base.themeTooSimilarToFg && player.repeat ? 'tonal' : 'text'" icon size="35"
-                       @click="player.toggleRepeat"
-                       :color="player.repeat ? base.themeColor : 'default'">
+                <v-btn
+                    icon="mdi-skip-next"
+                    size="35"
+                    variant="text"
+                    @click="player.skip(1)"
+                ></v-btn>
+                <v-btn
+                    :color="player.repeat ? base.themeColor : 'default'"
+                    :variant="
+                        base.themeTooSimilarToFg && player.repeat
+                            ? 'tonal'
+                            : 'text'
+                    "
+                    icon
+                    size="35"
+                    @click="player.toggleRepeat"
+                >
                     <v-icon size="20">mdi-repeat</v-icon>
                 </v-btn>
             </div>
@@ -48,21 +91,33 @@
             <like-button :item="player.track" variant="fill" />
             <queue-button />
             <div class="volume-slider">
-                <v-slider v-model="player.volume"
-                          density="compact"
-                          @wheel="handleScroll"
-                          thumb-size="10"
-                          track-size="1"
-                          @click:prepend="toggleMute"
-                          :prepend-icon="player.volume < .2 ? 'mdi-volume-low' : player.volume < .7 ? 'mdi-volume-medium' : 'mdi-volume-high'"
-                          hide-details :min="0" :max="1"></v-slider>
+                <v-slider
+                    v-model="player.volume"
+                    :max="1"
+                    :min="0"
+                    :prepend-icon="
+                        player.volume < 0.2
+                            ? 'mdi-volume-low'
+                            : player.volume < 0.7
+                            ? 'mdi-volume-medium'
+                            : 'mdi-volume-high'
+                    "
+                    density="compact"
+                    hide-details
+                    thumb-size="10"
+                    track-size="1"
+                    @wheel="handleScroll"
+                    @click:prepend="toggleMute"
+                ></v-slider>
             </div>
             <v-menu>
                 <template v-slot:activator="{ props }">
-                    <v-btn class="track-options ml-2"
-                           v-bind="props"
-                           rounded
-                           variant="text">
+                    <v-btn
+                        class="track-options ml-2"
+                        rounded
+                        v-bind="props"
+                        variant="text"
+                    >
                         <v-icon>mdi-dots-horizontal</v-icon>
                     </v-btn>
                 </template>
@@ -72,7 +127,7 @@
     </div>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import { computed, onMounted, onUnmounted, ref } from "vue";
 import GlowImage from "./GlowImage.vue";
 import { usePlayerStore } from "../store/player";
@@ -112,7 +167,6 @@ function checkElWidth() {
     elWidth.value = el.getBoundingClientRect().width;
 }
 
-
 let interval = 0;
 onMounted(() => {
     window.addEventListener("resize", checkElWidth);
@@ -125,7 +179,7 @@ onUnmounted(() => {
 });
 </script>
 
-<style scoped lang="less">
+<style lang="less" scoped>
 .mp {
     display: flex;
     flex-direction: column;
@@ -202,7 +256,8 @@ onUnmounted(() => {
     font-size: 13px;
 }
 
-.music-time-current, .music-time-total {
+.music-time-current,
+.music-time-total {
     opacity: 0.7;
     font-weight: 600;
     width: 35px;

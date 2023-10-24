@@ -1,17 +1,21 @@
 <template>
     <div class="playlists pt-4">
-        <item-card class="mb-4" v-for="playlist in library.saved.playlist" :item="playlist" />
+        <item-card
+            v-for="playlist in library.saved.playlist"
+            :item="playlist"
+            class="mb-4"
+        />
     </div>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import { useLibraryStore } from "../../store/library";
 import ItemCard from "../../components/ItemCard.vue";
 
 const library = useLibraryStore();
 </script>
 
-<style scoped lang="less">
+<style lang="less" scoped>
 .playlists {
     display: flex;
     flex-wrap: wrap;

@@ -17,15 +17,23 @@ export const baseDb = openDB("base", 1, {
         db.createObjectStore("trackVolumeStats");
 
         const trackStore = db.createObjectStore("tracks", { keyPath: "id" });
-        trackStore.createIndex("searchString", "searchString", { unique: false });
+        trackStore.createIndex("searchString", "searchString", {
+            unique: false,
+        });
         trackStore.createIndex("title", "title", { unique: false });
         trackStore.createIndex("artist", "artistString", { unique: false });
         trackStore.createIndex("oldToNew", "added_at", { unique: false });
-        trackStore.createIndex("newToOld", "added_at_reverse", { unique: false });
+        trackStore.createIndex("newToOld", "added_at_reverse", {
+            unique: false,
+        });
 
-        const ytTrackStore = db.createObjectStore("yt-tracks", { keyPath: "id" });
-        ytTrackStore.createIndex("newToOld", "added_at_reverse", { unique: false });
-    }
+        const ytTrackStore = db.createObjectStore("yt-tracks", {
+            keyPath: "id",
+        });
+        ytTrackStore.createIndex("newToOld", "added_at_reverse", {
+            unique: false,
+        });
+    },
 });
 
 export const useBaseStore = defineStore("base", () => {
@@ -37,7 +45,11 @@ export const useBaseStore = defineStore("base", () => {
     });
     const themeColorDark = ref("#FFFFFF");
     const themeColorLight = ref("#000000");
-    const themeColor = computed(() => theme.global.name.value === "dark" ? themeColorDark.value : themeColorLight.value);
+    const themeColor = computed(() =>
+        theme.global.name.value === "dark"
+            ? themeColorDark.value
+            : themeColorLight.value,
+    );
     const contrastToForeground = computed(() => {
         let themeRgb = hexToRgb(themeColor.value);
         let fgRgb = hexToRgb(theme.current.value.colors["on-background"]);
@@ -46,14 +58,16 @@ export const useBaseStore = defineStore("base", () => {
     });
     const themeTooSimilarToFg = computed(() => contrastToForeground.value < 17);
 
-    const snackbars = ref([] as { open: boolean, text: string, timeout: number }[]);
+    const snackbars = ref(
+        [] as { open: boolean; text: string; timeout: number }[],
+    );
     const isDark = computed(() => theme.current.value.dark);
 
     const contextMenu = ref({
         x: 0,
         y: 0,
         show: false,
-        item: null as any
+        item: null as any,
     });
 
     const sourceDialog = ref({
@@ -62,9 +76,9 @@ export const useBaseStore = defineStore("base", () => {
         loading: false,
         tempTrackOverride: {
             ytId: "",
-            trackId: ""
+            trackId: "",
         },
-        spotifyTrack: null as SpotifyApi.TrackObjectFull | null
+        spotifyTrack: null as SpotifyApi.TrackObjectFull | null,
     });
     const sourceSelectedId = ref("");
 
@@ -77,19 +91,23 @@ export const useBaseStore = defineStore("base", () => {
     window.addEventListener("resize", onWindowResize, false);
 
     function approximateDuration(millis: number) {
-        if (millis > 7200000)
-            return Math.round(millis / 3600000) + " hours";
+        if (millis > 7200000) return Math.round(millis / 3600000) + " hours";
         let minutes = Math.round(millis / 60000);
         return minutes + " minute" + (minutes === 1 ? "" : "s");
     }
 
     function albumString(item: SpotifyApi.AlbumObjectFull | any) {
-        return `${item.total_tracks} track${item.total_tracks === 1 ? "" : "s"} • ${item.artists.map(a => a.name).join(", ")} • ${item.release_date.substring(0, 4)} • ${caps(item.album_type)}`;
+        return `${item.total_tracks} track${
+            item.total_tracks === 1 ? "" : "s"
+        } • ${item.artists
+            .map((a) => a.name)
+            .join(", ")} • ${item.release_date.substring(0, 4)} • ${caps(
+            item.album_type,
+        )}`;
     }
 
     function msToReadable(millis: number) {
-        if (isNaN(millis) || millis === undefined)
-            return "0:00";
+        if (isNaN(millis) || millis === undefined) return "0:00";
 
         let seconds = Math.round(millis / 1000);
         let h = Math.floor(seconds / 3600);
@@ -104,14 +122,15 @@ export const useBaseStore = defineStore("base", () => {
         }
         sString = sString.padStart(2, "0");
 
-        if (hString === "0")
-            return `${mString}:${sString}`;
+        if (hString === "0") return `${mString}:${sString}`;
         else return `${hString}:${mString}:${sString}`;
     }
 
     function itemDescription(item: Item) {
         if (item.type === "album") {
-            return `${caps(item?.album_type ?? "")} • ${(item?.artists ?? []).map(a => a.name).join(", ")}`;
+            return `${caps(item?.album_type ?? "")} • ${(item?.artists ?? [])
+                .map((a) => a.name)
+                .join(", ")}`;
         }
         if (item.type !== "playlist") return "";
         return item.description ?? "";
@@ -135,15 +154,16 @@ export const useBaseStore = defineStore("base", () => {
     }
 
     const encodeUrlName = (name: string) => {
-        if (name.trim() === "")
-            return "_";
+        if (name.trim() === "") return "_";
         let toEncode = name.toLowerCase().replace(/ /gi, "-").slice(0, 36);
         let encoded: string;
         try {
             encoded = encodeURIComponent(toEncode);
         } catch (e) {
             encoded = toEncode.replace(/[^a-z0-9]/gi, "");
-            console.warn(`Couldn't uri encode ${toEncode}, changed to ${encoded}`);
+            console.warn(
+                `Couldn't uri encode ${toEncode}, changed to ${encoded}`,
+            );
         }
         return encoded;
     };
@@ -158,19 +178,21 @@ export const useBaseStore = defineStore("base", () => {
         name ??= "";
         if (type === "category")
             return `${type}/${encodeUrlName(name)}/${item.id}`;
-        if (type === "radio")
-            return "";
-        if (type === "search")
-            return item.to ?? "/";
-        if (type === "liked")
-            return "/library/tracks";
+        if (type === "radio") return "";
+        if (type === "search") return item.to ?? "/";
+        if (type === "liked") return "/library/tracks";
         return `/${type}/${encodeUrlName(name)}/${item.id}`;
     };
 
-    const itemCollection = (item: Item, tracks: SpotifyApi.TrackObjectFull[] | null = null) => {
+    const itemCollection = (
+        item: Item,
+        tracks: SpotifyApi.TrackObjectFull[] | null = null,
+    ) => {
         if (item.type === "playlist") {
             if (tracks === null)
-                tracks = item.tracks.items.map(t => t.track as SpotifyApi.TrackObjectFull);
+                tracks = item.tracks.items.map(
+                    (t) => t.track as SpotifyApi.TrackObjectFull,
+                );
             return {
                 id: item.id ?? "playlist",
                 tracks: tracks,
@@ -178,7 +200,7 @@ export const useBaseStore = defineStore("base", () => {
                 context: item,
                 name: item.name ?? "Playlist",
                 buttonText: "Playlist",
-                to: itemUrl(item)
+                to: itemUrl(item),
             } as ItemCollection;
         } else if (item.type === "artist") {
             return {
@@ -188,7 +210,7 @@ export const useBaseStore = defineStore("base", () => {
                 context: item,
                 name: item.name ?? "Artist",
                 buttonText: "Artist",
-                to: itemUrl(item)
+                to: itemUrl(item),
             } as ItemCollection;
         } else if (item.type === "album") {
             if (tracks === null && item.tracks !== undefined)
@@ -200,7 +222,7 @@ export const useBaseStore = defineStore("base", () => {
                 context: item,
                 name: item.name ?? "Album",
                 buttonText: "Album",
-                to: itemUrl(item)
+                to: itemUrl(item),
             } as ItemCollection;
         }
         return null;
@@ -217,7 +239,7 @@ export const useBaseStore = defineStore("base", () => {
         let snack = {
             text,
             timeout,
-            open: true
+            open: true,
         };
         snackbars.value.push(snack);
         setTimeout(() => {
@@ -226,7 +248,8 @@ export const useBaseStore = defineStore("base", () => {
         }, timeout + 500);
     }
 
-    const waitFor = (name: string) => new Promise(resolve => events.once(name, resolve));
+    const waitFor = (name: string) =>
+        new Promise((resolve) => events.once(name, resolve));
     const radioId = () => Math.random().toString().replace(".", "");
 
     return {
@@ -256,6 +279,6 @@ export const useBaseStore = defineStore("base", () => {
         windowWidth,
         encodeUrlName,
         caps,
-        isDark
+        isDark,
     };
 });

@@ -1,38 +1,46 @@
 <template>
-    <div class="album pb-5" v-if="album">
-        <track-list :collection="collection" type="album" no-images>
+    <div v-if="album" class="album pb-5">
+        <track-list :collection="collection" no-images type="album">
             <div class="mb-8 album-info">
                 <glow-image
-                    rounding="5px"
-                    :width="250"
                     :height="250"
+                    :src="base.itemImage(album)"
+                    :width="250"
                     class="mb-4"
-                    :src="base.itemImage(album)" />
+                    rounding="5px"
+                />
                 <spacer />
                 <h1>{{ album.name }}</h1>
                 <h2 class="artist-names">
                     <template v-for="(artist, i) in album.artists">
-                        <router-link class="user-url"
-                                     :to="base.itemUrl(artist)">
+                        <router-link
+                            :to="base.itemUrl(artist)"
+                            class="user-url"
+                        >
                             {{ artist.name }}
                         </router-link>
                         <span v-if="i < album.artists.length - 1">, </span>
                     </template>
                 </h2>
                 <p class="album-stats">
-                    {{ album.release_date.substring(0, 4) }} • {{ tracks.length }} Track{{
+                    {{ album.release_date.substring(0, 4) }} •
+                    {{ tracks.length }} Track{{
                         tracks.length === 1 ? "" : "s"
-                    }} •
+                    }}
+                    •
                     {{ base.approximateDuration(totalDurationMs) }}
                 </p>
-                <collection-buttons :collection="collection" :like-item="album" />
+                <collection-buttons
+                    :collection="collection"
+                    :like-item="album"
+                />
                 <p class="album-genres">{{ album.genres.join(", ") }}</p>
             </div>
         </track-list>
     </div>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import { computed, ref, toRaw, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useBaseStore } from "../../store/base";
@@ -59,7 +67,9 @@ const loadTrackId = computed(() => route.query.play);
 
 const checkForLoadTrackId = () => {
     if (loadTrackId.value && album.value !== null) {
-        let albumTrack = album.value.tracks.items.find(t => t.id === loadTrackId.value) as SpotifyApi.TrackObjectFull | undefined;
+        let albumTrack = album.value.tracks.items.find(
+            (t) => t.id === loadTrackId.value,
+        ) as SpotifyApi.TrackObjectFull | undefined;
         if (albumTrack && collection.value !== null) {
             player.load(collection.value, albumTrack);
             router.replace({ query: {} });
@@ -71,7 +81,7 @@ const updateAlbum = async () => {
     for (let item of responseAlbum.tracks.items) {
         //@ts-ignore
         item.album = {
-            images: [...responseAlbum.images]
+            images: [...responseAlbum.images],
         };
     }
     album.value = responseAlbum;
@@ -79,7 +89,11 @@ const updateAlbum = async () => {
     checkForLoadTrackId();
 };
 watch(route, async () => {
-    if (route.path.startsWith("/album") && typeof route.params.id === "string" && route.params.id !== loadedId) {
+    if (
+        route.path.startsWith("/album") &&
+        typeof route.params.id === "string" &&
+        route.params.id !== loadedId
+    ) {
         loadedId = route.params.id;
         await updateAlbum();
     }
@@ -90,11 +104,12 @@ const tracks = computed((): SpotifyApi.TrackObjectFull[] => {
     if (album.value === null) return [];
     return album.value.tracks.items as SpotifyApi.TrackObjectFull[];
 });
-const totalDurationMs = computed(() => tracks.value.reduce((a, b) => a + b.duration_ms, 0));
-
+const totalDurationMs = computed(() =>
+    tracks.value.reduce((a, b) => a + b.duration_ms, 0),
+);
 </script>
 
-<style scoped lang="less">
+<style lang="less" scoped>
 .album-info {
     display: flex;
     flex-direction: column;
@@ -120,7 +135,7 @@ const totalDurationMs = computed(() => tracks.value.reduce((a, b) => a + b.durat
 .album-stats {
     font-size: 13px;
     font-weight: 400;
-    opacity: .7;
+    opacity: 0.7;
 }
 
 .artist-names {
@@ -131,6 +146,6 @@ const totalDurationMs = computed(() => tracks.value.reduce((a, b) => a + b.durat
     text-transform: uppercase;
     font-weight: 400;
     font-size: 12px;
-    opacity: .7;
+    opacity: 0.7;
 }
 </style>

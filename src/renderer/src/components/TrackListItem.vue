@@ -1,7 +1,21 @@
 <template>
-    <div class="track-item" @dblclick="playItem" @click.right="base.setContextMenuItem($event, track)">
-        <v-lazy v-if="number === undefined" class="lazy-img" width="70" transition="fade-transition">
-            <v-img :cover="true" v-if="track.album.images.length > 0" class="track-img" :src="base.itemImage(track)" />
+    <div
+        class="track-item"
+        @dblclick="playItem"
+        @click.right="base.setContextMenuItem($event, track)"
+    >
+        <v-lazy
+            v-if="number === undefined"
+            class="lazy-img"
+            transition="fade-transition"
+            width="70"
+        >
+            <v-img
+                v-if="track.album.images.length > 0"
+                :cover="true"
+                :src="base.itemImage(track)"
+                class="track-img"
+            />
             <v-sheet v-else class="track-img"></v-sheet>
         </v-lazy>
         <div v-else class="track-number">
@@ -19,18 +33,21 @@
         </div>
         <v-menu>
             <template v-slot:activator="{ props }">
-                <v-btn class="track-options ml-2"
-                       v-bind="props"
-                       variant="text" size="30"
-                       density="compact"
-                       icon="mdi-dots-horizontal" />
+                <v-btn
+                    class="track-options ml-2"
+                    density="compact"
+                    icon="mdi-dots-horizontal"
+                    size="30"
+                    v-bind="props"
+                    variant="text"
+                />
             </template>
             <item-menu :item="track" />
         </v-menu>
     </div>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import type { PropType } from "vue";
 import { useBaseStore } from "../store/base";
 import { usePlayerStore } from "../store/player";
@@ -42,31 +59,30 @@ import Spacer from "./Spacer.vue";
 const props = defineProps({
     track: {
         type: Object as PropType<SpotifyApi.TrackObjectFull>,
-        required: true
+        required: true,
     },
     index: {
         type: Number,
-        required: true
+        required: true,
     },
     collection: {
         type: Object as PropType<ItemCollection | null>,
-        required: true
+        required: true,
     },
     number: {
         type: Number,
-        required: false
-    }
+        required: false,
+    },
 });
 const base = useBaseStore();
 const player = usePlayerStore();
 
 function playItem() {
-    if (props.collection !== null)
-        player.load(props.collection, props.track);
+    if (props.collection !== null) player.load(props.collection, props.track);
 }
 </script>
 
-<style scoped lang="less">
+<style lang="less" scoped>
 .track-item {
     overflow: hidden;
     height: 50px;
@@ -119,14 +135,14 @@ function playItem() {
 .track-artist {
     font-weight: 400;
     font-size: 13px;
-    opacity: .6;
+    opacity: 0.6;
     display: flex;
 }
 
 .track-duration {
     font-weight: 400;
     font-size: 13px;
-    opacity: .6;
+    opacity: 0.6;
     transform: translateX(30px);
     transition: transform 0.15s;
 }
@@ -140,6 +156,6 @@ function playItem() {
 }
 
 .track-item:hover .track-options {
-    opacity: .8;
+    opacity: 0.8;
 }
 </style>

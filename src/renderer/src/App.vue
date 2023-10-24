@@ -1,32 +1,62 @@
 <template>
-    <v-app class="root" :class="{dark: theme.current.value.dark}">
-        <div class="blurry-bg" :style="{
-            backgroundImage: `linear-gradient(rgb(var(--v-theme-background), 0.5), rgb(var(--v-theme-background))), url('${blurBgSrc}')`
-        }"></div>
-        <div class="blurry-bg-transition" :style="{
-            transitionDuration,
-            opacity: transitionBgOpacity,
-            backgroundImage: `linear-gradient(rgb(var(--v-theme-background), 0.5), rgb(var(--v-theme-background))), url('${transitionBgSrc}')`
-        }"></div>
+    <v-app :class="{ dark: theme.current.value.dark }" class="root">
+        <div
+            :style="{
+                backgroundImage: `linear-gradient(rgb(var(--v-theme-background), 0.5), rgb(var(--v-theme-background))), url('${blurBgSrc}')`,
+            }"
+            class="blurry-bg"
+        ></div>
+        <div
+            :style="{
+                transitionDuration,
+                opacity: transitionBgOpacity,
+                backgroundImage: `linear-gradient(rgb(var(--v-theme-background), 0.5), rgb(var(--v-theme-background))), url('${transitionBgSrc}')`,
+            }"
+            class="blurry-bg-transition"
+        ></div>
         <div class="main">
             <top-menu class="top-menu" />
             <search-suggestions />
             <div class="fake-top-menu" />
             <left-navigation />
-            <bottom-music-player class="music-player" v-if="base.windowWidth <= 930 && base.dbLoaded" :style="{
-                    transform: player.track === null ? 'translateX(-100%)' : 'translateX(0%)',
+            <bottom-music-player
+                v-if="base.windowWidth <= 930 && base.dbLoaded"
+                :style="{
+                    transform:
+                        player.track === null
+                            ? 'translateX(-100%)'
+                            : 'translateX(0%)',
                     transitionDuration: musicPlayerTransitionDuration,
-            }" />
-            <music-player class="music-player" v-else :style="{
-                    transform: player.track === null ? 'translateX(-100%)' : 'translateX(0%)',
+                }"
+                class="music-player"
+            />
+            <music-player
+                v-else
+                v-if="base.dbLoaded"
+                :style="{
+                    transform:
+                        player.track === null
+                            ? 'translateX(-100%)'
+                            : 'translateX(0%)',
                     transitionDuration: musicPlayerTransitionDuration,
-            }" v-if="base.dbLoaded" />
-            <div class="router-view" v-if="base.dbLoaded" :style="{
-                    width: base.windowWidth <= 930 ? 'calc(100% - 70px)' : player.track === null ? 'calc(100% - 90px)' : '50%',
+                }"
+                class="music-player"
+            />
+            <div
+                v-if="base.dbLoaded"
+                :style="{
+                    width:
+                        base.windowWidth <= 930
+                            ? 'calc(100% - 70px)'
+                            : player.track === null
+                            ? 'calc(100% - 90px)'
+                            : '50%',
                     transitionDuration: musicPlayerTransitionDuration,
-                }">
+                }"
+                class="router-view"
+            >
                 <router-view v-slot="{ Component }">
-                    <transition name="slide-fade" mode="out-in">
+                    <transition mode="out-in" name="slide-fade">
                         <component :is="Component" />
                     </transition>
                 </router-view>
@@ -36,12 +66,12 @@
         <item-context-menu />
         <v-snackbar
             v-for="snack in base.snackbars"
+            v-model="snack.open"
             :timeout="snack.timeout"
-            v-model="snack.open">
+        >
             {{ snack.text }}
             <template v-slot:actions>
-                <v-btn variant="text"
-                       @click="snack.open = false">
+                <v-btn variant="text" @click="snack.open = false">
                     Dismiss
                 </v-btn>
             </template>
@@ -49,9 +79,9 @@
     </v-app>
 </template>
 
-
-<script setup lang="ts">
+<script lang="ts" setup>
 // todo
+// Startup is niet meer zo smooth, animatie gaat terwijl het niet hoort en het is layout shiftig
 // support yt artist page
 // edit information about yt track (change title, artist)
 // edit information about any track (start/end time, more?)
@@ -97,7 +127,6 @@ const blurBgSrc = computed(() => {
     return base.itemImage(player.track);
 });
 
-
 const transitionBgSrc = ref(initialBg);
 const transitionDuration = ref("0s");
 const transitionBgOpacity = ref("1");
@@ -123,7 +152,6 @@ watch(blurBgSrc, () => {
         }, 50);
     }, 3000);
 });
-
 </script>
 
 <style lang="less">
@@ -132,7 +160,7 @@ watch(blurBgSrc, () => {
 }
 
 .slide-fade-leave-active {
-    transition: all 0.10s cubic-bezier(1, 0.5, 0.8, 1);
+    transition: all 0.1s cubic-bezier(1, 0.5, 0.8, 1);
 }
 
 .slide-fade-enter-from,
@@ -141,14 +169,16 @@ watch(blurBgSrc, () => {
     opacity: 0;
 }
 
-html, body {
+html,
+body {
     overflow-y: hidden !important;
     height: 100%;
     background-color: rgb(var(--v-theme-background));
     user-select: none;
 }
 
-.blurry-bg, .blurry-bg-transition {
+.blurry-bg,
+.blurry-bg-transition {
     background-position: center;
     background-size: cover;
     width: calc(100% + 150px);
@@ -172,7 +202,12 @@ html, body {
     flex-direction: column;
     width: 100%;
     height: 100%;
-    font-family: "Segoe UI", Helvetica Neue, Helvetica, Arial, sans-serif;
+    font-family:
+        "Segoe UI",
+        Helvetica Neue,
+        Helvetica,
+        Arial,
+        sans-serif;
 }
 
 .top-menu {
@@ -241,7 +276,10 @@ html, body {
     }
 }
 
-h1, h2, h3, h4 {
+h1,
+h2,
+h3,
+h4 {
     font-weight: 400;
     text-align: center;
 }
@@ -266,7 +304,7 @@ a[no-style]:hover {
 }
 
 ::-webkit-scrollbar-thumb {
-    background: rgba(0, 0, 0, 0.00);
+    background: rgba(0, 0, 0, 0);
     border-radius: 3px;
 }
 
@@ -275,7 +313,10 @@ a[no-style]:hover {
 }
 
 .v-btn--icon {
-    transition: transform 0.3s, color 1s, caret-color 1s !important;
+    transition:
+        transform 0.3s,
+        color 1s,
+        caret-color 1s !important;
 }
 
 *[no-drag] {

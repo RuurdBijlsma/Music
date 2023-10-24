@@ -1,14 +1,10 @@
 <template>
-    <div class="downloads">
-        downloads
-    </div>
+    <div class="downloads">downloads</div>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup></script>
 
-</script>
-
-<style scoped lang="less">
+<style lang="less" scoped>
 .downloads {
     padding-top: 60px;
 }

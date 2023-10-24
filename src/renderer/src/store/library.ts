@@ -1,14 +1,18 @@
-import {defineStore} from "pinia";
-import {computed, ref, toRaw} from "vue";
-import {baseDb, useBaseStore} from "./base";
-import {usePlatformStore} from "./electron";
-import type {IDBPDatabase} from "idb";
-import type {ExtendedPlaylistTrack, Item, ItemCollection, ItemType} from "../scripts/types";
-import {usePlayerStore} from "./player";
-import {useSpotifyApiStore} from "./spotify-api";
-import {useSpotifyAuthStore} from "./spotify-auth";
-import {randomUser} from "../scripts/imageSources";
-
+import { defineStore } from "pinia";
+import { computed, ref, toRaw } from "vue";
+import { baseDb, useBaseStore } from "./base";
+import { usePlatformStore } from "./electron";
+import type { IDBPDatabase } from "idb";
+import type {
+    ExtendedPlaylistTrack,
+    Item,
+    ItemCollection,
+    ItemType,
+} from "../scripts/types";
+import { usePlayerStore } from "./player";
+import { useSpotifyApiStore } from "./spotify-api";
+import { useSpotifyAuthStore } from "./spotify-auth";
+import { randomUser } from "../scripts/imageSources";
 
 export const useLibraryStore = defineStore("library", () => {
     const platform = usePlatformStore();
@@ -19,9 +23,9 @@ export const useLibraryStore = defineStore("library", () => {
 
     let valuesLoaded = ref(false);
     let db: IDBPDatabase;
-    baseDb.then(r => {
+    baseDb.then((r) => {
         db = r;
-        loadValues().then(() => valuesLoaded.value = true);
+        loadValues().then(() => (valuesLoaded.value = true));
     });
 
     // Spotify UI variables
@@ -31,13 +35,13 @@ export const useLibraryStore = defineStore("library", () => {
         mail: "",
         country: "",
         followers: 0,
-        avatar: randomUser()
+        avatar: randomUser(),
     });
 
     const saved = ref({
         playlist: [] as SpotifyApi.PlaylistObjectFull[],
         artist: [] as SpotifyApi.ArtistObjectFull[],
-        album: [] as SpotifyApi.AlbumObjectFull[]
+        album: [] as SpotifyApi.AlbumObjectFull[],
     });
     const tracks = ref([] as ExtendedPlaylistTrack[]);
     const likedTracksTotal = ref(1);
@@ -46,49 +50,49 @@ export const useLibraryStore = defineStore("library", () => {
     const viewedPlaylistRefreshRequired = ref(false);
 
     const userPlaylists = computed(() =>
-        saved.value.playlist.filter(p => p.owner.id === userInfo.value.id || p.collaborative)
+        saved.value.playlist.filter(
+            (p) => p.owner.id === userInfo.value.id || p.collaborative,
+        ),
     );
     const isRefreshing = ref({
         playlist: false,
         album: false,
         artist: false,
-        track: false
+        track: false,
     });
     const view = ref({
         homePage: {
             featured: {
                 title: "" as string | undefined,
-                playlists: [] as SpotifyApi.PlaylistObjectSimplified[]
+                playlists: [] as SpotifyApi.PlaylistObjectSimplified[],
             },
             newReleases: [] as any[],
-            personalized: [] as any[]
+            personalized: [] as any[],
         },
         playlist: {},
         album: {},
         artist: {},
         category: {},
-        user: {}
+        user: {},
     });
     const offlineCollections = ref(new Set<string>([]));
     const recentPlays = ref([] as ItemCollection[]);
 
     // IndexedDB persistent storage
     async function loadValues() {
-        let [dbSaved, dbView, dbOfflineCollections, dbRecentPlays] = await Promise.all([
-            db.get("spotify", "saved"),
-            db.get("spotify", "view"),
-            db.get("spotify", "offlineCollections"),
-            db.get("spotify", "recentPlays")
-        ]);
+        let [dbSaved, dbView, dbOfflineCollections, dbRecentPlays] =
+            await Promise.all([
+                db.get("spotify", "saved"),
+                db.get("spotify", "view"),
+                db.get("spotify", "offlineCollections"),
+                db.get("spotify", "recentPlays"),
+            ]);
 
-        if (dbRecentPlays)
-            recentPlays.value = dbRecentPlays;
+        if (dbRecentPlays) recentPlays.value = dbRecentPlays;
         if (dbOfflineCollections)
             offlineCollections.value = dbOfflineCollections;
-        if (dbSaved)
-            saved.value = dbSaved;
-        if (dbView)
-            view.value = dbView;
+        if (dbSaved) saved.value = dbSaved;
+        if (dbView) view.value = dbView;
 
         if (localStorage.getItem("userInfo") !== null)
             userInfo.value = JSON.parse(localStorage.userInfo);
@@ -101,8 +105,7 @@ export const useLibraryStore = defineStore("library", () => {
         let doneCount = 0;
         loadDbTracks().then((tracksCached) => {
             if (!tracksCached) {
-                loadLikedTracks().then(() => {
-                });
+                loadLikedTracks().then(() => {});
             }
         });
 
@@ -128,7 +131,7 @@ export const useLibraryStore = defineStore("library", () => {
             mail: me.email,
             country: me.country,
             followers: me.followers?.total ?? 0,
-            avatar: me.images?.[0]?.url ?? ""
+            avatar: me.images?.[0]?.url ?? "",
         };
         localStorage.userInfo = JSON.stringify(toRaw(userInfo.value));
     }
@@ -149,20 +152,23 @@ export const useLibraryStore = defineStore("library", () => {
         // @ts-ignore
         let isInitial = saved.value[type].length === 0;
 
-        if (userInfo.value.id === "")
-            await refreshUserInfo();
+        if (userInfo.value.id === "") await refreshUserInfo();
 
-        let retrieval: Function, page = (r: any) => r;
+        let retrieval: Function,
+            page = (r: any) => r;
         switch (type) {
             case "playlist":
-                retrieval = () => spotify.api.getUserPlaylists(userInfo.value.id, {limit: 50});
+                retrieval = () =>
+                    spotify.api.getUserPlaylists(userInfo.value.id, {
+                        limit: 50,
+                    });
                 break;
             case "album":
                 retrieval = () => spotify.api.getMySavedAlbums();
                 break;
             case "artist":
                 retrieval = () => spotify.api.getFollowedArtists();
-                page = r => r.artists;
+                page = (r) => r.artists;
                 break;
         }
 
@@ -174,12 +180,10 @@ export const useLibraryStore = defineStore("library", () => {
             } else items.push(item);
         };
 
-        for await(let batch of await spotify.retrieveArray(retrieval)) {
+        for await (let batch of await spotify.retrieveArray(retrieval)) {
             for (let item of page(batch).items) {
-                if (type === "album")
-                    addToLib(item.album);
-                else
-                    addToLib(item);
+                if (type === "album") addToLib(item.album);
+                else addToLib(item);
             }
         }
         if (!isInitial) {
@@ -221,7 +225,7 @@ export const useLibraryStore = defineStore("library", () => {
         let searchString = track.name.toLowerCase() + " " + artistString;
         let id = track.id;
         let title = track.name;
-        let added_at_reverse = 10000000000000 - +(new Date(item.added_at));
+        let added_at_reverse = 10000000000000 - +new Date(item.added_at);
 
         return {
             ...item,
@@ -230,8 +234,7 @@ export const useLibraryStore = defineStore("library", () => {
             id,
             title,
             added_at_reverse,
-            originalName: track.name
-
+            originalName: track.name,
         } as ExtendedPlaylistTrack;
     }
 
@@ -251,11 +254,16 @@ export const useLibraryStore = defineStore("library", () => {
         likedTracksLoaded.value = 0;
         likedTracksTotal.value = 1;
 
-        let ytTracks = (await db.getAllFromIndex("yt-tracks", "newToOld")) as ExtendedPlaylistTrack[];
+        let ytTracks = (await db.getAllFromIndex(
+            "yt-tracks",
+            "newToOld",
+        )) as ExtendedPlaylistTrack[];
         let newestYtTrack = ytTracks.shift();
 
         let once = true;
-        for await(let batch of await spotify.retrieveArray(() => spotify.api.getMySavedTracks({limit: 50}))) {
+        for await (let batch of await spotify.retrieveArray(() =>
+            spotify.api.getMySavedTracks({ limit: 50 }),
+        )) {
             if (once) {
                 likedTracksTotal.value = batch.total;
                 once = false;
@@ -265,7 +273,10 @@ export const useLibraryStore = defineStore("library", () => {
                 if (!spotifyItem.track.is_local) {
                     let item = enhancePlaylistObject(spotifyItem);
 
-                    while (newestYtTrack !== undefined && newestYtTrack.added_at_reverse < item.added_at_reverse) {
+                    while (
+                        newestYtTrack !== undefined &&
+                        newestYtTrack.added_at_reverse < item.added_at_reverse
+                    ) {
                         // yt track is newer than this spotify track
                         items.push(newestYtTrack);
                         if (isInitial) {
@@ -306,10 +317,10 @@ export const useLibraryStore = defineStore("library", () => {
         await spotifyAuth.awaitAuth();
 
         //Featured playlists
-        let featured = await spotify.api.getFeaturedPlaylists({limit: 50});
+        let featured = await spotify.api.getFeaturedPlaylists({ limit: 50 });
         view.value.homePage.featured = {
             title: featured.message,
-            playlists: featured.playlists.items
+            playlists: featured.playlists.items,
         };
 
         //Personalized playlists
@@ -317,15 +328,21 @@ export const useLibraryStore = defineStore("library", () => {
         if (saved.value.playlist.length === 0) {
             await refreshUserData("playlist");
         }
-        const discoverNames = ["Discover Weekly", "Release Radar", ...[...Array(10)].map((_, i) => "Daily Mix " + (i + 1))];
+        const discoverNames = [
+            "Discover Weekly",
+            "Release Radar",
+            ...[...Array(10)].map((_, i) => "Daily Mix " + (i + 1)),
+        ];
 
-        personalized = toRaw(saved.value).playlist.filter(playlist => discoverNames
-                .findIndex(name => playlist.name.includes(name)) !== -1 &&
-            playlist.owner.display_name === "Spotify"
+        personalized = toRaw(saved.value).playlist.filter(
+            (playlist) =>
+                discoverNames.findIndex((name) =>
+                    playlist.name.includes(name),
+                ) !== -1 && playlist.owner.display_name === "Spotify",
         );
         personalized.sort((a, b) => {
-            let aI = discoverNames.findIndex(name => a.name.includes(name));
-            let bI = discoverNames.findIndex(name => b.name.includes(name));
+            let aI = discoverNames.findIndex((name) => a.name.includes(name));
+            let bI = discoverNames.findIndex((name) => b.name.includes(name));
             return aI - bI;
         });
         if (personalized.length > 0) {
@@ -333,7 +350,7 @@ export const useLibraryStore = defineStore("library", () => {
         }
 
         //New releases
-        let newReleases = await spotify.api.getNewReleases({limit: 50});
+        let newReleases = await spotify.api.getNewReleases({ limit: 50 });
         view.value.homePage.newReleases = newReleases.albums.items;
         await db.put("spotify", toRaw(view.value), "view");
     }
@@ -341,7 +358,7 @@ export const useLibraryStore = defineStore("library", () => {
     function checkLiked(type: ItemType, id: string) {
         let result: ExtendedPlaylistTrack | undefined;
         if (type === "track") {
-            result = tracks.value.find(t => t.track.id === id);
+            result = tracks.value.find((t) => t.track.id === id);
         } else {
             //@ts-ignore
             result = saved.value[type].find((t: any) => t.id === id);
@@ -352,40 +369,51 @@ export const useLibraryStore = defineStore("library", () => {
     async function toggleLike(item: Item | ItemCollection) {
         await baseDb;
         const id = item.id;
-        if ('buttonText' in item) {
-            if (item.type === 'liked' || item.type === 'radio' || item.type === 'search' || item.type === "youtube")
+        if ("buttonText" in item) {
+            if (
+                item.type === "liked" ||
+                item.type === "radio" ||
+                item.type === "search" ||
+                item.type === "youtube"
+            )
                 return false;
-            if (!item.context)
-                return false;
+            if (!item.context) return false;
             item = item.context;
         }
         // if ('buttonText' in item) return false;
         let liked = checkLiked(item.type, id);
         if (item.type === "track") {
             if (liked) {
-                if (item.id.startsWith("yt-")) { // YouTube
+                if (item.id.startsWith("yt-")) {
+                    // YouTube
                     db.delete("yt-tracks", id).then();
-                } else { // Spotify
+                } else {
+                    // Spotify
                     await spotify.api.removeFromMySavedTracks([id]);
                 }
 
                 db.delete("tracks", id).then();
-                tracks.value.splice(tracks.value.findIndex((t) => t.track.id === id), 1);
+                tracks.value.splice(
+                    tracks.value.findIndex((t) => t.track.id === id),
+                    1,
+                );
                 if (!isRefreshing.value["track"]) {
                     likedTracksTotal.value--;
                     likedTracksLoaded.value--;
                 }
                 return false;
             } else {
-                let date = (new Date()).toISOString();
+                let date = new Date().toISOString();
                 let playlistObject = enhancePlaylistObject({
                     track: toRaw(item) as SpotifyApi.TrackObjectFull,
-                    added_at: date
+                    added_at: date,
                 } as SpotifyApi.PlaylistTrackObject);
 
-                if (item.id.startsWith("yt-")) { // YouTube
+                if (item.id.startsWith("yt-")) {
+                    // YouTube
                     db.add("yt-tracks", playlistObject).then();
-                } else { // Spotify
+                } else {
+                    // Spotify
                     await spotify.api.addToMySavedTracks([id]);
                 }
 
@@ -400,7 +428,10 @@ export const useLibraryStore = defineStore("library", () => {
         } else if (item.type === "playlist") {
             if (liked) {
                 await spotify.api.unfollowPlaylist(id);
-                saved.value.playlist.splice(saved.value.playlist.findIndex(t => t.id === id), 1);
+                saved.value.playlist.splice(
+                    saved.value.playlist.findIndex((t) => t.id === id),
+                    1,
+                );
                 return false;
             } else {
                 await spotify.api.followPlaylist(id);
@@ -410,7 +441,10 @@ export const useLibraryStore = defineStore("library", () => {
         } else if (item.type === "album") {
             if (liked) {
                 await spotify.api.removeFromMySavedAlbums([id]);
-                saved.value.album.splice(saved.value.album.findIndex(t => t.id === id), 1);
+                saved.value.album.splice(
+                    saved.value.album.findIndex((t) => t.id === id),
+                    1,
+                );
                 return false;
             } else {
                 await spotify.api.addToMySavedAlbums([id]);
@@ -420,7 +454,10 @@ export const useLibraryStore = defineStore("library", () => {
         } else if (item.type === "artist") {
             if (liked) {
                 await spotify.api.unfollowArtists([id]);
-                saved.value.artist.splice(saved.value.artist.findIndex(t => t.id === id), 1);
+                saved.value.artist.splice(
+                    saved.value.artist.findIndex((t) => t.id === id),
+                    1,
+                );
                 return false;
             } else {
                 await spotify.api.followArtists([id]);
@@ -432,16 +469,15 @@ export const useLibraryStore = defineStore("library", () => {
     }
 
     async function chooseSource(track: SpotifyApi.TrackObjectFull) {
-        if (player.playing)
-            player.pause();
+        if (player.playing) player.pause();
         base.sourceDialog.show = true;
         base.sourceDialog.loading = true;
         base.sourceDialog.spotifyTrack = track;
 
-        const {cacheKey, query} = platform.trackToNames(track);
+        const { cacheKey, query } = platform.trackToNames(track);
         let [options, selectedId] = await Promise.all([
             platform.searchYouTube(query, 6),
-            db.get("nameToId", cacheKey)
+            db.get("nameToId", cacheKey),
         ]);
 
         base.sourceDialog.loading = false;
@@ -453,26 +489,35 @@ export const useLibraryStore = defineStore("library", () => {
         let spotifyTrack = base.sourceDialog.spotifyTrack;
         if (spotifyTrack === null) return;
         const trackId = spotifyTrack.id;
-        const {cacheKey, outPath} = platform.trackToNames(spotifyTrack);
+        const { cacheKey, outPath } = platform.trackToNames(spotifyTrack);
         await db.put("nameToId", id, cacheKey);
         await platform.deleteFile(outPath);
         await db.delete("trackBars", spotifyTrack.id);
-        if (player.track !== null && player.collection !== null && player.trackId === spotifyTrack.id) {
+        if (
+            player.track !== null &&
+            player.collection !== null &&
+            player.trackId === spotifyTrack.id
+        ) {
             base.sourceDialog.show = false;
 
             base.sourceDialog.tempTrackOverride = {
                 ytId: id,
-                trackId: trackId
+                trackId: trackId,
             };
             await player.load(player.collection, spotifyTrack);
         }
     }
 
-    async function addToPlaylist(playlistId: string, track: SpotifyApi.TrackObjectFull) {
+    async function addToPlaylist(
+        playlistId: string,
+        track: SpotifyApi.TrackObjectFull,
+    ) {
         await baseDb;
         await spotify.api.addTracksToPlaylist(playlistId, [track.uri]);
         if (viewedPlaylist.value === null) return;
-        let trackInPlaylist = viewedPlaylist.value.tracks.items.find(t => t.track.id === track.id);
+        let trackInPlaylist = viewedPlaylist.value.tracks.items.find(
+            (t) => t.track.id === track.id,
+        );
         if (trackInPlaylist === undefined)
             viewedPlaylistRefreshRequired.value = true;
     }
@@ -481,7 +526,9 @@ export const useLibraryStore = defineStore("library", () => {
         await baseDb;
         await spotify.api.removeTracksFromPlaylist(playlistId, [trackUri]);
         if (viewedPlaylist.value === null) return;
-        let trackIndex = viewedPlaylist.value.tracks.items.findIndex(t => t.track.uri === trackUri);
+        let trackIndex = viewedPlaylist.value.tracks.items.findIndex(
+            (t) => t.track.uri === trackUri,
+        );
         if (trackIndex === -1) return;
         viewedPlaylist.value.tracks.items.splice(trackIndex, 1);
     }
@@ -510,6 +557,6 @@ export const useLibraryStore = defineStore("library", () => {
         viewedPlaylistRefreshRequired,
         offlineCollections,
         recentPlays,
-        valuesLoaded
+        valuesLoaded,
     };
 });

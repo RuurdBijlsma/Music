@@ -1,14 +1,17 @@
 <template>
-    <div class="category" v-if="category">
+    <div v-if="category" class="category">
         <h1 class="page-title">{{ category.name }}</h1>
         <v-divider class="mt-4 mb-8" />
-        <div class="playlist-grid" v-if="playlists">
-            <item-card v-for="playlist in playlists" :item="playlist"></item-card>
+        <div v-if="playlists" class="playlist-grid">
+            <item-card
+                v-for="playlist in playlists"
+                :item="playlist"
+            ></item-card>
         </div>
     </div>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import { ref, watch } from "vue";
 import { useSpotifyApiStore } from "../../store/spotify-api";
 import { useRoute } from "vue-router";
@@ -25,7 +28,7 @@ async function refresh() {
 
     let result = await spotify.getCategory(id);
     category.value = result.category;
-    playlists.value = result.playlists.filter(p => p !== null);
+    playlists.value = result.playlists.filter((p) => p !== null);
 }
 
 refresh();

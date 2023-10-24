@@ -1,47 +1,51 @@
 <template>
-    <div class="track-list" v-if="collection !== null"
-         :style="{paddingTop}">
+    <div v-if="collection !== null" :style="{ paddingTop }" class="track-list">
         <slot />
         <track-list-item
             v-for="(item, index) in realTracks"
-            :collection="collection" :number="noImages ? item.track_number : undefined"
-            :index="index"
             :class="{
-                    'odd-item': !isActive(item.id) && index % 2 === 0,
-                    'active': isActive(item.id)
-                }"
-            class="track-list-item" :track="item" />
+                'odd-item': !isActive(item.id) && index % 2 === 0,
+                active: isActive(item.id),
+            }"
+            :collection="collection"
+            :index="index"
+            :number="noImages ? item.track_number : undefined"
+            :track="item"
+            class="track-list-item"
+        />
     </div>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import type { PropType } from "vue";
+import { computed } from "vue";
 import TrackListItem from "./TrackListItem.vue";
 import { usePlayerStore } from "../store/player";
 import type { ItemCollection } from "../scripts/types";
-import { computed } from "vue";
 
 const player = usePlayerStore();
 
 const props = defineProps({
     collection: {
         type: Object as PropType<ItemCollection | null>,
-        required: true
+        required: true,
     },
     tracks: {
         type: Object as PropType<SpotifyApi.TrackObjectFull[] | null>,
-        default: () => null
+        default: () => null,
     },
     noImages: {
         type: Boolean,
-        default: () => false
+        default: () => false,
     },
     paddingTop: {
         type: String,
-        default: () => "60px"
-    }
+        default: () => "60px",
+    },
 });
-const isActive = (id: string) => player.trackId === id && (player.collection?.id ?? "") === props.collection?.id;
+const isActive = (id: string) =>
+    player.trackId === id &&
+    (player.collection?.id ?? "") === props.collection?.id;
 
 const realTracks = computed(() => {
     if (props.tracks !== null) return props.tracks;
@@ -49,7 +53,7 @@ const realTracks = computed(() => {
 });
 </script>
 
-<style scoped lang="less">
+<style lang="less" scoped>
 .track-list {
     overflow-y: auto;
 }
@@ -61,7 +65,7 @@ const realTracks = computed(() => {
 }
 
 .track-list-item.odd-item {
-    background-color: rgba(var(--v-theme-on-background), .06);
+    background-color: rgba(var(--v-theme-on-background), 0.06);
 }
 
 .track-list-item {

@@ -1,9 +1,9 @@
-import electron from 'electron';
-import fs from 'fs';
-import path from 'path';
+import electron from "electron";
+import fs from "fs";
+import path from "path";
 
 type PathType =
-    "temp"
+    | "temp"
     | "home"
     | "appData"
     | "userData"
@@ -18,7 +18,7 @@ type PathType =
     | "videos"
     | "recent"
     | "logs"
-    | "crashDumps"
+    | "crashDumps";
 
 class Directories {
     public temp: string;
@@ -26,9 +26,9 @@ class Directories {
     public music: string;
 
     constructor() {
-        this.temp = this.initializeDir('temp', 'ruurd-music');
-        this.files = this.initializeDir('appData', 'ruurd-music-files');
-        this.music = this.getDir('music', '');
+        this.temp = this.initializeDir("temp", "ruurd-music");
+        this.files = this.initializeDir("appData", "ruurd-music-files");
+        this.music = this.getDir("music", "");
     }
 
     initializeDir(base: PathType, dir: string) {
@@ -37,16 +37,14 @@ class Directories {
         return fullDir;
     }
 
-    getDir(base: PathType = 'music', dir = 'files') {
+    getDir(base: PathType = "music", dir = "files") {
         let app = electron.app;
-        if (electron.hasOwnProperty('remote'))
-            app = electron.app;
+        if (electron.hasOwnProperty("remote")) app = electron.app;
         return path.join(app.getPath(base), dir);
     }
 
     createDir(dir: string) {
-        if (!fs.existsSync(dir))
-            fs.mkdirSync(dir);
+        if (!fs.existsSync(dir)) fs.mkdirSync(dir);
     }
 }
 

@@ -1,36 +1,45 @@
 <template>
     <div class="spb">
-        <div class="music-time-current">{{ base.msToReadable(currentTime * 1000) }}</div>
+        <div class="music-time-current">
+            {{ base.msToReadable(currentTime * 1000) }}
+        </div>
         <div class="container" @mousedown="mouseDown">
             <div class="progress-bar">
-                <div class="progress" :style="{
-                    width: `${percent}%`,
-                    backgroundColor: base.themeColor,
-                }"></div>
+                <div
+                    :style="{
+                        width: `${percent}%`,
+                        backgroundColor: base.themeColor,
+                    }"
+                    class="progress"
+                ></div>
             </div>
         </div>
-        <div class="music-time-total">{{ base.msToReadable(duration * 1000) }}</div>
+        <div class="music-time-total">
+            {{ base.msToReadable(duration * 1000) }}
+        </div>
     </div>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import { useBaseStore } from "../store/base";
 import { computed, onMounted, onUnmounted } from "vue";
 
 const props = defineProps({
     duration: {
         type: Number,
-        required: true
+        required: true,
     },
     currentTime: {
         type: Number,
-        required: true
-    }
+        required: true,
+    },
 });
 const emit = defineEmits(["seek"]);
 const base = useBaseStore();
 
-const percent = computed(() => Math.round(10000 * props.currentTime / props.duration) / 100);
+const percent = computed(
+    () => Math.round((10000 * props.currentTime) / props.duration) / 100,
+);
 
 let el: HTMLElement | null = null;
 let seekDown = false;
@@ -49,7 +58,7 @@ const mouseDown = (e: MouseEvent) => {
     seek(e);
 };
 const mouseMove = (e: MouseEvent) => seek(e);
-const mouseUp = () => seekDown = false;
+const mouseUp = () => (seekDown = false);
 onMounted(() => {
     el = document.querySelector(".container");
     document.addEventListener("mousemove", mouseMove, false);
@@ -61,13 +70,14 @@ onUnmounted(() => {
 });
 </script>
 
-<style scoped lang="less">
+<style lang="less" scoped>
 .spb {
     display: flex;
     width: 100%;
 }
 
-.music-time-current, .music-time-total {
+.music-time-current,
+.music-time-total {
     opacity: 0.7;
     font-weight: 500;
     font-size: 12px;

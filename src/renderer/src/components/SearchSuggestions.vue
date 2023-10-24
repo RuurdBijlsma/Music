@@ -1,30 +1,50 @@
 <template>
-    <div class="search-suggestions"
-         v-show="showSuggestions"
-         :style="{
+    <div
+        v-show="showSuggestions"
+        :style="{
             left: searchX + 'px',
             top: searchY + 'px',
-            width: width + 'px'}">
-        <div class="recent-searches" v-if="!hasValidSearch">
+            width: width + 'px',
+        }"
+        class="search-suggestions"
+    >
+        <div v-if="!hasValidSearch" class="recent-searches">
             <template v-if="search.recentSearches.length !== 0">
                 <v-list-subheader>Recent searches</v-list-subheader>
-                <v-list-item :exact="true" rounded :to="`/search/${recent}`" v-for="recent in search.recentSearches">
+                <v-list-item
+                    v-for="recent in search.recentSearches"
+                    :exact="true"
+                    :to="`/search/${recent}`"
+                    rounded
+                >
                     <v-list-item-title>{{ recent }}</v-list-item-title>
                 </v-list-item>
             </template>
         </div>
         <template v-else-if="r !== null">
-            <search-suggestion-section type="Library" :id="'library' + searchValue" :tracks="r.liked.tracks"
-                                       :loading="r.liked.loading">
+            <search-suggestion-section
+                :id="'library' + searchValue"
+                :loading="r.liked.loading"
+                :tracks="r.liked.tracks"
+                type="Library"
+            >
                 Library
             </search-suggestion-section>
-            <search-suggestion-section type="Spotify" :id="'spotify' + searchValue" :tracks="r.spotify.data.tracks"
-                                       :loading="r.spotify.loading">
+            <search-suggestion-section
+                :id="'spotify' + searchValue"
+                :loading="r.spotify.loading"
+                :tracks="r.spotify.data.tracks"
+                type="Spotify"
+            >
                 <v-icon class="mr-2">mdi-spotify</v-icon>
                 Spotify
             </search-suggestion-section>
-            <search-suggestion-section type="YouTube" :id="'youtube' + searchValue" :tracks="r.youtube.tracks"
-                                       :loading="r.youtube.loading">
+            <search-suggestion-section
+                :id="'youtube' + searchValue"
+                :loading="r.youtube.loading"
+                :tracks="r.youtube.tracks"
+                type="YouTube"
+            >
                 <v-icon class="mr-2">mdi-youtube</v-icon>
                 YouTube
             </search-suggestion-section>
@@ -32,8 +52,15 @@
     </div>
 </template>
 
-<script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, onUnmounted, ref, watch } from "vue";
+<script lang="ts" setup>
+import {
+    computed,
+    onBeforeUnmount,
+    onMounted,
+    onUnmounted,
+    ref,
+    watch,
+} from "vue";
 import { storeToRefs } from "pinia";
 import { useSearchStore } from "../store/search";
 import SearchSuggestionSection from "./SearchSuggestionSection.vue";
@@ -41,11 +68,7 @@ import { useRoute } from "vue-router";
 
 const search = useSearchStore();
 
-const {
-    suggestionResults,
-    searchValue,
-    showSuggestions
-} = storeToRefs(search);
+const { suggestionResults, searchValue, showSuggestions } = storeToRefs(search);
 
 const r = computed(() => suggestionResults.value);
 
@@ -59,10 +82,13 @@ document.addEventListener("mousedown", onClick, false);
 onUnmounted(() => document.removeEventListener("mousedown", onClick));
 
 function onClick(e: MouseEvent) {
-    let searchSuggestions = document.querySelector(".search-suggestions") as HTMLElement;
+    let searchSuggestions = document.querySelector(
+        ".search-suggestions",
+    ) as HTMLElement;
     let searchBox = document.querySelector(".search-field") as HTMLElement;
     let target = e.target as HTMLElement;
-    showSuggestions.value = searchSuggestions.contains(target) || searchBox.contains(target);
+    showSuggestions.value =
+        searchSuggestions.contains(target) || searchBox.contains(target);
 }
 
 let lastInputTime = performance.now();
@@ -72,7 +98,7 @@ watch(searchValue, () => {
 });
 
 const route = useRoute();
-watch(route, () => showSuggestions.value = false);
+watch(route, () => (showSuggestions.value = false));
 
 let el = null as null | Element;
 let searchX = ref(200);
@@ -97,7 +123,6 @@ interval = window.setInterval(() => {
 }, 375);
 onBeforeUnmount(() => clearInterval(interval));
 
-
 function updateSearchPos() {
     if (el === null) return;
     let bounds = el.getBoundingClientRect();
@@ -107,7 +132,7 @@ function updateSearchPos() {
 }
 </script>
 
-<style scoped lang="less">
+<style lang="less" scoped>
 .search-suggestions {
     position: fixed;
     border-bottom-left-radius: 10px;
@@ -135,7 +160,7 @@ function updateSearchPos() {
 }
 
 .search-suggestions::-webkit-scrollbar-track {
-    background: rgba(0, 0, 0, .1);
+    background: rgba(0, 0, 0, 0.1);
     border-radius: 3px;
 }
 

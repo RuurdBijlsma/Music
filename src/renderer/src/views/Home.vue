@@ -1,19 +1,24 @@
 <template>
     <div class="home">
         <div class="home-title">
-            <h1 class="featured-title mb-1">{{ library.view.homePage.featured.title }}</h1>
+            <h1 class="featured-title mb-1">
+                {{ library.view.homePage.featured.title }}
+            </h1>
         </div>
         <horizontal-scroller>
             <highlight-card
-                class="mr-4"
-                :size="250"
                 v-if="highlight"
-                :item="highlight" />
-            <item-card class="mr-4"
-                       :item="playlist"
-                       :size="250"
-                       hide-name
-                       v-for="playlist in otherPlaylists" />
+                :item="highlight"
+                :size="250"
+                class="mr-4"
+            />
+            <item-card
+                v-for="playlist in otherPlaylists"
+                :item="playlist"
+                :size="250"
+                class="mr-4"
+                hide-name
+            />
         </horizontal-scroller>
 
         <template v-if="library.recentPlays.length > 0">
@@ -22,22 +27,28 @@
             </div>
 
             <horizontal-scroller class="mt-1">
-                <item-card class="mr-4"
-                           v-for="itemCollection in library.recentPlays"
-                           :item="itemCollection" />
+                <item-card
+                    v-for="itemCollection in library.recentPlays"
+                    :item="itemCollection"
+                    class="mr-4"
+                />
             </horizontal-scroller>
         </template>
 
         <template v-if="library.view.homePage.personalized.length > 0">
             <div class="home-title mt-4">
-                <h2 class="other-title mb-5">Made for {{ library.userInfo.name }}</h2>
+                <h2 class="other-title mb-5">
+                    Made for {{ library.userInfo.name }}
+                </h2>
             </div>
 
             <horizontal-scroller class="mt-1">
-                <item-card class="mr-4"
-                           v-for="item in library.view.homePage.personalized"
-                           hide-name
-                           :item="item" />
+                <item-card
+                    v-for="item in library.view.homePage.personalized"
+                    :item="item"
+                    class="mr-4"
+                    hide-name
+                />
             </horizontal-scroller>
         </template>
 
@@ -47,16 +58,18 @@
             </div>
 
             <horizontal-scroller class="mt-1 mb-5">
-                <item-card class="mr-4"
-                           v-for="item in library.view.homePage.newReleases"
-                           :title="item.name"
-                           :item="item" />
+                <item-card
+                    v-for="item in library.view.homePage.newReleases"
+                    :item="item"
+                    :title="item.name"
+                    class="mr-4"
+                />
             </horizontal-scroller>
         </template>
     </div>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import { useLibraryStore } from "../store/library";
 import { computed, toRaw } from "vue";
 import HighlightCard from "../components/HighlightCard.vue";
@@ -66,15 +79,24 @@ import HorizontalScroller from "../components/HorizontalScroller.vue";
 const library = useLibraryStore();
 library.refreshHomePage();
 
-const highlight = computed(() => library.view.homePage.featured.playlists[0] as SpotifyApi.PlaylistObjectFull);
-const otherPlaylists = computed(() => library.view.homePage.featured.playlists.slice(1) as SpotifyApi.PlaylistObjectFull[]);
+const highlight = computed(
+    () =>
+        library.view.homePage.featured
+            .playlists[0] as SpotifyApi.PlaylistObjectFull,
+);
+const otherPlaylists = computed(
+    () =>
+        library.view.homePage.featured.playlists.slice(
+            1,
+        ) as SpotifyApi.PlaylistObjectFull[],
+);
 
 setTimeout(() => {
     console.log(toRaw(library.view.homePage));
 }, 500);
 </script>
 
-<style scoped lang="less">
+<style lang="less" scoped>
 .home {
     padding-top: 60px;
 }
@@ -98,13 +120,13 @@ setTimeout(() => {
     margin-bottom: 0 !important;
     font-size: 23px;
     font-weight: 500;
-    opacity: .8;
+    opacity: 0.8;
 }
 
 .other-title {
     margin-bottom: 0 !important;
     font-size: 20px;
     font-weight: 500;
-    opacity: .8;
+    opacity: 0.8;
 }
 </style>

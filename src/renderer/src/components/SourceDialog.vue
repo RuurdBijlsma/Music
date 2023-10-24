@@ -1,34 +1,74 @@
 <template>
-    <v-dialog v-model="base.sourceDialog.show" :scrollable="true" width="auto"
-              :class="{dark: theme.current.value.dark}">
+    <v-dialog
+        v-model="base.sourceDialog.show"
+        :class="{ dark: theme.current.value.dark }"
+        :scrollable="true"
+        width="auto"
+    >
         <div class="card">
-            <v-card-title class="main-title pt-5 mb-3">Choose a YouTube source video</v-card-title>
+            <v-card-title class="main-title pt-5 mb-3"
+                >Choose a YouTube source video</v-card-title
+            >
             <v-divider></v-divider>
-            <v-card-text class="card-content" :style="{
-                alignItems: base.sourceDialog.loading ? 'center' : 'left'
-            }">
-                <v-progress-circular indeterminate size="100" v-if="base.sourceDialog.loading" />
+            <v-card-text
+                :style="{
+                    alignItems: base.sourceDialog.loading ? 'center' : 'left',
+                }"
+                class="card-content"
+            >
+                <v-progress-circular
+                    v-if="base.sourceDialog.loading"
+                    indeterminate
+                    size="100"
+                />
                 <template v-else>
-                    <div class="yt-card mb-5" v-for="item in base.sourceDialog.items">
-                        <v-img class="image" height="200" min-width="355" max-width="355" :src="item.thumbnail">
-                            <p class="duration">{{ base.msToReadable(item.duration * 1000) }}</p>
-                            <p class="selected" v-if="sourceSelectedId === item.id">Active</p>
+                    <div
+                        v-for="item in base.sourceDialog.items"
+                        class="yt-card mb-5"
+                    >
+                        <v-img
+                            :src="item.thumbnail"
+                            class="image"
+                            height="200"
+                            max-width="355"
+                            min-width="355"
+                        >
+                            <p class="duration">
+                                {{ base.msToReadable(item.duration * 1000) }}
+                            </p>
+                            <p
+                                v-if="sourceSelectedId === item.id"
+                                class="selected"
+                            >
+                                Active
+                            </p>
                         </v-img>
                         <div class="info-content">
                             <h3 class="title mb-1">{{ item.title }}</h3>
-                            <v-list-item-subtitle>{{ viewCountString(item.viewCount) }} •
+                            <v-list-item-subtitle
+                                >{{ viewCountString(item.viewCount) }} •
                                 {{ item.uploadDate.toLocaleDateString() }}
                             </v-list-item-subtitle>
                             <div class="channel mt-2">
-                                <v-avatar :color="randomColor(item.id)">{{ item.channel[0] }}</v-avatar>
+                                <v-avatar :color="randomColor(item.id)">{{
+                                    item.channel[0]
+                                }}</v-avatar>
                                 <span class="ml-4">{{ item.channel }}</span>
                             </div>
-                            <p class="description mt-2">{{ item.description }}</p>
+                            <p class="description mt-2">
+                                {{ item.description }}
+                            </p>
                             <div class="actions mt-4">
-                                <v-btn @click="activate(item)" v-if="sourceSelectedId !== item.id" variant="tonal">
+                                <v-btn
+                                    v-if="sourceSelectedId !== item.id"
+                                    variant="tonal"
+                                    @click="activate(item)"
+                                >
                                     activate
                                 </v-btn>
-                                <simple-yt-player :track="search.ytResultToTrack(item)"></simple-yt-player>
+                                <simple-yt-player
+                                    :track="search.ytResultToTrack(item)"
+                                ></simple-yt-player>
                             </div>
                         </div>
                     </div>
@@ -36,13 +76,18 @@
             </v-card-text>
             <v-divider></v-divider>
             <v-card-actions>
-                <v-btn :color="base.themeColor" :block="true" @click="base.sourceDialog.show = false">Dismiss</v-btn>
+                <v-btn
+                    :block="true"
+                    :color="base.themeColor"
+                    @click="base.sourceDialog.show = false"
+                    >Dismiss</v-btn
+                >
             </v-card-actions>
         </div>
     </v-dialog>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import { useBaseStore } from "../store/base";
 import { useTheme } from "vuetify";
 import { useSearchStore } from "../store/search";
@@ -69,30 +114,46 @@ watch(sourceSelectedId, () => {
 const randomColor = (id: string) => {
     let random = parseInt(id.substring(2, 6), 36) / 1679616;
     if (theme.current.value.dark) {
-        return "hsl(" + 360 * random + "," +
-            (25 + 70 * random) + "%," +
-            (25 + 10 * random) + "%)";
+        return (
+            "hsl(" +
+            360 * random +
+            "," +
+            (25 + 70 * random) +
+            "%," +
+            (25 + 10 * random) +
+            "%)"
+        );
     } else {
-        return "hsl(" + 360 * random + "," +
-            (25 + 70 * random) + "%," +
-            (75 + 10 * random) + "%)";
+        return (
+            "hsl(" +
+            360 * random +
+            "," +
+            (25 + 70 * random) +
+            "%," +
+            (75 + 10 * random) +
+            "%)"
+        );
     }
 };
 
 const viewCountString = (viewCount: number) => {
     if (viewCount > 1000000000) {
         let followerBillions = Math.round(viewCount / 1000000000);
-        return followerBillions + "B view" + (followerBillions === 1 ? "" : "s");
+        return (
+            followerBillions + "B view" + (followerBillions === 1 ? "" : "s")
+        );
     }
     if (viewCount > 1000000) {
         let followerMillions = Math.round(viewCount / 1000000);
-        return followerMillions + "M view" + (followerMillions === 1 ? "" : "s");
+        return (
+            followerMillions + "M view" + (followerMillions === 1 ? "" : "s")
+        );
     }
     return viewCount.toLocaleString() + " view" + (viewCount === 1 ? "" : "s");
 };
 </script>
 
-<style scoped lang="less">
+<style lang="less" scoped>
 .card {
     backdrop-filter: blur(40px) saturate(150%) brightness(130%);
     background-color: rgba(var(--v-theme-background), 0.5);
@@ -137,7 +198,8 @@ const viewCountString = (viewCount: number) => {
     background-color: black;
 }
 
-.duration, .selected {
+.duration,
+.selected {
     position: absolute;
     border-radius: 5px;
     padding: 4px 8px;
@@ -164,7 +226,7 @@ const viewCountString = (viewCount: number) => {
 .title {
     font-size: 20px;
     font-weight: 500;
-    opacity: .9;
+    opacity: 0.9;
     overflow-x: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
@@ -184,7 +246,7 @@ const viewCountString = (viewCount: number) => {
     -webkit-box-orient: vertical;
     overflow-y: hidden;
     font-size: 14px;
-    opacity: .8;
+    opacity: 0.8;
 }
 
 .actions {

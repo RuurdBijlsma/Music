@@ -2,7 +2,7 @@
     <canvas class="progress-canvas"></canvas>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import { usePlayerStore } from "../store/player";
 import { onMounted, onUnmounted } from "vue";
 import { storeToRefs } from "pinia";
@@ -27,10 +27,10 @@ const canvasDown = (e: MouseEvent) => {
     seek(e);
 };
 
-const canvasUp = () => mouseActive.value = false;
+const canvasUp = () => (mouseActive.value = false);
 const canvasMove = (e: MouseEvent) => seek(e);
-const mouseEnter = () => mouseHover.value = true;
-const mouseLeave = () => mouseHover.value = false;
+const mouseEnter = () => (mouseHover.value = true);
+const mouseLeave = () => (mouseHover.value = false);
 
 onMounted(() => {
     player.initTrackbars(player.trackId, player.playerElement.src);
@@ -55,7 +55,7 @@ onUnmounted(() => {
 });
 </script>
 
-<style scoped lang="less">
+<style lang="less" scoped>
 .progress-canvas {
     width: 300px;
     height: 100px;

@@ -1,21 +1,22 @@
 <template>
-    <div class="artist" v-if="artist">
+    <div v-if="artist" class="artist">
         <div class="mb-2 artist-info">
             <glow-image
-                @click.right="base.setContextMenuItem($event, artist)"
                 :effect-scale="1.3"
-                rounding="125px"
-                :width="250"
                 :height="250"
+                :src="base.itemImage(artist)"
+                :width="250"
                 class="mb-4"
-                :src="base.itemImage(artist)" />
+                rounding="125px"
+                @click.right="base.setContextMenuItem($event, artist)"
+            />
             <spacer />
             <h1>{{ artist.name }}</h1>
             <p>{{ followerString }}</p>
             <p class="genres">{{ artist.genres.join(" / ") }}</p>
             <collection-buttons :collection="collection" :like-item="artist" />
         </div>
-        <track-list padding-top="0" :collection="collection" />
+        <track-list :collection="collection" padding-top="0" />
         <div class="sub-header mt-6 mb-5">
             <v-divider />
             <p class="top-tracks-text ml-4 mr-4">Albums</p>
@@ -24,12 +25,8 @@
         <div>
             <horizontal-scroller v-if="albums" class="mt-4 albums-grid">
                 <template v-for="(album, i) in albums">
-                    <highlight-card :item="album"
-                                    class="mr-4"
-                                    v-if="i === 0" />
-                    <item-card :item="album"
-                               class="mr-4"
-                               v-else />
+                    <highlight-card v-if="i === 0" :item="album" class="mr-4" />
+                    <item-card v-else :item="album" class="mr-4" />
                 </template>
             </horizontal-scroller>
         </div>
@@ -41,15 +38,14 @@
         <div>
             <horizontal-scroller v-if="relatedArtists" class="mt-4 albums-grid">
                 <template v-for="relatedArtist in relatedArtists">
-                    <item-card :item="relatedArtist"
-                               class="mr-4" />
+                    <item-card :item="relatedArtist" class="mr-4" />
                 </template>
             </horizontal-scroller>
         </div>
     </div>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import { computed, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import { baseDb, useBaseStore } from "../../store/base";
@@ -80,28 +76,31 @@ let loadedId = route.params.id as string;
 reloadArtist(loadedId);
 
 watch(route, async () => {
-    if (route.path.startsWith("/artist") && typeof route.params.id === "string" && route.params.id !== loadedId) {
+    if (
+        route.path.startsWith("/artist") &&
+        typeof route.params.id === "string" &&
+        route.params.id !== loadedId
+    ) {
         loadedId = route.params.id;
         reloadArtist(loadedId).then();
         let el = document.querySelector(".router-view");
-        if (el !== null)
-            el.scrollTop = 0;
+        if (el !== null) el.scrollTop = 0;
     }
 });
 
 async function reloadArtist(id: string) {
     await baseDb;
-    spotify.getArtist(id).then(r => {
+    spotify.getArtist(id).then((r) => {
         artist.value = r;
         console.log(r);
     });
-    spotify.getArtistAlbums(id).then(r => {
+    spotify.getArtistAlbums(id).then((r) => {
         albums.value = r.items as SpotifyApi.AlbumObjectFull[];
     });
-    spotify.getArtistRelatedArtists(id).then(r => {
+    spotify.getArtistRelatedArtists(id).then((r) => {
         relatedArtists.value = r.artists;
     });
-    spotify.getArtistTopTracks(id).then(r => {
+    spotify.getArtistTopTracks(id).then((r) => {
         topTracks.value = r.tracks;
     });
 }
@@ -110,18 +109,27 @@ const followerString = computed(() => {
     if (artist.value === null) return "0 followers";
     if (artist.value.followers.total === 0) return "No followers";
     if (artist.value.followers.total > 1000000) {
-        let followerMillions = Math.round(artist.value.followers.total / 1000000);
-        return followerMillions + "M follower" + (followerMillions === 1 ? "" : "s");
+        let followerMillions = Math.round(
+            artist.value.followers.total / 1000000,
+        );
+        return (
+            followerMillions +
+            "M follower" +
+            (followerMillions === 1 ? "" : "s")
+        );
     }
-    return artist.value.followers.total.toLocaleString() + " follower" + (artist.value.followers.total === 1 ? "" : "s");
+    return (
+        artist.value.followers.total.toLocaleString() +
+        " follower" +
+        (artist.value.followers.total === 1 ? "" : "s")
+    );
 });
 // const totalDurationMs = computed(() => {
 //     return tracks.value.reduce((a, b) => a + b.duration_ms, 0);
 // });
-
 </script>
 
-<style scoped lang="less">
+<style lang="less" scoped>
 .artist {
     padding-top: 100px;
     padding-bottom: 100px;
@@ -138,7 +146,7 @@ const followerString = computed(() => {
 
 .genres {
     text-transform: uppercase;
-    opacity: .7;
+    opacity: 0.7;
     text-align: center;
     font-size: 12px;
 }
@@ -159,12 +167,12 @@ const followerString = computed(() => {
 .artist-stats {
     font-size: 13px;
     font-weight: 400;
-    opacity: .7;
+    opacity: 0.7;
 }
 
 .top-tracks-text {
     text-align: center;
-    opacity: .7;
+    opacity: 0.7;
     text-transform: uppercase;
     font-weight: 400;
     font-size: 13px;

@@ -5,7 +5,12 @@ import type { IDBPDatabase } from "idb";
 import { usePlatformStore } from "./electron";
 import { useSpotifyApiStore } from "./spotify-api";
 import { useRouter } from "vue-router";
-import type { ItemCollection, ExtendedPlaylistTrack, YouTubeTrackInfo, SearchResult } from "../scripts/types";
+import type {
+    ExtendedPlaylistTrack,
+    ItemCollection,
+    SearchResult,
+    YouTubeTrackInfo,
+} from "../scripts/types";
 import { Ref, ref, watch } from "vue";
 import { usePlayerStore } from "./player";
 import { executeCached } from "../scripts/utils";
@@ -18,11 +23,14 @@ export const useSearchStore = defineStore("search", () => {
     const base = useBaseStore();
     const player = usePlayerStore();
 
-    let recentSearches: Ref<string[]> = ref(localStorage.getItem("recentSearch") === null ?
-        [] : JSON.parse(localStorage.recentSearch));
+    let recentSearches: Ref<string[]> = ref(
+        localStorage.getItem("recentSearch") === null
+            ? []
+            : JSON.parse(localStorage.recentSearch),
+    );
 
     let db: IDBPDatabase;
-    baseDb.then(r => db = r);
+    baseDb.then((r) => (db = r));
 
     const searchResults: Map<string, Ref<SearchResult>> = new Map();
     const suggestionResults: Ref<SearchResult | null> = ref(null);
@@ -38,7 +46,11 @@ export const useSearchStore = defineStore("search", () => {
             let [type, id] = term.split("/");
             if (type === "track") {
                 let track = await spotify.getTrack(id);
-                await router.push(`/album/${base.encodeUrlName(track.album.name)}/${track.album.id}?play=${id}`);
+                await router.push(
+                    `/album/${base.encodeUrlName(track.album.name)}/${
+                        track.album.id
+                    }?play=${id}`,
+                );
             } else {
                 await router.push(`/${type}/from-url/${id}`);
             }
@@ -46,21 +58,26 @@ export const useSearchStore = defineStore("search", () => {
             searchValue.value = "";
         }
 
-        let match = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+        let match = url.match(
+            /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/,
+        );
         if (match !== null && !!match[1] && match[1].length === 11) {
             base.addSnack("Locating YouTube™ track... Please wait.");
             //https://youtu.be/PeAMGlDBB7c
             let id = match[1];
             searchValue.value = "";
             let track = await ytIdToTrack(id);
-            await player.load({
-                tracks: [track],
-                type: "youtube",
-                id: track.id,
-                name: `From YouTube URL`,
-                buttonText: "",
-                to: `/`
-            } as ItemCollection, track);
+            await player.load(
+                {
+                    tracks: [track],
+                    type: "youtube",
+                    id: track.id,
+                    name: `From YouTube URL`,
+                    buttonText: "",
+                    to: `/`,
+                } as ItemCollection,
+                track,
+            );
         }
     });
 
@@ -68,21 +85,21 @@ export const useSearchStore = defineStore("search", () => {
         suggestionResults.value = {
             youtube: {
                 tracks: [],
-                loading: true
+                loading: true,
             },
             spotify: {
                 data: {
                     tracks: [],
                     albums: [],
                     artists: [],
-                    playlists: []
+                    playlists: [],
                 },
-                loading: true
+                loading: true,
             },
             liked: {
                 tracks: [],
-                loading: true
-            }
+                loading: true,
+            },
         } as SearchResult;
     }
 
@@ -97,21 +114,21 @@ export const useSearchStore = defineStore("search", () => {
         let result = ref({
             youtube: {
                 tracks: [],
-                loading: true
+                loading: true,
             },
             spotify: {
                 data: {
                     tracks: [],
                     albums: [],
                     artists: [],
-                    playlists: []
+                    playlists: [],
                 },
-                loading: true
+                loading: true,
             },
             liked: {
                 tracks: [],
-                loading: true
-            }
+                loading: true,
+            },
         } as SearchResult);
         searchResults.set(query, result);
         if (query === null) return result;
@@ -119,24 +136,25 @@ export const useSearchStore = defineStore("search", () => {
         addToRecentSearches(query);
 
         console.log("Performing search for ", query);
-        searchSpotify(query).then(res => {
+        searchSpotify(query).then((res) => {
             result.value.spotify.loading = false;
-            if (res.tracks)
-                result.value.spotify.data.tracks = res.tracks.items;
+            if (res.tracks) result.value.spotify.data.tracks = res.tracks.items;
             if (res.playlists)
-                result.value.spotify.data.playlists = res.playlists.items as SpotifyApi.PlaylistObjectFull[];
+                result.value.spotify.data.playlists = res.playlists
+                    .items as SpotifyApi.PlaylistObjectFull[];
             if (res.albums)
-                result.value.spotify.data.albums = res.albums.items as SpotifyApi.AlbumObjectFull[];
+                result.value.spotify.data.albums = res.albums
+                    .items as SpotifyApi.AlbumObjectFull[];
             if (res.artists)
                 result.value.spotify.data.artists = res.artists.items;
             // console.log(toRaw(result.value.spotify));
         });
-        searchYouTube(query).then(res => {
+        searchYouTube(query).then((res) => {
             result.value.youtube.loading = false;
             result.value.youtube.tracks = res;
             console.log(res);
         });
-        searchLikedTracks(query).then(res => {
+        searchLikedTracks(query).then((res) => {
             result.value.liked.loading = false;
             result.value.liked.tracks = res;
         });
@@ -153,7 +171,9 @@ export const useSearchStore = defineStore("search", () => {
         localStorage.recentSearch = JSON.stringify(recentSearches.value);
     }
 
-    function ytResultToTrack(ytResult: YouTubeTrackInfo): SpotifyApi.TrackObjectFull {
+    function ytResultToTrack(
+        ytResult: YouTubeTrackInfo,
+    ): SpotifyApi.TrackObjectFull {
         return {
             available_markets: [],
             disc_number: 0,
@@ -165,14 +185,16 @@ export const useSearchStore = defineStore("search", () => {
             preview_url: "",
             track_number: 0,
             uri: "",
-            artists: [{
-                name: ytResult.channel.replaceAll("\"", ""),
-                type: "artist",
-                id: ytResult.channelId,
-                uri: "",
-                href: ytResult.channelUrl,
-                external_urls: { spotify: "" }
-            }],
+            artists: [
+                {
+                    name: ytResult.channel.replaceAll('"', ""),
+                    type: "artist",
+                    id: ytResult.channelId,
+                    uri: "",
+                    href: ytResult.channelUrl,
+                    external_urls: { spotify: "" },
+                },
+            ],
             album: {
                 images: [{ url: ytResult.thumbnail }],
                 type: "album",
@@ -180,14 +202,14 @@ export const useSearchStore = defineStore("search", () => {
                 href: "",
                 album_type: "youtube",
                 external_urls: { spotify: "" },
-                name: (ytResult.playlist ?? "").replaceAll("\"", ""),
-                uri: ""
+                name: (ytResult.playlist ?? "").replaceAll('"', ""),
+                uri: "",
             },
             type: "track",
-            name: ytResult.title.replaceAll("\"", ""),
+            name: ytResult.title.replaceAll('"', ""),
             id: `yt-${ytResult.id}`,
             duration_ms: ytResult.duration * 1000,
-            popularity: ytResult.viewCount
+            popularity: ytResult.viewCount,
         };
     }
 
@@ -196,10 +218,8 @@ export const useSearchStore = defineStore("search", () => {
     async function searchLikedTracks(query: string) {
         if (likedCache.hasOwnProperty(query)) {
             let res = likedCache[query];
-            if (res.expiryDate < Date.now())
-                delete likedCache[query];
-            else
-                return likedCache[query].result;
+            if (res.expiryDate < Date.now()) delete likedCache[query];
+            else return likedCache[query].result;
         }
         let tracks: ExtendedPlaylistTrack[];
         if (library.tracks.length > 0) {
@@ -218,7 +238,7 @@ export const useSearchStore = defineStore("search", () => {
         likedCache[query] = {
             result,
             // expiry date 5 minutes from now
-            expiryDate: Date.now() + 1000 * 60 * 5
+            expiryDate: Date.now() + 1000 * 60 * 5,
         };
         return result;
     }
@@ -234,10 +254,20 @@ export const useSearchStore = defineStore("search", () => {
     }
 
     async function searchSpotify(query: string) {
-        return await executeCached<SpotifyApi.SearchResponse>(db, async () => {
-            await baseDb;
-            return await spotify.search(query, ["album", "artist", "playlist", "track"]);
-        }, "sp" + query, 1000 * 60 * 5);
+        return await executeCached<SpotifyApi.SearchResponse>(
+            db,
+            async () => {
+                await baseDb;
+                return await spotify.search(query, [
+                    "album",
+                    "artist",
+                    "playlist",
+                    "track",
+                ]);
+            },
+            "sp" + query,
+            1000 * 60 * 5,
+        );
     }
 
     return {
@@ -250,6 +280,6 @@ export const useSearchStore = defineStore("search", () => {
         recentSearches,
         cachedSearch,
         suggestionResults,
-        clearSuggestions
+        clearSuggestions,
     };
 });

@@ -2,25 +2,37 @@
     <div class="playlist">
         <p class="tracks-info">
             {{ tracksAmount }}
-            Track{{ tracks.length === 1 ? "" : "s" }}
-            • {{ base.approximateDuration((totalDurationMs)) }}
-            <v-btn v-show="trackLoadProgress === 100" @click="library.loadLikedTracks" icon="mdi-refresh"
-                   density="compact" variant="plain" size="25" class="refresh-button" />
+            Track{{ tracks.length === 1 ? "" : "s" }} •
+            {{ base.approximateDuration(totalDurationMs) }}
+            <v-btn
+                v-show="trackLoadProgress === 100"
+                class="refresh-button"
+                density="compact"
+                icon="mdi-refresh"
+                size="25"
+                variant="plain"
+                @click="library.loadLikedTracks"
+            />
         </p>
         <collection-buttons :collection="collection" show-filter />
-        <v-progress-linear :indeterminate="trackLoadProgress === 0"
-                           :style="{opacity: trackLoadProgress === 100 ? 0 : 1}"
-                           class="mb-2 progress"
-                           rounded
-                           :model-value="trackLoadProgress"></v-progress-linear>
-        <track-list-virtual v-if="collection !== null" :collection="collection"
-                            :tracks="collection.tracks"
-                            :height="(base.windowHeight - subtractFromHeight).toString()"
-                            padding-top="0" />
+        <v-progress-linear
+            :indeterminate="trackLoadProgress === 0"
+            :model-value="trackLoadProgress"
+            :style="{ opacity: trackLoadProgress === 100 ? 0 : 1 }"
+            class="mb-2 progress"
+            rounded
+        ></v-progress-linear>
+        <track-list-virtual
+            v-if="collection !== null"
+            :collection="collection"
+            :height="(base.windowHeight - subtractFromHeight).toString()"
+            :tracks="collection.tracks"
+            padding-top="0"
+        />
     </div>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import { useLibraryStore } from "../../store/library";
 import { useBaseStore } from "../../store/base";
 import { computed, toRaw } from "vue";
@@ -33,40 +45,44 @@ const library = useLibraryStore();
 const { tracks } = storeToRefs(library);
 const base = useBaseStore();
 
-const subtractFromHeight = computed(()=>{
+const subtractFromHeight = computed(() => {
     return base.windowWidth <= 930 ? 358 : 188;
-})
+});
 
 const collection = computed(() => {
     if (tracks.value === null || tracks.value === undefined) {
         return null;
     }
     return {
-        tracks: toRaw(tracks.value).map(t => t.track),
+        tracks: toRaw(tracks.value).map((t) => t.track),
         type: "liked",
         id: "liked",
         loaded: library.likedTracksLoaded,
         total: library.likedTracksTotal,
         name: "Liked tracks",
         buttonText: "Library",
-        to: "/library"
+        to: "/library",
     } as ItemCollection;
 });
 
 setTimeout(() => {
     // if last track reload is 24 or more hours ago then reload tracks
-    if (localStorage.getItem("lastTracksLoad") === null || Date.now() - 1000 * 60 * 60 * 24 > +localStorage.lastTracksLoad) {
+    if (
+        localStorage.getItem("lastTracksLoad") === null ||
+        Date.now() - 1000 * 60 * 60 * 24 > +localStorage.lastTracksLoad
+    ) {
         library.loadLikedTracks();
     }
 }, 500);
-
 
 const totalDurationMs = computed(() => {
     if (tracks.value === null || tracks.value === undefined) return 0;
     return tracks.value.reduce((a, b) => a + b.track.duration_ms, 0);
 });
 // const trackLoadProgress = computed(() => 100)
-const trackLoadProgress = computed(() => 100 * library.likedTracksLoaded / library.likedTracksTotal);
+const trackLoadProgress = computed(
+    () => (100 * library.likedTracksLoaded) / library.likedTracksTotal,
+);
 
 const tracksAmount = computed(() => {
     if (trackLoadProgress.value === 100) {
@@ -76,7 +92,7 @@ const tracksAmount = computed(() => {
 });
 </script>
 
-<style scoped lang="less">
+<style lang="less" scoped>
 .track-list-item.odd-item {
     background-color: rgba(0, 0, 0, 0.07);
 }
@@ -86,14 +102,14 @@ const tracksAmount = computed(() => {
 }
 
 .progress {
-    transition: opacity .3s;
+    transition: opacity 0.3s;
     width: 80%;
 }
 
 .tracks-info {
     font-size: 13px;
     font-weight: 400;
-    opacity: .7;
+    opacity: 0.7;
     text-align: center;
 }
 

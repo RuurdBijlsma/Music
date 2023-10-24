@@ -1,34 +1,54 @@
 <template>
     <template v-if="!loading">
-        <div class="sub-list" v-if="tracks.length > 0" ref="subList" :style="{
-            maxHeight: sublistMaxHeight + 'px',
-        }">
-            <div class="sub-header mt-1 mb-1" v-if="showHeader">
+        <div
+            v-if="tracks.length > 0"
+            ref="subList"
+            :style="{
+                maxHeight: sublistMaxHeight + 'px',
+            }"
+            class="sub-list"
+        >
+            <div v-if="showHeader" class="sub-header mt-1 mb-1">
                 <v-divider />
                 <div>
                     <slot></slot>
                 </div>
                 <v-divider />
             </div>
-            <track-list padding-top="0" :collection="collection" :tracks="collection.tracks" />
+            <track-list
+                :collection="collection"
+                :tracks="collection.tracks"
+                padding-top="0"
+            />
         </div>
         <template v-if="tracks.length > 3">
             <v-divider />
             <div class="list-expander">
-                <v-btn v-if="expanded" @click="smallify()" icon="mdi-chevron-up" size="small"
-                       variant="text"></v-btn>
-                <v-btn v-else @click="expand()" icon="mdi-chevron-down" size="small" variant="text"></v-btn>
+                <v-btn
+                    v-if="expanded"
+                    icon="mdi-chevron-up"
+                    size="small"
+                    variant="text"
+                    @click="smallify()"
+                ></v-btn>
+                <v-btn
+                    v-else
+                    icon="mdi-chevron-down"
+                    size="small"
+                    variant="text"
+                    @click="expand()"
+                ></v-btn>
             </div>
         </template>
     </template>
     <div v-else class="loading-circle">
-        <v-progress-circular size="40" indeterminate />
+        <v-progress-circular indeterminate size="40" />
     </div>
 </template>
 
-<script setup lang="ts">
-import { computed, ref } from "vue";
+<script lang="ts" setup>
 import type { PropType } from "vue";
+import { computed, ref } from "vue";
 import TrackList from "./TrackList.vue";
 import type { ItemCollection } from "../scripts/types";
 
@@ -37,35 +57,40 @@ const subList = ref<HTMLElement | null>(null);
 const props = defineProps({
     tracks: {
         type: Object as PropType<SpotifyApi.TrackObjectFull[]>,
-        required: true
+        required: true,
     },
     loading: {
         type: Boolean,
         required: false,
-        default: () => false
+        default: () => false,
     },
     collection: {
         type: Object as PropType<ItemCollection>,
-        required: true
+        required: true,
     },
     showAmount: {
         type: Number,
         required: false,
-        default: 4
+        default: 4,
     },
     showHeader: {
         type: Boolean,
-        default: false
-    }
+        default: false,
+    },
 });
 
 const expanded = ref(false);
-const collapsedHeight = computed(() => props.showAmount * 50 + (props.showHeader ? 28 : 0));
+const collapsedHeight = computed(
+    () => props.showAmount * 50 + (props.showHeader ? 28 : 0),
+);
 let sublistMaxHeight = ref(collapsedHeight.value);
 
 function expand() {
     if (subList.value === null) return;
-    sublistMaxHeight.value = Math.max(subList.value.scrollHeight, collapsedHeight.value);
+    sublistMaxHeight.value = Math.max(
+        subList.value.scrollHeight,
+        collapsedHeight.value,
+    );
     expanded.value = true;
 }
 
@@ -74,10 +99,9 @@ function smallify() {
     sublistMaxHeight.value = collapsedHeight.value;
     expanded.value = false;
 }
-
 </script>
 
-<style scoped lang="less">
+<style lang="less" scoped>
 .sub-header {
     display: flex;
     align-items: center;
@@ -90,13 +114,13 @@ function smallify() {
     width: 100%;
     font-size: 13px;
     font-weight: 400;
-    opacity: .7;
+    opacity: 0.7;
     text-align: center;
 }
 
 .sub-list {
     overflow-y: hidden;
-    transition: .5s;
+    transition: 0.5s;
 }
 
 .list-expander {

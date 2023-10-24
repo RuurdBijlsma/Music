@@ -1,17 +1,21 @@
 <template>
     <div class="artists pt-4">
-        <item-card class="mb-4" v-for="artist in library.saved.artist" :item="artist" />
+        <item-card
+            v-for="artist in library.saved.artist"
+            :item="artist"
+            class="mb-4"
+        />
     </div>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import { useLibraryStore } from "../../store/library";
 import ItemCard from "../../components/ItemCard.vue";
 
 const library = useLibraryStore();
 </script>
 
-<style scoped lang="less">
+<style lang="less" scoped>
 .artists {
     display: flex;
     flex-wrap: wrap;

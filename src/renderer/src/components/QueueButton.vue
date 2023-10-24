@@ -1,27 +1,46 @@
 <template>
-    <v-menu :close-on-content-click="false" transition="none" :class="{dark: theme.current.value.dark}">
+    <v-menu
+        :class="{ dark: theme.current.value.dark }"
+        :close-on-content-click="false"
+        transition="none"
+    >
         <template v-slot:activator="{ props }">
-            <v-btn rounded variant="text" v-bind="props" @click="delayedScrollToTrack">
+            <v-btn
+                rounded
+                v-bind="props"
+                variant="text"
+                @click="delayedScrollToTrack"
+            >
                 <v-icon>mdi-playlist-play</v-icon>
             </v-btn>
         </template>
         <v-card v-if="collection" class="card-bg">
-            <v-card-title class="card-title">{{ collection.name }}</v-card-title>
+            <v-card-title class="card-title">{{
+                collection.name
+            }}</v-card-title>
             <v-divider />
-            <track-list v-if="player.queue.length < 200"
-                        :collection="collection"
-                        :tracks="player.queue"
-                        class="list-container pb-2"
-                        padding-top="0" />
-            <track-list-virtual v-else
-                                :collection="collection"
-                                :tracks="player.queue"
-                                class="list-container"
-                                padding-top="10px"
-                                :scroll-into-view="focusTrack"
-                                height="500" />
+            <track-list
+                v-if="player.queue.length < 200"
+                :collection="collection"
+                :tracks="player.queue"
+                class="list-container pb-2"
+                padding-top="0"
+            />
+            <track-list-virtual
+                v-else
+                :collection="collection"
+                :scroll-into-view="focusTrack"
+                :tracks="player.queue"
+                class="list-container"
+                height="500"
+                padding-top="10px"
+            />
             <v-card-actions v-if="collection.to !== ''">
-                <v-btn :disabled="route.path === collection.to" :to="collection.to" :color="base.themeColor">
+                <v-btn
+                    :color="base.themeColor"
+                    :disabled="route.path === collection.to"
+                    :to="collection.to"
+                >
                     Go to {{ collection.buttonText }}
                 </v-btn>
                 <v-btn :color="base.themeColor" @click="scrollToTrack">
@@ -32,7 +51,7 @@
     </v-menu>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import TrackListVirtual from "./TrackListVirtual.vue";
 import TrackList from "./TrackList.vue";
 import { usePlayerStore } from "../store/player";
@@ -62,14 +81,17 @@ function delayedScrollToTrack() {
 function scrollToTrack() {
     if (player.track === null) return;
     focusTrack.value = player.track;
-    let index = player.queue.findIndex(t => t.id === player.trackId);
+    let index = player.queue.findIndex((t) => t.id === player.trackId);
     let container = document.querySelector(".list-container");
     if (container === null) return;
-    container.scrollTo({ top: (index - 3) * 50, behavior: smoothScroll ? "smooth" : "auto" });
+    container.scrollTo({
+        top: (index - 3) * 50,
+        behavior: smoothScroll ? "smooth" : "auto",
+    });
 }
 </script>
 
-<style scoped lang="less">
+<style lang="less" scoped>
 .card-bg {
     border-radius: 10px;
     overflow: hidden;
@@ -84,7 +106,7 @@ function scrollToTrack() {
 }
 
 .card-title {
-    opacity: .7;
+    opacity: 0.7;
     font-weight: bolder;
 }
 

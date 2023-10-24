@@ -1,12 +1,13 @@
 <template>
-    <div class="user" v-if="user">
+    <div v-if="user" class="user">
         <div class="user-info">
             <glow-image
                 :effect-scale="1.4"
-                rounding="125px"
-                :width="250"
                 :height="250"
-                :src="userImage" />
+                :src="userImage"
+                :width="250"
+                rounding="125px"
+            />
             <h1 class="mt-14">{{ user.display_name }}</h1>
             <p>{{ followerString }}</p>
         </div>
@@ -23,7 +24,7 @@
     </div>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import { useLibraryStore } from "../../store/library";
 import { computed, ref, watch } from "vue";
 import { useRoute } from "vue-router";
@@ -43,17 +44,24 @@ let loadedId = route.params.id as string;
 reloadUser();
 
 watch(route, async () => {
-    if (route.path.startsWith("/user") && typeof route.params.id === "string" && route.params.id !== loadedId) {
+    if (
+        route.path.startsWith("/user") &&
+        typeof route.params.id === "string" &&
+        route.params.id !== loadedId
+    ) {
         loadedId = route.params.id;
         reloadUser();
         let el = document.querySelector(".router-view");
-        if (el !== null)
-            el.scrollTop = 0;
+        if (el !== null) el.scrollTop = 0;
     }
 });
 
 const userImage = computed(() => {
-    if (user.value !== null && user.value.images !== undefined && user.value.images.length > 0) {
+    if (
+        user.value !== null &&
+        user.value.images !== undefined &&
+        user.value.images.length > 0
+    ) {
         return user.value.images[0].url;
     }
     return randomUser();
@@ -61,29 +69,39 @@ const userImage = computed(() => {
 
 function reloadUser() {
     let id = loadedId;
-    if (id === "")
-        id = library.userInfo.id;
-    spotify.getUser(id).then(r => {
+    if (id === "") id = library.userInfo.id;
+    spotify.getUser(id).then((r) => {
         user.value = r;
     });
-    spotify.getUserPlaylists(id).then(r => {
+    spotify.getUserPlaylists(id).then((r) => {
         playlists.value = r.items as SpotifyApi.PlaylistObjectFull[];
     });
 }
 
 const followerString = computed(() => {
-    if (user.value === null || user.value.followers === undefined || user.value.followers.total === 0)
+    if (
+        user.value === null ||
+        user.value.followers === undefined ||
+        user.value.followers.total === 0
+    )
         return "No followers";
     if (user.value.followers.total > 1000000) {
         let followerMillions = Math.round(user.value.followers.total / 1000000);
-        return followerMillions + "M follower" + (followerMillions === 1 ? "" : "s");
+        return (
+            followerMillions +
+            "M follower" +
+            (followerMillions === 1 ? "" : "s")
+        );
     }
-    return user.value.followers.total.toLocaleString() + " follower" + (user.value.followers.total === 1 ? "" : "s");
+    return (
+        user.value.followers.total.toLocaleString() +
+        " follower" +
+        (user.value.followers.total === 1 ? "" : "s")
+    );
 });
-
 </script>
 
-<style scoped lang="less">
+<style lang="less" scoped>
 .playlist-grid {
     display: flex;
     flex-wrap: wrap;
@@ -121,12 +139,12 @@ const followerString = computed(() => {
 .user-stats {
     font-size: 13px;
     font-weight: 400;
-    opacity: .7;
+    opacity: 0.7;
 }
 
 .top-tracks-text {
     text-align: center;
-    opacity: .7;
+    opacity: 0.7;
     text-transform: uppercase;
     font-weight: 400;
     font-size: 13px;

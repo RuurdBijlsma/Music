@@ -9,27 +9,48 @@ const routes = [
     { path: "/settings", component: () => import("../views/Settings.vue") },
     { path: "/downloads", component: () => import("../views/Downloads.vue") },
     { path: "/browse", component: () => import("../views/browse/Browse.vue") },
-    { path: "/playlist/:name/:id", component: () => import("../views/item/Playlist.vue") },
-    { path: "/album/:name/:id", component: () => import("../views/item/Album.vue") },
-    { path: "/user/:name?/:id?", component: () => import("../views/item/User.vue") },
-    { path: "/artist/:name/:id", component: () => import("../views/item/Artist.vue") },
+    {
+        path: "/playlist/:name/:id",
+        component: () => import("../views/item/Playlist.vue"),
+    },
+    {
+        path: "/album/:name/:id",
+        component: () => import("../views/item/Album.vue"),
+    },
+    {
+        path: "/user/:name?/:id?",
+        component: () => import("../views/item/User.vue"),
+    },
+    {
+        path: "/artist/:name/:id",
+        component: () => import("../views/item/Artist.vue"),
+    },
     { path: "/library/:lib?", component: () => import("../views/Library.vue") },
     { path: "/search/:query", component: () => import("../views/Search.vue") },
     { path: "/login", component: () => import("../views/Login.vue") },
-    { path: "/category/:name/:id", component: () => import("../views/browse/Category.vue") },
+    {
+        path: "/category/:name/:id",
+        component: () => import("../views/browse/Category.vue"),
+    },
     { path: "/tune", component: () => import("../views/browse/Tune.vue") },
     { path: "/radio", component: () => import("../views/browse/Radio.vue") },
 ];
 
 const router = createRouter({
     history: createWebHashHistory(),
-    routes
+    routes,
 });
 
 watch(router.currentRoute, () => {
     localStorage.lastRoute = router.currentRoute.value.fullPath;
 });
-router.replace(localStorage.getItem("lastRoute") === null ? "/" : localStorage.lastRoute).then();
+router
+    .replace(
+        localStorage.getItem("lastRoute") === null
+            ? "/"
+            : localStorage.lastRoute,
+    )
+    .then();
 
 router.beforeEach(async (to) => {
     const spotifyAuth = useSpotifyAuthStore();

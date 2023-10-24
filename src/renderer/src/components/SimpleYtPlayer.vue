@@ -1,32 +1,43 @@
 <template>
     <template v-if="isLoaded">
-        <v-btn @click="togglePlay" icon variant="tonal"
-               density="compact">
-            <v-progress-circular :indeterminate="isNaN(loadProgress)"
-                                 :model-value="loadProgress"
-                                 size="24" v-if="loading" />
+        <v-btn density="compact" icon variant="tonal" @click="togglePlay">
+            <v-progress-circular
+                v-if="loading"
+                :indeterminate="isNaN(loadProgress)"
+                :model-value="loadProgress"
+                size="24"
+            />
             <v-icon v-else-if="playing">mdi-pause</v-icon>
             <v-icon v-else>mdi-play</v-icon>
         </v-btn>
     </template>
-    <v-btn v-else @click="load(track)" icon="mdi-play" variant="tonal"
-           density="compact"></v-btn>
-    <simple-progress-bar @seek="playerElement.currentTime = $event" :current-time="currentTime" :duration="duration"
-                         v-if="isLoaded" />
+    <v-btn
+        v-else
+        density="compact"
+        icon="mdi-play"
+        variant="tonal"
+        @click="load(track)"
+    ></v-btn>
+    <simple-progress-bar
+        v-if="isLoaded"
+        :current-time="currentTime"
+        :duration="duration"
+        @seek="playerElement.currentTime = $event"
+    />
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import SimpleProgressBar from "./SimpleProgressBar.vue";
-import { onUnmounted, ref } from "vue";
 import type { PropType } from "vue";
+import { onUnmounted, ref } from "vue";
 import { usePlatformStore } from "../store/electron";
 import { useBaseStore } from "../store/base";
 
 defineProps({
     track: {
         type: Object as PropType<SpotifyApi.TrackObjectFull>,
-        required: true
-    }
+        required: true,
+    },
 });
 
 const platform = usePlatformStore();
@@ -74,10 +85,9 @@ async function load(track: SpotifyApi.TrackObjectFull) {
     const id = track.id;
 
     let onProgress: (percent: number) => void;
-    onProgress = percent => {
+    onProgress = (percent) => {
         loadProgress.value = percent;
-        if (percent === 100)
-            base.events.off(id + "progress", onProgress);
+        if (percent === 100) base.events.off(id + "progress", onProgress);
     };
     base.events.on(id + "progress", onProgress);
     playerElement.src = await platform.getTrackFile(track);
@@ -92,5 +102,4 @@ async function togglePlay() {
 }
 </script>
 
-<style scoped lang="less">
-</style>
+<style lang="less" scoped></style>

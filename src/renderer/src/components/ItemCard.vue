@@ -1,43 +1,60 @@
 <template>
-    <router-link no-style :to="base.itemUrl(item)" :class="{round: item.type === 'artist'}"
-                 @click.right="base.setContextMenuItem($event, item)">
-        <div class="image"
-             :style="{backgroundImage: `url(${itemImage(item)})`}">
-            <item-play-button :color="base.themeColor" variant="elevated"
-                              class="play-button" @click.prevent :item="item" />
+    <router-link
+        :class="{ round: item.type === 'artist' }"
+        :to="base.itemUrl(item)"
+        no-style
+        @click.right="base.setContextMenuItem($event, item)"
+    >
+        <div
+            :style="{ backgroundImage: `url(${itemImage(item)})` }"
+            class="image"
+        >
+            <item-play-button
+                :color="base.themeColor"
+                :item="item"
+                class="play-button"
+                variant="elevated"
+                @click.prevent
+            />
         </div>
         <div class="info mt-2">
-            <p class="title" v-if="!hideName">{{ itemName }}</p>
-            <p class="description" v-if="item.type === 'album'">{{ base.albumString(actualItem) }}</p>
-            <p class="description" v-else-if="hasItem" v-html="base.itemDescription(actualItem)"></p>
+            <p v-if="!hideName" class="title">{{ itemName }}</p>
+            <p v-if="item.type === 'album'" class="description">
+                {{ base.albumString(actualItem) }}
+            </p>
+            <p
+                v-else-if="hasItem"
+                class="description"
+                v-html="base.itemDescription(actualItem)"
+            ></p>
         </div>
     </router-link>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import { useBaseStore } from "../store/base";
 import type { Item, ItemCollection } from "../scripts/types";
 import type { PropType } from "vue";
-import ItemPlayButton from "./ItemPlayButton.vue";
 import { computed } from "vue";
+import ItemPlayButton from "./ItemPlayButton.vue";
 import { randomLiked, randomNotFound } from "../scripts/imageSources";
 
 const base = useBaseStore();
 const props = defineProps({
     item: {
         type: Object as PropType<Item | ItemCollection>,
-        required: true
+        required: true,
     },
     size: {
         type: Number,
         required: false,
-        default: () => 200
+        default: () => 200,
     },
     hideName: {
         type: Boolean,
         required: false,
-        default: () => false
-    }
+        default: () => false,
+    },
 });
 const itemName = computed(() => props.item.name);
 const isCollection = computed(() => "buttonText" in props.item);
@@ -74,7 +91,7 @@ function itemImage(item: Item | ItemCollection) {
 }
 </script>
 
-<style scoped lang="less">
+<style lang="less" scoped>
 .image {
     border-radius: 10px;
     box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.2);
@@ -93,7 +110,7 @@ function itemImage(item: Item | ItemCollection) {
     right: 10px;
     bottom: 10px;
     opacity: 0;
-    transition: opacity .15s !important;
+    transition: opacity 0.15s !important;
 }
 
 .round .image {
@@ -122,7 +139,7 @@ function itemImage(item: Item | ItemCollection) {
 
 .title {
     font-size: 13px;
-    opacity: .9;
+    opacity: 0.9;
     margin-bottom: 0 !important;
     font-weight: 500;
     white-space: nowrap;
@@ -130,7 +147,7 @@ function itemImage(item: Item | ItemCollection) {
 }
 
 .description {
-    opacity: .7;
+    opacity: 0.7;
     text-overflow: ellipsis;
     display: -webkit-box;
     -webkit-line-clamp: 2; /* number of lines to show */

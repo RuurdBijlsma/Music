@@ -1,12 +1,20 @@
 <template>
-    <v-menu :style="{
+    <v-menu
+        :model-value="contextMenu.show"
+        :style="{
             transform: `translate(${contextMenu.x}px, ${contextMenu.y}px)`,
-        }" :model-value="contextMenu.show" @update:modelValue="contextMenu.show=$event">
-        <item-menu :key="contextMenu.x" :show-descriptor="contextMenu.item.type === 'track'" :item="contextMenu.item" />
+        }"
+        @update:modelValue="contextMenu.show = $event"
+    >
+        <item-menu
+            :key="contextMenu.x"
+            :item="contextMenu.item"
+            :show-descriptor="contextMenu.item.type === 'track'"
+        />
     </v-menu>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import { useBaseStore } from "../store/base";
 import { storeToRefs } from "pinia";
 import ItemMenu from "./ItemMenu.vue";
@@ -15,7 +23,7 @@ import { onMounted, onUnmounted } from "vue";
 const base = useBaseStore();
 const { contextMenu } = storeToRefs(base);
 
-const onBlur = () => contextMenu.value.show = false;
+const onBlur = () => (contextMenu.value.show = false);
 onMounted(() => {
     window.addEventListener("blur", onBlur, false);
 });
@@ -24,6 +32,4 @@ onUnmounted(() => {
 });
 </script>
 
-<style scoped lang="less">
-
-</style>
+<style lang="less" scoped></style>

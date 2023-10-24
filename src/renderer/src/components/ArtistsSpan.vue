@@ -1,11 +1,13 @@
 <template>
-<span class="mr-2" v-for="(artist, i) in artists">
-    <router-link no-style
-                 :to="base.itemUrl(artist)">{{ artist.name }}</router-link>{{ i === artists.length - 1 ? "" : ", " }}
-</span>
+    <span v-for="(artist, i) in artists" class="mr-2">
+        <router-link :to="base.itemUrl(artist)" no-style>{{
+            artist.name
+        }}</router-link
+        >{{ i === artists.length - 1 ? "" : ", " }}
+    </span>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import { useBaseStore } from "../store/base";
 import type { PropType } from "vue";
 
@@ -13,7 +15,7 @@ const base = useBaseStore();
 defineProps({
     artists: {
         type: Array as PropType<any[]>,
-        required: true
-    }
+        required: true,
+    },
 });
 </script>

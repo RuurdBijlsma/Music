@@ -1,6 +1,6 @@
 import { app, BrowserWindow, ipcMain } from "electron";
 import { join } from "path";
-import { electronApp, optimizer, is } from "@electron-toolkit/utils";
+import { electronApp, is, optimizer } from "@electron-toolkit/utils";
 import icon from "../../resources/app-icon/dark-500.png?asset";
 import { handleIpc } from "./ipcFunctions";
 
@@ -19,8 +19,8 @@ function createWindow(): void {
         webPreferences: {
             preload: join(__dirname, "../preload/index.js"),
             sandbox: false,
-            webSecurity: false
-        }
+            webSecurity: false,
+        },
     });
 
     mainWindow.on("ready-to-show", () => {
@@ -30,15 +30,14 @@ function createWindow(): void {
     mainWindow.webContents.setWindowOpenHandler(() => ({ action: "deny" }));
 
     let isDev = is.dev && process.env["ELECTRON_RENDERER_URL"];
-    const url = isDev ?
-        process.env["ELECTRON_RENDERER_URL"] ?? "" :
-        "file:///" + join(__dirname, "../renderer/index.html");
+    const url = isDev
+        ? process.env["ELECTRON_RENDERER_URL"] ?? ""
+        : "file:///" + join(__dirname, "../renderer/index.html");
 
     // HMR for renderer base on electron-vite cli.
     // Load the remote URL for development or the local html file for production.
     mainWindow.loadURL(url);
-    if (isDev)
-        mainWindow.webContents.openDevTools();
+    if (isDev) mainWindow.webContents.openDevTools();
 
     handleIpc(ipcMain, mainWindow);
 }
@@ -58,7 +57,7 @@ app.whenReady().then(() => {
 
     createWindow();
 
-    app.on("activate", function() {
+    app.on("activate", function () {
         // On macOS, it's common to re-create a window in the app when the
         // dock icon is clicked and there are no other windows open.
         if (BrowserWindow.getAllWindows().length === 0) createWindow();
@@ -69,6 +68,5 @@ app.whenReady().then(() => {
 // for applications and their menu bar to stay active until the user quits
 // explicitly with Cmd + Q.
 app.on("window-all-closed", () => {
-    if (process.platform !== "darwin")
-        app.quit();
+    if (process.platform !== "darwin") app.quit();
 });

@@ -1,54 +1,68 @@
 <template>
-    <div class="highlight-featured mr-2" @click.right="base.setContextMenuItem($event, item)">
+    <div
+        class="highlight-featured mr-2"
+        @click.right="base.setContextMenuItem($event, item)"
+    >
         <div class="card-info">
             <div class="card-text">
-                <router-link no-style :to="base.itemUrl(item)">
+                <router-link :to="base.itemUrl(item)" no-style>
                     <h2 class="card-title">{{ itemName }}</h2>
                 </router-link>
                 <p class="card-description mt-3">
-                    <template v-if="item.type !== 'album'">{{ base.itemDescription(item) }}</template>
+                    <template v-if="item.type !== 'album'">{{
+                        base.itemDescription(item)
+                    }}</template>
                     <template v-else>{{ base.albumString(item) }}</template>
                 </p>
             </div>
             <spacer />
             <div class="buttons mt-3">
-                <item-play-button :color="base.themeColor" :item="item" class="mr-3" />
-                <item-play-button :color="base.themeColor" :item="item" :shuffle="true" />
+                <item-play-button
+                    :color="base.themeColor"
+                    :item="item"
+                    class="mr-3"
+                />
+                <item-play-button
+                    :color="base.themeColor"
+                    :item="item"
+                    :shuffle="true"
+                />
             </div>
         </div>
         <spacer></spacer>
         <router-link :to="base.itemUrl(item)">
-            <div class="card-image"
-                 :style="{backgroundImage: `url(${base.itemImage(item)})`}" />
+            <div
+                :style="{ backgroundImage: `url(${base.itemImage(item)})` }"
+                class="card-image"
+            />
         </router-link>
     </div>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import { useBaseStore } from "../store/base";
 import type { PropType } from "vue";
+import { computed } from "vue";
 import type { Item } from "../scripts/types";
 import Spacer from "./Spacer.vue";
 import ItemPlayButton from "./ItemPlayButton.vue";
-import { computed } from "vue";
 
 const base = useBaseStore();
 const props = defineProps({
     item: {
         type: Object as PropType<Item>,
-        required: true
+        required: true,
     },
     size: {
         type: Number,
         required: false,
-        default: () => 200
-    }
+        default: () => 200,
+    },
 });
 const itemName = computed(() => props.item.name);
-
 </script>
 
-<style scoped lang="less">
+<style lang="less" scoped>
 .highlight-featured {
     width: 30vw;
     height: calc(12vw + 50px);

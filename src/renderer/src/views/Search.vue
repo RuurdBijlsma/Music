@@ -1,70 +1,95 @@
 <template>
-    <div class="search mt-8" v-if="r !== null">
-        <h1 class="title mb-5 mt-4">Search results for <span class="query">{{ query }}</span></h1>
-        <div v-if="r.liked.loading ||  r.liked.tracks.length > 0">
+    <div v-if="r !== null" class="search mt-8">
+        <h1 class="title mb-5 mt-4">
+            Search results for <span class="query">{{ query }}</span>
+        </h1>
+        <div v-if="r.liked.loading || r.liked.tracks.length > 0">
             <v-divider class="mt-5 mb-3" />
             <h2 class="mb-3 text-center">
-                <v-icon icon="mdi-thumb-up" color="white" size="25" class="mr-1" />
+                <v-icon
+                    class="mr-1"
+                    color="white"
+                    icon="mdi-thumb-up"
+                    size="25"
+                />
                 Liked Tracks
             </h2>
             <div class="add-margin">
                 <track-list-expander
-                    :show-amount="6"
-                    :loading="r.liked.loading"
                     :collection="likedCollection"
-                    :tracks="r.liked.tracks" />
+                    :loading="r.liked.loading"
+                    :show-amount="6"
+                    :tracks="r.liked.tracks"
+                />
             </div>
         </div>
         <h4 v-else>No liked tracks found</h4>
         <div>
             <v-divider class="mt-5 mb-3" />
             <h2 class="mb-3 text-center">
-                <v-icon icon="mdi-spotify" color="green" />
+                <v-icon color="green" icon="mdi-spotify" />
                 Spotify
             </h2>
-            <div class="add-margin" v-if="r.spotify.data.tracks.length > 0 || r.spotify.loading">
+            <div
+                v-if="r.spotify.data.tracks.length > 0 || r.spotify.loading"
+                class="add-margin"
+            >
                 <track-list-expander
-                    :show-amount="6"
-                    :loading="r.spotify.loading"
                     :collection="spotifyCollection"
-                    :tracks="r.spotify.data.tracks" />
+                    :loading="r.spotify.loading"
+                    :show-amount="6"
+                    :tracks="r.spotify.data.tracks"
+                />
             </div>
             <h4 v-else>No tracks found</h4>
 
             <h3 class="mb-3 text-center">Albums</h3>
-            <template v-if="r.spotify.data.albums.length > 0 || r.spotify.loading">
+            <template
+                v-if="r.spotify.data.albums.length > 0 || r.spotify.loading"
+            >
                 <horizontal-scroller>
                     <highlight-card
-                        class="mr-4"
-                        :size="250"
                         v-if="r.spotify.data.albums[0]"
-                        :item="r.spotify.data.albums[0]" />
-                    <item-card class="mr-4"
-                               :item="album"
-                               :size="250"
-                               v-for="album in r.spotify.data.albums.slice(1)" />
+                        :item="r.spotify.data.albums[0]"
+                        :size="250"
+                        class="mr-4"
+                    />
+                    <item-card
+                        v-for="album in r.spotify.data.albums.slice(1)"
+                        :item="album"
+                        :size="250"
+                        class="mr-4"
+                    />
                 </horizontal-scroller>
             </template>
             <h4 v-else>No albums found</h4>
 
             <h3 class="mb-3 text-center">Artists</h3>
-            <template v-if="r.spotify.data.artists.length > 0 || r.spotify.loading">
+            <template
+                v-if="r.spotify.data.artists.length > 0 || r.spotify.loading"
+            >
                 <horizontal-scroller>
-                    <item-card class="mr-4"
-                               :item="artist"
-                               :size="250"
-                               v-for="artist in r.spotify.data.artists" />
+                    <item-card
+                        v-for="artist in r.spotify.data.artists"
+                        :item="artist"
+                        :size="250"
+                        class="mr-4"
+                    />
                 </horizontal-scroller>
             </template>
             <h4 v-else>No artists found</h4>
 
             <h3 class="mb-3 text-center">Playlists</h3>
-            <template v-if="r.spotify.data.playlists.length > 0 || r.spotify.loading">
+            <template
+                v-if="r.spotify.data.playlists.length > 0 || r.spotify.loading"
+            >
                 <horizontal-scroller>
-                    <item-card class="mr-4"
-                               :item="playlist"
-                               :size="250"
-                               v-for="playlist in r.spotify.data.playlists" />
+                    <item-card
+                        v-for="playlist in r.spotify.data.playlists"
+                        :item="playlist"
+                        :size="250"
+                        class="mr-4"
+                    />
                 </horizontal-scroller>
             </template>
             <h4 v-else>No playlists found</h4>
@@ -72,16 +97,20 @@
         <div>
             <v-divider class="mt-5 mb-3" />
             <h2 class="mb-3 text-center">
-                <v-icon icon="mdi-youtube" color="red" />
+                <v-icon color="red" icon="mdi-youtube" />
                 YouTube
             </h2>
-            <div class="add-margin" v-if="r.youtube.tracks.length > 0 || r.youtube.loading">
+            <div
+                v-if="r.youtube.tracks.length > 0 || r.youtube.loading"
+                class="add-margin"
+            >
                 <track-list
-                    padding-top="0"
                     v-if="!r.youtube.loading"
                     :collection="youtubeCollection"
-                    :tracks="r.youtube.tracks" />
-                <div class="center-loader" v-else>
+                    :tracks="r.youtube.tracks"
+                    padding-top="0"
+                />
+                <div v-else class="center-loader">
                     <v-progress-circular indeterminate />
                 </div>
             </div>
@@ -90,7 +119,7 @@
     </div>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import { useRoute } from "vue-router";
 import { computed, Ref, ref, watch } from "vue";
 import { useSearchStore } from "../store/search";
@@ -105,31 +134,39 @@ const route = useRoute();
 const search = useSearchStore();
 const r: Ref<null | SearchResult> = ref(null);
 
-
-const spotifyCollection = computed(() => ({
-    tracks: r.value === null ? [] : r.value.spotify.data.tracks,
-    type: "search",
-    id: "searchSpotify" + query.value,
-    name: `Spotify search "${query.value}"`,
-    buttonText: "Search",
-    to: `/search/${query.value}`
-} as ItemCollection));
-const youtubeCollection = computed(() => ({
-    tracks: r.value === null ? [] : r.value.youtube.tracks,
-    type: "search",
-    id: "searchYouTube" + query.value,
-    name: `YouTube search "${query.value}"`,
-    buttonText: "Search",
-    to: `/search/${query.value}`
-} as ItemCollection));
-const likedCollection = computed(() => ({
-    tracks: r.value === null ? [] : r.value.liked.tracks,
-    type: "search",
-    id: "searchLiked" + query.value,
-    name: `Filtered liked tracks for "${query.value}"`,
-    buttonText: "Search",
-    to: `/search/${query.value}`
-} as ItemCollection));
+const spotifyCollection = computed(
+    () =>
+        ({
+            tracks: r.value === null ? [] : r.value.spotify.data.tracks,
+            type: "search",
+            id: "searchSpotify" + query.value,
+            name: `Spotify search "${query.value}"`,
+            buttonText: "Search",
+            to: `/search/${query.value}`,
+        }) as ItemCollection,
+);
+const youtubeCollection = computed(
+    () =>
+        ({
+            tracks: r.value === null ? [] : r.value.youtube.tracks,
+            type: "search",
+            id: "searchYouTube" + query.value,
+            name: `YouTube search "${query.value}"`,
+            buttonText: "Search",
+            to: `/search/${query.value}`,
+        }) as ItemCollection,
+);
+const likedCollection = computed(
+    () =>
+        ({
+            tracks: r.value === null ? [] : r.value.liked.tracks,
+            type: "search",
+            id: "searchLiked" + query.value,
+            name: `Filtered liked tracks for "${query.value}"`,
+            buttonText: "Search",
+            to: `/search/${query.value}`,
+        }) as ItemCollection,
+);
 
 function init() {
     if (query.value === undefined || query.value === null) {
@@ -137,8 +174,7 @@ function init() {
     }
     r.value = search.cachedSearch(query.value).value;
     let el = document.querySelector(".router-view");
-    if (el !== null)
-        el.scrollTop = 0;
+    if (el !== null) el.scrollTop = 0;
 }
 
 const query = computed(() => route.params.query?.toString());
@@ -147,7 +183,7 @@ watch(route, () => init());
 init();
 </script>
 
-<style scoped lang="less">
+<style lang="less" scoped>
 .search {
     padding: 10px 0 50px 10px;
 }

@@ -2,10 +2,15 @@
     <div class="browse">
         <div class="generate-radio">
             <h2>
-                <v-icon class="mr-4" size="30" icon="mdi-radio-tower"></v-icon>
+                <v-icon class="mr-4" icon="mdi-radio-tower" size="30"></v-icon>
                 Want to create your own radio?
             </h2>
-            <v-btn :color="base.themeColor" class="generate-button mt-3" variant="tonal" to="/tune">Generate Custom Radio
+            <v-btn
+                :color="base.themeColor"
+                class="generate-button mt-3"
+                to="/tune"
+                variant="tonal"
+                >Generate Custom Radio
             </v-btn>
         </div>
         <div class="categories">
@@ -14,13 +19,17 @@
             <v-divider class="mb-8" />
             <div class="category-grid">
                 <router-link
-                    class="category"
                     v-for="category in categories"
+                    :to="base.itemUrl(category)"
+                    class="category"
                     no-style
-                    :to="base.itemUrl(category)">
-                    <div class="image"
-                         :style="{backgroundImage: `url(${category.icons[0].url})`}">
-                    </div>
+                >
+                    <div
+                        :style="{
+                            backgroundImage: `url(${category.icons[0].url})`,
+                        }"
+                        class="image"
+                    ></div>
                     <div class="info mt-2">
                         <p class="title">{{ category.name }}</p>
                     </div>
@@ -33,17 +42,19 @@
             <v-divider class="mb-8" />
             <div class="genre-grid">
                 <v-chip
-                    class="genre"
-                    :to="`/radio?id=${base.radioId()}&seed_genres=${genre.replace(/ /gi, '-').toLowerCase()}`"
                     v-for="genre in genres"
-                >{{ genre }}
+                    :to="`/radio?id=${base.radioId()}&seed_genres=${genre
+                        .replace(/ /gi, '-')
+                        .toLowerCase()}`"
+                    class="genre"
+                    >{{ genre }}
                 </v-chip>
             </div>
         </div>
     </div>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import { useSpotifyApiStore } from "../../store/spotify-api";
 import { ref } from "vue";
 import { executeCached } from "../../scripts/utils";
@@ -56,12 +67,13 @@ const categories = ref(null as null | SpotifyApi.CategoryObject[]);
 
 async function refresh() {
     const result = await executeCached<{
-        categories: Array<SpotifyApi.CategoryObject>,
-        genres: Array<string>
-    }>(await baseDb,
+        categories: Array<SpotifyApi.CategoryObject>;
+        genres: Array<string>;
+    }>(
+        await baseDb,
         async () => await spotify.getBrowsePage(),
         "browsePage",
-        1000 * 60 * 60 * 24
+        1000 * 60 * 60 * 24,
     );
     categories.value = result.categories;
     genres.value = result.genres;
@@ -134,7 +146,7 @@ refresh();
 
 .title {
     font-size: 13px;
-    opacity: .9;
+    opacity: 0.9;
     margin-bottom: 0 !important;
     font-weight: 500;
     white-space: nowrap;
@@ -153,5 +165,4 @@ refresh();
     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
     gap: 17px;
 }
-
 </style>

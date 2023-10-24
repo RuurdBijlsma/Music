@@ -1,44 +1,86 @@
 <template>
     <div class="left-nav">
-        <v-btn class="nav-1-btn nav-button"
-               :icon="route.path === '/' ? 'mdi-play-box' : 'mdi-play-box-outline'"
-               rounded
-               variant="text"
-               to="/"></v-btn>
-        <span class="button-text nav-1-text"
-              :class="{active: route.path === '/'}">Listen Now</span>
-        <v-btn class="nav-2-btn nav-button"
-               :icon="route.path === '/browse' ? 'mdi-library' : 'mdi-library-outline'"
-               rounded
-               variant="text"
-               to="/browse"></v-btn>
-        <span class="button-text nav-2-text"
-              :class="{active: route.path === '/browse'}">Browse</span>
-        <v-btn class="nav-3-btn nav-button"
-               variant="text"
-               :icon="route.path === '/library' ? 'mdi-music-note' : 'mdi-music-note-outline'"
-               rounded
-               to="/library" />
-        <span class="button-text nav-3-text"
-              :class="{active: route.path === '/library'}">Library</span>
-        <v-btn class="nav-4-btn nav-button"
-               :style="{
-                            transform: playlistsExpanded ? 'rotate(180deg)' : 'rotate(0deg)'
-                       }"
-               variant="text"
-               @click="playlistsExpanded = !playlistsExpanded"
-               :icon="playlistsExpanded ? 'mdi-chevron-up' : 'mdi-playlist-play'"
-               rounded />
-        <span class="button-text nav-4-text"
-              :class="{active: playlistsExpanded}">Playlists</span>
-        <div class="pinned-playlists" :style="{
-                    opacity: playlistsExpanded ? '1' : '0',
-                    transform: playlistsExpanded ? 'scaleY(1) translateY(0%)' : 'scaleY(.7)',
-                    pointerEvents: playlistsExpanded ? 'auto' : 'none'
-                }">
-            <v-tooltip location="right" :text="playlist.name" v-for="playlist in library.saved.playlist">
+        <v-btn
+            :icon="route.path === '/' ? 'mdi-play-box' : 'mdi-play-box-outline'"
+            class="nav-1-btn nav-button"
+            rounded
+            to="/"
+            variant="text"
+        ></v-btn>
+        <span
+            :class="{ active: route.path === '/' }"
+            class="button-text nav-1-text"
+            >Listen Now</span
+        >
+        <v-btn
+            :icon="
+                route.path === '/browse' ? 'mdi-library' : 'mdi-library-outline'
+            "
+            class="nav-2-btn nav-button"
+            rounded
+            to="/browse"
+            variant="text"
+        ></v-btn>
+        <span
+            :class="{ active: route.path === '/browse' }"
+            class="button-text nav-2-text"
+            >Browse</span
+        >
+        <v-btn
+            :icon="
+                route.path === '/library'
+                    ? 'mdi-music-note'
+                    : 'mdi-music-note-outline'
+            "
+            class="nav-3-btn nav-button"
+            rounded
+            to="/library"
+            variant="text"
+        />
+        <span
+            :class="{ active: route.path === '/library' }"
+            class="button-text nav-3-text"
+            >Library</span
+        >
+        <v-btn
+            :icon="playlistsExpanded ? 'mdi-chevron-up' : 'mdi-playlist-play'"
+            :style="{
+                transform: playlistsExpanded
+                    ? 'rotate(180deg)'
+                    : 'rotate(0deg)',
+            }"
+            class="nav-4-btn nav-button"
+            rounded
+            variant="text"
+            @click="playlistsExpanded = !playlistsExpanded"
+        />
+        <span
+            :class="{ active: playlistsExpanded }"
+            class="button-text nav-4-text"
+            >Playlists</span
+        >
+        <div
+            :style="{
+                opacity: playlistsExpanded ? '1' : '0',
+                transform: playlistsExpanded
+                    ? 'scaleY(1) translateY(0%)'
+                    : 'scaleY(.7)',
+                pointerEvents: playlistsExpanded ? 'auto' : 'none',
+            }"
+            class="pinned-playlists"
+        >
+            <v-tooltip
+                v-for="playlist in library.saved.playlist"
+                :text="playlist.name"
+                location="right"
+            >
                 <template v-slot:activator="{ props }">
-                    <v-btn variant="text" v-bind="props" height="64" max-width="64">
+                    <v-btn
+                        height="64"
+                        max-width="64"
+                        v-bind="props"
+                        variant="text"
+                    >
                         <router-link :to="base.itemUrl(playlist)">
                             <v-avatar rounded size="50">
                                 <v-img :src="base.itemImage(playlist)"></v-img>
@@ -51,7 +93,7 @@
     </div>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import { useRoute } from "vue-router";
 import { ref } from "vue";
 import { useBaseStore } from "../store/base";
@@ -63,9 +105,7 @@ const library = useLibraryStore();
 const playlistsExpanded = ref(false);
 </script>
 
-<style scoped lang="less">
-
-
+<style lang="less" scoped>
 .left-nav {
     position: fixed;
     left: 0;
@@ -87,7 +127,6 @@ const playlistsExpanded = ref(false);
     background-color: rgba(var(--v-theme-background), 0.5);
 }
 
-
 .nav-button {
     transform: translateY(0);
 }
@@ -106,32 +145,32 @@ const playlistsExpanded = ref(false);
     margin-top: -10px;
     opacity: 0;
     transform: translateY(-10px);
-    transition: .3s;
+    transition: 0.3s;
     pointer-events: none;
 }
 
 .nav-1-btn:hover + .nav-1-text {
-    opacity: .6;
+    opacity: 0.6;
     transform: translateY(0px);
 }
 
 .nav-2-btn:hover + .nav-2-text {
-    opacity: .6;
+    opacity: 0.6;
     transform: translateY(0px);
 }
 
 .nav-3-btn:hover + .nav-3-text {
-    opacity: .6;
+    opacity: 0.6;
     transform: translateY(0px);
 }
 
 .nav-4-btn:hover + .nav-4-text {
-    opacity: .6;
+    opacity: 0.6;
     transform: translateY(0px);
 }
 
 .button-text.active {
-    opacity: .8;
+    opacity: 0.8;
     transform: translateY(0px);
 }
 
@@ -141,7 +180,9 @@ const playlistsExpanded = ref(false);
     gap: 10px;
     align-items: center;
     transform-origin: top center;
-    transition: transform 0.3s, opacity 0.2s;
+    transition:
+        transform 0.3s,
+        opacity 0.2s;
     overflow-y: auto;
 }
 

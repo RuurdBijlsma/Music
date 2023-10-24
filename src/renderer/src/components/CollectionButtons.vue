@@ -1,51 +1,100 @@
 <template>
     <div class="mb-1 collection-buttons">
-        <div class="play-buttons" v-if="collection">
+        <div v-if="collection" class="play-buttons">
             <v-divider />
-            <v-btn icon="mdi-play-outline" variant="text" @click="player.playCollection(collection)" />
-            <v-btn icon="mdi-shuffle" variant="text" @click="player.shuffleCollection(collection)" />
+            <v-btn
+                icon="mdi-play-outline"
+                variant="text"
+                @click="player.playCollection(collection)"
+            />
+            <v-btn
+                icon="mdi-shuffle"
+                variant="text"
+                @click="player.shuffleCollection(collection)"
+            />
             <v-btn v-if="showFilter" icon="mdi-filter-outline" variant="text" />
-            <like-button icon-button v-if="likeItem" variant="no-theme" :item="likeItem" />
-            <v-tooltip text="Go to artist radio" location="top">
+            <like-button
+                v-if="likeItem"
+                :item="likeItem"
+                icon-button
+                variant="no-theme"
+            />
+            <v-tooltip location="top" text="Go to artist radio">
                 <template v-slot:activator="{ props }">
-                    <v-btn v-bind="props"
-                           variant="text"
-                           icon="mdi-radio-tower"
-                           v-if="collection.context && collection.type === 'artist'"
-                           :to="`/radio?id=${base.radioId()}&seed_artists=${collection.context.id}`" />
+                    <v-btn
+                        v-if="
+                            collection.context && collection.type === 'artist'
+                        "
+                        :to="`/radio?id=${base.radioId()}&seed_artists=${
+                            collection.context.id
+                        }`"
+                        icon="mdi-radio-tower"
+                        v-bind="props"
+                        variant="text"
+                    />
                 </template>
             </v-tooltip>
-            <v-tooltip text="Make available offline" location="top">
+            <v-tooltip location="top" text="Make available offline">
                 <template v-slot:activator="{ props }">
-                    <v-btn v-bind="props"
-                           variant="text"
-                           :icon="library.offlineCollections.has(collection.id) ? 'mdi-cloud' : 'mdi-cloud-arrow-down-outline'"
-                           v-if="collection.type === 'playlist' || collection.type === 'album'"
-                           @click="downloadTracks" />
+                    <v-btn
+                        v-if="
+                            collection.type === 'playlist' ||
+                            collection.type === 'album'
+                        "
+                        :icon="
+                            library.offlineCollections.has(collection.id)
+                                ? 'mdi-cloud'
+                                : 'mdi-cloud-arrow-down-outline'
+                        "
+                        v-bind="props"
+                        variant="text"
+                        @click="downloadTracks"
+                    />
                 </template>
             </v-tooltip>
             <v-divider />
         </div>
-        <div class="download-stats" v-if="downloadState && downloadState.loading && !downloadState.canceled">
+        <div
+            v-if="
+                downloadState &&
+                downloadState.loading &&
+                !downloadState.canceled
+            "
+            class="download-stats"
+        >
             <div class="download-info">
-                <p>Downloaded {{ downloadState.downloaded }} / {{ downloadState.total }} tracks</p>
-                <v-btn @click="cancelDownload" class="cancel-button" variant="text" density="compact" size="16"
-                       icon="mdi-close"></v-btn>
+                <p>
+                    Downloaded {{ downloadState.downloaded }} /
+                    {{ downloadState.total }} tracks
+                </p>
+                <v-btn
+                    class="cancel-button"
+                    density="compact"
+                    icon="mdi-close"
+                    size="16"
+                    variant="text"
+                    @click="cancelDownload"
+                ></v-btn>
             </div>
-            <v-progress-linear rounded class="progress-bar mb-3 mt-2"
-                               :model-value="100 * (downloadState.downloaded / downloadState.total)" />
+            <v-progress-linear
+                :model-value="
+                    100 * (downloadState.downloaded / downloadState.total)
+                "
+                class="progress-bar mb-3 mt-2"
+                rounded
+            />
         </div>
     </div>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import { usePlayerStore } from "../store/player";
 import type { PropType } from "vue";
+import { computed } from "vue";
 import type { Item, ItemCollection } from "../scripts/types";
 import LikeButton from "./LikeButton.vue";
 import { useBaseStore } from "../store/base";
 import { usePlatformStore } from "../store/electron";
-import { computed } from "vue";
 import { useLibraryStore } from "../store/library";
 
 const base = useBaseStore();
@@ -53,20 +102,22 @@ const library = useLibraryStore();
 const props = defineProps({
     collection: {
         type: Object as PropType<ItemCollection | null>,
-        required: true
+        required: true,
     },
     likeItem: {
         type: Object as PropType<Item | null>,
-        default: () => null
+        default: () => null,
     },
     showFilter: {
         type: Boolean,
-        default: false
-    }
+        default: false,
+    },
 });
 const platform = usePlatformStore();
 const player = usePlayerStore();
-const downloadState = computed(() => platform.downloadState.get(props.collection?.id ?? "")?.value);
+const downloadState = computed(
+    () => platform.downloadState.get(props.collection?.id ?? "")?.value,
+);
 
 async function cancelDownload() {
     if (downloadState.value === null || downloadState.value === undefined)
@@ -75,12 +126,13 @@ async function cancelDownload() {
 }
 
 function downloadTracks() {
-    if (props.collection === null || props.collection.tracks.length === 0) return;
+    if (props.collection === null || props.collection.tracks.length === 0)
+        return;
     platform.downloadTracks(props.collection.id, props.collection.tracks);
 }
 </script>
 
-<style scoped lang="less">
+<style lang="less" scoped>
 .collection-buttons {
     width: 100%;
 }
@@ -94,7 +146,7 @@ function downloadTracks() {
 
 .download-stats {
     text-align: center;
-    opacity: .8;
+    opacity: 0.8;
     font-size: 14px;
     font-weight: bolder;
     width: 100%;
@@ -113,7 +165,7 @@ function downloadTracks() {
 }
 
 .cancel-button {
-    opacity: .6;
+    opacity: 0.6;
 }
 
 .cancel-button:hover {

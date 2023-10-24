@@ -1,14 +1,13 @@
 // A function to calculate the relative luminance of an RGB color
 export function getRelativeLuminance(rgb: number[]): number {
     // Apply a linear transformation to each component
-    const [r, g, b] = rgb.map(c => {
+    const [r, g, b] = rgb.map((c) => {
         c /= 255; // Normalize to [0, 1]
         return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
     });
     // Return the weighted sum of the components
     return 0.2126 * r + 0.7152 * g + 0.0722 * b;
 }
-
 
 export function RGBToHSL(r: number, g: number, b: number) {
     r /= 255;
@@ -20,8 +19,8 @@ export function RGBToHSL(r: number, g: number, b: number) {
         ? l === r
             ? (g - b) / s
             : l === g
-                ? 2 + (b - r) / s
-                : 4 + (r - g) / s
+            ? 2 + (b - r) / s
+            : 4 + (r - g) / s
         : 0;
     return [
         60 * h < 0 ? 60 * h + 360 : 60 * h,
@@ -31,9 +30,8 @@ export function RGBToHSL(r: number, g: number, b: number) {
 }
 
 export function RGBToHex(r: number, g: number, b: number): string {
-    return '#' + [r, g, b].map(x => x.toString(16).padStart(2, '0')).join('');
+    return "#" + [r, g, b].map((x) => x.toString(16).padStart(2, "0")).join("");
 }
-
 
 // A function to calculate the contrast ratio between two RGB colors
 export function getContrastRatio(rgb1: number[], rgb2: number[]): number {

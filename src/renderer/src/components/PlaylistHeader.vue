@@ -1,32 +1,35 @@
 <template>
-    <div class="mb-8 playlist-info" v-if="playlist">
+    <div v-if="playlist" class="mb-8 playlist-info">
         <glow-image
-            rounding="5px"
-            :width="250"
             :height="250"
+            :src="base.itemImage(playlist)"
+            :width="250"
             class="mb-4"
-            :src="base.itemImage(playlist)" />
+            rounding="5px"
+        />
         <spacer />
         <h1>{{ playlist.name }}</h1>
         <p class="playlist-stats">
             Created by
-            <router-link :style="{color:base.themeColor}" class="user-url"
-                         :to="base.itemUrl(playlist.owner)">{{
-                    playlist.owner.display_name
-                }}
+            <router-link
+                :style="{ color: base.themeColor }"
+                :to="base.itemUrl(playlist.owner)"
+                class="user-url"
+                >{{ playlist.owner.display_name }}
             </router-link>
             • {{ tracks.length }} Track{{ tracks.length === 1 ? "" : "s" }} •
-            {{ base.approximateDuration(totalDurationMs) }} • {{ followerString }}
+            {{ base.approximateDuration(totalDurationMs) }} •
+            {{ followerString }}
         </p>
         <collection-buttons :collection="collection" :like-item="playlist" />
         <p class="text-center">{{ playlist.description }}</p>
     </div>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import type { ComputedRef, PropType } from "vue";
-import { useBaseStore } from "../store/base";
 import { computed } from "vue";
+import { useBaseStore } from "../store/base";
 import type { ItemCollection } from "../scripts/types";
 import GlowImage from "../components/GlowImage.vue";
 import CollectionButtons from "./CollectionButtons.vue";
@@ -35,8 +38,8 @@ import Spacer from "./Spacer.vue";
 const props = defineProps({
     collection: {
         type: Object as PropType<ItemCollection | null>,
-        required: true
-    }
+        required: true,
+    },
 });
 const base = useBaseStore();
 
@@ -46,20 +49,29 @@ const followerString = computed(() => {
     if (followers.total === 0) return "No followers";
     if (followers.total > 1000000) {
         let followerMillions = Math.round(followers.total / 1000000);
-        return followerMillions + "M follower" + (followerMillions === 1 ? "" : "s");
+        return (
+            followerMillions +
+            "M follower" +
+            (followerMillions === 1 ? "" : "s")
+        );
     }
-    return followers.total.toLocaleString() + " follower" + (followers.total === 1 ? "" : "s");
+    return (
+        followers.total.toLocaleString() +
+        " follower" +
+        (followers.total === 1 ? "" : "s")
+    );
 });
-const playlist = computed(() => props.collection?.context as SpotifyApi.PlaylistObjectFull | null);
+const playlist = computed(
+    () => props.collection?.context as SpotifyApi.PlaylistObjectFull | null,
+);
 const tracks = computed(() => props.collection?.tracks ?? []);
 const totalDurationMs: ComputedRef<number> = computed(() => {
-    if (tracks.value === null)
-        return 0;
+    if (tracks.value === null) return 0;
     return tracks.value.reduce((a, b) => a + b.duration_ms, 0);
 });
 </script>
 
-<style scoped lang="less">
+<style lang="less" scoped>
 .playlist-info {
     display: flex;
     flex-direction: column;
@@ -86,6 +98,6 @@ const totalDurationMs: ComputedRef<number> = computed(() => {
 .playlist-stats {
     font-size: 13px;
     font-weight: 400;
-    opacity: .7;
+    opacity: 0.7;
 }
 </style>

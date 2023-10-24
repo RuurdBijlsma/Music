@@ -1,8 +1,8 @@
 import { defineStore } from "pinia";
 import { baseDb, useBaseStore } from "./base";
 import type { IDBPDatabase } from "idb";
-import { computed, ref, toRaw, watch } from "vue";
 import type { Ref } from "vue";
+import { computed, ref, toRaw, watch } from "vue";
 import { usePlatformStore } from "./electron";
 import { useLibraryStore } from "./library";
 import { useSpotifyApiStore } from "./spotify-api";
@@ -11,10 +11,10 @@ import { usePlayerStore } from "./player";
 import { randomUser } from "../scripts/imageSources";
 
 export interface AuthToken {
-    code: null | string,
-    access: null | string,
-    refresh: null | string,
-    expiryDate: null | number,
+    code: null | string;
+    access: null | string;
+    refresh: null | string;
+    expiryDate: null | number;
 }
 
 export const useSpotifyAuthStore = defineStore("spotify-auth", () => {
@@ -26,15 +26,13 @@ export const useSpotifyAuthStore = defineStore("spotify-auth", () => {
     const player = usePlayerStore();
 
     let db: IDBPDatabase;
-    baseDb.then(r => {
+    baseDb.then((r) => {
         db = r;
-        loadValues().then(() => {
-        });
+        loadValues().then(() => {});
     });
 
     // IndexedDB persistent storage
     async function loadValues() {
-
         if (localStorage.getItem("secret") !== null) {
             secret.value = localStorage.secret;
         }
@@ -53,16 +51,17 @@ export const useSpotifyAuthStore = defineStore("spotify-auth", () => {
         code: null,
         access: null,
         refresh: null,
-        expiryDate: null
+        expiryDate: null,
     });
-    const hasCredentials = computed(() =>
-        secret.value.length === 32 && clientId.value.length === 32
+    const hasCredentials = computed(
+        () => secret.value.length === 32 && clientId.value.length === 32,
     );
-    const isLoggedIn = computed(() =>
-        tokens.value.code !== null &&
-        tokens.value.access !== null &&
-        tokens.value.refresh !== null &&
-        tokens.value.expiryDate !== null
+    const isLoggedIn = computed(
+        () =>
+            tokens.value.code !== null &&
+            tokens.value.access !== null &&
+            tokens.value.refresh !== null &&
+            tokens.value.expiryDate !== null,
     );
 
     watch(secret, async () => {
@@ -73,19 +72,26 @@ export const useSpotifyAuthStore = defineStore("spotify-auth", () => {
     });
 
     // Spotify API Stuff
-    const requestedScopes = "ugc-image-upload user-read-email user-read-private playlist-read-collaborative playlist-modify-public playlist-read-private playlist-modify-private user-library-modify user-library-read user-top-read user-read-recently-played user-follow-read user-follow-modify";
+    const requestedScopes =
+        "ugc-image-upload user-read-email user-read-private playlist-read-collaborative playlist-modify-public playlist-read-private playlist-modify-private user-library-modify user-library-read user-top-read user-read-recently-played user-follow-read user-follow-modify";
 
-    async function getAuthByRefreshToken(refreshToken: string): Promise<AuthToken> {
-        let result = await (await fetch("https://accounts.spotify.com/api/token", {
-            method: "post",
-            body: `grant_type=refresh_token&refresh_token=${refreshToken}&client_id=${clientId.value}&client_secret=${secret.value}`,
-            headers: { "Content-Type": "application/x-www-form-urlencoded" }
-        })).text();
+    async function getAuthByRefreshToken(
+        refreshToken: string,
+    ): Promise<AuthToken> {
+        let result = await (
+            await fetch("https://accounts.spotify.com/api/token", {
+                method: "post",
+                body: `grant_type=refresh_token&refresh_token=${refreshToken}&client_id=${clientId.value}&client_secret=${secret.value}`,
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                },
+            })
+        ).text();
         try {
             let parsed = JSON.parse(result);
             return {
                 access: parsed.access_token,
-                expiryDate: (+new Date) + parsed.expires_in * 1000
+                expiryDate: +new Date() + parsed.expires_in * 1000,
             } as AuthToken;
         } catch (e: any) {
             console.log("Error", e.message, "result = ", result);
@@ -100,10 +106,15 @@ export const useSpotifyAuthStore = defineStore("spotify-auth", () => {
 
     async function loginByRefreshToken() {
         if (tokens.value.refresh === null || tokens.value.refresh === "") {
-            console.warn("Couldn't get new token, refresh token isn't set", tokens);
+            console.warn(
+                "Couldn't get new token, refresh token isn't set",
+                tokens,
+            );
             return;
         }
-        let { access, expiryDate } = await getAuthByRefreshToken(tokens.value.refresh);
+        let { access, expiryDate } = await getAuthByRefreshToken(
+            tokens.value.refresh,
+        );
         tokens.value.access = access;
         tokens.value.expiryDate = expiryDate;
 
@@ -120,7 +131,7 @@ export const useSpotifyAuthStore = defineStore("spotify-auth", () => {
             code: null,
             access: null,
             refresh: null,
-            expiryDate: null
+            expiryDate: null,
         };
         library.userInfo = {
             id: "",
@@ -150,9 +161,12 @@ export const useSpotifyAuthStore = defineStore("spotify-auth", () => {
 
             let msUntilExpire = tokens.value.expiryDate - now;
             clearTimeout(tokenTimeout);
-            tokenTimeout = window.setTimeout(async () => {
-                await loginByRefreshToken();
-            }, msUntilExpire - 1000 * 60 * 5);
+            tokenTimeout = window.setTimeout(
+                async () => {
+                    await loginByRefreshToken();
+                },
+                msUntilExpire - 1000 * 60 * 5,
+            );
 
             localStorage.tokens = JSON.stringify(toRaw(tokens.value));
             await library.initialize();
@@ -176,6 +190,6 @@ export const useSpotifyAuthStore = defineStore("spotify-auth", () => {
         hasCredentials,
         login,
         logout,
-        awaitAuth
+        awaitAuth,
     };
 });

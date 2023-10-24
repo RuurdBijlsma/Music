@@ -1,7 +1,11 @@
 <template>
     <div class="menu">
         <div class="logo">
-            <v-img width="30" height="30" :src="base.isDark ? iconUrlDark : iconUrlLight"></v-img>
+            <v-img
+                :src="base.isDark ? iconUrlDark : iconUrlLight"
+                height="30"
+                width="30"
+            ></v-img>
             <div>Ruurd Music</div>
         </div>
         <spacer />
@@ -10,20 +14,35 @@
         <user-menu />
         <spacer />
         <div class="app-buttons" no-drag>
-            <v-btn class="minimize window-button" variant="plain" density="compact" @click="platform.minimize()">
+            <v-btn
+                class="minimize window-button"
+                density="compact"
+                variant="plain"
+                @click="platform.minimize()"
+            >
                 <v-icon icon="mdi-window-minimize" />
             </v-btn>
-            <v-btn class="maximize window-button" variant="plain" density="compact" @click="platform.toggleMaximize()">
+            <v-btn
+                class="maximize window-button"
+                density="compact"
+                variant="plain"
+                @click="platform.toggleMaximize()"
+            >
                 <v-icon icon="mdi-window-restore" />
             </v-btn>
-            <v-btn class="close window-button" variant="plain" density="compact" @click="platform.close()">
+            <v-btn
+                class="close window-button"
+                density="compact"
+                variant="plain"
+                @click="platform.close()"
+            >
                 <v-icon icon="mdi-window-close" />
             </v-btn>
         </div>
     </div>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import Spacer from "./Spacer.vue";
 import SearchBar from "./SearchBar.vue";
 import UserMenu from "./UserMenu.vue";
@@ -38,8 +57,7 @@ const base = useBaseStore();
 const platform = usePlatformStore();
 </script>
 
-<style scoped lang="less">
-
+<style lang="less" scoped>
 .menu {
     display: flex;
     flex-direction: row;
