@@ -19,9 +19,6 @@ const api = {
     getDirectories: () => ipcRenderer.invoke("getDirectories"),
     setTheme: (theme: "dark" | "light") =>
         ipcRenderer.invoke("setTheme", theme),
-    minimizeWindow: () => ipcRenderer.invoke("minimizeWindow"),
-    toggleMaximize: () => ipcRenderer.invoke("toggleMaximize"),
-    closeWindow: () => ipcRenderer.invoke("closeWindow"),
     downloadYt: (filename: string, tags: any, imageFile: string) =>
         ipcRenderer.invoke("downloadYt", filename, tags, imageFile),
     updateYtdlp: () => ipcRenderer.invoke("updateYtdlp"),
@@ -42,6 +39,10 @@ const api = {
         secret: string;
     }) => ipcRenderer.invoke("firstLogin", spotifyAuth),
     resetSpotifyLogin: () => ipcRenderer.invoke("resetSpotifyLogin"),
+
+    minimizeWindow: () => ipcRenderer.send("win:invoke", "min"),
+    toggleMaximize: () => ipcRenderer.send("win:invoke", "max"),
+    closeWindow: () => ipcRenderer.send("win:invoke", "close"),
 };
 
 const listeners = new Map<string, Array<Function>>();

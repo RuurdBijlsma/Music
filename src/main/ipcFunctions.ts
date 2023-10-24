@@ -32,9 +32,6 @@ export function handleIpc(ipcMain: Electron.IpcMain, win: BrowserWindow) {
         nf.setTheme(theme),
     );
     ipcMain.handle("updateYtdlp", () => nf.updateYtdlp());
-    ipcMain.handle("minimizeWindow", () => win.minimize());
-    ipcMain.handle("closeWindow", () => win.close());
-    ipcMain.handle("toggleMaximize", () => nf.toggleMaximize());
     ipcMain.handle(
         "downloadYt",
         async (_, filename: string, tags: any, imageFile: string) =>

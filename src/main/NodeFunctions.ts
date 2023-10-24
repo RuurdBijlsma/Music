@@ -476,16 +476,6 @@ export default class NodeFunctions {
         this.win.setIcon(theme === "dark" ? darkIcon : lightIcon);
     }
 
-    toggleMaximize() {
-        if (this.win.isMaximized()) {
-            this.win.unmaximize();
-            return false;
-        } else {
-            this.win.maximize();
-            return true;
-        }
-    }
-
     async getOutputDirectory() {
         return await dialog.showOpenDialog(this.win, {
             properties: ["openDirectory"],

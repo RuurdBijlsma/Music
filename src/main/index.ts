@@ -53,6 +53,7 @@ app.whenReady().then(() => {
     // and ignore CommandOrControl + R in production.
     app.on("browser-window-created", (_, window) => {
         optimizer.watchWindowShortcuts(window);
+        optimizer.registerFramelessWindowIpc();
     });
 
     createWindow();
