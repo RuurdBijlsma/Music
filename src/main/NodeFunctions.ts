@@ -313,16 +313,10 @@ export default class NodeFunctions {
     }
 
     async checkFileExists(filePath: string) {
-        try {
-            await fs.access(filePath);
-            return true;
-        } catch (error: any) {
-            if (error.code === "ENOENT") {
-                return false;
-            } else {
-                throw error;
-            }
-        }
+        return fs
+            .access(filePath, fs.constants.F_OK)
+            .then(() => true)
+            .catch(() => false);
     }
 
     async searchYouTube(query: string, results: number) {
@@ -503,6 +497,19 @@ export default class NodeFunctions {
             child_process.exec(command, (error, stdout) => {
                 if (error) return reject(error);
                 resolve(stdout);
+            });
+        });
+    }
+
+    checkTracksDownloaded(filenames: string[]) {
+        return new Promise<boolean>((resolve) => {
+            let checks = filenames.length;
+            filenames.forEach(async (f) => {
+                if (!(await this.checkFileExists(f))) {
+                    resolve(false);
+                } else if (--checks === 0) {
+                    resolve(true);
+                }
             });
         });
     }

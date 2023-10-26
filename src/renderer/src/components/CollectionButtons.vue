@@ -42,7 +42,7 @@
                             collection.type === 'album'
                         "
                         :icon="
-                            library.offlineCollections.has(collection.id)
+                            isLibraryDownloaded
                                 ? 'mdi-cloud'
                                 : 'mdi-cloud-arrow-down-outline'
                         "
@@ -90,12 +90,13 @@
 <script lang="ts" setup>
 import { usePlayerStore } from "../store/player";
 import type { PropType } from "vue";
-import { computed } from "vue";
+import { computed, toRaw, watch } from "vue";
 import type { Item, ItemCollection } from "../scripts/types";
 import LikeButton from "./LikeButton.vue";
-import { useBaseStore } from "../store/base";
+import { baseDb, useBaseStore } from "../store/base";
 import { usePlatformStore } from "../store/electron";
 import { useLibraryStore } from "../store/library";
+import { useRoute } from "vue-router";
 
 const base = useBaseStore();
 const library = useLibraryStore();
@@ -115,9 +116,43 @@ const props = defineProps({
 });
 const platform = usePlatformStore();
 const player = usePlayerStore();
+const route = useRoute();
 const downloadState = computed(
     () => platform.downloadState.get(props.collection?.id ?? "")?.value,
 );
+const isLibraryDownloaded = computed(() => {
+    if (props.collection === null) return false;
+    return library.offlineCollections.has(props.collection.id);
+});
+
+async function checkTracksDownloaded() {
+    console.log("Checking tracks downloaded");
+    if (props.collection === null || props.collection.tracks.length === 0)
+        return;
+    let isDownloaded = await platform.checkTracksDownloaded(
+        props.collection.tracks,
+    );
+    let change = false;
+    if (isDownloaded && !isLibraryDownloaded.value) {
+        library.offlineCollections.add(props.collection.id);
+        change = true;
+    } else if (!isDownloaded && isLibraryDownloaded.value) {
+        library.offlineCollections.delete(props.collection.id);
+        change = true;
+    }
+    if (change) {
+        (await baseDb)
+            .put(
+                "spotify",
+                toRaw(library.offlineCollections),
+                "offlineCollections",
+            )
+            .then();
+    }
+}
+
+watch(route, () => checkTracksDownloaded());
+// checkTracksDownloaded();
 
 async function cancelDownload() {
     if (downloadState.value === null || downloadState.value === undefined)

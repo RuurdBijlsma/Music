@@ -31,6 +31,8 @@ const api = {
         ipcRenderer.invoke("copyIfExists", fromPath, toDirectory),
     copyFile: (from: string, to: string) =>
         ipcRenderer.invoke("copyFile", from, to),
+    checkTracksDownloaded: (filenames: string[]) =>
+        ipcRenderer.invoke("checkTracksDownloaded", filenames),
 
     firstLogin: (spotifyAuth: {
         hasCredentials: boolean;

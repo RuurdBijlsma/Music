@@ -50,6 +50,9 @@ export function handleIpc(ipcMain: Electron.IpcMain, win: BrowserWindow) {
     ipcMain.handle("deleteFile", (_, filename: string) =>
         nf.deleteFile(filename),
     );
+    ipcMain.handle("checkTracksDownloaded", (_, filenames: string[]) =>
+        nf.checkTracksDownloaded(filenames),
+    );
 
     ipcMain.handle(
         "firstLogin",

@@ -415,6 +415,12 @@ export const usePlatformStore = defineStore("platform", () => {
         return state;
     }
 
+    async function checkTracksDownloaded(tracks: SpotifyApi.TrackObjectFull[]) {
+        return await window.api.checkTracksDownloaded(
+            tracks.map((t) => trackToNames(t).outPath),
+        );
+    }
+
     return {
         searchYouTube,
         getTrackFile,
@@ -437,5 +443,6 @@ export const usePlatformStore = defineStore("platform", () => {
         updateYtdlp,
         downloadTracks,
         downloadState,
+        checkTracksDownloaded,
     };
 });

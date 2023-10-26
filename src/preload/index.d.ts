@@ -1,6 +1,4 @@
 import { ElectronAPI } from "@electron-toolkit/preload";
-import { CpuInfo } from "os";
-import { ipcRenderer } from "electron";
 import { AuthToken } from "../renderer/src/store/spotify-auth";
 
 declare global {
@@ -22,6 +20,7 @@ declare global {
             closeWindow: () => Promise<any>,
             downloadYt: (filename: string, tags: any, imageFile: string) => Promise<any>,
             updateYtdlp: () => Promise<string>,
+            checkTracksDownloaded: (filenames: string[]) => Promise<boolean>,
 
             checkFileExists: (filename: string) => Promise<any>,
             deleteFile: (filename: string) => Promise<any>,
