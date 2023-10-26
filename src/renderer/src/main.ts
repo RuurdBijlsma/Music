@@ -22,3 +22,7 @@ app.use(router);
 app.use(vuetify);
 
 app.mount("#app");
+
+if (localStorage.getItem("lastRoute") !== null) {
+    router.replace(localStorage.lastRoute).then();
+}

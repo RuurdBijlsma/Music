@@ -44,13 +44,6 @@ const router = createRouter({
 watch(router.currentRoute, () => {
     localStorage.lastRoute = router.currentRoute.value.fullPath;
 });
-router
-    .replace(
-        localStorage.getItem("lastRoute") === null
-            ? "/"
-            : localStorage.lastRoute,
-    )
-    .then();
 
 router.beforeEach(async (to) => {
     const spotifyAuth = useSpotifyAuthStore();

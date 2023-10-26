@@ -1,8 +1,8 @@
 <template>
     <v-list density="compact">
-        <v-list-subheader v-if="showDescriptor" class="descriptor">{{
-            descriptor
-        }}</v-list-subheader>
+        <v-list-subheader v-if="showDescriptor" class="descriptor"
+            >{{ descriptor }}
+        </v-list-subheader>
 
         <v-divider v-if="showDescriptor" />
 
@@ -11,24 +11,10 @@
                 <v-icon v-if="isLiked" icon="mdi-heart"></v-icon>
                 <v-icon v-else icon="mdi-heart-outline"></v-icon>
             </template>
-            <v-list-item-title v-if="isLiked"
-                >Remove from library</v-list-item-title
-            >
+            <v-list-item-title v-if="isLiked">
+                Remove from library
+            </v-list-item-title>
             <v-list-item-title v-else>Add to library</v-list-item-title>
-        </v-list-item>
-        <v-list-item
-            v-if="
-                item.type === 'track' &&
-                player.track !== null &&
-                isDownloaded &&
-                player.track.id === item.id
-            "
-            @click="player.reloadCurrentTrack"
-        >
-            <template v-slot:prepend>
-                <v-icon icon="mdi-reload" />
-            </template>
-            <v-list-item-title>Reload track file</v-list-item-title>
         </v-list-item>
 
         <v-menu location="left">
@@ -80,10 +66,10 @@
                 />
                 <v-icon v-else icon="mdi-playlist-minus" />
             </template>
-            <v-list-item-title
-                >Remove from
-                {{ library.viewedPlaylist.name }}</v-list-item-title
-            >
+            <v-list-item-title>
+                Remove from
+                {{ library.viewedPlaylist.name }}
+            </v-list-item-title>
         </v-list-item>
 
         <v-list-item
@@ -128,8 +114,8 @@
             @click="library.chooseSource(item)"
         >
             <v-list-item-title class="small-title"
-                >Change source</v-list-item-title
-            >
+                >Change source
+            </v-list-item-title>
         </v-list-item>
         <v-list-item
             v-if="item.type === 'track' && isDownloaded"
@@ -138,8 +124,21 @@
             @click="deleteTrack"
         >
             <v-list-item-title class="small-title"
-                >Delete file</v-list-item-title
-            >
+                >Delete file
+            </v-list-item-title>
+        </v-list-item>
+        <v-list-item
+            class="small-item"
+            density="compact"
+            v-if="
+                item.type === 'track' &&
+                player.track !== null &&
+                isDownloaded &&
+                player.track.id === item.id
+            "
+            @click="player.reloadCurrentTrack"
+        >
+            <v-list-item-title class="small-title">Reload track file</v-list-item-title>
         </v-list-item>
     </v-list>
 </template>
