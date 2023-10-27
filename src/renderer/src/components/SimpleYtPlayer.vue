@@ -1,15 +1,13 @@
 <template>
     <template v-if="isLoaded">
-        <v-btn density="compact" icon variant="tonal" @click="togglePlay">
-            <v-progress-circular
-                v-if="loading"
-                :indeterminate="isNaN(loadProgress)"
-                :model-value="loadProgress"
-                size="24"
-            />
-            <v-icon v-else-if="playing">mdi-pause</v-icon>
-            <v-icon v-else>mdi-play</v-icon>
-        </v-btn>
+        <play-button
+            @click="togglePlay"
+            :loading="loading"
+            :load-progress="loadProgress"
+            :playing="playing"
+            :size="30"
+            density="compact"
+        ></play-button>
     </template>
     <v-btn
         v-else
@@ -22,7 +20,7 @@
         v-if="isLoaded"
         :current-time="currentTime"
         :duration="duration"
-        @seek="playerElement.currentTime = $event"
+        @seek="playerElement.currentTime = $event * duration"
     />
 </template>
 
@@ -32,6 +30,7 @@ import type { PropType } from "vue";
 import { onUnmounted, ref } from "vue";
 import { usePlatformStore } from "../store/electron";
 import { useBaseStore } from "../store/base";
+import PlayButton from "./PlayButton.vue";
 
 defineProps({
     track: {
@@ -90,7 +89,7 @@ async function load(track: SpotifyApi.TrackObjectFull) {
         if (percent === 100) base.events.off(id + "progress", onProgress);
     };
     base.events.on(id + "progress", onProgress);
-    playerElement.src = await platform.getTrackFile(track);
+    playerElement.src = await platform.getTrackFile(track, false);
 }
 
 async function togglePlay() {

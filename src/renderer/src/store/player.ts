@@ -188,7 +188,11 @@ export const usePlayerStore = defineStore("player", () => {
         try {
             outPath = await platform.getTrackFile(_track);
         } catch (e: any) {
-            console.warn("Track load error, EXITING OUT OF LOAD FUNCTION", _track, e);
+            console.warn(
+                "Track load error, EXITING OUT OF LOAD FUNCTION",
+                _track,
+                e,
+            );
             return;
         } finally {
             tracksLoading.delete(_trackId);
@@ -286,13 +290,13 @@ export const usePlayerStore = defineStore("player", () => {
         let today = new Date().toISOString().substring(0, 10);
         let popularityHistory = await db.get("statistics", "popularityHistory");
         if (popularityHistory === undefined) popularityHistory = {};
-        if(!popularityHistory.hasOwnProperty(today)){
-            popularityHistory[today]={
+        if (!popularityHistory.hasOwnProperty(today)) {
+            popularityHistory[today] = {
                 popularitySum: 0,
-                listenCount:0
-            }
+                listenCount: 0,
+            };
         }
-        popularityHistory[today].popularitySum+=currentTrack.popularity;
+        popularityHistory[today].popularitySum += currentTrack.popularity;
         popularityHistory[today].listenCount++;
         await db.put("statistics", popularityHistory, "popularityHistory");
         console.log({ popularityHistory });
@@ -466,6 +470,10 @@ export const usePlayerStore = defineStore("player", () => {
         };
         element.ondurationchange = () => {
             duration.value = element.duration;
+            if (track.value !== null)
+                library
+                    .updateTrackDuration(track.value, element.duration * 1000)
+                    .then();
         };
         element.oncanplay = () => {
             loading.value = false;

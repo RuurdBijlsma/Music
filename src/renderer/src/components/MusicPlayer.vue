@@ -48,23 +48,13 @@
                     variant="text"
                     @click="player.skip(-1)"
                 ></v-btn>
-                <v-btn
-                    icon
-                    size="60"
-                    variant="tonal"
-                    @click="player.togglePlay"
-                >
-                    <v-progress-circular
-                        v-if="player.loading"
-                        :indeterminate="isNaN(player.loadProgress)"
-                        :model-value="player.loadProgress"
-                        size="40"
-                    />
-                    <v-icon v-else-if="player.playing" size="30"
-                        >mdi-pause</v-icon
-                    >
-                    <v-icon v-else size="30">mdi-play</v-icon>
-                </v-btn>
+                <play-button :loading="player.loading"
+                             :load-progress="player.loadProgress"
+                             :playing="player.playing"
+                             :size="60"
+                             :icon-size="30"
+                             @click="player.togglePlay"
+                ></play-button>
                 <v-btn
                     icon="mdi-skip-next"
                     size="35"
@@ -138,6 +128,7 @@ import LikeButton from "./LikeButton.vue";
 import QueueButton from "./QueueButton.vue";
 import ItemMenu from "./ItemMenu.vue";
 import Spacer from "./Spacer.vue";
+import PlayButton from "./PlayButton.vue";
 
 const player = usePlayerStore();
 const base = useBaseStore();

@@ -149,7 +149,7 @@
         <v-list-item
             class="small-item"
             density="compact"
-            v-if="item.type === 'track' && player.track !== null"
+            v-if="item.type === 'track' && isLiked"
             @click="library.editTrack(item)"
         >
             <v-list-item-title class="small-title"

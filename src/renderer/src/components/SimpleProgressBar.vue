@@ -3,12 +3,12 @@
         <div class="music-time-current">
             {{ base.msToReadable(currentTime * 1000) }}
         </div>
-        <div class="container" @mousedown="mouseDown">
+        <div class="container" @mousedown="mouseDown" ref="seekContainer">
             <div class="progress-bar">
                 <div
                     :style="{
                         width: `${percent}%`,
-                        backgroundColor: base.themeColor,
+                        backgroundColor: getColor,
                     }"
                     class="progress"
                 ></div>
@@ -22,7 +22,7 @@
 
 <script lang="ts" setup>
 import { useBaseStore } from "../store/base";
-import { computed, onMounted, onUnmounted } from "vue";
+import { computed, onMounted, onUnmounted, ref } from "vue";
 
 const props = defineProps({
     duration: {
@@ -33,24 +33,36 @@ const props = defineProps({
         type: Number,
         required: true,
     },
+    color:{
+        type:String,
+        default:"default",
+    },
 });
+
+const getColor = computed(()=>{
+    if(props.color==='default'){
+        return base.isDark ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.7)';
+    }
+    return props.color;
+})
+
 const emit = defineEmits(["seek"]);
 const base = useBaseStore();
+const seekContainer = ref(null as null | HTMLElement);
 
 const percent = computed(
     () => Math.round((10000 * props.currentTime) / props.duration) / 100,
 );
 
-let el: HTMLElement | null = null;
 let seekDown = false;
 const seek = (e: MouseEvent) => {
     if (seekDown) {
-        if (el === null) return;
-        let bounds = el.getBoundingClientRect();
+        if (seekContainer.value === null) return;
+        let bounds = seekContainer.value.getBoundingClientRect();
         let x = e.pageX - bounds.left;
         let percent = x / bounds.width;
 
-        emit("seek", percent * props.duration);
+        emit("seek", percent);
     }
 };
 const mouseDown = (e: MouseEvent) => {
@@ -60,7 +72,6 @@ const mouseDown = (e: MouseEvent) => {
 const mouseMove = (e: MouseEvent) => seek(e);
 const mouseUp = () => (seekDown = false);
 onMounted(() => {
-    el = document.querySelector(".container");
     document.addEventListener("mousemove", mouseMove, false);
     document.addEventListener("mouseup", mouseUp, false);
 });

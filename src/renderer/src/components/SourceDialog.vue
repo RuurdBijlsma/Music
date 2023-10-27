@@ -191,6 +191,7 @@ const viewCountString = (viewCount: number) => {
 .yt-card {
     display: flex;
     gap: 20px;
+    width: 100%;
 }
 
 .image {

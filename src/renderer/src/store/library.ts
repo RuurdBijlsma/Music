@@ -52,6 +52,9 @@ export const useLibraryStore = defineStore("library", () => {
     const editDialog = ref({
         show: false,
         track: null as null | SpotifyApi.TrackObjectFull,
+        title: "",
+        artists: [""],
+        durationRange: [0, 1],
     });
 
     const userPlaylists = computed(() =>
@@ -545,6 +548,19 @@ export const useLibraryStore = defineStore("library", () => {
         editDialog.value.show = true;
     }
 
+    async function updateTrackDuration(
+        track: SpotifyApi.TrackObjectFull,
+        durationMs: number,
+    ) {
+        track.duration_ms = durationMs;
+        let libTrack = tracks.value.find((t) => t.id === track.id);
+        if (!libTrack) return;
+        libTrack.track.duration_ms = durationMs;
+        console.log("PUT", toRaw(libTrack));
+        await db.put("tracks", toRaw(libTrack));
+        //todo zet de nieuwe duration ook in de edits DB
+    }
+
     return {
         addToPlaylist,
         removeFromPlaylist,
@@ -572,5 +588,6 @@ export const useLibraryStore = defineStore("library", () => {
         valuesLoaded,
         editDialog,
         editTrack,
+        updateTrackDuration,
     };
 });

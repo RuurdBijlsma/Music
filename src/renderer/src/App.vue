@@ -1,5 +1,5 @@
 <template>
-    <v-app :class="{ dark: theme.current.value.dark }" class="root">
+    <v-app :class="{ dark: base.isDark }" class="root">
         <div
             :style="{
                 backgroundImage: `linear-gradient(rgb(var(--v-theme-background), 0.5), rgb(var(--v-theme-background))), url('${blurBgSrc}')`,
@@ -63,7 +63,7 @@
             </div>
         </div>
         <source-dialog />
-        <edit-info-dialog/>
+        <edit-info-dialog />
         <item-context-menu />
         <v-snackbar
             v-for="snack in base.snackbars"
@@ -89,6 +89,21 @@
 // in die database kan dan: track customizations (start/end time, etc), spotify api keys, yt liked tracks, spotify tokens, trackbars, alles in idb basically, localStorage ook
 // possibly replace color thief with something without vulnerabilities
 // playlists cachen
+// simple player en simple yt player samenvoegen
+
+// -------------------------------------------------------------------------
+// alleen edit track in menu laten zien als de track in liked zit
+// edit track info:
+// track durations zijn lastig
+// zodra een track geload wordt in een src, moet de duration opgeslagen worden in de track edits database
+// de track edits database heeft dus
+// - title
+// - artists
+// - start time
+// - end time
+// - duration from source file
+// -------------------------------------------------------------------------
+
 // -----------------------------------------------------------
 // listen stats
 // - per song listen count
@@ -107,7 +122,6 @@
 
 import TopMenu from "./components/TopMenu.vue";
 import MusicPlayer from "./components/MusicPlayer.vue";
-import { useTheme } from "vuetify";
 import SearchSuggestions from "./components/SearchSuggestions.vue";
 import { useBaseStore } from "./store/base";
 import { usePlayerStore } from "./store/player";
@@ -120,7 +134,6 @@ import BottomMusicPlayer from "./components/BottomMusicPlayer.vue";
 import coverImage from "../assets/cover.jpg?asset";
 import EditInfoDialog from "./components/EditInfoDialog.vue";
 
-const theme = useTheme();
 const base = useBaseStore();
 const player = usePlayerStore();
 const initialBg = coverImage;
