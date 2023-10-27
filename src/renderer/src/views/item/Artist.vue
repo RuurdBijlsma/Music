@@ -50,7 +50,7 @@
 
 <script lang="ts" setup>
 import { computed, ref, watch } from "vue";
-import { useRoute, useRouter } from "vue-router";
+import { useRoute } from "vue-router";
 import { baseDb, useBaseStore } from "../../store/base";
 import GlowImage from "../../components/GlowImage.vue";
 import ItemCard from "../../components/ItemCard.vue";
@@ -64,7 +64,6 @@ import Spacer from "../../components/Spacer.vue";
 const route = useRoute();
 const base = useBaseStore();
 const spotify = useSpotifyApiStore();
-const router = useRouter();
 
 const artist = ref(null as null | SpotifyApi.ArtistObjectFull);
 const albums = ref(null as null | SpotifyApi.AlbumObjectFull[]);
