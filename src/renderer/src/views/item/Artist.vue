@@ -1,5 +1,8 @@
 <template>
-    <div v-if="artist" class="artist">
+    <div v-if="loadedId.startsWith('yt-')" class="mt-15">
+        <h1>Unfortunately YouTube™️ artist pages are not supported.</h1>
+    </div>
+    <div v-else-if="artist" class="artist">
         <div class="mb-2 artist-info">
             <glow-image
                 :effect-scale="1.3"
@@ -47,7 +50,7 @@
 
 <script lang="ts" setup>
 import { computed, ref, watch } from "vue";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { baseDb, useBaseStore } from "../../store/base";
 import GlowImage from "../../components/GlowImage.vue";
 import ItemCard from "../../components/ItemCard.vue";
@@ -61,6 +64,7 @@ import Spacer from "../../components/Spacer.vue";
 const route = useRoute();
 const base = useBaseStore();
 const spotify = useSpotifyApiStore();
+const router = useRouter();
 
 const artist = ref(null as null | SpotifyApi.ArtistObjectFull);
 const albums = ref(null as null | SpotifyApi.AlbumObjectFull[]);
@@ -89,6 +93,9 @@ watch(route, async () => {
 });
 
 async function reloadArtist(id: string) {
+    if (id.startsWith("yt-")) {
+        return;
+    }
     await baseDb;
     spotify.getArtist(id).then((r) => {
         artist.value = r;

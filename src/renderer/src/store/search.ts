@@ -189,7 +189,7 @@ export const useSearchStore = defineStore("search", () => {
                 {
                     name: ytResult.channel.replaceAll('"', ""),
                     type: "artist",
-                    id: ytResult.channelId,
+                    id: "yt-" + ytResult.channelId,
                     uri: "",
                     href: ytResult.channelUrl,
                     external_urls: { spotify: "" },

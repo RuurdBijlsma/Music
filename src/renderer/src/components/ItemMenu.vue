@@ -118,7 +118,11 @@
             </v-list-item-title>
         </v-list-item>
         <v-list-item
-            v-if="item.type === 'track' && isDownloaded"
+            v-if="
+                item.type === 'track' &&
+                isDownloaded &&
+                (player.track === null || player.track.id !== item.id)
+            "
             class="small-item"
             density="compact"
             @click="deleteTrack"
@@ -138,7 +142,19 @@
             "
             @click="player.reloadCurrentTrack"
         >
-            <v-list-item-title class="small-title">Reload track file</v-list-item-title>
+            <v-list-item-title class="small-title"
+                >Reload file
+            </v-list-item-title>
+        </v-list-item>
+        <v-list-item
+            class="small-item"
+            density="compact"
+            v-if="item.type === 'track' && player.track !== null"
+            @click="library.editTrack(item)"
+        >
+            <v-list-item-title class="small-title"
+                >Edit track
+            </v-list-item-title>
         </v-list-item>
     </v-list>
 </template>

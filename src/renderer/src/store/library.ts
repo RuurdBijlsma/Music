@@ -49,6 +49,11 @@ export const useLibraryStore = defineStore("library", () => {
     const viewedPlaylist = ref(null as SpotifyApi.PlaylistObjectFull | null);
     const viewedPlaylistRefreshRequired = ref(false);
 
+    const editDialog = ref({
+        show: false,
+        track: null as null | SpotifyApi.TrackObjectFull,
+    });
+
     const userPlaylists = computed(() =>
         saved.value.playlist.filter(
             (p) => p.owner.id === userInfo.value.id || p.collaborative,
@@ -475,10 +480,12 @@ export const useLibraryStore = defineStore("library", () => {
         base.sourceDialog.spotifyTrack = track;
 
         const { cacheKey, query } = platform.trackToNames(track);
+        console.log("Search", { query });
         let [options, selectedId] = await Promise.all([
             platform.searchYouTube(query, 6),
             db.get("nameToId", cacheKey),
         ]);
+        console.log("Result", { options, selectedId });
 
         base.sourceDialog.loading = false;
         base.sourceDialog.items = options;
@@ -533,6 +540,11 @@ export const useLibraryStore = defineStore("library", () => {
         viewedPlaylist.value.tracks.items.splice(trackIndex, 1);
     }
 
+    function editTrack(track: SpotifyApi.TrackObjectFull) {
+        editDialog.value.track = track;
+        editDialog.value.show = true;
+    }
+
     return {
         addToPlaylist,
         removeFromPlaylist,
@@ -558,5 +570,7 @@ export const useLibraryStore = defineStore("library", () => {
         offlineCollections,
         recentPlays,
         valuesLoaded,
+        editDialog,
+        editTrack,
     };
 });

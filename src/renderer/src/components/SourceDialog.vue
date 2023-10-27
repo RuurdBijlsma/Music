@@ -1,17 +1,18 @@
 <template>
     <v-dialog
         v-model="base.sourceDialog.show"
-        :class="{ dark: theme.current.value.dark }"
+        :class="{ dark: base.isDark }"
         :scrollable="true"
         width="auto"
     >
-        <div class="card">
-            <v-card-title class="main-title pt-5 mb-3"
-                >Choose a YouTube source video</v-card-title
-            >
+        <div class="translucent">
+            <v-card-title class="main-title pt-5 mb-3">
+                Choose a YouTube source video
+            </v-card-title>
             <v-divider></v-divider>
             <v-card-text
                 :style="{
+                    overflowY: base.sourceDialog.loading ? 'hidden' : 'auto',
                     alignItems: base.sourceDialog.loading ? 'center' : 'left',
                 }"
                 class="card-content"
@@ -50,9 +51,9 @@
                                 {{ item.uploadDate.toLocaleDateString() }}
                             </v-list-item-subtitle>
                             <div class="channel mt-2">
-                                <v-avatar :color="randomColor(item.id)">{{
-                                    item.channel[0]
-                                }}</v-avatar>
+                                <v-avatar :color="randomColor(item.id)"
+                                    >{{ item.channel[0] }}
+                                </v-avatar>
                                 <span class="ml-4">{{ item.channel }}</span>
                             </div>
                             <p class="description mt-2">
@@ -80,8 +81,8 @@
                     :block="true"
                     :color="base.themeColor"
                     @click="base.sourceDialog.show = false"
-                    >Dismiss</v-btn
-                >
+                    >Dismiss
+                </v-btn>
             </v-card-actions>
         </div>
     </v-dialog>
@@ -154,14 +155,14 @@ const viewCountString = (viewCount: number) => {
 </script>
 
 <style lang="less" scoped>
-.card {
+.translucent {
     backdrop-filter: blur(40px) saturate(150%) brightness(130%);
     background-color: rgba(var(--v-theme-background), 0.5);
     border-radius: 8px;
     box-shadow: 0 4px 2px 0 rgba(0, 0, 0, 0.2);
 }
 
-.dark .card {
+.dark .translucent {
     backdrop-filter: blur(40px) saturate(150%) brightness(70%) !important;
     background-color: rgba(var(--v-theme-background), 0.7) !important;
 }
@@ -253,5 +254,12 @@ const viewCountString = (viewCount: number) => {
     display: flex;
     gap: 20px;
     align-items: center;
+}
+
+h1,
+h2,
+h3,
+h4 {
+    text-align: left;
 }
 </style>

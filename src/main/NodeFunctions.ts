@@ -321,22 +321,35 @@ export default class NodeFunctions {
 
     async searchYouTube(query: string, results: number) {
         if (query === undefined) return [];
-        let args = [
-            `ytsearch${results}:"${query.replace(/"/gi, '"')}"`,
-            `--match-filter`,
-            `!is_live & !post_live & !was_live`,
-            `--dump-json`,
-        ];
-        let stdout = await this.ytdlp.execPromise(args);
-        try {
-            // return stdout;
-            return stdout
-                .split("\n")
-                .filter((l: string) => l.length > 0)
-                .map((l: string) => JSON.parse(l));
-        } catch (e: any) {
-            console.error("YTDL PARSE ERROR", e, stdout);
-        }
+        return new Promise<any>((resolve, reject) => {
+            let command = `${
+                this.ytdlpPath
+            } ytsearch${results}:"${query.replace(
+                /"/gi,
+                '"',
+            )}" --match-filter "!is_live & !post_live & !was_live" --dump-json`;
+
+            child_process.exec(
+                command,
+                { maxBuffer: 10 * 1024 * 1024 },
+                (error, stdout) => {
+                    if (error) return reject(error);
+                    try {
+                        // return stdout;
+                        resolve(
+                            stdout
+                                .split("\n")
+                                .filter((l: string) => l.length > 0)
+                                .map((l: string) => JSON.parse(l)),
+                        );
+                    } catch (e: any) {
+                        console.error("YTDL PARSE ERROR", e, stdout);
+                        reject({ error, e });
+                    }
+                    // resolve(outFile);
+                },
+            );
+        });
     }
 
     async youTubeInfoById(id: string) {
@@ -359,7 +372,8 @@ export default class NodeFunctions {
             Math.random().toString() + ".jpg",
         );
         return new Promise<string>((resolve, reject) => {
-            let command = `${this.ffmpegPath} -i ${imgUrl} ${outFile}`;
+            let command = `${this.ffmpegPath} -i "${imgUrl}" "${outFile}"`;
+            console.log("Command", command);
 
             child_process.exec(command, (error) => {
                 if (error) return reject(error);

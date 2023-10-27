@@ -188,7 +188,8 @@ export const usePlayerStore = defineStore("player", () => {
         try {
             outPath = await platform.getTrackFile(_track);
         } catch (e: any) {
-            console.warn("Track load error", _track, e);
+            console.warn("Track load error, EXITING OUT OF LOAD FUNCTION", _track, e);
+            return;
         } finally {
             tracksLoading.delete(_trackId);
         }

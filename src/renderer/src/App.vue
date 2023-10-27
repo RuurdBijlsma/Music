@@ -63,6 +63,7 @@
             </div>
         </div>
         <source-dialog />
+        <edit-info-dialog/>
         <item-context-menu />
         <v-snackbar
             v-for="snack in base.snackbars"
@@ -81,9 +82,14 @@
 
 <script lang="ts" setup>
 // todo
-// support yt artist page
 // edit information about yt track (change title, artist)
 // edit information about any track (start/end time, more?)
+// maak knop: export database naar file of cloud?
+// when visit page (ex. discover weekly) check if all songs are cached and update the offline cloud icon
+// in die database kan dan: track customizations (start/end time, etc), spotify api keys, yt liked tracks, spotify tokens, trackbars, alles in idb basically, localStorage ook
+// possibly replace color thief with something without vulnerabilities
+// playlists cachen
+// -----------------------------------------------------------
 // listen stats
 // - per song listen count
 // - minuten geluistered optellen
@@ -98,12 +104,6 @@
 // - Download's tellen in megabytes
 // - skip rate voor alle liedjes laten zien
 // - track popularity running average grafiek laten zien
-// maak knop: export database naar file of cloud?
-// when visit page (ex. discover weekly) check if all songs are cached and update the offline cloud icon
-// in die database kan dan: track customizations (start/end time, etc), spotify api keys, yt liked tracks, spotify tokens, trackbars, alles in idb basically, localStorage ook
-// possibly replace color thief with something without vulnerabilities
-// het is best weird dat de error event nu firet voor ytDownload via search, test even tracks die het horen te doen zie hoe dat gaat, zie hoe een echte error nu handled wordt
-// playlists cachen
 
 import TopMenu from "./components/TopMenu.vue";
 import MusicPlayer from "./components/MusicPlayer.vue";
@@ -118,6 +118,7 @@ import LeftNavigation from "./components/LeftNavigation.vue";
 import BottomMusicPlayer from "./components/BottomMusicPlayer.vue";
 //@ts-ignore
 import coverImage from "../assets/cover.jpg?asset";
+import EditInfoDialog from "./components/EditInfoDialog.vue";
 
 const theme = useTheme();
 const base = useBaseStore();

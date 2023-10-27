@@ -106,7 +106,7 @@
                     hide-details
                     thumb-size="10"
                     track-size="1"
-                    @wheel="handleScroll"
+                    @wheel.passive="handleScroll"
                     @click:prepend="toggleMute"
                 ></v-slider>
             </div>
