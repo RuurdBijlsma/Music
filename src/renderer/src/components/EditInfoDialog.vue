@@ -99,8 +99,16 @@
                 ></simple-player>
             </v-card-item>
             <v-card-actions class="mt-1">
-                <v-btn :block="true" :color="base.themeColor" variant="tonal">
-                    Dismiss
+                <spacer></spacer>
+                <v-btn
+                    :color="base.themeColor"
+                    variant="tonal"
+                    @click="applyChanges"
+                >
+                    Apply Changes
+                </v-btn>
+                <v-btn variant="tonal" @click="editDialog.show = false">
+                    Cancel
                 </v-btn>
             </v-card-actions>
         </div>
@@ -112,6 +120,7 @@ import { useBaseStore } from "../store/base";
 import { useLibraryStore } from "../store/library";
 import { computed, toRaw, watch } from "vue";
 import SimplePlayer from "./SimplePlayer.vue";
+import Spacer from "./Spacer.vue";
 
 const base = useBaseStore();
 const library = useLibraryStore();
@@ -125,6 +134,14 @@ watch(track, () => {
     editDialog.value.artists = track.value.artists.map((a) => a.name);
     console.log(toRaw(editDialog.value));
 });
+
+async function applyChanges() {
+    if (await library.applyEditChanges()) {
+        editDialog.value.show = false;
+    } else {
+        base.addSnack("Couldn't apply changes, can't find related track.");
+    }
+}
 </script>
 <style lang="less" scoped>
 .translucent {

@@ -108,7 +108,11 @@ function createAudioElement() {
         playing.value = !element.paused;
     });
     element.addEventListener("durationchange", () => {
-        library.updateTrackDuration(props.track, playerElement.duration * 1000);
+        if (props.track.duration_ms !== playerElement.duration * 1000)
+            library.updateTrackDuration(
+                props.track,
+                playerElement.duration * 1000,
+            );
     });
     element.addEventListener("canplay", () => {
         loading.value = false;

@@ -8,6 +8,7 @@ import type {
     Item,
     ItemCollection,
     ItemType,
+    TrackChanges,
 } from "../scripts/types";
 import { usePlayerStore } from "./player";
 import { useSpotifyApiStore } from "./spotify-api";
@@ -263,7 +264,7 @@ export const useLibraryStore = defineStore("library", () => {
         likedTracksTotal.value = 1;
 
         let ytTracks = (await db.getAllFromIndex(
-            "yt-tracks",
+            "ytTracks",
             "newToOld",
         )) as ExtendedPlaylistTrack[];
         let newestYtTrack = ytTracks.shift();
@@ -394,7 +395,7 @@ export const useLibraryStore = defineStore("library", () => {
             if (liked) {
                 if (item.id.startsWith("yt-")) {
                     // YouTube
-                    db.delete("yt-tracks", id).then();
+                    db.delete("ytTracks", id).then();
                 } else {
                     // Spotify
                     await spotify.api.removeFromMySavedTracks([id]);
@@ -419,7 +420,7 @@ export const useLibraryStore = defineStore("library", () => {
 
                 if (item.id.startsWith("yt-")) {
                     // YouTube
-                    db.add("yt-tracks", playlistObject).then();
+                    db.add("ytTracks", playlistObject).then();
                 } else {
                     // Spotify
                     await spotify.api.addToMySavedTracks([id]);
@@ -556,9 +557,71 @@ export const useLibraryStore = defineStore("library", () => {
         let libTrack = tracks.value.find((t) => t.id === track.id);
         if (!libTrack) return;
         libTrack.track.duration_ms = durationMs;
-        console.log("PUT", toRaw(libTrack));
         await db.put("tracks", toRaw(libTrack));
         //todo zet de nieuwe duration ook in de edits DB
+    }
+
+    function revertTrackObject(
+        track: SpotifyApi.TrackObjectFull,
+        changes: TrackChanges,
+    ) {
+        track.name = changes.original.title;
+        const originalArtists = changes.original.artists;
+        if (track.artists.length === originalArtists.length)
+            track.artists.forEach(
+                (_, i) => (track.artists[i].name = changes.original.artists[i]),
+            );
+        else
+            console.warn(
+                "MISMATCH BETWEEN TRACK ARTISTS AND EDIT ARTISTS LENGTH.",
+                track,
+                changes,
+            );
+        track.duration_ms = changes.original.endTime * 1000;
+    }
+
+    function editTrackObject(
+        track: SpotifyApi.TrackObjectFull,
+        changes: TrackChanges,
+    ) {
+        track.name = changes.title;
+        if (track.artists.length === changes.artists.length)
+            track.artists.forEach(
+                (_, i) => (track.artists[i].name = changes.artists[i]),
+            );
+        track.duration_ms = (changes.endTime - changes.startTime) * 1000;
+    }
+
+    async function applyEditChanges() {
+        let track = editDialog.value.track;
+        if (track === null) return false;
+        let existingChanges = await db.get("trackEdits", track.id);
+        if (existingChanges) {
+            // remove existing changes from track
+            revertTrackObject(track, existingChanges);
+        }
+        let changes: TrackChanges = {
+            title: editDialog.value.title,
+            artists: toRaw(editDialog.value.artists),
+            startTime: editDialog.value.durationRange[0],
+            endTime: editDialog.value.durationRange[1],
+            id: track.id,
+            original: {
+                title: track.name,
+                artists: track.artists.map((a) => a.name),
+                endTime: track.duration_ms / 1000,
+            },
+        };
+
+        console.log("CHANGES", changes);
+        editTrackObject(track, changes);
+        await db.put("trackEdits", changes, track.id);
+
+        let libTrack = tracks.value.find((t) => t.id === track.id);
+        if (!libTrack) return;
+        editTrackObject(libTrack.track, changes);
+        await db.put("tracks", toRaw(libTrack));
+        return true;
     }
 
     return {
@@ -589,5 +652,6 @@ export const useLibraryStore = defineStore("library", () => {
         editDialog,
         editTrack,
         updateTrackDuration,
+        applyEditChanges,
     };
 });

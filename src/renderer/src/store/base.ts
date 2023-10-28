@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { openDB } from "idb";
+import { IDBPDatabase, IDBPObjectStore, openDB, StoreNames } from "idb";
 import { computed, ref } from "vue";
 import { useTheme } from "vuetify";
 import type { Item, ItemCollection } from "../scripts/types";
@@ -7,37 +7,83 @@ import { deltaE, hexToRgb } from "../scripts/utils";
 import { EventEmitter } from "events";
 import { randomNotFound } from "../scripts/imageSources";
 
-export const baseDb = openDB("base", 1, {
-    upgrade(db) {
-        db.createObjectStore("trackBars");
-        db.createObjectStore("spotify");
-        db.createObjectStore("cache");
-        db.createObjectStore("nameToId");
-        db.createObjectStore("imageColor");
-        db.createObjectStore("trackVolumeStats");
+function createStore(
+    db: IDBPDatabase,
+    transaction: any,
+    storeName: string,
+    storeOptions: { keyPath?: string } = {},
+    indices: { name: string; keyPath: string; unique: boolean }[] = [],
+) {
+    let store: IDBPObjectStore<
+        unknown,
+        ArrayLike<StoreNames<unknown>>,
+        string,
+        "versionchange"
+    >;
+    if (!db.objectStoreNames.contains(storeName)) {
+        store = db.createObjectStore(storeName, storeOptions);
+    } else {
+        store = transaction.objectStore(storeName);
+    }
+    for (let index of indices) {
+        if (!store.indexNames.contains(index.name)) {
+            store.createIndex(index.name, index.keyPath, {
+                unique: index.unique,
+            });
+        }
+    }
+    return store;
+}
 
-        db.createObjectStore("artistStats");
-        db.createObjectStore("trackStats");
-        db.createObjectStore("collectionStats");
-        db.createObjectStore("statistics");
+export const baseDb = openDB("base", 3, {
+    upgrade(db, _, __, transaction) {
+        db.deleteObjectStore('yt-tracks')
+        createStore(db, transaction, "trackBars");
+        createStore(db, transaction, "spotify");
+        createStore(db, transaction, "cache");
+        createStore(db, transaction, "nameToId");
+        createStore(db, transaction, "imageColor");
+        createStore(db, transaction, "trackVolumeStats");
+        createStore(db, transaction, "artistStats");
+        createStore(db, transaction, "trackStats");
+        createStore(db, transaction, "collectionStats");
+        createStore(db, transaction, "statistics");
+        createStore(db, transaction, "trackEdits");
 
-        const trackStore = db.createObjectStore("tracks", { keyPath: "id" });
-        trackStore.createIndex("searchString", "searchString", {
-            unique: false,
-        });
-        trackStore.createIndex("title", "title", { unique: false });
-        trackStore.createIndex("artist", "artistString", { unique: false });
-        trackStore.createIndex("oldToNew", "added_at", { unique: false });
-        trackStore.createIndex("newToOld", "added_at_reverse", {
-            unique: false,
-        });
-
-        const ytTrackStore = db.createObjectStore("yt-tracks", {
-            keyPath: "id",
-        });
-        ytTrackStore.createIndex("newToOld", "added_at_reverse", {
-            unique: false,
-        });
+        createStore(db, transaction, "tracks", { keyPath: "id" }, [
+            {
+                name: "searchString",
+                keyPath: "searchString",
+                unique: false,
+            },
+            {
+                name: "title",
+                keyPath: "title",
+                unique: false,
+            },
+            {
+                name: "artist",
+                keyPath: "artistString",
+                unique: false,
+            },
+            {
+                name: "oldToNew",
+                keyPath: "added_at",
+                unique: false,
+            },
+            {
+                name: "newToOld",
+                keyPath: "added_at_reverse",
+                unique: false,
+            },
+        ]);
+        createStore(db, transaction, "ytTracks", { keyPath: "id" }, [
+            {
+                name: "newToOld",
+                keyPath: "added_at_reverse",
+                unique: false,
+            },
+        ]);
     },
 });
 

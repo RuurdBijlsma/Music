@@ -90,6 +90,8 @@
 // possibly replace color thief with something without vulnerabilities
 // playlists cachen
 // simple player en simple yt player samenvoegen
+// track edit updates arent updated without refresh
+// after editing track name / artists, it won't remember the track is downloaded already
 
 // -------------------------------------------------------------------------
 // alleen edit track in menu laten zien als de track in liked zit

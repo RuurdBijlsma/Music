@@ -66,6 +66,19 @@ export interface DownloadState {
     loading: boolean;
 }
 
+export interface TrackChanges {
+    title: string;
+    artists: string[];
+    startTime: number;
+    endTime: number;
+    id: string;
+    original: {
+        title: string;
+        artists: string[];
+        endTime: number;
+    };
+}
+
 export type CollectionType =
     | "radio"
     | "search"
