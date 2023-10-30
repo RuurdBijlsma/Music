@@ -53,6 +53,7 @@ const collection = computed(() => {
     if (tracks.value === null || tracks.value === undefined) {
         return null;
     }
+    console.log("tracks", toRaw(tracks.value));
     return {
         tracks: toRaw(tracks.value).map((t) => t.track),
         type: "liked",

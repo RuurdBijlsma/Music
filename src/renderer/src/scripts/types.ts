@@ -39,6 +39,7 @@ export interface ExtendedPlaylistTrack extends SpotifyApi.PlaylistTrackObject {
     id: string;
     title: string;
     added_at_reverse: number;
+    track: EditedTrack,
 }
 
 export type Item =
@@ -77,6 +78,11 @@ export interface TrackChanges {
         artists: string[];
         endTime: number;
     };
+}
+
+export interface EditedTrack extends SpotifyApi.TrackObjectFull {
+    startTime?: number;
+    endTime?: number;
 }
 
 export type CollectionType =

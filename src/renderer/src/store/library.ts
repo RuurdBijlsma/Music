@@ -4,6 +4,7 @@ import { baseDb, useBaseStore } from "./base";
 import { usePlatformStore } from "./electron";
 import type { IDBPDatabase } from "idb";
 import type {
+    EditedTrack,
     ExtendedPlaylistTrack,
     Item,
     ItemCollection,
@@ -238,6 +239,7 @@ export const useLibraryStore = defineStore("library", () => {
 
         return {
             ...item,
+            track: item.track as EditedTrack,
             artistString,
             searchString,
             id,
@@ -263,6 +265,12 @@ export const useLibraryStore = defineStore("library", () => {
         likedTracksLoaded.value = 0;
         likedTracksTotal.value = 1;
 
+        let trackEdits = await db.getAll("trackEdits");
+        let trackEditKeys = await db.getAllKeys("trackEdits");
+        const editsObject = Object.fromEntries(
+            trackEdits.map((_, i) => [trackEditKeys[i], trackEdits[i]]),
+        );
+
         let ytTracks = (await db.getAllFromIndex(
             "ytTracks",
             "newToOld",
@@ -286,6 +294,14 @@ export const useLibraryStore = defineStore("library", () => {
                         newestYtTrack !== undefined &&
                         newestYtTrack.added_at_reverse < item.added_at_reverse
                     ) {
+                        if (
+                            editsObject.hasOwnProperty(newestYtTrack.track.id)
+                        ) {
+                            editTrackObject(
+                                newestYtTrack.track as SpotifyApi.TrackObjectFull,
+                                editsObject[newestYtTrack.track.id],
+                            );
+                        }
                         // yt track is newer than this spotify track
                         items.push(newestYtTrack);
                         if (isInitial) {
@@ -294,6 +310,12 @@ export const useLibraryStore = defineStore("library", () => {
                         likedTracksLoaded.value++;
                         likedTracksTotal.value++;
                         newestYtTrack = ytTracks.shift();
+                    }
+                    if (editsObject.hasOwnProperty(item.track.id)) {
+                        editTrackObject(
+                            item.track as SpotifyApi.TrackObjectFull,
+                            editsObject[item.track.id],
+                        );
                     }
                     items.push(item);
                     if (isInitial) {
@@ -580,16 +602,15 @@ export const useLibraryStore = defineStore("library", () => {
         track.duration_ms = changes.original.endTime * 1000;
     }
 
-    function editTrackObject(
-        track: SpotifyApi.TrackObjectFull,
-        changes: TrackChanges,
-    ) {
+    function editTrackObject(track: EditedTrack, changes: TrackChanges) {
         track.name = changes.title;
         if (track.artists.length === changes.artists.length)
             track.artists.forEach(
                 (_, i) => (track.artists[i].name = changes.artists[i]),
             );
         track.duration_ms = (changes.endTime - changes.startTime) * 1000;
+        track.startTime = changes.startTime;
+        track.endTime = changes.endTime;
     }
 
     async function applyEditChanges() {

@@ -82,6 +82,7 @@
 
 <script lang="ts" setup>
 // todo
+// make use of starttime/endtime prop
 // edit information about yt track (change title, artist)
 // edit information about any track (start/end time, more?)
 // maak knop: export database naar file of cloud?
