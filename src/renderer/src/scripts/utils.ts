@@ -43,6 +43,27 @@ export function deltaE(rgbA: number[], rgbB: number[]) {
     return i < 0 ? 0 : Math.sqrt(i);
 }
 
+export function hmsToSeconds(time: string): number {
+    const parts = time.split(":").map((part) => parseInt(part, 10));
+    let milliseconds = 0;
+
+    if (parts.length === 3) {
+        // If the input is in the format "hours:minutes:seconds"
+        const [hours, minutes, seconds] = parts;
+        milliseconds = hours * 60 * 60 + minutes * 60 + seconds;
+    } else if (parts.length === 2) {
+        // If the input is in the format "minutes:seconds"
+        const [minutes, seconds] = parts;
+        milliseconds = minutes * 60 + seconds;
+    } else {
+        throw new Error(
+            'Invalid time format. Please use "hours:minutes:seconds" or "minutes:seconds".',
+        );
+    }
+
+    return milliseconds;
+}
+
 export function rgb2lab(rgb: number[]) {
     let r = rgb[0] / 255,
         g = rgb[1] / 255,

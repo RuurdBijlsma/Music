@@ -41,7 +41,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, toRaw, watch } from "vue";
+import { computed, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useBaseStore } from "../../store/base";
 import GlowImage from "../../components/GlowImage.vue";
@@ -85,7 +85,6 @@ const updateAlbum = async () => {
         };
     }
     album.value = responseAlbum;
-    console.log(toRaw(album.value));
     checkForLoadTrackId();
 };
 watch(route, async () => {

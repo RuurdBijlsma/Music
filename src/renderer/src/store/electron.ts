@@ -5,7 +5,7 @@ import fileNamify from "filenamify";
 import { baseDb, useBaseStore } from "./base";
 import type { IDBPDatabase } from "idb";
 import { usePlayerStore } from "./player";
-import type { DownloadState, YouTubeTrackInfo } from "../scripts/types";
+import type { DownloadState, YouTubeTrack } from "../scripts/types";
 import { executeCached } from "../scripts/utils";
 import { useSpotifyAuthStore } from "./spotify-auth";
 
@@ -220,7 +220,7 @@ export const usePlatformStore = defineStore("platform", () => {
     }
 
     async function youTubeInfoById(id: string) {
-        return await executeCached<YouTubeTrackInfo>(
+        return await executeCached<YouTubeTrack>(
             db,
             async () => {
                 let ytr = await window.api.ytInfoById(id);
@@ -250,39 +250,6 @@ export const usePlatformStore = defineStore("platform", () => {
             },
             "ytId" + id,
             1000 * 60 * 60 * 24 * 365,
-        );
-    }
-
-    async function searchYouTube(query: string, limit = 5) {
-        return await executeCached<YouTubeTrackInfo[]>(
-            db,
-            async () => {
-                let result = await window.api.searchYt(query, limit);
-                return result.map((r: any) => ({
-                    duration: r.duration,
-                    description: r.description,
-                    channel: r.channel,
-                    title: r.title,
-                    thumbnail: r.thumbnail,
-                    id: r.id,
-                    channelUrl: r.channel_url,
-                    channelId: r.channel_id,
-                    playlist: r.playlist,
-                    playlistId: r.playlist_id,
-                    viewCount: r.view_count,
-                    uploadDate: new Date(
-                        `${r.upload_date.substring(
-                            0,
-                            4,
-                        )}-${r.upload_date.substring(
-                            4,
-                            6,
-                        )}-${r.upload_date.substring(6, 8)}`,
-                    ),
-                }));
-            },
-            "yt" + query + "|" + limit,
-            1000 * 60 * 60 * 24 * 30,
         );
     }
 
@@ -422,7 +389,6 @@ export const usePlatformStore = defineStore("platform", () => {
     }
 
     return {
-        searchYouTube,
         getTrackFile,
         setTheme,
         close,

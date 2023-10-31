@@ -29,7 +29,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, PropType, ref, toRaw, watch } from "vue";
+import { computed, PropType, ref, watch } from "vue";
 import { usePlatformStore } from "../store/electron";
 import { useBaseStore } from "../store/base";
 import SimpleProgressBar from "./SimpleProgressBar.vue";
@@ -79,8 +79,6 @@ const isLoaded = ref(false);
 watch(
     () => props.startTime,
     () => {
-        console.log("Start time change");
-        console.log("Start time value", toRaw(props.startTime));
         if (currentTime.value < props.startTime) {
             playerElement.currentTime = props.startTime;
         }
@@ -92,7 +90,6 @@ const endTime = computed(() =>
 );
 
 const duration = computed(() => {
-    console.log("Calculated duration", endTime.value - props.startTime);
     return endTime.value - props.startTime;
 });
 
@@ -140,7 +137,7 @@ async function load(track: SpotifyApi.TrackObjectFull) {
     };
     base.events.on(id + "progress", onProgress);
     playerElement.src = await platform.getTrackFile(track, false);
-    let onFirstPlay = () => 0;
+    let onFirstPlay = () => {};
     onFirstPlay = () => {
         playerElement.currentTime = props.startTime;
         if (!props.autoPlay) playerElement.pause();
@@ -151,13 +148,10 @@ async function load(track: SpotifyApi.TrackObjectFull) {
 }
 
 function seek(percent: number) {
-    console.log("seek", percent);
-    let result = Math.min(
+    playerElement.currentTime = Math.min(
         endTime.value,
         Math.max(props.startTime, props.startTime + percent * duration.value),
     );
-    console.log("setting el time to", result);
-    playerElement.currentTime = result;
 }
 
 async function togglePlay() {

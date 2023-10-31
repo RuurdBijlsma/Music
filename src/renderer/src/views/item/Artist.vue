@@ -98,7 +98,6 @@ async function reloadArtist(id: string) {
     await baseDb;
     spotify.getArtist(id).then((r) => {
         artist.value = r;
-        console.log(r);
     });
     spotify.getArtistAlbums(id).then((r) => {
         albums.value = r.items as SpotifyApi.AlbumObjectFull[];

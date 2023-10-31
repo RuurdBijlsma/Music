@@ -126,7 +126,6 @@ const isLibraryDownloaded = computed(() => {
 });
 
 async function checkTracksDownloaded() {
-    console.log("Checking tracks downloaded");
     if (props.collection === null || props.collection.tracks.length === 0)
         return;
     let isDownloaded = await platform.checkTracksDownloaded(

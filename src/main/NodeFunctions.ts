@@ -6,11 +6,10 @@ import os from "os";
 import type { BrowserWindow } from "electron";
 import { dialog, globalShortcut } from "electron";
 import type { Progress } from "yt-dlp-wrap";
-import child_process from "child_process";
+import child_process, { spawn } from "child_process";
 import * as https from "https";
 import ColorThief from "color-extr-thief";
 import { getContrastRatio, RGBToHex, RGBToHSL } from "./utils";
-import replaceSpecialCharacters from "replace-special-characters";
 import darkIcon from "../../resources/app-icon/dark-500.png?asset";
 import lightIcon from "../../resources/app-icon/light-500.png?asset";
 import darkPlayIcon from "../../resources/media-icon/dark-playicon.png?asset";
@@ -21,6 +20,7 @@ import lightPlayIcon from "../../resources/media-icon/light-playicon.png?asset";
 import lightPauseIcon from "../../resources/media-icon/light-pauseicon.png?asset";
 import lightPrevIcon from "../../resources/media-icon/light-previcon.png?asset";
 import lightNextIcon from "../../resources/media-icon/light-nexticon.png?asset";
+import replaceSpecialCharacters from "replace-special-characters";
 
 const YTDlpWrap = require("yt-dlp-wrap").default;
 const ffbinaries = require("ffbinaries");
@@ -121,10 +121,10 @@ export default class NodeFunctions {
         filename: string,
         destinationFolder = Directories.temp,
     ) {
-        return new Promise<{ outPath: string; id: string }>((resolve) => {
+        return new Promise<{ outPath: string; id: string }>(async (resolve) => {
             query = replaceSpecialCharacters(query);
             let args = [
-                `ytsearch15:"${query.replace(/"/gi, '"')}"`,
+                `ytsearch15:"${query}"`,
                 `--max-downloads`,
                 `1`,
                 `--match-filter`,
@@ -137,21 +137,41 @@ export default class NodeFunctions {
                 `-o`,
                 `${path.join(destinationFolder, filename + ".temp.%(ext)s")}`,
             ];
-            let id: string = "";
-            this.ytdlp
-                .exec(args)
-                .on("progress", (progress: Progress) => {
-                    this.win.webContents.send("progress", {
-                        filename,
-                        progress,
-                    });
-                })
-                .on("ytDlpEvent", (_, b: string) => {
-                    if (id === "" && b.includes("watch?v=")) {
-                        id = b.split("watch?v=")[1];
+            let id = "";
+            if (process.platform === "win32") {
+                let command =
+                    "cmd /c chcp 65001>nul && " +
+                    [`${this.ytdlpPath}`, ...args]
+                        .map((a) =>
+                            a.includes(" ") && !a.includes('"')
+                                ? `"${a.replaceAll('"', '\\"')}"`
+                                : a,
+                        )
+                        .join(" ");
+                let proc = spawn(command, {
+                    shell: true,
+                });
+                proc.stdout.on("data", (data) => {
+                    let line = data.toString().trim();
+                    if (id === "" && line.includes("watch?v=")) {
+                        id = line
+                            .split("watch?v=")[1]
+                            .split("\n")[0]
+                            .trim();
                     }
-                })
-                .on("error", () => {
+                    if (line.startsWith("[download]")) {
+                        let parts = line.split(" ").filter((t) => t.length > 0);
+                        let percent = +parts[1].substring(
+                            0,
+                            parts[1].length - 1,
+                        );
+                        this.win.webContents.send("progress", {
+                            filename,
+                            progress: { percent },
+                        });
+                    }
+                });
+                proc.on("close", () => {
                     resolve({
                         outPath: path.join(
                             destinationFolder,
@@ -159,16 +179,40 @@ export default class NodeFunctions {
                         ),
                         id,
                     });
-                })
-                .on("close", () =>
-                    resolve({
-                        outPath: path.join(
-                            destinationFolder,
-                            filename + ".temp.mp3",
-                        ),
-                        id,
-                    }),
-                );
+                });
+            } else {
+                this.ytdlp
+                    .exec(args)
+                    .on("progress", (progress: Progress) => {
+                        this.win.webContents.send("progress", {
+                            filename,
+                            progress,
+                        });
+                    })
+                    .on("ytDlpEvent", (_, b: string) => {
+                        if (id === "" && b.includes("watch?v=")) {
+                            id = b.split("watch?v=")[1];
+                        }
+                    })
+                    .on("error", () => {
+                        resolve({
+                            outPath: path.join(
+                                destinationFolder,
+                                filename + ".temp.mp3",
+                            ),
+                            id,
+                        });
+                    })
+                    .on("close", () =>
+                        resolve({
+                            outPath: path.join(
+                                destinationFolder,
+                                filename + ".temp.mp3",
+                            ),
+                            id,
+                        }),
+                    );
+            }
         });
     }
 
@@ -373,7 +417,6 @@ export default class NodeFunctions {
         );
         return new Promise<string>((resolve, reject) => {
             let command = `${this.ffmpegPath} -i "${imgUrl}" "${outFile}"`;
-            console.log("Command", command);
 
             child_process.exec(command, (error) => {
                 if (error) return reject(error);

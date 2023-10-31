@@ -161,7 +161,7 @@
 
 <script lang="ts" setup>
 import type { PropType } from "vue";
-import { computed, onMounted, ref, toRaw } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { useBaseStore } from "../store/base";
 import { useLibraryStore } from "../store/library";
 import type { Item, ItemCollection } from "../scripts/types";
@@ -193,7 +193,6 @@ const canLike = computed(() => {
 });
 
 onMounted(() => {
-    console.log("ITEMMENU", toRaw(props.item));
     if (props.item.type === "track")
         platform
             .trackIsDownloaded(props.item as SpotifyApi.TrackObjectFull)

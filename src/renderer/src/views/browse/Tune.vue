@@ -223,7 +223,6 @@ async function generate() {
         return base.addSnack("Select some options before generating radio");
 
     radio.id = base.radioId();
-    console.log("GENERATED", radio);
 
     await router.push({
         path: "/radio",

@@ -24,7 +24,6 @@ async function init() {
     if (!result) return;
     labels.value = Object.keys(result);
     data.value = Object.values(result);
-    console.log(labels, data);
 }
 
 init();

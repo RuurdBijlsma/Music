@@ -1,16 +1,24 @@
-export interface YouTubeTrackInfo {
-    duration: number;
+export interface YouTubeTrack {
     description: string;
-    channel: string;
-    title: string;
-    thumbnail: string;
-    id: string;
     channelUrl: string;
     channelId: string;
     playlist: string;
     playlistId: string;
     viewCount: number;
     uploadDate: string;
+    id: string;
+    duration: number;
+    channel: string;
+    title: string;
+    thumbnails: { url: string; height: number; width: number }[];
+}
+
+export interface YouTubeSearchResult {
+    channelTitle: string;
+    id: string;
+    length: { simpleText: string };
+    thumbnail: { thumbnails: { url: string; width: number; height: number }[] };
+    title: string;
 }
 
 export interface SearchResult {
@@ -39,7 +47,7 @@ export interface ExtendedPlaylistTrack extends SpotifyApi.PlaylistTrackObject {
     id: string;
     title: string;
     added_at_reverse: number;
-    track: EditedTrack,
+    track: EditedTrack;
 }
 
 export type Item =

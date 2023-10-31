@@ -15,9 +15,11 @@ import { usePlayerStore } from "./player";
 import { useSpotifyApiStore } from "./spotify-api";
 import { useSpotifyAuthStore } from "./spotify-auth";
 import { randomUser } from "../scripts/imageSources";
+import { useSearchStore } from "./search";
 
 export const useLibraryStore = defineStore("library", () => {
     const platform = usePlatformStore();
+    const search = useSearchStore();
     const base = useBaseStore();
     const player = usePlayerStore();
     const spotify = useSpotifyApiStore();
@@ -506,12 +508,10 @@ export const useLibraryStore = defineStore("library", () => {
         base.sourceDialog.spotifyTrack = track;
 
         const { cacheKey, query } = platform.trackToNames(track);
-        console.log("Search", { query });
         let [options, selectedId] = await Promise.all([
-            platform.searchYouTube(query, 6),
+            search.searchYouTubeRaw(query, 10),
             db.get("nameToId", cacheKey),
         ]);
-        console.log("Result", { options, selectedId });
 
         base.sourceDialog.loading = false;
         base.sourceDialog.items = options;
@@ -634,11 +634,10 @@ export const useLibraryStore = defineStore("library", () => {
             },
         };
 
-        console.log("CHANGES", changes);
         editTrackObject(track, changes);
         await db.put("trackEdits", changes, track.id);
 
-        let libTrack = tracks.value.find((t) => t.id === track.id);
+        let libTrack = tracks.value.find((t) => t.id === track?.id);
         if (!libTrack) return;
         editTrackObject(libTrack.track, changes);
         await db.put("tracks", toRaw(libTrack));

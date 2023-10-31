@@ -24,18 +24,18 @@
                 />
                 <template v-else>
                     <div
-                        v-for="item in base.sourceDialog.items"
+                        v-for="(item, i) in base.sourceDialog.items"
                         class="yt-card mb-5"
                     >
                         <v-img
-                            :src="item.thumbnail"
+                            :src="getImg(item)"
                             class="image"
                             height="200"
                             max-width="355"
                             min-width="355"
                         >
                             <p class="duration">
-                                {{ base.msToReadable(item.duration * 1000) }}
+                                {{ item.length.simpleText }}
                             </p>
                             <p
                                 v-if="sourceSelectedId === item.id"
@@ -46,19 +46,15 @@
                         </v-img>
                         <div class="info-content">
                             <h3 class="title mb-1">{{ item.title }}</h3>
-                            <v-list-item-subtitle
-                                >{{ viewCountString(item.viewCount) }} •
-                                {{ item.uploadDate.toLocaleDateString() }}
-                            </v-list-item-subtitle>
                             <div class="channel mt-2">
                                 <v-avatar :color="randomColor(item.id)"
-                                    >{{ item.channel[0] }}
+                                    >{{ item.channelTitle[0] }}
                                 </v-avatar>
-                                <span class="ml-4">{{ item.channel }}</span>
+                                <span class="ml-4">{{
+                                    item.channelTitle
+                                }}</span>
                             </div>
-                            <p class="description mt-2">
-                                {{ item.description }}
-                            </p>
+                            <spacer></spacer>
                             <div class="actions mt-4">
                                 <v-btn
                                     v-if="sourceSelectedId !== item.id"
@@ -68,7 +64,8 @@
                                     activate
                                 </v-btn>
                                 <simple-yt-player
-                                    :track="search.ytResultToTrack(item)"
+                                    v-if="spotifyTracks[i]"
+                                    :track="spotifyTracks[i]"
                                 ></simple-yt-player>
                             </div>
                         </div>
@@ -92,25 +89,53 @@
 import { useBaseStore } from "../store/base";
 import { useTheme } from "vuetify";
 import { useSearchStore } from "../store/search";
-import { watch } from "vue";
+import { ref, watch } from "vue";
 import { storeToRefs } from "pinia";
 import SimpleYtPlayer from "./SimpleYtPlayer.vue";
 import { useLibraryStore } from "../store/library";
+import { YouTubeSearchResult } from "../scripts/types";
+import Spacer from "./Spacer.vue";
 
 const theme = useTheme();
 const search = useSearchStore();
 const base = useBaseStore();
 const library = useLibraryStore();
-const { sourceSelectedId } = storeToRefs(base);
+const { sourceSelectedId, sourceDialog } = storeToRefs(base);
 
 function activate(item: any) {
     sourceSelectedId.value = item.id;
     library.activateSource(item.id);
 }
 
+function getImg(item: YouTubeSearchResult) {
+    return item.thumbnail.thumbnails[item.thumbnail.thumbnails.length - 1].url;
+}
+
 watch(sourceSelectedId, () => {
     console.log("ssid", sourceSelectedId.value);
 });
+
+let lastSourceTrackId = "";
+const spotifyTracks = ref([] as SpotifyApi.TrackObjectFull[]);
+watch(
+    () => sourceDialog.value.items,
+    () => {
+        onTracksChange();
+    },
+);
+onTracksChange();
+
+function onTracksChange() {
+    if (
+        sourceDialog.value.spotifyTrack &&
+        sourceDialog.value.spotifyTrack?.id !== lastSourceTrackId
+    ) {
+        lastSourceTrackId = sourceDialog.value.spotifyTrack?.id;
+        spotifyTracks.value = sourceDialog.value.items.map(
+            search.ytSearchResultToTrack,
+        );
+    }
+}
 
 const randomColor = (id: string) => {
     let random = parseInt(id.substring(2, 6), 36) / 1679616;
@@ -135,22 +160,6 @@ const randomColor = (id: string) => {
             "%)"
         );
     }
-};
-
-const viewCountString = (viewCount: number) => {
-    if (viewCount > 1000000000) {
-        let followerBillions = Math.round(viewCount / 1000000000);
-        return (
-            followerBillions + "B view" + (followerBillions === 1 ? "" : "s")
-        );
-    }
-    if (viewCount > 1000000) {
-        let followerMillions = Math.round(viewCount / 1000000);
-        return (
-            followerMillions + "M view" + (followerMillions === 1 ? "" : "s")
-        );
-    }
-    return viewCount.toLocaleString() + " view" + (viewCount === 1 ? "" : "s");
 };
 </script>
 
@@ -223,6 +232,9 @@ const viewCountString = (viewCount: number) => {
 
 .info-content {
     width: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: 20px 5px;
 }
 
 .title {

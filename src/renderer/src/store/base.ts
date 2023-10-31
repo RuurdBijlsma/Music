@@ -2,7 +2,7 @@ import { defineStore } from "pinia";
 import { IDBPDatabase, IDBPObjectStore, openDB, StoreNames } from "idb";
 import { computed, ref } from "vue";
 import { useTheme } from "vuetify";
-import type { Item, ItemCollection } from "../scripts/types";
+import type { Item, ItemCollection, YouTubeSearchResult } from "../scripts/types";
 import { deltaE, hexToRgb } from "../scripts/utils";
 import { EventEmitter } from "events";
 import { randomNotFound } from "../scripts/imageSources";
@@ -123,7 +123,7 @@ export const useBaseStore = defineStore("base", () => {
 
     const sourceDialog = ref({
         show: false,
-        items: [] as any[],
+        items: [] as YouTubeSearchResult[],
         loading: false,
         tempTrackOverride: {
             ytId: "",

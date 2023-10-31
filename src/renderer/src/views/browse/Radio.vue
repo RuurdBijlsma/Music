@@ -27,7 +27,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, toRaw, watch } from "vue";
+import { computed, ref, watch } from "vue";
 import { useBaseStore } from "../../store/base";
 import { useRoute } from "vue-router";
 import { Item, ItemCollection } from "../../scripts/types";
@@ -77,7 +77,6 @@ async function refresh() {
     if (artistsIds.length > 0)
         spotify.getCachedArtists(artistsIds).then((r) => {
             artists.value = r;
-            console.log(toRaw(r));
         });
 }
 
@@ -86,7 +85,6 @@ const radioName = computed(() => {
     if (route.query.hasOwnProperty("seed_genres")) radioName = "Genre radio";
     if (route.query.hasOwnProperty("seed_tracks")) radioName = "Song radio";
     if (route.query.hasOwnProperty("seed_artists")) radioName = "Artist radio";
-    console.log(route.query, radioName);
     return radioName;
 });
 

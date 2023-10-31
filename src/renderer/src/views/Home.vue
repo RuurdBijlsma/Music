@@ -71,7 +71,7 @@
 
 <script lang="ts" setup>
 import { useLibraryStore } from "../store/library";
-import { computed, toRaw } from "vue";
+import { computed } from "vue";
 import HighlightCard from "../components/HighlightCard.vue";
 import ItemCard from "../components/ItemCard.vue";
 import HorizontalScroller from "../components/HorizontalScroller.vue";
@@ -90,10 +90,6 @@ const otherPlaylists = computed(
             1,
         ) as SpotifyApi.PlaylistObjectFull[],
 );
-
-setTimeout(() => {
-    console.log(toRaw(library.view.homePage));
-}, 500);
 </script>
 
 <style lang="less" scoped>

@@ -283,7 +283,6 @@ export const usePlayerStore = defineStore("player", () => {
         let listenCount = await db.get("statistics", "listenCount");
         if (listenCount === undefined) listenCount = 0;
         await db.put("statistics", ++listenCount, "listenCount");
-        console.log({ listenCount });
 
         if (currentTrack === null) return;
 
@@ -299,13 +298,11 @@ export const usePlayerStore = defineStore("player", () => {
         popularityHistory[today].popularitySum += currentTrack.popularity;
         popularityHistory[today].listenCount++;
         await db.put("statistics", popularityHistory, "popularityHistory");
-        console.log({ popularityHistory });
 
         let trackStats = await db.get("trackStats", currentTrack.id);
         if (!trackStats) trackStats = emptyTrackStats();
         trackStats.listenCount++;
         await db.put("trackStats", trackStats, currentTrack.id);
-        console.log({ trackStats });
     }
 
     async function collectSkipStat(
@@ -318,20 +315,17 @@ export const usePlayerStore = defineStore("player", () => {
         let skips = await db.get("statistics", "skips");
         if (skips === undefined) skips = 0;
         await db.put("statistics", ++skips, "skips");
-        console.log({ skips });
 
         let trackStats = await db.get("trackStats", track.id);
         if (!trackStats) trackStats = emptyTrackStats();
         trackStats.skips++;
         await db.put("trackStats", trackStats, track.id);
-        console.log({ trackStats });
 
         for (let artist of track.artists) {
             let artistStats = await db.get("artistStats", artist.id);
             if (!artistStats) artistStats = emptyArtistStats(artist.name);
             artistStats.skips++;
             await db.put("artistStats", artistStats, artist.id);
-            console.log({ artistStats });
         }
 
         let collectionStats = await db.get("collectionStats", collection.id);
@@ -339,7 +333,6 @@ export const usePlayerStore = defineStore("player", () => {
             collectionStats = emptyCollectionStats(collection.name);
         collectionStats.skips++;
         await db.put("collectionStats", collectionStats, collection.id);
-        console.log({ collectionStats });
     }
 
     async function collectMinuteStats() {
@@ -350,19 +343,16 @@ export const usePlayerStore = defineStore("player", () => {
         let listenMinutes = await db.get("statistics", "listenMinutes");
         if (listenMinutes === undefined) listenMinutes = 0;
         await db.put("statistics", ++listenMinutes, "listenMinutes");
-        console.log({ listenMinutes });
 
         let historyMinutes = await db.get("statistics", "historyMinutes");
         if (historyMinutes === undefined) historyMinutes = {};
         historyMinutes[today] = (historyMinutes[today] ?? 0) + 1;
         await db.put("statistics", historyMinutes, "historyMinutes");
-        console.log({ historyMinutes });
 
         let trackStats = await db.get("trackStats", track.value.id);
         if (!trackStats) trackStats = emptyTrackStats();
         trackStats.listenMinutes++;
         await db.put("trackStats", trackStats, track.value.id);
-        console.log({ trackStats });
 
         for (let artist of track.value.artists) {
             let artistStats = await db.get("artistStats", artist.id);
@@ -370,7 +360,6 @@ export const usePlayerStore = defineStore("player", () => {
             artistStats.history[today] = (artistStats.history[today] ?? 0) + 1;
             artistStats.listenMinutes++;
             await db.put("artistStats", artistStats, artist.id);
-            console.log({ artistStats });
         }
 
         if (collection.value !== null) {
@@ -386,7 +375,6 @@ export const usePlayerStore = defineStore("player", () => {
                 collectionStats,
                 collection.value.id,
             );
-            console.log({ collectionStats });
         }
     }
 

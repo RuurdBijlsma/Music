@@ -8,12 +8,12 @@ import { useRouter } from "vue-router";
 import type {
     ExtendedPlaylistTrack,
     ItemCollection,
-    SearchResult,
-    YouTubeTrackInfo,
+    SearchResult, YouTubeSearchResult, YouTubeTrack
 } from "../scripts/types";
 import { Ref, ref, watch } from "vue";
 import { usePlayerStore } from "./player";
-import { executeCached } from "../scripts/utils";
+import { executeCached, hmsToSeconds } from "../scripts/utils";
+import YouTubeSearchAPI from "youtube-search-api";
 
 export const useSearchStore = defineStore("search", () => {
     const platform = usePlatformStore();
@@ -135,7 +135,6 @@ export const useSearchStore = defineStore("search", () => {
         query = query.trim();
         addToRecentSearches(query);
 
-        console.log("Performing search for ", query);
         searchSpotify(query).then((res) => {
             result.value.spotify.loading = false;
             if (res.tracks) result.value.spotify.data.tracks = res.tracks.items;
@@ -147,12 +146,10 @@ export const useSearchStore = defineStore("search", () => {
                     .items as SpotifyApi.AlbumObjectFull[];
             if (res.artists)
                 result.value.spotify.data.artists = res.artists.items;
-            // console.log(toRaw(result.value.spotify));
         });
         searchYouTube(query).then((res) => {
             result.value.youtube.loading = false;
             result.value.youtube.tracks = res;
-            console.log(res);
         });
         searchLikedTracks(query).then((res) => {
             result.value.liked.loading = false;
@@ -171,8 +168,50 @@ export const useSearchStore = defineStore("search", () => {
         localStorage.recentSearch = JSON.stringify(recentSearches.value);
     }
 
+    function ytSearchResultToTrack(
+        ytSearchResult: YouTubeSearchResult,
+    ): SpotifyApi.TrackObjectFull {
+        return {
+            available_markets: [],
+            disc_number: 0,
+            explicit: false,
+            external_ids: {},
+            external_urls: { spotify: "" },
+            href: "",
+            is_playable: false,
+            preview_url: "",
+            track_number: 0,
+            uri: "",
+            artists: [
+                {
+                    name: ytSearchResult.channelTitle.replaceAll('"', ""),
+                    type: "artist",
+                    id: "yt-" + ytSearchResult.channelTitle,
+                    uri: "",
+                    href: ytSearchResult.channelTitle,
+                    external_urls: { spotify: "" },
+                },
+            ],
+            album: {
+                images: ytSearchResult.thumbnail.thumbnails.reverse(),
+                type: "album",
+                id: "yt-NA",
+                href: "",
+                album_type: "youtube",
+                external_urls: { spotify: "" },
+                name: "yt-NA",
+                uri: "",
+            },
+            type: "track",
+            name: ytSearchResult.title.replaceAll('"', ""),
+            id: `yt-${ytSearchResult.id}`,
+            duration_ms: hmsToSeconds(ytSearchResult.length.simpleText) * 1000,
+            popularity: 80,
+        };
+    }
+
     function ytResultToTrack(
-        ytResult: YouTubeTrackInfo,
+        ytResult: YouTubeTrack,
     ): SpotifyApi.TrackObjectFull {
         return {
             available_markets: [],
@@ -196,7 +235,7 @@ export const useSearchStore = defineStore("search", () => {
                 },
             ],
             album: {
-                images: [{ url: ytResult.thumbnail }],
+                images: ytResult.thumbnails,
                 type: "album",
                 id: ytResult.playlistId,
                 href: "",
@@ -243,9 +282,30 @@ export const useSearchStore = defineStore("search", () => {
         return result;
     }
 
-    async function searchYouTube(query: string) {
-        let rawResult = await platform.searchYouTube(query, 6);
-        return rawResult.map(ytResultToTrack);
+    async function searchYouTubeRaw(query: string, limit = 10) {
+        return await executeCached<YouTubeSearchResult[]>(
+            db,
+            async () => {
+                return (
+                    await YouTubeSearchAPI.GetListByKeyword(
+                        query,
+                        false,
+                        limit,
+                        {
+                            type: "video",
+                        },
+                    )
+                ).items.filter((i) => i.type === "video");
+            },
+            "ytsearch" + query + limit,
+            1,
+            // 1000 * 60 * 60 * 24 * 7,
+        );
+    }
+
+    async function searchYouTube(query: string, limit = 10) {
+        let results = await searchYouTubeRaw(query, limit);
+        return results.map(ytSearchResultToTrack);
     }
 
     async function ytIdToTrack(id: string) {
@@ -281,5 +341,7 @@ export const useSearchStore = defineStore("search", () => {
         cachedSearch,
         suggestionResults,
         clearSuggestions,
+        ytSearchResultToTrack,
+        searchYouTubeRaw,
     };
 });

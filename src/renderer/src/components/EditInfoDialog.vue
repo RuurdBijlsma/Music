@@ -118,7 +118,7 @@
 <script lang="ts" setup>
 import { useBaseStore } from "../store/base";
 import { useLibraryStore } from "../store/library";
-import { computed, toRaw, watch } from "vue";
+import { computed, watch } from "vue";
 import SimplePlayer from "./SimplePlayer.vue";
 import Spacer from "./Spacer.vue";
 
@@ -132,7 +132,6 @@ watch(track, () => {
     editDialog.value.durationRange[1] = track.value.duration_ms / 1000;
     editDialog.value.title = track.value.name;
     editDialog.value.artists = track.value.artists.map((a) => a.name);
-    console.log(toRaw(editDialog.value));
 });
 
 async function applyChanges() {
