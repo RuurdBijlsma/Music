@@ -37,7 +37,7 @@ export const usePlatformStore = defineStore("platform", () => {
     });
     window.events.on("play", () => player.play());
     window.events.on("pause", () => player.pause());
-    window.events.on("skip", (_, n) => player.skip(n));
+    window.events.on("skip", n => player.skip(n));
 
     window
         .matchMedia("(prefers-color-scheme: dark)")
