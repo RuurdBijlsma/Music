@@ -82,31 +82,16 @@
 
 <script lang="ts" setup>
 // todo
-// make use of starttime/endtime prop
-// edit information about yt track (change title, artist)
-// edit information about any track (start/end time, more?)
+// bug: song plays in edit dialog and can't be stopped???
+// track edit updates arent updated in liked list without refresh (shown duration in list isnt updated, title and artist isnt either)
 // maak knop: export database naar file of cloud?
-// when visit page (ex. discover weekly) check if all songs are cached and update the offline cloud icon
 // in die database kan dan: track customizations (start/end time, etc), spotify api keys, yt liked tracks, spotify tokens, trackbars, alles in idb basically, localStorage ook
 // possibly replace color thief with something without vulnerabilities
 // playlists cachen
 // simple player en simple yt player samenvoegen
-// track edit updates arent updated without refresh
 // after editing track name / artists, it won't remember the track is downloaded already
-
-// -------------------------------------------------------------------------
-// alleen edit track in menu laten zien als de track in liked zit
-// edit track info:
-// track durations zijn lastig
-// zodra een track geload wordt in een src, moet de duration opgeslagen worden in de track edits database
-// de track edits database heeft dus
-// - title
-// - artists
-// - start time
-// - end time
-// - duration from source file
-// -------------------------------------------------------------------------
-
+// show listen stats
+// generate a spotify wrapped / ruurd music wrapped
 // -----------------------------------------------------------
 // listen stats
 // - per song listen count
@@ -119,7 +104,6 @@
 //      - Top songs in jaar
 //      - Meest geskipte liedjes, skip percentage en absoluut nummer
 //      - Meest geskipte artiesten
-// - Download's tellen in megabytes
 // - skip rate voor alle liedjes laten zien
 // - track popularity running average grafiek laten zien
 
