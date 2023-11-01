@@ -52,6 +52,7 @@ export const useLibraryStore = defineStore("library", () => {
     const likedTracksLoaded = ref(0);
     const viewedPlaylist = ref(null as SpotifyApi.PlaylistObjectFull | null);
     const viewedPlaylistRefreshRequired = ref(false);
+    let likedDbChecked=false;
 
     const editDialog = ref({
         show: false,
@@ -115,7 +116,10 @@ export const useLibraryStore = defineStore("library", () => {
 
         await refreshUserInfo();
         let doneCount = 0;
+
         loadDbTracks().then((tracksCached) => {
+            likedDbChecked=true;
+            base.events.emit('likedDbCheck');
             if (!tracksCached) {
                 loadLikedTracks().then(() => {});
             }
@@ -211,7 +215,7 @@ export const useLibraryStore = defineStore("library", () => {
         let type = "track";
         if (isRefreshing.value["track"]) {
             await base.waitFor("refreshed" + type);
-            return;
+            return true;
         }
         isRefreshing.value["track"] = true;
         let likedTracks = await db.getAllFromIndex("tracks", "newToOld");
@@ -673,5 +677,6 @@ export const useLibraryStore = defineStore("library", () => {
         editTrack,
         updateTrackDuration,
         applyEditChanges,
+        likedDbChecked
     };
 });

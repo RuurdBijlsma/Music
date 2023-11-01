@@ -4,7 +4,7 @@ import { computed, ref, toRaw, watch } from "vue";
 import { baseDb, useBaseStore } from "./base";
 import type { IDBPDatabase } from "idb";
 import { useTheme } from "vuetify";
-import type { ItemCollection } from "../scripts/types";
+import type { EditedTrack, ItemCollection } from "../scripts/types";
 import { shuffleArray } from "../scripts/utils";
 import { useLibraryStore } from "./library";
 import { randomNotFound } from "../scripts/imageSources";
@@ -37,9 +37,16 @@ export const usePlayerStore = defineStore("player", () => {
         db = r;
         let lastPlaying = await db.get("cache", "nowPlaying");
         if (lastPlaying !== undefined) {
+            if (                lastPlaying.collection.id === "liked"            ) {
+                if(!library.likedDbChecked)
+                    await base.waitFor('likedDbCheck');
+                lastPlaying.collection.tracks = library.tracks.map(
+                    (t) => t.track,
+                );
+            }
             let collection: ItemCollection = lastPlaying.collection;
-            let track: SpotifyApi.TrackObjectFull = lastPlaying.track;
-            load(collection, track, false).then();
+            let t = track.value ?? collection.tracks[0];
+            if (t) load(collection, t, false).then();
         }
     });
 
@@ -57,9 +64,10 @@ export const usePlayerStore = defineStore("player", () => {
     const track = ref(
         (localStorage.getItem("trackInMemory") === null
             ? null
-            : JSON.parse(
-                  localStorage.trackInMemory,
-              )) as null | SpotifyApi.TrackObjectFull,
+            : JSON.parse(localStorage.trackInMemory)) as
+            | null
+            | SpotifyApi.TrackObjectFull
+            | EditedTrack,
     );
     const trackId = ref("");
     const repeat = ref(
@@ -117,7 +125,7 @@ export const usePlayerStore = defineStore("player", () => {
 
     async function load(
         _collection: ItemCollection,
-        _track: SpotifyApi.TrackObjectFull,
+        _track: EditedTrack | SpotifyApi.TrackObjectFull,
         autoplay = true,
     ) {
         const _trackId = _track.id;
@@ -136,7 +144,7 @@ export const usePlayerStore = defineStore("player", () => {
         playerElement.autoplay = autoplay;
 
         duration.value = _track.duration_ms / 1000;
-        currentTime.value = 1;
+        currentTime.value = 0;
         loading.value = true;
         loadProgress.value = NaN;
         volumeNormalizer.value = 0.5;
@@ -200,38 +208,65 @@ export const usePlayerStore = defineStore("player", () => {
         platform.getVolumeStats(_track).then(({ mean }) => {
             // volume is normalized to where a track with max volume of >= 38000 gets normalizer 0.3
             // a track with max volume of <= 15000 gets normalizer 1 (so full volume)
-            const maxVolumeToNormalizer = (x: number) =>
+            const volumeToNormalizer = (x: number) =>
                 -0.06363636364 * (x + 7) + 0.3;
             volumeNormalizer.value = Math.max(
-                Math.min(1, maxVolumeToNormalizer(mean)),
+                Math.min(1, volumeToNormalizer(mean)),
                 0.3,
             );
         });
-        setTimeout(() => {
+        setTimeout(async () => {
             if (
                 _collection.id === collection.value?.id &&
                 track.value &&
                 _trackId === trackId.value
-            )
-                db.put(
-                    "cache",
-                    {
-                        collection: _collection,
-                        track: toRaw(_track),
-                    },
-                    "nowPlaying",
-                ).then(() => {
-                    localStorage.hasTrackInMemory = "true";
-                });
-            localStorage.trackInMemory = JSON.stringify(toRaw(_track));
+            ) {
+                let storeCollection: any = _collection;
+                if (_collection.id === "liked") {
+                    storeCollection = {
+                        ..._collection,
+                    };
+                    delete storeCollection.tracks;
+                }
+                await db
+                    .put(
+                        "cache",
+                        {
+                            collection: storeCollection,
+                        },
+                        "nowPlaying",
+                    )
+                    .then(() => {
+                        localStorage.hasTrackInMemory = "true";
+                    });
+            }
+            const delOp = (obj: any, p: string) => delete obj[p];
+            delOp(_track, "available_markets");
+            delOp(_track, "external_ids");
+            delOp(_track, "external_urls");
+            delOp(_track, "href");
+            delOp(_track, "preview_url");
+            delOp(_track.album, "available_markets");
+            delOp(_track.album, "external_urls");
+            delOp(_track.album, "href");
+            for (let artist of _track.artists) {
+                delOp(artist, "external_urls");
+                delOp(artist, "href");
+            }
+            localStorage.trackInMemory = JSON.stringify(_track);
         }, 100);
         // Check if user hasn't changed track while it was loading
         if (
             _collection.id === collection.value.id &&
             track.value &&
             _trackId === trackId.value
-        )
+        ) {
             playerElement.src = outPath;
+
+            if ("startTime" in _track && _track.startTime !== undefined) {
+                playerElement.currentTime = _track.startTime;
+            }
+        }
 
         platform.setPlatformPlaying(autoplay);
         await initTrackbars(outPath, _trackId);
@@ -466,8 +501,17 @@ export const usePlayerStore = defineStore("player", () => {
         element.oncanplay = () => {
             loading.value = false;
         };
-        element.ontimeupdate = () => {
+        element.ontimeupdate = async () => {
             currentTime.value = element.currentTime;
+            if (
+                track.value !== null &&
+                "endTime" in track.value &&
+                track.value.endTime !== undefined &&
+                element.currentTime >= track.value.endTime
+            ) {
+                element.src = "";
+                await skip(1);
+            }
         };
         element.onended = async () => {
             element.src = "";
