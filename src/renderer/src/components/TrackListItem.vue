@@ -29,7 +29,7 @@
         </div>
         <spacer />
         <div class="track-duration ml-2">
-            {{ base.msToReadable(track.duration_ms) }}
+            {{ base.msToReadable(trackDuration * 1000) }}
         </div>
         <v-menu>
             <template v-slot:activator="{ props }">
@@ -49,16 +49,17 @@
 
 <script lang="ts" setup>
 import type { PropType } from "vue";
+import { computed } from "vue";
 import { useBaseStore } from "../store/base";
 import { usePlayerStore } from "../store/player";
 import ArtistsSpan from "./ArtistsSpan.vue";
 import ItemMenu from "./ItemMenu.vue";
-import type { ItemCollection } from "../scripts/types";
+import type { EditedTrack, ItemCollection } from "../scripts/types";
 import Spacer from "./Spacer.vue";
 
 const props = defineProps({
     track: {
-        type: Object as PropType<SpotifyApi.TrackObjectFull>,
+        type: Object as PropType<EditedTrack>,
         required: true,
     },
     index: {
@@ -76,6 +77,11 @@ const props = defineProps({
 });
 const base = useBaseStore();
 const player = usePlayerStore();
+const trackDuration = computed(
+    () =>
+        (props.track.endTime ?? props.track.duration_ms / 1000) -
+        (props.track.startTime ?? 0),
+);
 
 function playItem() {
     if (props.collection !== null) player.load(props.collection, props.track);

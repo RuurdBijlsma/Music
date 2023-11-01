@@ -16,6 +16,8 @@ interface TrackBars {
     binPos: number[];
     binNeg: number[];
     maxVolume: number;
+    startTime: number;
+    endTime: number;
 }
 
 interface MetaTrackBars {
@@ -37,9 +39,8 @@ export const usePlayerStore = defineStore("player", () => {
         db = r;
         let lastPlaying = await db.get("cache", "nowPlaying");
         if (lastPlaying !== undefined) {
-            if (                lastPlaying.collection.id === "liked"            ) {
-                if(!library.likedDbChecked)
-                    await base.waitFor('likedDbCheck');
+            if (lastPlaying.collection.id === "liked") {
+                if (!library.likedDbChecked) await base.waitFor("likedDbCheck");
                 lastPlaying.collection.tracks = library.tracks.map(
                     (t) => t.track,
                 );
@@ -64,10 +65,7 @@ export const usePlayerStore = defineStore("player", () => {
     const track = ref(
         (localStorage.getItem("trackInMemory") === null
             ? null
-            : JSON.parse(localStorage.trackInMemory)) as
-            | null
-            | SpotifyApi.TrackObjectFull
-            | EditedTrack,
+            : JSON.parse(localStorage.trackInMemory)) as null | EditedTrack,
     );
     const trackId = ref("");
     const repeat = ref(
@@ -109,7 +107,7 @@ export const usePlayerStore = defineStore("player", () => {
 
     const collection = ref(null as ItemCollection | null);
     const tracks = computed(
-        () => collection.value?.tracks ?? ([] as SpotifyApi.TrackObjectFull[]),
+        () => collection.value?.tracks ?? ([] as EditedTrack[]),
     );
     const shuffledTracks = computed(() => shuffleArray(tracks.value));
     const queue = computed(() =>
@@ -125,7 +123,7 @@ export const usePlayerStore = defineStore("player", () => {
 
     async function load(
         _collection: ItemCollection,
-        _track: EditedTrack | SpotifyApi.TrackObjectFull,
+        _track: EditedTrack,
         autoplay = true,
     ) {
         const _trackId = _track.id;
@@ -143,7 +141,9 @@ export const usePlayerStore = defineStore("player", () => {
 
         playerElement.autoplay = autoplay;
 
-        duration.value = _track.duration_ms / 1000;
+        duration.value =
+            (_track.endTime ?? _track.duration_ms / 1000) -
+            (_track.startTime ?? 0);
         currentTime.value = 0;
         loading.value = true;
         loadProgress.value = NaN;
@@ -172,7 +172,7 @@ export const usePlayerStore = defineStore("player", () => {
         trackId.value = _trackId;
         setMetadata(_track);
 
-        dbTrackBarsPromise = showTrackBars(_track);
+        dbTrackBarsPromise = getDbTrackBars(_track);
 
         let onProgress: (p: number) => void;
         onProgress = (percent) => {
@@ -263,13 +263,13 @@ export const usePlayerStore = defineStore("player", () => {
         ) {
             playerElement.src = outPath;
 
-            if ("startTime" in _track && _track.startTime !== undefined) {
+            if (_track.startTime !== undefined) {
                 playerElement.currentTime = _track.startTime;
             }
         }
 
         platform.setPlatformPlaying(autoplay);
-        await initTrackbars(outPath, _trackId);
+        await initTrackbars(outPath, _track);
     }
 
     let statsInterval = 0;
@@ -413,27 +413,6 @@ export const usePlayerStore = defineStore("player", () => {
         }
     }
 
-    async function initTrackbars(outPath: string, _trackId: string) {
-        canvas = document.querySelector(".progress-canvas");
-        if (dbTrackBarsPromise === null) return;
-        const { trackBars, canvasWidth, binWidth, barSpacing, barCount } =
-            await dbTrackBarsPromise;
-        if (canvas !== null) {
-            canvas.width = canvasWidth;
-            canvas.height = 100;
-            context = canvas.getContext("2d");
-        }
-        // only calculate track bars if they weren't retrieved from db cache
-        if (trackBars === undefined)
-            calculateTrackBars(
-                outPath,
-                _trackId,
-                barCount,
-                binWidth,
-                barSpacing,
-            ).then();
-    }
-
     async function deleteTrack(deleteTrack: SpotifyApi.TrackObjectFull) {
         if (deleteTrack === null) return;
         await db.delete("trackBars", deleteTrack.id);
@@ -460,7 +439,7 @@ export const usePlayerStore = defineStore("player", () => {
         base.themeColorLight = "#000000";
         playerElement.src = "";
         duration.value = 1;
-        currentTime.value = 1;
+        currentTime.value = 0;
         loading.value = false;
         loadProgress.value = NaN;
         collection.value = null;
@@ -478,6 +457,8 @@ export const usePlayerStore = defineStore("player", () => {
             binPos: new Array<number>(barCount).fill(0.02),
             binNeg: new Array<number>(barCount).fill(-0.02),
             maxVolume: 1,
+            startTime: 0,
+            endTime: 1,
         };
         platform.stopPlatformPlaying();
     }
@@ -492,26 +473,37 @@ export const usePlayerStore = defineStore("player", () => {
             platform.setPlatformPlaying(false);
         };
         element.ondurationchange = () => {
-            duration.value = element.duration;
-            if (track.value !== null)
+            let dur = element.duration;
+            if (track.value !== null) {
                 library
                     .updateTrackDuration(track.value, element.duration * 1000)
                     .then();
+
+                if (
+                    track.value.startTime !== undefined &&
+                    track.value.endTime !== undefined
+                ) {
+                    dur = track.value.endTime - track.value.startTime;
+                }
+            }
+            duration.value = dur;
         };
         element.oncanplay = () => {
             loading.value = false;
         };
         element.ontimeupdate = async () => {
-            currentTime.value = element.currentTime;
-            if (
-                track.value !== null &&
-                "endTime" in track.value &&
-                track.value.endTime !== undefined &&
-                element.currentTime >= track.value.endTime
-            ) {
-                element.src = "";
-                await skip(1);
+            let startTime = 0;
+            if (track.value !== null && "endTime" in track.value) {
+                if (
+                    track.value.endTime !== undefined &&
+                    element.currentTime >= track.value.endTime
+                ) {
+                    element.src = "";
+                    await skip(1);
+                }
+                startTime = track.value.startTime ?? 0;
             }
+            currentTime.value = element.currentTime - startTime;
         };
         element.onended = async () => {
             element.src = "";
@@ -531,19 +523,34 @@ export const usePlayerStore = defineStore("player", () => {
         return element;
     }
 
-    async function showTrackBars(
-        _track: SpotifyApi.TrackObjectFull,
-    ): Promise<MetaTrackBars> {
+    function getTrackTimes(_track: EditedTrack) {
+        let trackStartTime = _track.startTime ?? 0;
+        let trackEndTime = _track.endTime ?? _track.duration_ms / 1000;
+        return { trackStartTime, trackEndTime };
+    }
+
+    async function getDbTrackBars(_track: EditedTrack): Promise<MetaTrackBars> {
         // get track bars from db or create empty structure
         const canvasWidth = 300;
         const binWidth = 2;
         const barSpacing = 1;
         const barCount = canvasWidth / (binWidth + barSpacing);
         await baseDb;
-        let trackBars = (await db.get("trackBars", _track.id)) as TrackBars;
-        if (trackBars !== undefined && _track.id === trackId.value) {
+        let trackBars = (await db.get("trackBars", _track.id)) as
+            | TrackBars
+            | undefined;
+        let { trackStartTime, trackEndTime } = getTrackTimes(_track);
+        if (
+            trackBars !== undefined &&
+            _track.id === trackId.value &&
+            trackBars.startTime === trackStartTime &&
+            trackBars.endTime === trackEndTime
+        ) {
+            console.log("Got trackbars from db");
             canvasBars = trackBars;
         } else if (_track.id === trackId.value) {
+            trackBars = undefined;
+            console.log("NO trackbars from db");
             canvasBars = {
                 binSize: 1,
                 binWidth,
@@ -551,6 +558,8 @@ export const usePlayerStore = defineStore("player", () => {
                 binPos: new Array<number>(barCount).fill(0.02),
                 binNeg: new Array<number>(barCount).fill(-0.02),
                 maxVolume: 1,
+                startTime: trackStartTime,
+                endTime: trackEndTime,
             };
         }
         return {
@@ -562,9 +571,31 @@ export const usePlayerStore = defineStore("player", () => {
         } as MetaTrackBars;
     }
 
+    async function initTrackbars(outPath: string, _track: EditedTrack) {
+        canvas = document.querySelector(".progress-canvas");
+        if (dbTrackBarsPromise === null) return;
+        const { trackBars, canvasWidth, binWidth, barSpacing, barCount } =
+            await dbTrackBarsPromise;
+        if (canvas !== null) {
+            canvas.width = canvasWidth;
+            canvas.height = 100;
+            context = canvas.getContext("2d");
+        }
+        console.log("in init, trackbars = ", trackBars);
+        // only calculate track bars if they weren't retrieved from db cache
+        if (trackBars === undefined)
+            calculateTrackBars(
+                outPath,
+                _track,
+                barCount,
+                binWidth,
+                barSpacing,
+            ).then();
+    }
+
     async function calculateTrackBars(
         outPath: string,
-        _trackId: string,
+        _track: EditedTrack,
         barCount: number,
         binWidth: number,
         barSpacing: number,
@@ -575,6 +606,14 @@ export const usePlayerStore = defineStore("player", () => {
             await response.arrayBuffer(),
         );
         let channelData = decoded.getChannelData(0);
+        let { trackStartTime, trackEndTime } = getTrackTimes(_track);
+        if (_track.startTime !== undefined && _track.endTime !== undefined) {
+            let duration = _track.duration_ms / 1000;
+            channelData = channelData.slice(
+                Math.floor((trackStartTime / duration) * channelData.length),
+                Math.ceil(trackEndTime / duration) * channelData.length,
+            );
+        }
 
         let binSize = (channelData.length / barCount) | 0;
         let binPos = 0;
@@ -587,6 +626,8 @@ export const usePlayerStore = defineStore("player", () => {
             binPos: [] as number[],
             binNeg: [] as number[],
             maxVolume: 0,
+            startTime: trackStartTime,
+            endTime: trackEndTime,
         } as TrackBars;
         for (let i = 0; i < channelData.length; i++) {
             if (channelData[i] > 0) binPos += channelData[i];
@@ -600,18 +641,15 @@ export const usePlayerStore = defineStore("player", () => {
                 binNeg = 0;
             }
         }
-        if (track.value !== null && trackId.value === _trackId)
+        if (track.value !== null && trackId.value === _track.id)
             canvasBars = bars;
-        await db.put("trackBars", bars, _trackId).then();
+        await db.put("trackBars", bars, _track.id).then();
         return bars;
     }
 
     function renderProgress() {
         requestAnimationFrame(renderProgress);
         if (context === null || canvasBars === null || canvas === null) return;
-        let duration = 1,
-            currentTime = playerElement.currentTime;
-        if (playerElement.duration) duration = playerElement.duration;
 
         let mouseHoverBar = canvasBars.binPos.length * mouseHoverPercent.value;
         const defaultBarFill = theme.current.value.dark
@@ -624,7 +662,7 @@ export const usePlayerStore = defineStore("player", () => {
             mapping(normalizeVolume.value ? volumeNormalizer.value : 0.3) * 0.7;
 
         for (let i = 0; i < canvasBars.binPos.length; i++) {
-            let timePercent = currentTime / duration;
+            let timePercent = currentTime.value / duration.value;
             let isActiveBar =
                 ((canvasBars.binPos.length * timePercent) | 0) === i;
             let barPartFill = (canvasBars.binPos.length * timePercent) % 1;
@@ -636,7 +674,7 @@ export const usePlayerStore = defineStore("player", () => {
             let x = ((binWidth + barSpacing) * i) | 0;
 
             context.fillStyle = defaultBarFill;
-            if (x / canvas.width < currentTime / duration)
+            if (x / canvas.width < currentTime.value / duration.value)
                 context.fillStyle = base.themeColor;
 
             let h = negHeight + posHeight;
@@ -787,7 +825,8 @@ export const usePlayerStore = defineStore("player", () => {
     }
 
     function seekTo(time: number) {
-        playerElement.currentTime = time;
+        let startTime = track.value?.startTime ?? 0;
+        playerElement.currentTime = Math.max(startTime, startTime + time);
     }
 
     function toggleShuffle() {

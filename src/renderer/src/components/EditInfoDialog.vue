@@ -28,24 +28,24 @@
                         :single-line="true"
                         density="compact"
                     >
-<!--                        <template v-slot:append>-->
-<!--                            <v-btn-->
-<!--                                size="40"-->
-<!--                                variant="tonal"-->
-<!--                                :color="base.themeColor"-->
-<!--                                icon="mdi-delete"-->
-<!--                                @click="editDialog.artists.splice(i, 1)"-->
-<!--                            ></v-btn>-->
-<!--                        </template>-->
+                        <!--                        <template v-slot:append>-->
+                        <!--                            <v-btn-->
+                        <!--                                size="40"-->
+                        <!--                                variant="tonal"-->
+                        <!--                                :color="base.themeColor"-->
+                        <!--                                icon="mdi-delete"-->
+                        <!--                                @click="editDialog.artists.splice(i, 1)"-->
+                        <!--                            ></v-btn>-->
+                        <!--                        </template>-->
                     </v-text-field>
-<!--                    <v-btn-->
-<!--                        prepend-icon="mdi-playlist-plus"-->
-<!--                        class="mt-3"-->
-<!--                        @click="editDialog.artists.push('')"-->
-<!--                        variant="tonal"-->
-<!--                        :color="base.themeColor"-->
-<!--                        >Add artist-->
-<!--                    </v-btn>-->
+                    <!--                    <v-btn-->
+                    <!--                        prepend-icon="mdi-playlist-plus"-->
+                    <!--                        class="mt-3"-->
+                    <!--                        @click="editDialog.artists.push('')"-->
+                    <!--                        variant="tonal"-->
+                    <!--                        :color="base.themeColor"-->
+                    <!--                        >Add artist-->
+                    <!--                    </v-btn>-->
                 </div>
 
                 <v-list-subheader class="mb-2 mt-4">Duration</v-list-subheader>
@@ -86,6 +86,15 @@
                         ></v-text-field>
                     </template>
                 </v-range-slider>
+                <v-btn
+                    :color="base.themeColor"
+                    variant="tonal"
+                    @click="revert"
+                    prepend-icon="mdi-restore"
+                    v-if="changesObject !== null"
+                >
+                    Revert to original values
+                </v-btn>
             </v-card-text>
             <v-divider class="mb-3"></v-divider>
             <v-card-item>
@@ -116,23 +125,39 @@
 </template>
 
 <script lang="ts" setup>
-import { useBaseStore } from "../store/base";
+import { baseDb, useBaseStore } from "../store/base";
 import { useLibraryStore } from "../store/library";
-import { computed, watch } from "vue";
+import { computed, ref, watch } from "vue";
 import SimplePlayer from "./SimplePlayer.vue";
 import Spacer from "./Spacer.vue";
+import { TrackChanges } from "../scripts/types";
 
 const base = useBaseStore();
 const library = useLibraryStore();
 const editDialog = computed(() => library.editDialog);
 const track = computed(() => library.editDialog.track);
-watch(track, () => {
+const changesObject = ref(null as TrackChanges | null);
+watch(track, async () => {
     if (track.value === null) return;
-    editDialog.value.durationRange[0] = 0;
-    editDialog.value.durationRange[1] = track.value.duration_ms / 1000;
     editDialog.value.title = track.value.name;
     editDialog.value.artists = track.value.artists.map((a) => a.name);
+
+    let db = await baseDb;
+    changesObject.value = (await db.get("trackEdits", track.value.id)) ?? null;
 });
+
+function revert() {
+    if (changesObject.value === null) return;
+    editDialog.value.durationRange = [
+        0,
+        Math.max(
+            changesObject.value.original.endTime,
+            (track.value?.duration_ms ?? 0) / 1000,
+        ),
+    ];
+    editDialog.value.artists = changesObject.value.original.artists;
+    editDialog.value.title = changesObject.value.original.title;
+}
 
 async function applyChanges() {
     if (await library.applyEditChanges()) {

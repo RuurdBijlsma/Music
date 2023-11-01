@@ -52,11 +52,11 @@ export const useLibraryStore = defineStore("library", () => {
     const likedTracksLoaded = ref(0);
     const viewedPlaylist = ref(null as SpotifyApi.PlaylistObjectFull | null);
     const viewedPlaylistRefreshRequired = ref(false);
-    let likedDbChecked=false;
+    let likedDbChecked = false;
 
     const editDialog = ref({
         show: false,
-        track: null as null | SpotifyApi.TrackObjectFull,
+        track: null as null | EditedTrack,
         title: "",
         artists: [""],
         durationRange: [0, 1],
@@ -118,8 +118,8 @@ export const useLibraryStore = defineStore("library", () => {
         let doneCount = 0;
 
         loadDbTracks().then((tracksCached) => {
-            likedDbChecked=true;
-            base.events.emit('likedDbCheck');
+            likedDbChecked = true;
+            base.events.emit("likedDbCheck");
             if (!tracksCached) {
                 loadLikedTracks().then(() => {});
             }
@@ -570,9 +570,15 @@ export const useLibraryStore = defineStore("library", () => {
         viewedPlaylist.value.tracks.items.splice(trackIndex, 1);
     }
 
-    function editTrack(track: SpotifyApi.TrackObjectFull) {
+    function editTrack(track: EditedTrack) {
         editDialog.value.track = track;
+        console.log(toRaw(editDialog.value.durationRange))
         editDialog.value.show = true;
+        console.log(editDialog.value);
+        editDialog.value.durationRange = [
+            track.startTime ?? 0,
+            track.endTime ?? track.duration_ms / 1000,
+        ];
     }
 
     async function updateTrackDuration(
@@ -612,7 +618,6 @@ export const useLibraryStore = defineStore("library", () => {
             track.artists.forEach(
                 (_, i) => (track.artists[i].name = changes.artists[i]),
             );
-        track.duration_ms = (changes.endTime - changes.startTime) * 1000;
         track.startTime = changes.startTime;
         track.endTime = changes.endTime;
     }
@@ -677,6 +682,6 @@ export const useLibraryStore = defineStore("library", () => {
         editTrack,
         updateTrackDuration,
         applyEditChanges,
-        likedDbChecked
+        likedDbChecked,
     };
 });

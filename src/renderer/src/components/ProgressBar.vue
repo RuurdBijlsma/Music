@@ -33,7 +33,8 @@ const mouseEnter = () => (mouseHover.value = true);
 const mouseLeave = () => (mouseHover.value = false);
 
 onMounted(() => {
-    player.initTrackbars(player.trackId, player.playerElement.src);
+    if (player.track !== null)
+        player.initTrackbars(player.playerElement.src, player.track);
 
     canvas = document.querySelector(".progress-canvas");
     if (canvas !== null) {
