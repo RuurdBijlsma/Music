@@ -23,6 +23,7 @@
             rounded
         ></v-progress-linear>
         <track-list-virtual
+            :key="library.likedListKey"
             v-if="collection !== null"
             :collection="collection"
             :height="(base.windowHeight - subtractFromHeight).toString()"

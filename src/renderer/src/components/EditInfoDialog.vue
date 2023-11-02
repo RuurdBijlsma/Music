@@ -28,24 +28,7 @@
                         :single-line="true"
                         density="compact"
                     >
-                        <!--                        <template v-slot:append>-->
-                        <!--                            <v-btn-->
-                        <!--                                size="40"-->
-                        <!--                                variant="tonal"-->
-                        <!--                                :color="base.themeColor"-->
-                        <!--                                icon="mdi-delete"-->
-                        <!--                                @click="editDialog.artists.splice(i, 1)"-->
-                        <!--                            ></v-btn>-->
-                        <!--                        </template>-->
                     </v-text-field>
-                    <!--                    <v-btn-->
-                    <!--                        prepend-icon="mdi-playlist-plus"-->
-                    <!--                        class="mt-3"-->
-                    <!--                        @click="editDialog.artists.push('')"-->
-                    <!--                        variant="tonal"-->
-                    <!--                        :color="base.themeColor"-->
-                    <!--                        >Add artist-->
-                    <!--                    </v-btn>-->
                 </div>
 
                 <v-list-subheader class="mb-2 mt-4">Duration</v-list-subheader>

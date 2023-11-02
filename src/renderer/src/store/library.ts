@@ -53,6 +53,7 @@ export const useLibraryStore = defineStore("library", () => {
     const viewedPlaylist = ref(null as SpotifyApi.PlaylistObjectFull | null);
     const viewedPlaylistRefreshRequired = ref(false);
     let likedDbChecked = false;
+    const likedListKey = ref(0);
 
     const editDialog = ref({
         show: false,
@@ -571,8 +572,9 @@ export const useLibraryStore = defineStore("library", () => {
     }
 
     function editTrack(track: EditedTrack) {
+        player.pause().then();
         editDialog.value.track = track;
-        console.log(toRaw(editDialog.value.durationRange))
+        console.log(toRaw(editDialog.value.durationRange));
         editDialog.value.show = true;
         console.log(editDialog.value);
         editDialog.value.durationRange = [
@@ -650,6 +652,13 @@ export const useLibraryStore = defineStore("library", () => {
         if (!libTrack) return;
         editTrackObject(libTrack.track, changes);
         await db.put("tracks", toRaw(libTrack));
+        likedListKey.value++;
+        if (
+            player.track?.id === track.id &&
+            player.collection?.id === "liked"
+        ) {
+            player.load(player.collection, track, false).then();
+        }
         return true;
     }
 
@@ -683,5 +692,6 @@ export const useLibraryStore = defineStore("library", () => {
         updateTrackDuration,
         applyEditChanges,
         likedDbChecked,
+        likedListKey,
     };
 });

@@ -82,8 +82,6 @@
 
 <script lang="ts" setup>
 // todo
-// bug: song plays in edit dialog and can't be stopped???
-// track edit updates arent updated in liked list without refresh (shown duration in list isnt updated, title and artist isnt either)
 // maak knop: export database naar file of cloud?
 // in die database kan dan: track customizations (start/end time, etc), spotify api keys, yt liked tracks, spotify tokens, trackbars, alles in idb basically, localStorage ook
 // possibly replace color thief with something without vulnerabilities

@@ -29,7 +29,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, PropType, ref, watch } from "vue";
+import { computed, onUnmounted, PropType, ref, watch } from "vue";
 import { usePlatformStore } from "../store/electron";
 import { useBaseStore } from "../store/base";
 import SimpleProgressBar from "./SimpleProgressBar.vue";
@@ -164,6 +164,11 @@ async function togglePlay() {
         await playerElement.play();
     }
 }
+
+onUnmounted(() => {
+    playerElement.src = "";
+    playerElement.load();
+});
 
 if (props.instaLoad) {
     load(props.track);
