@@ -2,7 +2,12 @@ import { defineStore } from "pinia";
 import { IDBPDatabase, IDBPObjectStore, openDB, StoreNames } from "idb";
 import { computed, ref } from "vue";
 import { useTheme } from "vuetify";
-import type { Item, ItemCollection, YouTubeSearchResult } from "../scripts/types";
+import type {
+    DataExport,
+    Item,
+    ItemCollection,
+    YouTubeSearchResult,
+} from "../scripts/types";
 import { deltaE, hexToRgb } from "../scripts/utils";
 import { EventEmitter } from "events";
 import { randomNotFound } from "../scripts/imageSources";
@@ -37,7 +42,7 @@ function createStore(
 
 export const baseDb = openDB("base", 3, {
     upgrade(db, _, __, transaction) {
-        db.deleteObjectStore('yt-tracks')
+        db.deleteObjectStore("yt-tracks");
         createStore(db, transaction, "trackBars");
         createStore(db, transaction, "spotify");
         createStore(db, transaction, "cache");
@@ -91,7 +96,7 @@ export const useBaseStore = defineStore("base", () => {
     const theme = useTheme();
     const dbLoaded = ref(false);
     const events = new EventEmitter();
-    baseDb.then(() => {
+    baseDb.then(async () => {
         dbLoaded.value = true;
     });
     const themeColorDark = ref("#FFFFFF");
@@ -140,6 +145,66 @@ export const useBaseStore = defineStore("base", () => {
         windowHeight.value = window.innerHeight;
     };
     window.addEventListener("resize", onWindowResize, false);
+
+    async function exportToServer() {
+        let data = await getDataExport();
+        console.log(JSON.parse(JSON.stringify(data)));
+        const blob = new Blob([JSON.stringify(data)], {
+            type: "application/json",
+        });
+        const formData = new FormData();
+        formData.append("files", blob, "ruurd-music-data.json");
+        formData.append("email", "-");
+        formData.append("password", "-");
+        console.log(blob);
+
+        const fetchOptions = {
+            method: "POST",
+            body: formData,
+        };
+
+        let response = await fetch('https://api.ruurd.dev/drive/upload', fetchOptions);
+        console.log(response);
+        if (response.ok) {
+            return true;
+        }
+        addSnack(response.statusText);
+        return false;
+    }
+
+    async function getDataExport(): Promise<DataExport> {
+        let db = await baseDb;
+        const getObjectStore = async (
+            storeName: string,
+        ): Promise<{ [key: string]: any }> => {
+            let keys = (await db.getAllKeys(storeName)) as string[];
+            let values = await db.getAll(storeName);
+            let result = {};
+            for (let i = 0; i < keys.length; i++) {
+                result[keys[i]] = values[i];
+            }
+            return result;
+        };
+        return {
+            localStorage,
+            idb: {
+                artistStats: await getObjectStore("artistStats"),
+                collectionStats: await getObjectStore("collectionStats"),
+                imageColor: await getObjectStore("imageColor"),
+                nameToId: await getObjectStore("nameToId"),
+                //@ts-ignore
+                spotify: await getObjectStore("spotify"),
+                //@ts-ignore
+                statistics: await getObjectStore("statistics"),
+                trackBars: await getObjectStore("trackBars"),
+                trackEdits: await getObjectStore("trackEdits"),
+                trackStats: await getObjectStore("trackStats"),
+                trackVolumeStats: await getObjectStore("trackVolumeStats"),
+                tracks: await db.getAll("tracks"),
+                ytTracks: await db.getAll("ytTracks"),
+            },
+        };
+    }
 
     function approximateDuration(millis: number) {
         if (millis > 7200000) return Math.round(millis / 3600000) + " hours";
@@ -331,5 +396,6 @@ export const useBaseStore = defineStore("base", () => {
         encodeUrlName,
         caps,
         isDark,
+        exportToServer,
     };
 });

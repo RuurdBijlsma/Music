@@ -4,29 +4,11 @@ import { computed, ref, toRaw, watch } from "vue";
 import { baseDb, useBaseStore } from "./base";
 import type { IDBPDatabase } from "idb";
 import { useTheme } from "vuetify";
-import type { EditedTrack, ItemCollection } from "../scripts/types";
+import type { EditedTrack, ItemCollection, MetaTrackBars, TrackBars } from "../scripts/types";
 import { shuffleArray } from "../scripts/utils";
 import { useLibraryStore } from "./library";
 import { randomNotFound } from "../scripts/imageSources";
 
-interface TrackBars {
-    binSize: number;
-    binWidth: number;
-    barSpacing: number;
-    binPos: number[];
-    binNeg: number[];
-    maxVolume: number;
-    startTime: number;
-    endTime: number;
-}
-
-interface MetaTrackBars {
-    trackBars: TrackBars;
-    canvasWidth: number;
-    binWidth: number;
-    barSpacing: number;
-    barCount: number;
-}
 
 export const usePlayerStore = defineStore("player", () => {
     const base = useBaseStore();

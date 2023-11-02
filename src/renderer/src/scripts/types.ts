@@ -103,3 +103,101 @@ export type CollectionType =
     | "category"
     | "youtube";
 export type ItemType = "track" | "playlist" | "album" | "artist" | "category";
+
+export interface TrackBars {
+    binSize: number;
+    binWidth: number;
+    barSpacing: number;
+    binPos: number[];
+    binNeg: number[];
+    maxVolume: number;
+    startTime: number;
+    endTime: number;
+}
+
+export interface MetaTrackBars {
+    trackBars: TrackBars;
+    canvasWidth: number;
+    binWidth: number;
+    barSpacing: number;
+    barCount: number;
+}
+
+export interface DataExport {
+    localStorage: { [key: string]: string };
+    idb: {
+        artistStats: {
+            [key: string]: {
+                name: string;
+                skips: number;
+                listenMinutes: number;
+                history: { [key: string]: number };
+            };
+        };
+        collectionStats: {
+            [key: string]: {
+                name: string;
+                skips: number;
+                listenMinutes: number;
+            };
+        };
+        imageColor: {
+            [key: string]: {
+                light: string;
+                dark: string;
+            };
+        };
+        nameToId: { [key: string]: string };
+        spotify: {
+            library: {
+                playlist: SpotifyApi.PlaylistObjectFull[];
+                artist: SpotifyApi.ArtistObjectFull[];
+                album: SpotifyApi.AlbumObjectFull[];
+            };
+            offlineCollections: Set<string>;
+            recentPlays: ItemCollection[];
+            view: {
+                homePage: {
+                    featured: {
+                        title: string | undefined;
+                        playlists: SpotifyApi.PlaylistObjectSimplified[];
+                    };
+                    newReleases: any[];
+                    personalized: any[];
+                };
+                playlist: any;
+                album: any;
+                artist: any;
+                category: any;
+                user: any;
+            };
+        };
+        statistics: {
+            historyMinutes: { [key: string]: number };
+            listenCount: number;
+            listenMinutes: number;
+            popularityHistory: {
+                [key: string]: { listenCount: number; popularitySum: 1017 };
+            };
+            skips: number;
+        };
+        trackBars: { [key: string]: MetaTrackBars };
+        trackEdits: { [key: string]: TrackChanges };
+        trackStats: {
+            [key: string]: {
+                track: SpotifyApi.TrackObjectFull;
+                listenCount: number;
+                skips: number;
+                listenMinutes: number;
+            };
+        };
+        trackVolumeStats: {
+            [key: string]: {
+                mean: number;
+                peak: number;
+            };
+        };
+        tracks: ExtendedPlaylistTrack[];
+        ytTracks: ExtendedPlaylistTrack[];
+    };
+}

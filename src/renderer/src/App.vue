@@ -91,6 +91,7 @@
 // setting for schedule dark/light mode
 // show listen stats
 // generate a spotify wrapped / ruurd music wrapped
+// if bottom player is active set volume to full
 // -----------------------------------------------------------
 // listen stats
 // - per song listen count

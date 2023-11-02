@@ -4,8 +4,8 @@
         <v-divider class="mt-2 mb-2"></v-divider>
         <h3>
             <v-icon :color="spotifyAuth.hasCredentials ? 'green' : 'default'"
-                >mdi-spotify</v-icon
-            >
+                >mdi-spotify
+            </v-icon>
             Spotify
         </h3>
         <authentication />
@@ -16,6 +16,7 @@
             :block="true"
             :loading="platform.exportMp3State.loading"
             class="mt-2"
+            :color="base.themeColor"
             prepend-icon="mdi-export"
             variant="tonal"
             @click="platform.exportLikedTracks"
@@ -25,6 +26,7 @@
         <template v-if="downloadState && !downloadState.canceled">
             <v-progress-linear
                 v-if="downloadState.loading"
+                :color="base.themeColor"
                 :model-value="
                     (100 * downloadState.downloaded) / downloadState.total
                 "
@@ -57,9 +59,13 @@
             :color="base.themeColor"
             label="Normalize volume"
         />
-        <v-btn :loading="updateLoading" variant="tonal" @click="updateYtdlp"
-            >Update YT-DLP</v-btn
-        >
+        <v-btn
+            :loading="updateLoading"
+            variant="tonal"
+            :color="base.themeColor"
+            @click="updateYtdlp"
+            >Update YT-DLP
+        </v-btn>
         <v-sheet
             v-if="updateResult !== ''"
             :color="base.themeColor"
@@ -68,6 +74,22 @@
         >
             {{ updateResult }}
         </v-sheet>
+        <div class="mt-4">
+            <v-btn
+                :loading="exportLoading"
+                :color="base.themeColor"
+                variant="tonal"
+                @click="exportToServer"
+                :append-icon="
+                    exportResult === 'none'
+                        ? ''
+                        : exportResult === 'success'
+                        ? 'mdi-check-bold'
+                        : 'mdi-alert-circle-outline'
+                "
+                >Export data to server
+            </v-btn>
+        </div>
     </div>
 </template>
 
@@ -89,6 +111,22 @@ const updateResult = ref("");
 const downloadState = computed(
     () => platform.downloadState.get("liked")?.value,
 );
+
+const exportLoading = ref(false);
+const exportResult = ref("none" as "none" | "failed" | "success");
+
+async function exportToServer() {
+    exportResult.value = "none";
+    exportLoading.value = true;
+    try {
+        let result = await base.exportToServer();
+        console.log("reULST", result);
+        exportResult.value = result ? "success" : "failed";
+    } catch (e: any) {
+        base.addSnack("Export to server failed: ", e.message);
+    }
+    exportLoading.value = false;
+}
 
 async function updateYtdlp() {
     updateLoading.value = true;

@@ -6,6 +6,7 @@
         hide-details
         label="Spotify client ID"
         variant="filled"
+        :color="base.themeColor"
     />
     <v-text-field
         v-model="spotifyAuth.secret"
@@ -17,6 +18,7 @@
         label="Spotify secret"
         variant="filled"
         @click:append="showPassword = !showPassword"
+        :color="base.themeColor"
     />
     <v-btn
         v-if="spotifyAuth.hasCredentials && !spotifyAuth.isLoggedIn"
@@ -44,7 +46,9 @@
 import { ref } from "vue";
 import { useLibraryStore } from "../store/library";
 import { useSpotifyAuthStore } from "../store/spotify-auth";
+import { useBaseStore } from "../store/base";
 
+const base = useBaseStore();
 const library = useLibraryStore();
 const spotifyAuth = useSpotifyAuthStore();
 
