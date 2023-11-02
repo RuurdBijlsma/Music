@@ -88,6 +88,7 @@
 // possibly replace color thief with something without vulnerabilities
 // playlists cachen
 // simple player en simple yt player samenvoegen
+// setting for schedule dark/light mode
 // show listen stats
 // generate a spotify wrapped / ruurd music wrapped
 // -----------------------------------------------------------
