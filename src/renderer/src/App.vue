@@ -82,12 +82,12 @@
 
 <script lang="ts" setup>
 // todo
+// after editing track name / artists, it won't remember the track is downloaded already
 // maak knop: export database naar file of cloud?
 // in die database kan dan: track customizations (start/end time, etc), spotify api keys, yt liked tracks, spotify tokens, trackbars, alles in idb basically, localStorage ook
 // possibly replace color thief with something without vulnerabilities
 // playlists cachen
 // simple player en simple yt player samenvoegen
-// after editing track name / artists, it won't remember the track is downloaded already
 // show listen stats
 // generate a spotify wrapped / ruurd music wrapped
 // -----------------------------------------------------------
