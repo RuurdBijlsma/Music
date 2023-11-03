@@ -528,11 +528,9 @@ export const usePlayerStore = defineStore("player", () => {
             trackBars.startTime === trackStartTime &&
             trackBars.endTime === trackEndTime
         ) {
-            console.log("Got trackbars from db");
             canvasBars = trackBars;
         } else if (_track.id === trackId.value) {
             trackBars = undefined;
-            console.log("NO trackbars from db");
             canvasBars = {
                 binSize: 1,
                 binWidth,
@@ -563,7 +561,6 @@ export const usePlayerStore = defineStore("player", () => {
             canvas.height = 100;
             context = canvas.getContext("2d");
         }
-        console.log("in init, trackbars = ", trackBars);
         // only calculate track bars if they weren't retrieved from db cache
         if (trackBars === undefined)
             calculateTrackBars(

@@ -2,16 +2,10 @@
     <div class="settings mt-8">
         <h1>Settings</h1>
         <v-divider class="mt-2 mb-2"></v-divider>
-        <h3>
-            <v-icon :color="spotifyAuth.hasCredentials ? 'green' : 'default'"
-                >mdi-spotify
-            </v-icon>
-            Spotify
-        </h3>
         <authentication />
         <v-divider class="mt-3 mb-3" />
 
-        <h3>Export</h3>
+        <h3 class="mb-3">Export</h3>
         <v-btn
             :block="true"
             :loading="platform.exportMp3State.loading"
@@ -48,20 +42,41 @@
                 >Cancel exporting
             </v-btn>
         </template>
+
+        <v-btn
+            class="mt-4"
+            :block="true"
+            v-if="ruurdAuth.isLoggedIn"
+            :loading="exportLoading"
+            :color="base.themeColor"
+            variant="tonal"
+            @click="exportToServer"
+            :append-icon="
+                    exportResult === 'none'
+                        ? ''
+                        : exportResult === 'success'
+                        ? 'mdi-check-bold'
+                        : 'mdi-alert-circle-outline'
+                "
+        >Export data to server
+        </v-btn>
+
         <v-divider class="mt-3 mb-3" />
-        <h3>Audio settings</h3>
+        <h3 class="mb-3">Audio settings</h3>
         <p>
             Attempt to make loud tracks quieter to match closer with quiet
             tracks.
         </p>
         <v-switch
             v-model="player.normalizeVolume"
+            hide-details
             :color="base.themeColor"
             label="Normalize volume"
         />
         <v-btn
             :loading="updateLoading"
             variant="tonal"
+            :block="true"
             :color="base.themeColor"
             @click="updateYtdlp"
             >Update YT-DLP
@@ -74,22 +89,6 @@
         >
             {{ updateResult }}
         </v-sheet>
-        <div class="mt-4">
-            <v-btn
-                :loading="exportLoading"
-                :color="base.themeColor"
-                variant="tonal"
-                @click="exportToServer"
-                :append-icon="
-                    exportResult === 'none'
-                        ? ''
-                        : exportResult === 'success'
-                        ? 'mdi-check-bold'
-                        : 'mdi-alert-circle-outline'
-                "
-                >Export data to server
-            </v-btn>
-        </div>
     </div>
 </template>
 
@@ -97,14 +96,14 @@
 import { usePlatformStore } from "../store/electron";
 import { useBaseStore } from "../store/base";
 import { usePlayerStore } from "../store/player";
-import { useSpotifyAuthStore } from "../store/spotify-auth";
 import Authentication from "../components/Authentication.vue";
 import { computed, ref } from "vue";
+import { useRuurdAuthStore } from "../store/ruurd-auth";
 
 const player = usePlayerStore();
 const platform = usePlatformStore();
 const base = useBaseStore();
-const spotifyAuth = useSpotifyAuthStore();
+const ruurdAuth = useRuurdAuthStore();
 
 const updateLoading = ref(false);
 const updateResult = ref("");
@@ -120,7 +119,6 @@ async function exportToServer() {
     exportLoading.value = true;
     try {
         let result = await base.exportToServer();
-        console.log("reULST", result);
         exportResult.value = result ? "success" : "failed";
     } catch (e: any) {
         base.addSnack("Export to server failed: ", e.message);

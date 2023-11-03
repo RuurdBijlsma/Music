@@ -28,9 +28,12 @@ export const useSpotifyApiStore = defineStore("spotify-api", () => {
                 item = await getAlbum(item.id);
             }
             let tracks = item.tracks.items as SpotifyApi.TrackObjectFull[];
-            tracks.forEach(
-                (t) => (t.album = item as SpotifyApi.AlbumObjectFull),
-            );
+            for (let track of tracks) {
+                //@ts-ignore
+                track.album = {
+                    images: [...item.images],
+                };
+            }
             return tracks;
         }
         console.warn("Didn't upgrade item to full, type not supported", item);

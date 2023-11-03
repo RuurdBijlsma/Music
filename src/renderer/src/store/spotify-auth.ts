@@ -191,5 +191,6 @@ export const useSpotifyAuthStore = defineStore("spotify-auth", () => {
         login,
         logout,
         awaitAuth,
+        loadValues,
     };
 });

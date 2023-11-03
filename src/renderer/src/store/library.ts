@@ -574,9 +574,7 @@ export const useLibraryStore = defineStore("library", () => {
     function editTrack(track: EditedTrack) {
         player.pause().then();
         editDialog.value.track = track;
-        console.log(toRaw(editDialog.value.durationRange));
         editDialog.value.show = true;
-        console.log(editDialog.value);
         editDialog.value.durationRange = [
             track.startTime ?? 0,
             track.endTime ?? track.duration_ms / 1000,
