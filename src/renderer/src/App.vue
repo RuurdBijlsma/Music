@@ -82,6 +82,7 @@
 
 <script lang="ts" setup>
 // todo
+// bug: library.offlineCollections.has is not a function
 // periodic backup to server?
 // possibly replace color thief with something without vulnerabilities
 // playlists cachen
