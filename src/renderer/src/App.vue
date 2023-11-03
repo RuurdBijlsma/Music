@@ -82,6 +82,7 @@
 
 <script lang="ts" setup>
 // todo
+// big bug: trackbars are entirely broken after refresh, they are not cached!
 // bug: library.offlineCollections.has is not a function
 // periodic backup to server?
 // possibly replace color thief with something without vulnerabilities
