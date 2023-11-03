@@ -82,10 +82,7 @@
 
 <script lang="ts" setup>
 // todo
-// edit authentication page to have option to log into ruurd account
-// after editing track name / artists, it won't remember the track is downloaded already
-// maak knop: export database naar file of cloud?
-// in die database kan dan: track customizations (start/end time, etc), spotify api keys, yt liked tracks, spotify tokens, trackbars, alles in idb basically, localStorage ook
+// periodic backup to server?
 // possibly replace color thief with something without vulnerabilities
 // playlists cachen
 // simple player en simple yt player samenvoegen
