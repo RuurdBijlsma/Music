@@ -41,15 +41,6 @@ export interface SearchResult {
     };
 }
 
-export interface ExtendedPlaylistTrack extends SpotifyApi.PlaylistTrackObject {
-    searchString: string;
-    artistString: string;
-    id: string;
-    title: string;
-    added_at_reverse: number;
-    track: EditedTrack;
-}
-
 export type Item =
     | SpotifyApi.PlaylistObjectFull
     | SpotifyApi.TrackObjectFull
@@ -61,8 +52,6 @@ export interface ItemCollection {
     tracks: SpotifyApi.TrackObjectFull[];
     type: CollectionType;
     context?: Item;
-    loaded?: number;
-    total?: number;
     name: string;
     buttonText: string;
     to: string;
@@ -88,11 +77,6 @@ export interface TrackChanges {
     };
 }
 
-export interface EditedTrack extends SpotifyApi.TrackObjectFull {
-    startTime?: number;
-    endTime?: number;
-}
-
 export type CollectionType =
     | "radio"
     | "search"
@@ -111,8 +95,6 @@ export interface TrackBars {
     binPos: number[];
     binNeg: number[];
     maxVolume: number;
-    startTime: number;
-    endTime: number;
 }
 
 export interface MetaTrackBars {
@@ -121,6 +103,42 @@ export interface MetaTrackBars {
     binWidth: number;
     barSpacing: number;
     barCount: number;
+}
+export interface TrackData{
+    path:string,
+    track:SpotifyApi.TrackObjectFull,
+    metadata:TrackMetadata,
+    likedInfo?: LikedTrack,
+}
+
+export interface LikedTrack extends SpotifyApi.PlaylistTrackObject {
+    searchString: string;
+    artistString: string;
+    id: string;
+    title: string;
+    added_at_reverse: number;
+    track: SpotifyApi.TrackObjectFull;
+    original: {
+        name: string;
+        artists: string[];
+    };
+    startTime?: number;
+    endTime?: number;
+}
+
+export interface TrackMetadata {
+    sourceDuration?: number;
+    id: string;
+    trackBars?: MetaTrackBars;
+    volume?: {
+        mean: number;
+        peak: number;
+    };
+    imageColor?: {
+        light: string;
+        dark: string;
+    };
+    youTubeSource?: string;
 }
 
 export interface DataExport {
@@ -197,7 +215,6 @@ export interface DataExport {
                 peak: number;
             };
         };
-        tracks: ExtendedPlaylistTrack[];
-        ytTracks: ExtendedPlaylistTrack[];
+        tracks: LikedTrack[];
     };
 }

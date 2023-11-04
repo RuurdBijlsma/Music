@@ -27,7 +27,7 @@
 </template>
 
 <script lang="ts" setup>
-import { usePlayerStore } from "../store/player";
+import { usePlayerStore } from "../store/player/player";
 import { useSpotifyApiStore } from "../store/spotify-api";
 import { Item, ItemCollection } from "../scripts/types";
 import { computed, PropType, ref } from "vue";

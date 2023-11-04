@@ -54,7 +54,7 @@
 <script lang="ts" setup>
 import TrackListVirtual from "./TrackListVirtual.vue";
 import TrackList from "./TrackList.vue";
-import { usePlayerStore } from "../store/player";
+import { usePlayerStore } from "../store/player/player";
 import { storeToRefs } from "pinia";
 import { useBaseStore } from "../store/base";
 import { useRoute } from "vue-router";

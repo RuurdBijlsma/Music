@@ -105,7 +105,7 @@
 <script lang="ts" setup>
 import { ref } from "vue";
 import GlowImage from "./GlowImage.vue";
-import { usePlayerStore } from "../store/player";
+import { usePlayerStore } from "../store/player/player";
 import { useBaseStore } from "../store/base";
 import ArtistsSpan from "./ArtistsSpan.vue";
 import LikeButton from "./LikeButton.vue";

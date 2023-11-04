@@ -41,19 +41,28 @@ function createStore(
     return store;
 }
 
-export const baseDb = openDB("base", 3, {
+export const baseDb = openDB("base", 6, {
     upgrade(db, _, __, transaction) {
-        createStore(db, transaction, "trackBars");
+        if (db.objectStoreNames.contains("trackBars"))
+            db.deleteObjectStore("trackBars");
+        if (db.objectStoreNames.contains("trackVolumeStats"))
+            db.deleteObjectStore("trackVolumeStats");
+        if (db.objectStoreNames.contains("trackEdits"))
+            db.deleteObjectStore("trackEdits");
+        if (db.objectStoreNames.contains("ytTracks"))
+            db.deleteObjectStore("ytTracks");
+        if (db.objectStoreNames.contains("nameToId"))
+            db.deleteObjectStore("nameToId");
+        if (db.objectStoreNames.contains("imageColor"))
+            db.deleteObjectStore("imageColor");
+
         createStore(db, transaction, "spotify");
         createStore(db, transaction, "cache");
-        createStore(db, transaction, "nameToId");
-        createStore(db, transaction, "imageColor");
-        createStore(db, transaction, "trackVolumeStats");
         createStore(db, transaction, "artistStats");
         createStore(db, transaction, "trackStats");
         createStore(db, transaction, "collectionStats");
         createStore(db, transaction, "statistics");
-        createStore(db, transaction, "trackEdits");
+        createStore(db, transaction, "trackMetadata", { keyPath: "id" });
 
         createStore(db, transaction, "tracks", { keyPath: "id" }, [
             {
@@ -76,13 +85,6 @@ export const baseDb = openDB("base", 3, {
                 keyPath: "added_at",
                 unique: false,
             },
-            {
-                name: "newToOld",
-                keyPath: "added_at_reverse",
-                unique: false,
-            },
-        ]);
-        createStore(db, transaction, "ytTracks", { keyPath: "id" }, [
             {
                 name: "newToOld",
                 keyPath: "added_at_reverse",
@@ -215,7 +217,6 @@ export const useBaseStore = defineStore("base", () => {
                 trackStats: await getObjectStore("trackStats"),
                 trackVolumeStats: await getObjectStore("trackVolumeStats"),
                 tracks: await db.getAll("tracks"),
-                ytTracks: await db.getAll("ytTracks"),
             },
         };
     }
@@ -230,7 +231,7 @@ export const useBaseStore = defineStore("base", () => {
             storeName: string,
             object: { [key: string]: any },
         ) => {
-            const tx = db.transaction([storeName], "readwrite");
+            const tx = db.transaction(storeName, "readwrite");
             const store = tx.objectStore(storeName);
 
             for (let key in object) {
@@ -238,7 +239,7 @@ export const useBaseStore = defineStore("base", () => {
                 store.put(object[key], key);
             }
 
-            return new Promise((resolve) => (tx.oncomplete = resolve));
+            return tx.done;
         };
         let idb = data.idb;
         let db = await baseDb;
@@ -264,7 +265,6 @@ export const useBaseStore = defineStore("base", () => {
             return new Promise((resolve) => (tx.oncomplete = resolve));
         };
         await putStoreArray("tracks", idb.tracks);
-        await putStoreArray("ytTracks", idb.ytTracks);
     }
 
     function approximateDuration(millis: number) {

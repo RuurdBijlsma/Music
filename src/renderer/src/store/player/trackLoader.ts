@@ -1,0 +1,216 @@
+import { defineStore } from "pinia";
+import {
+    ItemCollection,
+    LikedTrack,
+    MetaTrackBars,
+    TrackBars,
+    TrackData,
+    TrackMetadata,
+} from "../../scripts/types";
+import { usePlatformStore } from "../electron";
+import { baseDb, useBaseStore } from "../base";
+import { useLibraryStore } from "../library";
+
+export const useTrackLoaderStore = defineStore("trackLoader", () => {
+    const platform = usePlatformStore();
+    const library = useLibraryStore();
+    const base = useBaseStore();
+
+    function isLoadedTrackData(trackData: TrackData) {
+        return (
+            trackData.metadata.volume !== undefined &&
+            trackData.metadata.trackBars !== undefined &&
+            trackData.metadata.imageColor !== undefined
+        );
+    }
+
+    let isLoading = new Set<string>();
+
+    async function getTrackData(
+        track: SpotifyApi.TrackObjectFull,
+        onData: (data: TrackData) => any,
+        collection: ItemCollection | undefined = undefined,
+    ) {
+        if (isLoading.has(track.id)) {
+            console.log(
+                "Track is already loading, so we don't need to calculate again",
+            );
+            return;
+        }
+        isLoading.add(track.id);
+
+        const db = await baseDb;
+        let metadata: TrackMetadata = await db.get("trackMetadata", track.id);
+        let trackPath = platform.trackToNames(track).outPath;
+        let fileExists = await platform.checkFileExists(trackPath);
+
+        let likedInfo: undefined | LikedTrack;
+        if (collection && collection.id === "liked") {
+            likedInfo = library.tracks.find((t) => t.id === track.id);
+        }
+
+        let trackData: TrackData = {
+            path: trackPath,
+            metadata: metadata ?? {
+                trackBars: getEmptyMetaTrackBars(),
+                id: track.id,
+            },
+            track,
+            likedInfo,
+        };
+
+        const sendData = (data: TrackData) => {
+            console.log(data.metadata);
+            if (isLoadedTrackData(data)) {
+                isLoading.delete(track.id);
+                // Done with calculations for track
+                console.log("Putting track metadata", data.metadata);
+                db.put("trackMetadata", data.metadata);
+            }
+            onData(data);
+        };
+
+        // all data is available
+        if (metadata !== undefined && fileExists) return sendData(trackData);
+
+        // file does not exist, full metadata does
+        if (!fileExists && metadata !== undefined) {
+            let { jpg, colors } = await platform.getTrackJpg(track);
+            let { path } = await platform.downloadTrackFile(
+                track,
+                metadata.youTubeSource,
+                jpg,
+            );
+            trackData.path = path;
+            trackData.metadata.imageColor = colors;
+            return sendData(trackData);
+        }
+
+        if (!fileExists) {
+            let { jpg, colors } = await platform.getTrackJpg(track);
+            trackData.metadata.imageColor = colors;
+            let { path, id } = await platform.downloadTrackFile(
+                track,
+                undefined,
+                jpg,
+            );
+            trackData.path = path;
+            trackData.metadata.youTubeSource = id;
+            return sendData(trackData);
+        }
+
+        // Track Bars
+        (async () => {
+            // get track bars and set to metadata en do sendData
+            let bars = await calculateTrackBars(trackData);
+            console.log("Made trackbars", bars);
+            if (bars === undefined) {
+                base.addSnack("Oops, can't calculate trackbars");
+            } else {
+                trackData.metadata.trackBars = makeMetaTrackBars(bars);
+                sendData(trackData);
+            }
+        })().then();
+
+        // Volume mean and peak
+        (async () => {
+            // get volume stats and set to metadata en do sendData
+            trackData.metadata.volume =
+                await platform.getVolumeStats(trackPath);
+            sendData(trackData);
+        })().then();
+
+        // Theme color
+        (async () => {
+            if (trackData.metadata.imageColor === undefined) {
+                let { colors } = await platform.getTrackJpg(track);
+                trackData.metadata.imageColor = colors;
+                sendData(trackData);
+            }
+        })().then();
+    }
+
+    const canvasWidth = 300;
+    const binWidth = 2;
+    const barSpacing = 1;
+    const barCount = canvasWidth / (binWidth + barSpacing);
+
+    function makeMetaTrackBars(trackBars: TrackBars) {
+        return {
+            barCount,
+            barSpacing,
+            binWidth,
+            canvasWidth,
+            trackBars,
+        };
+    }
+
+    function getEmptyMetaTrackBars(): MetaTrackBars {
+        return makeMetaTrackBars({
+            binSize: 1,
+            binWidth,
+            barSpacing,
+            binPos: new Array<number>(barCount).fill(0.02),
+            binNeg: new Array<number>(barCount).fill(-0.02),
+            maxVolume: 1,
+        });
+    }
+
+    async function calculateTrackBars(trackData: TrackData) {
+        let audioContext = new AudioContext();
+        let response = await fetch(trackData.path);
+        if (!response.ok) {
+            return undefined;
+        }
+        let decoded = await audioContext.decodeAudioData(
+            await response.arrayBuffer(),
+        );
+        let channelData = decoded.getChannelData(0);
+        // if track is liked, and start- and endTime are set,
+        // clamp channelData to the right range
+        if (
+            trackData.likedInfo !== undefined &&
+            trackData.likedInfo.startTime !== undefined &&
+            trackData.likedInfo.endTime !== undefined
+        ) {
+            let duration =
+                trackData.likedInfo.endTime - trackData.likedInfo.startTime;
+            channelData = channelData.slice(
+                Math.floor(
+                    (trackData.likedInfo.startTime / duration) *
+                        channelData.length,
+                ),
+                Math.ceil(trackData.likedInfo.endTime / duration) *
+                    channelData.length,
+            );
+        }
+
+        let binSize = (channelData.length / barCount) | 0;
+        let binPos = 0;
+        let binNeg = 0;
+        //only set canvasBars if the playing track is still the one being calculated
+        let bars = {
+            binSize,
+            binWidth,
+            barSpacing,
+            binPos: [] as number[],
+            binNeg: [] as number[],
+            maxVolume: 0,
+        } as TrackBars;
+        for (let i = 0; i < channelData.length; i++) {
+            if (channelData[i] > 0) binPos += channelData[i];
+            else binNeg += channelData[i];
+            if (i % binSize === binSize - 1) {
+                if (Math.abs(binPos - binNeg) > bars.maxVolume)
+                    bars.maxVolume = binPos - binNeg;
+                bars.binPos.push(binPos);
+                bars.binNeg.push(binNeg);
+                binPos = 0;
+                binNeg = 0;
+            }
+        }
+        return bars;
+    }
+
+    return { getTrackData, getEmptyMetaTrackBars, isLoadedTrackData };
+});

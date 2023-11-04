@@ -20,7 +20,7 @@
 </template>
 
 <script lang="ts" setup>
-import { usePlayerStore } from "../store/player";
+import { usePlayerStore } from "../store/player/player";
 import { computed, onMounted, onUnmounted } from "vue";
 import { useBaseStore } from "../store/base";
 

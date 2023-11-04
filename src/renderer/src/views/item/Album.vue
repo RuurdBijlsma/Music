@@ -47,7 +47,7 @@ import { useBaseStore } from "../../store/base";
 import GlowImage from "../../components/GlowImage.vue";
 import TrackList from "../../components/TrackList.vue";
 import CollectionButtons from "../../components/CollectionButtons.vue";
-import { usePlayerStore } from "../../store/player";
+import { usePlayerStore } from "../../store/player/player";
 import { useSpotifyApiStore } from "../../store/spotify-api";
 import Spacer from "../../components/Spacer.vue";
 

@@ -95,7 +95,7 @@
 <script lang="ts" setup>
 import { usePlatformStore } from "../store/electron";
 import { useBaseStore } from "../store/base";
-import { usePlayerStore } from "../store/player";
+import { usePlayerStore } from "../store/player/player";
 import Authentication from "../components/Authentication.vue";
 import { computed, ref } from "vue";
 import { useRuurdAuthStore } from "../store/ruurd-auth";

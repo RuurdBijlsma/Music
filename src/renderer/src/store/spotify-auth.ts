@@ -7,7 +7,7 @@ import { usePlatformStore } from "./electron";
 import { useLibraryStore } from "./library";
 import { useSpotifyApiStore } from "./spotify-api";
 import { useRouter } from "vue-router";
-import { usePlayerStore } from "./player";
+import { usePlayerStore } from "./player/player";
 import { randomUser } from "../scripts/imageSources";
 
 export interface AuthToken {

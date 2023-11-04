@@ -88,7 +88,7 @@
 </template>
 
 <script lang="ts" setup>
-import { usePlayerStore } from "../store/player";
+import { usePlayerStore } from "../store/player/player";
 import type { PropType } from "vue";
 import { computed, toRaw, watch } from "vue";
 import type { Item, ItemCollection } from "../scripts/types";
@@ -143,7 +143,7 @@ async function checkTracksDownloaded() {
         (await baseDb)
             .put(
                 "spotify",
-                toRaw(library.offlineCollections),
+                [...toRaw(library.offlineCollections)],
                 "offlineCollections",
             )
             .then();

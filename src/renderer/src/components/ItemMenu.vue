@@ -166,7 +166,7 @@ import { useBaseStore } from "../store/base";
 import { useLibraryStore } from "../store/library";
 import type { Item, ItemCollection } from "../scripts/types";
 import { usePlatformStore } from "../store/electron";
-import { usePlayerStore } from "../store/player";
+import { usePlayerStore } from "../store/player/player";
 import { useRoute } from "vue-router";
 
 const props = defineProps({

@@ -1,11 +1,11 @@
 <template>
     <div class="playlist">
         <p class="tracks-info">
-            {{ tracksAmount }}
+            {{ tracks.length.toLocaleString() }}
             Track{{ tracks.length === 1 ? "" : "s" }} •
             {{ base.approximateDuration(totalDurationMs) }}
             <v-btn
-                v-show="trackLoadProgress === 100"
+                :loading="library.isRefreshing.track"
                 class="refresh-button"
                 density="compact"
                 icon="mdi-refresh"
@@ -15,15 +15,7 @@
             />
         </p>
         <collection-buttons :collection="collection" show-filter />
-        <v-progress-linear
-            :indeterminate="trackLoadProgress === 0"
-            :model-value="trackLoadProgress"
-            :style="{ opacity: trackLoadProgress === 100 ? 0 : 1 }"
-            class="mb-2 progress"
-            rounded
-        ></v-progress-linear>
         <track-list-virtual
-            :key="library.likedListKey"
             v-if="collection !== null"
             :collection="collection"
             :height="(base.windowHeight - subtractFromHeight).toString()"
@@ -36,7 +28,7 @@
 <script lang="ts" setup>
 import { useLibraryStore } from "../../store/library";
 import { useBaseStore } from "../../store/base";
-import { computed, toRaw } from "vue";
+import { computed } from "vue";
 import TrackListVirtual from "../../components/TrackListVirtual.vue";
 import { storeToRefs } from "pinia";
 import type { ItemCollection } from "../../scripts/types";
@@ -55,11 +47,9 @@ const collection = computed(() => {
         return null;
     }
     return {
-        tracks: toRaw(tracks.value).map((t) => t.track),
+        tracks: tracks.value.map((t) => t.track),
         type: "liked",
         id: "liked",
-        loaded: library.likedTracksLoaded,
-        total: library.likedTracksTotal,
         name: "Liked tracks",
         buttonText: "Library",
         to: "/library",
@@ -79,17 +69,6 @@ setTimeout(() => {
 const totalDurationMs = computed(() => {
     if (tracks.value === null || tracks.value === undefined) return 0;
     return tracks.value.reduce((a, b) => a + b.track.duration_ms, 0);
-});
-// const trackLoadProgress = computed(() => 100)
-const trackLoadProgress = computed(
-    () => (100 * library.likedTracksLoaded) / library.likedTracksTotal,
-);
-
-const tracksAmount = computed(() => {
-    if (trackLoadProgress.value === 100) {
-        return tracks.value.length.toLocaleString();
-    }
-    return `${library.likedTracksLoaded.toLocaleString()} / ${library.likedTracksTotal.toLocaleString()}`;
 });
 </script>
 

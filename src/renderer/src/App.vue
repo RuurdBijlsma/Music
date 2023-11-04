@@ -82,6 +82,7 @@
 
 <script lang="ts" setup>
 // todo
+// todo big refactor
 // big bug: trackbars are entirely broken after refresh, they are not cached!
 // bug: library.offlineCollections.has is not a function
 // periodic backup to server?
@@ -111,7 +112,7 @@ import TopMenu from "./components/TopMenu.vue";
 import MusicPlayer from "./components/MusicPlayer.vue";
 import SearchSuggestions from "./components/SearchSuggestions.vue";
 import { useBaseStore } from "./store/base";
-import { usePlayerStore } from "./store/player";
+import { usePlayerStore } from "./store/player/player";
 import { computed, ref, watch } from "vue";
 import ItemContextMenu from "./components/ItemContextMenu.vue";
 import SourceDialog from "./components/SourceDialog.vue";

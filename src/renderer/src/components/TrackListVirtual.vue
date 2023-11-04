@@ -28,7 +28,7 @@
 import type { PropType } from "vue";
 import { computed } from "vue";
 import TrackListItem from "./TrackListItem.vue";
-import { usePlayerStore } from "../store/player";
+import { usePlayerStore } from "../store/player/player";
 import type { ItemCollection } from "../scripts/types";
 
 const player = usePlayerStore();

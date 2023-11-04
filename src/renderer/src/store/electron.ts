@@ -4,7 +4,7 @@ import { Ref, ref, toRaw } from "vue";
 import fileNamify from "filenamify";
 import { baseDb, useBaseStore } from "./base";
 import type { IDBPDatabase } from "idb";
-import { usePlayerStore } from "./player";
+import { usePlayerStore } from "./player/player";
 import type { DownloadState, YouTubeTrack } from "../scripts/types";
 import { executeCached } from "../scripts/utils";
 import { useSpotifyAuthStore } from "./spotify-auth";
@@ -37,7 +37,7 @@ export const usePlatformStore = defineStore("platform", () => {
     });
     window.events.on("play", () => player.play());
     window.events.on("pause", () => player.pause());
-    window.events.on("skip", n => player.skip(n));
+    window.events.on("skip", (n) => player.skip(n));
 
     window
         .matchMedia("(prefers-color-scheme: dark)")
@@ -109,100 +109,63 @@ export const usePlatformStore = defineStore("platform", () => {
         await db.delete("trackVolumeStats", track.id);
     }
 
-    async function getTrackFile(
-        track: SpotifyApi.TrackObjectFull,
-        applyThemeColor = true,
-    ) {
-        const isYouTubeTrack = track.id.startsWith("yt-");
-        let hasImage =
-            track.hasOwnProperty("album") && track.album.images.length > 0;
-        let imgUrl = hasImage ? track.album.images[0].url : "";
+    async function getTrackJpg(track: SpotifyApi.TrackObjectFull) {
+        let imgUrl = track.album.images[0].url;
+        if (imgUrl === undefined)
+            return { jpg: "", colors: { dark: "#eee", light: "#333" } };
 
-        let { cacheKey, filename, outPath } = trackToNames(track);
-        let [trackFileExists, dbColor] = await Promise.all([
-            checkFileExists(outPath),
-            db.get("imageColor", imgUrl),
-        ]);
-        // only download the album art if the track file hasn't been created yet
-        // or if the dominant theme color hasn't been put in the DB
-        let imageDownloadRequired =
-            !trackFileExists || (!dbColor && applyThemeColor);
-        let jpgFile = "";
-        if (hasImage && imageDownloadRequired) {
-            jpgFile = await window.api.downloadAsJpg(imgUrl);
-        }
-        if (hasImage && applyThemeColor) {
-            const applyColor = (c: { dark: string; light: string }) => {
-                base.themeColorDark = c.dark;
-                base.themeColorLight = c.light;
-            };
-            if (dbColor) {
-                applyColor(dbColor);
-            } else {
-                window.api.getDominantColor(jpgFile).then((c) => {
-                    db.put("imageColor", c, imgUrl);
-                    applyColor(c);
-                });
-            }
-        }
-        let cachedId = await db.get("nameToId", cacheKey);
-        if (!trackFileExists) {
-            let fun: (p: number) => void;
-            fun = (percent: number) => {
-                base.events.emit(track.id + "progress", percent);
-                if (percent === 100) {
-                    window.events.off(filename + "progress", fun);
-                }
-            };
-            window.events.on(filename + "progress", fun);
+        let jpg: string = await window.api.downloadAsJpg(imgUrl);
+        let colors: { dark: string; light: string } =
+            await window.api.getDominantColor(jpg);
 
-            let tags: any = {
-                title: track.name,
-                artist: track.artists.map((a) => a.name),
-                disc: track.disc_number,
-                track: track.track_number,
-                id: isYouTubeTrack ? track.id.substring(3) : undefined,
-            };
-            if (cachedId !== undefined && cachedId !== "") {
-                tags.id = cachedId;
-            }
-            if (track.hasOwnProperty("album")) {
-                if (track.album.hasOwnProperty("name"))
-                    tags.album = track.album.name;
-                if (track.album.hasOwnProperty("release_date"))
-                    tags.year = new Date(
-                        //@ts-ignore
-                        track.album.release_date,
-                    ).getFullYear();
-            }
-            let { id } = await window.api.downloadYt(
-                filename,
-                tags,
-                hasImage ? jpgFile : "",
-            );
-            if (base.sourceDialog.tempTrackOverride.trackId === track.id) {
-                outPath = await makeTempTrack(track);
-                base.sourceDialog.tempTrackOverride.trackId = "";
-            }
-            if (id !== "") {
-                db.put("nameToId", id, cacheKey).then();
-            }
-        }
-        if (jpgFile !== "") {
-            // set timeout because getDominantColor runs in parallel, would never take more than a second
-            // other uses of the image are awaited before this so no issue
-            setTimeout(() => window.api.deleteFile(jpgFile).then(), 1000);
-        }
-        return outPath;
+        return { jpg, colors };
     }
 
-    async function getVolumeStats(track: SpotifyApi.TrackObjectFull) {
-        let { outPath } = trackToNames(track);
-        let dbVolumeStats = await db.get("trackVolumeStats", track.id);
-        if (dbVolumeStats !== undefined)
-            return dbVolumeStats as { mean: number; peak: number };
+    async function downloadTrackFile(
+        track: SpotifyApi.TrackObjectFull,
+        youtubeSource?: string,
+        imgPath = track.album.images[0]?.url,
+    ) {
+        const isYouTubeTrack = track.id.startsWith("yt-");
 
-        let { err } = await window.api.getVolumeStats(outPath);
+        let { filename, outPath } = trackToNames(track);
+
+        let fun: (p: number) => void;
+        fun = (percent: number) => {
+            base.events.emit(track.id + "progress", percent);
+            if (percent === 100) {
+                window.events.off(filename + "progress", fun);
+            }
+        };
+        window.events.on(filename + "progress", fun);
+
+        let tags: any = {
+            title: track.name,
+            artist: track.artists.map((a) => a.name),
+            disc: track.disc_number,
+            track: track.track_number,
+            id: isYouTubeTrack ? track.id.substring(3) : undefined,
+        };
+        if (youtubeSource !== undefined) tags.id = youtubeSource;
+
+        if (track.hasOwnProperty("album")) {
+            if (track.album.hasOwnProperty("name"))
+                tags.album = track.album.name;
+            if (track.album.hasOwnProperty("release_date"))
+                //@ts-ignore
+                tags.year = new Date(track.album.release_date).getFullYear();
+        }
+        let { id } = await window.api.downloadYt(filename, tags, imgPath ?? "");
+        if (base.sourceDialog.tempTrackOverride.trackId === track.id) {
+            outPath = await makeTempTrack(track);
+            base.sourceDialog.tempTrackOverride.trackId = "";
+        }
+
+        return { path: outPath, id };
+    }
+
+    async function getVolumeStats(trackPath: string) {
+        let { err } = await window.api.getVolumeStats(trackPath);
         let lines = err.split("\n") as string[];
         let volumeLines = lines.filter((l) =>
             l.startsWith("[Parsed_volumedetect_0"),
@@ -214,9 +177,7 @@ export const usePlatformStore = defineStore("platform", () => {
         let mean: number, peak: number;
         mean = +meanLine.split("mean_volume:")[1].split("dB")[0].trim();
         peak = +peakLine.split("max_volume:")[1].split("dB")[0].trim();
-        let result = { mean, peak };
-        db.put("trackVolumeStats", result, track.id).then();
-        return result;
+        return { mean, peak };
     }
 
     async function youTubeInfoById(id: string) {
@@ -336,7 +297,7 @@ export const usePlatformStore = defineStore("platform", () => {
         library.offlineCollections.delete(key);
         db.put(
             "spotify",
-            toRaw(library.offlineCollections),
+            [...toRaw(library.offlineCollections)],
             "offlineCollections",
         ).then();
         downloadState.value.set(key, state);
@@ -349,7 +310,7 @@ export const usePlatformStore = defineStore("platform", () => {
                 try {
                     let tracks = await Promise.all(
                         batch.map((track) =>
-                            getTrackFile(
+                            downloadTrackFile(
                                 track as SpotifyApi.TrackObjectFull,
                                 false,
                             ),
@@ -371,7 +332,7 @@ export const usePlatformStore = defineStore("platform", () => {
             library.offlineCollections.add(key);
             db.put(
                 "spotify",
-                toRaw(library.offlineCollections),
+                [...toRaw(library.offlineCollections)],
                 "offlineCollections",
             ).then();
 
@@ -389,7 +350,7 @@ export const usePlatformStore = defineStore("platform", () => {
     }
 
     return {
-        getTrackFile,
+        downloadTrackFile,
         setTheme,
         close,
         toggleMaximize,
@@ -410,5 +371,7 @@ export const usePlatformStore = defineStore("platform", () => {
         downloadTracks,
         downloadState,
         checkTracksDownloaded,
+        checkFileExists,
+        getTrackJpg,
     };
 });

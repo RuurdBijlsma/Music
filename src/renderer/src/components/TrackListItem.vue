@@ -51,15 +51,15 @@
 import type { PropType } from "vue";
 import { computed } from "vue";
 import { useBaseStore } from "../store/base";
-import { usePlayerStore } from "../store/player";
+import { usePlayerStore } from "../store/player/player";
 import ArtistsSpan from "./ArtistsSpan.vue";
 import ItemMenu from "./ItemMenu.vue";
-import type { EditedTrack, ItemCollection } from "../scripts/types";
+import type { ItemCollection } from "../scripts/types";
 import Spacer from "./Spacer.vue";
 
 const props = defineProps({
     track: {
-        type: Object as PropType<EditedTrack>,
+        type: Object as PropType<SpotifyApi.TrackObjectFull>,
         required: true,
     },
     index: {

@@ -3,7 +3,7 @@
 </template>
 
 <script lang="ts" setup>
-import { usePlayerStore } from "../store/player";
+import { usePlayerStore } from "../store/player/player";
 import { onMounted, onUnmounted } from "vue";
 import { storeToRefs } from "pinia";
 
@@ -34,7 +34,8 @@ const mouseLeave = () => (mouseHover.value = false);
 
 onMounted(() => {
     if (player.track !== null)
-        player.initTrackbars(player.playerElement.src, player.track);
+        // player.initializeCanvas(player.playerElement.src, player.track);
+        player.initializeCanvas();
 
     canvas = document.querySelector(".progress-canvas");
     if (canvas !== null) {

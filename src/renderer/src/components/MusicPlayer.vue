@@ -120,7 +120,7 @@
 <script lang="ts" setup>
 import { computed, onMounted, onUnmounted, ref } from "vue";
 import GlowImage from "./GlowImage.vue";
-import { usePlayerStore } from "../store/player";
+import { usePlayerStore } from "../store/player/player";
 import { useBaseStore } from "../store/base";
 import ArtistsSpan from "./ArtistsSpan.vue";
 import ProgressBar from "./ProgressBar.vue";

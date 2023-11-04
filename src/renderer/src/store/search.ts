@@ -6,12 +6,12 @@ import { usePlatformStore } from "./electron";
 import { useSpotifyApiStore } from "./spotify-api";
 import { useRouter } from "vue-router";
 import type {
-    ExtendedPlaylistTrack,
+    LikedTrack,
     ItemCollection,
     SearchResult, YouTubeSearchResult, YouTubeTrack
 } from "../scripts/types";
 import { Ref, ref, watch } from "vue";
-import { usePlayerStore } from "./player";
+import { usePlayerStore } from "./player/player";
 import { executeCached, hmsToSeconds } from "../scripts/utils";
 import YouTubeSearchAPI from "youtube-search-api";
 
@@ -260,7 +260,7 @@ export const useSearchStore = defineStore("search", () => {
             if (res.expiryDate < Date.now()) delete likedCache[query];
             else return likedCache[query].result;
         }
-        let tracks: ExtendedPlaylistTrack[];
+        let tracks: LikedTrack[];
         if (library.tracks.length > 0) {
             tracks = library.tracks;
         } else {
