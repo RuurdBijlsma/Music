@@ -7,7 +7,7 @@
     >
         <div class="translucent" v-if="track">
             <v-card-title>Edit Track Info</v-card-title>
-            <v-divider />
+            <v-divider/>
             <v-card-text>
                 <v-list-subheader class="mb-2">Title</v-list-subheader>
                 <v-text-field
@@ -108,20 +108,20 @@
 </template>
 
 <script lang="ts" setup>
-import { baseDb, useBaseStore } from "../store/base";
-import { useLibraryStore } from "../store/library";
-import { computed, ref, watch } from "vue";
+import {baseDb, useBaseStore} from "../store/base";
+import {useLibraryStore} from "../store/library";
+import {computed, ref, watch} from "vue";
 import SimplePlayer from "./SimplePlayer.vue";
 import Spacer from "./Spacer.vue";
-import { TrackChanges } from "../scripts/types";
+import {TrackChanges} from "../scripts/types";
 
 const base = useBaseStore();
 const library = useLibraryStore();
 const editDialog = computed(() => library.editDialog);
-const track = computed(() => library.editDialog.track);
+const track = computed(() => library.editDialog.likedTrack?.track);
 const changesObject = ref(null as TrackChanges | null);
 watch(track, async () => {
-    if (track.value === null) return;
+    if (!track.value) return;
     editDialog.value.title = track.value.name;
     editDialog.value.artists = track.value.artists.map((a) => a.name);
 
@@ -143,7 +143,12 @@ function revert() {
 }
 
 async function applyChanges() {
-    if (await library.applyEditChanges()) {
+    if (editDialog.value.likedTrack !== null && await library.applyEditChanges(
+        editDialog.value.likedTrack,
+        editDialog.value.title,
+        editDialog.value.artists,
+        editDialog.value.durationRange
+    )) {
         editDialog.value.show = false;
     } else {
         base.addSnack("Couldn't apply changes, can't find related track.");

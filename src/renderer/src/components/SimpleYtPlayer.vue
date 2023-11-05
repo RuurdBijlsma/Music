@@ -31,7 +31,6 @@ import {onUnmounted, ref} from "vue";
 import {usePlatformStore} from "../store/electron";
 import {useBaseStore} from "../store/base";
 import PlayButton from "./PlayButton.vue";
-import {useTrackLoaderStore} from "../store/player/trackLoader";
 
 defineProps({
     track: {
@@ -41,7 +40,6 @@ defineProps({
 });
 
 const platform = usePlatformStore();
-const trackLoader = useTrackLoaderStore()
 const base = useBaseStore();
 
 const currentTime = ref(0);

@@ -34,11 +34,9 @@ import { usePlatformStore } from "../store/electron";
 import { useBaseStore } from "../store/base";
 import SimpleProgressBar from "./SimpleProgressBar.vue";
 import PlayButton from "./PlayButton.vue";
-import { useLibraryStore } from "../store/library";
 
 const platform = usePlatformStore();
 const base = useBaseStore();
-const library = useLibraryStore();
 const props = defineProps({
     track: {
         type: Object as PropType<SpotifyApi.TrackObjectFull>,
@@ -105,11 +103,9 @@ function createAudioElement() {
         playing.value = !element.paused;
     });
     element.addEventListener("durationchange", () => {
-        if (props.track.duration_ms !== playerElement.duration * 1000)
-            library.updateTrackDuration(
-                props.track,
-                playerElement.duration * 1000,
-            );
+        if (props.track.duration_ms !== playerElement.duration * 1000) {
+            // todo update track duration maybe?
+        }
     });
     element.addEventListener("canplay", () => {
         loading.value = false;
