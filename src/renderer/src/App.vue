@@ -83,6 +83,8 @@
 <script lang="ts" setup>
 // todo
 // todo big refactor
+// ruurd login flow not working without refresh
+// ffbinaries error, http is not defined
 // big bug: trackbars are entirely broken after refresh, they are not cached!
 // bug: library.offlineCollections.has is not a function
 // periodic backup to server?
