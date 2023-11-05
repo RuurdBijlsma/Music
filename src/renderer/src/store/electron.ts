@@ -1,19 +1,21 @@
-import { defineStore } from "pinia";
-import { useLibraryStore } from "./library";
-import { Ref, ref, toRaw } from "vue";
+import {defineStore} from "pinia";
+import {useLibraryStore} from "./library";
+import {Ref, ref, toRaw} from "vue";
 import fileNamify from "filenamify";
-import { baseDb, useBaseStore } from "./base";
-import type { IDBPDatabase } from "idb";
-import { usePlayerStore } from "./player/player";
-import type { DownloadState, YouTubeTrack } from "../scripts/types";
-import { executeCached } from "../scripts/utils";
-import { useSpotifyAuthStore } from "./spotify-auth";
+import {baseDb, useBaseStore} from "./base";
+import type {IDBPDatabase} from "idb";
+import {usePlayerStore} from "./player/player";
+import type {DownloadState, YouTubeTrack} from "../scripts/types";
+import {executeCached} from "../scripts/utils";
+import {useSpotifyAuthStore} from "./spotify-auth";
+import {useTrackLoaderStore} from "./player/trackLoader";
 
 export const usePlatformStore = defineStore("platform", () => {
     const library = useLibraryStore();
     const base = useBaseStore();
     const player = usePlayerStore();
     const spotifyAuth = useSpotifyAuthStore();
+    const trackLoader = useTrackLoaderStore();
 
     let db: IDBPDatabase;
     baseDb.then(async (r) => (db = r));
@@ -44,7 +46,7 @@ export const usePlatformStore = defineStore("platform", () => {
         .addEventListener("change", () => {
             window.api.setTheme(
                 window.matchMedia &&
-                    window.matchMedia("(prefers-color-scheme: dark)").matches
+                window.matchMedia("(prefers-color-scheme: dark)").matches
                     ? "dark"
                     : "light",
             );
@@ -55,7 +57,7 @@ export const usePlatformStore = defineStore("platform", () => {
         window.api.setPlatformPlaying(
             playing,
             window.matchMedia &&
-                window.matchMedia("(prefers-color-scheme: dark)").matches,
+            window.matchMedia("(prefers-color-scheme: dark)").matches,
         );
     }
 
@@ -72,12 +74,12 @@ export const usePlatformStore = defineStore("platform", () => {
     }
 
     async function trackIsDownloaded(track: SpotifyApi.TrackObjectFull) {
-        let { outPath } = trackToNames(track);
+        let {outPath} = trackToNames(track);
         return await checkFileExists(outPath);
     }
 
     async function makeTempTrack(track: SpotifyApi.TrackObjectFull) {
-        let { outPath, filename } = trackToNames(track);
+        let {outPath, filename} = trackToNames(track);
         let tempDir = `${directories?.temp ?? ""}/${filename}.mp3`;
         await window.api.copyFile(outPath, tempDir);
         return tempDir;
@@ -93,11 +95,11 @@ export const usePlatformStore = defineStore("platform", () => {
         );
         let outPath = `${directories?.music ?? ""}/${filename}.mp3`;
         let query = `${artistsString} - ${track.name}`;
-        return { cacheKey: `PTI-${filename}`, filename, outPath, query };
+        return {cacheKey: `PTI-${filename}`, filename, outPath, query};
     }
 
     async function deleteTrackCache(track: SpotifyApi.TrackObjectFull) {
-        let { outPath } = trackToNames(track);
+        let {outPath} = trackToNames(track);
         if (await checkFileExists(outPath))
             await window.api.deleteFile(outPath);
 
@@ -112,13 +114,22 @@ export const usePlatformStore = defineStore("platform", () => {
     async function getTrackJpg(track: SpotifyApi.TrackObjectFull) {
         let imgUrl = track.album.images[0].url;
         if (imgUrl === undefined)
-            return { jpg: "", colors: { dark: "#eee", light: "#333" } };
+            return {jpg: "", colors: {dark: "#eee", light: "#333"}};
 
         let jpg: string = await window.api.downloadAsJpg(imgUrl);
         let colors: { dark: string; light: string } =
             await window.api.getDominantColor(jpg);
 
-        return { jpg, colors };
+        return {jpg, colors};
+    }
+
+    async function getTrackFile(track: SpotifyApi.TrackObjectFull) {
+        let {outPath} = trackToNames(track);
+        if (!await checkFileExists(outPath))
+            return outPath;
+        let {jpg} = await getTrackJpg(track);
+        let result = await downloadTrackFile(track, undefined, jpg);
+        return result.path;
     }
 
     async function downloadTrackFile(
@@ -128,7 +139,7 @@ export const usePlatformStore = defineStore("platform", () => {
     ) {
         const isYouTubeTrack = track.id.startsWith("yt-");
 
-        let { filename, outPath } = trackToNames(track);
+        let {filename, outPath} = trackToNames(track);
 
         let fun: (p: number) => void;
         fun = (percent: number) => {
@@ -155,17 +166,17 @@ export const usePlatformStore = defineStore("platform", () => {
                 //@ts-ignore
                 tags.year = new Date(track.album.release_date).getFullYear();
         }
-        let { id } = await window.api.downloadYt(filename, tags, imgPath ?? "");
+        let {id} = await window.api.downloadYt(filename, tags, imgPath ?? "");
         if (base.sourceDialog.tempTrackOverride.trackId === track.id) {
             outPath = await makeTempTrack(track);
             base.sourceDialog.tempTrackOverride.trackId = "";
         }
 
-        return { path: outPath, id };
+        return {path: outPath, id};
     }
 
     async function getVolumeStats(trackPath: string) {
-        let { err } = await window.api.getVolumeStats(trackPath);
+        let {err} = await window.api.getVolumeStats(trackPath);
         let lines = err.split("\n") as string[];
         let volumeLines = lines.filter((l) =>
             l.startsWith("[Parsed_volumedetect_0"),
@@ -173,11 +184,11 @@ export const usePlatformStore = defineStore("platform", () => {
         let peakLine = volumeLines.find((l) => l.includes("max_volume"));
         let meanLine = volumeLines.find((l) => l.includes("mean_volume"));
         if (meanLine === undefined || peakLine === undefined)
-            return { mean: -5, peak: 0 };
+            return {mean: -5, peak: 0};
         let mean: number, peak: number;
         mean = +meanLine.split("mean_volume:")[1].split("dB")[0].trim();
         peak = +peakLine.split("max_volume:")[1].split("dB")[0].trim();
-        return { mean, peak };
+        return {mean, peak};
     }
 
     async function youTubeInfoById(id: string) {
@@ -303,20 +314,17 @@ export const usePlatformStore = defineStore("platform", () => {
         downloadState.value.set(key, state);
 
         (async () => {
-            let batchSize = 8;
+            let batchSize = 10;
             for (let i = 0; i < tracks.length; i += batchSize) {
                 state.value.downloaded = i;
                 let batch = tracks.slice(i, i + batchSize);
                 try {
                     let tracks = await Promise.all(
                         batch.map((track) =>
-                            downloadTrackFile(
-                                track as SpotifyApi.TrackObjectFull,
-                                false,
-                            ),
+                            trackLoader.getFullTrackData(track as SpotifyApi.TrackObjectFull),
                         ),
                     );
-                    await processFunc(tracks);
+                    await processFunc(tracks.map(t => t.path));
                     if (state.value.canceled) {
                         downloadState.value.delete(key);
                         return;
@@ -373,5 +381,6 @@ export const usePlatformStore = defineStore("platform", () => {
         checkTracksDownloaded,
         checkFileExists,
         getTrackJpg,
+        getTrackFile
     };
 });

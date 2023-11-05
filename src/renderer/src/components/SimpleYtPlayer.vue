@@ -26,11 +26,12 @@
 
 <script lang="ts" setup>
 import SimpleProgressBar from "./SimpleProgressBar.vue";
-import type { PropType } from "vue";
-import { onUnmounted, ref } from "vue";
-import { usePlatformStore } from "../store/electron";
-import { useBaseStore } from "../store/base";
+import type {PropType} from "vue";
+import {onUnmounted, ref} from "vue";
+import {usePlatformStore} from "../store/electron";
+import {useBaseStore} from "../store/base";
 import PlayButton from "./PlayButton.vue";
+import {useTrackLoaderStore} from "../store/player/trackLoader";
 
 defineProps({
     track: {
@@ -40,6 +41,7 @@ defineProps({
 });
 
 const platform = usePlatformStore();
+const trackLoader = useTrackLoaderStore()
 const base = useBaseStore();
 
 const currentTime = ref(0);
@@ -89,7 +91,7 @@ async function load(track: SpotifyApi.TrackObjectFull) {
         if (percent === 100) base.events.off(id + "progress", onProgress);
     };
     base.events.on(id + "progress", onProgress);
-    playerElement.src = await platform.getTrackFile(track, false);
+    playerElement.src = await platform.getTrackFile(track);
 }
 
 async function togglePlay() {

@@ -159,13 +159,6 @@ export interface DataExport {
                 listenMinutes: number;
             };
         };
-        imageColor: {
-            [key: string]: {
-                light: string;
-                dark: string;
-            };
-        };
-        nameToId: { [key: string]: string };
         spotify: {
             library: {
                 playlist: SpotifyApi.PlaylistObjectFull[];
@@ -199,8 +192,6 @@ export interface DataExport {
             };
             skips: number;
         };
-        trackBars: { [key: string]: MetaTrackBars };
-        trackEdits: { [key: string]: TrackChanges };
         trackStats: {
             [key: string]: {
                 track: SpotifyApi.TrackObjectFull;
@@ -209,12 +200,7 @@ export interface DataExport {
                 listenMinutes: number;
             };
         };
-        trackVolumeStats: {
-            [key: string]: {
-                mean: number;
-                peak: number;
-            };
-        };
+        trackMetadata:TrackMetadata[],
         tracks: LikedTrack[];
     };
 }

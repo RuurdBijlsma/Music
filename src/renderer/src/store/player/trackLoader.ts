@@ -1,4 +1,4 @@
-import { defineStore } from "pinia";
+import {defineStore} from "pinia";
 import {
     ItemCollection,
     LikedTrack,
@@ -7,9 +7,9 @@ import {
     TrackData,
     TrackMetadata,
 } from "../../scripts/types";
-import { usePlatformStore } from "../electron";
-import { baseDb, useBaseStore } from "../base";
-import { useLibraryStore } from "../library";
+import {usePlatformStore} from "../electron";
+import {baseDb, useBaseStore} from "../base";
+import {useLibraryStore} from "../library";
 
 export const useTrackLoaderStore = defineStore("trackLoader", () => {
     const platform = usePlatformStore();
@@ -20,25 +20,16 @@ export const useTrackLoaderStore = defineStore("trackLoader", () => {
         return (
             trackData.metadata.volume !== undefined &&
             trackData.metadata.trackBars !== undefined &&
-            trackData.metadata.imageColor !== undefined
+            trackData.metadata.imageColor !== undefined &&
+            trackData.metadata.youTubeSource !== undefined
         );
     }
-
-    let isLoading = new Set<string>();
 
     async function getTrackData(
         track: SpotifyApi.TrackObjectFull,
         onData: (data: TrackData) => any,
         collection: ItemCollection | undefined = undefined,
     ) {
-        if (isLoading.has(track.id)) {
-            console.log(
-                "Track is already loading, so we don't need to calculate again",
-            );
-            return;
-        }
-        isLoading.add(track.id);
-
         const db = await baseDb;
         let metadata: TrackMetadata = await db.get("trackMetadata", track.id);
         let trackPath = platform.trackToNames(track).outPath;
@@ -60,11 +51,8 @@ export const useTrackLoaderStore = defineStore("trackLoader", () => {
         };
 
         const sendData = (data: TrackData) => {
-            console.log(data.metadata);
             if (isLoadedTrackData(data)) {
-                isLoading.delete(track.id);
                 // Done with calculations for track
-                console.log("Putting track metadata", data.metadata);
                 db.put("trackMetadata", data.metadata);
             }
             onData(data);
@@ -75,8 +63,8 @@ export const useTrackLoaderStore = defineStore("trackLoader", () => {
 
         // file does not exist, full metadata does
         if (!fileExists && metadata !== undefined) {
-            let { jpg, colors } = await platform.getTrackJpg(track);
-            let { path } = await platform.downloadTrackFile(
+            let {jpg, colors} = await platform.getTrackJpg(track);
+            let {path} = await platform.downloadTrackFile(
                 track,
                 metadata.youTubeSource,
                 jpg,
@@ -87,23 +75,22 @@ export const useTrackLoaderStore = defineStore("trackLoader", () => {
         }
 
         if (!fileExists) {
-            let { jpg, colors } = await platform.getTrackJpg(track);
+            let {jpg, colors} = await platform.getTrackJpg(track);
             trackData.metadata.imageColor = colors;
-            let { path, id } = await platform.downloadTrackFile(
+            let {path, id} = await platform.downloadTrackFile(
                 track,
                 undefined,
                 jpg,
             );
             trackData.path = path;
             trackData.metadata.youTubeSource = id;
-            return sendData(trackData);
+            sendData(trackData);
         }
 
         // Track Bars
         (async () => {
             // get track bars and set to metadata en do sendData
             let bars = await calculateTrackBars(trackData);
-            console.log("Made trackbars", bars);
             if (bars === undefined) {
                 base.addSnack("Oops, can't calculate trackbars");
             } else {
@@ -123,11 +110,20 @@ export const useTrackLoaderStore = defineStore("trackLoader", () => {
         // Theme color
         (async () => {
             if (trackData.metadata.imageColor === undefined) {
-                let { colors } = await platform.getTrackJpg(track);
+                let {colors} = await platform.getTrackJpg(track);
                 trackData.metadata.imageColor = colors;
                 sendData(trackData);
             }
         })().then();
+    }
+
+    async function getFullTrackData(track: SpotifyApi.TrackObjectFull, collection?: ItemCollection) {
+        return new Promise<TrackData>(resolve => {
+            getTrackData(track, (data) => {
+                if (isLoadedTrackData(data))
+                    resolve(data);
+            }, collection);
+        });
     }
 
     const canvasWidth = 300;
@@ -178,10 +174,10 @@ export const useTrackLoaderStore = defineStore("trackLoader", () => {
             channelData = channelData.slice(
                 Math.floor(
                     (trackData.likedInfo.startTime / duration) *
-                        channelData.length,
+                    channelData.length,
                 ),
                 Math.ceil(trackData.likedInfo.endTime / duration) *
-                    channelData.length,
+                channelData.length,
             );
         }
 
@@ -212,5 +208,5 @@ export const useTrackLoaderStore = defineStore("trackLoader", () => {
         return bars;
     }
 
-    return { getTrackData, getEmptyMetaTrackBars, isLoadedTrackData };
+    return {getTrackData, getEmptyMetaTrackBars, isLoadedTrackData, getFullTrackData};
 });

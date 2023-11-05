@@ -136,7 +136,7 @@ async function load(track: SpotifyApi.TrackObjectFull) {
         if (percent === 100) base.events.off(id + "progress", onProgress);
     };
     base.events.on(id + "progress", onProgress);
-    playerElement.src = await platform.getTrackFile(track, false);
+    playerElement.src = await platform.getTrackFile(track);
     let onFirstPlay = () => {};
     onFirstPlay = () => {
         playerElement.currentTime = props.startTime;

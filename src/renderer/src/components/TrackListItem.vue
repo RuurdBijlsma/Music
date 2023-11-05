@@ -29,7 +29,7 @@
         </div>
         <spacer />
         <div class="track-duration ml-2">
-            {{ base.msToReadable(trackDuration * 1000) }}
+            {{ base.msToReadable(track.duration_ms) }}
         </div>
         <v-menu>
             <template v-slot:activator="{ props }">
@@ -49,7 +49,6 @@
 
 <script lang="ts" setup>
 import type { PropType } from "vue";
-import { computed } from "vue";
 import { useBaseStore } from "../store/base";
 import { usePlayerStore } from "../store/player/player";
 import ArtistsSpan from "./ArtistsSpan.vue";
@@ -77,11 +76,6 @@ const props = defineProps({
 });
 const base = useBaseStore();
 const player = usePlayerStore();
-const trackDuration = computed(
-    () =>
-        (props.track.endTime ?? props.track.duration_ms / 1000) -
-        (props.track.startTime ?? 0),
-);
 
 function playItem() {
     if (props.collection !== null) player.load(props.collection, props.track);

@@ -15,10 +15,10 @@
             class="blurry-bg-transition"
         ></div>
         <div class="main">
-            <top-menu class="top-menu" />
-            <search-suggestions />
-            <div class="fake-top-menu" />
-            <left-navigation />
+            <top-menu class="top-menu"/>
+            <search-suggestions/>
+            <div class="fake-top-menu"/>
+            <left-navigation/>
             <bottom-music-player
                 v-if="base.windowWidth <= 930 && base.dbLoaded"
                 :style="{
@@ -57,14 +57,14 @@
             >
                 <router-view v-slot="{ Component }">
                     <transition mode="out-in" name="slide-fade">
-                        <component :is="Component" />
+                        <component :is="Component"/>
                     </transition>
                 </router-view>
             </div>
         </div>
-        <source-dialog />
-        <edit-info-dialog />
-        <item-context-menu />
+        <source-dialog/>
+        <edit-info-dialog/>
+        <item-context-menu/>
         <v-snackbar
             v-for="snack in base.snackbars"
             v-model="snack.open"
@@ -84,7 +84,6 @@
 // todo
 // todo big refactor
 // ruurd login flow not working without refresh
-// ffbinaries error, http is not defined
 // big bug: trackbars are entirely broken after refresh, they are not cached!
 // bug: library.offlineCollections.has is not a function
 // periodic backup to server?
@@ -113,9 +112,9 @@
 import TopMenu from "./components/TopMenu.vue";
 import MusicPlayer from "./components/MusicPlayer.vue";
 import SearchSuggestions from "./components/SearchSuggestions.vue";
-import { useBaseStore } from "./store/base";
-import { usePlayerStore } from "./store/player/player";
-import { computed, ref, watch } from "vue";
+import {useBaseStore} from "./store/base";
+import {usePlayerStore} from "./store/player/player";
+import {computed, ref, watch} from "vue";
 import ItemContextMenu from "./components/ItemContextMenu.vue";
 import SourceDialog from "./components/SourceDialog.vue";
 import LeftNavigation from "./components/LeftNavigation.vue";
@@ -207,12 +206,11 @@ body {
     flex-direction: column;
     width: 100%;
     height: 100%;
-    font-family:
-        "Segoe UI",
-        Helvetica Neue,
-        Helvetica,
-        Arial,
-        sans-serif;
+    font-family: "Segoe UI",
+    Helvetica Neue,
+    Helvetica,
+    Arial,
+    sans-serif;
 }
 
 .top-menu {
@@ -318,10 +316,9 @@ a[no-style]:hover {
 }
 
 .v-btn--icon {
-    transition:
-        transform 0.3s,
-        color 1s,
-        caret-color 1s !important;
+    transition: transform 0.3s,
+    color 1s,
+    caret-color 1s !important;
 }
 
 *[no-drag] {

@@ -18,7 +18,7 @@
 
 <script lang="ts" setup>
 import { useLibraryStore } from "../../store/library";
-import { computed, ref, watch } from "vue";
+import {computed, ref, watch} from "vue";
 import { useRoute } from "vue-router";
 import { useBaseStore } from "../../store/base";
 import TrackListVirtual from "../../components/TrackListVirtual.vue";

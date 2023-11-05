@@ -27,7 +27,10 @@ export const useLibraryStore = defineStore("library", () => {
     let db: IDBPDatabase;
     baseDb.then((r) => {
         db = r;
-        loadValues().then(() => (valuesLoaded.value = true));
+        loadValues().then(() => {
+            valuesLoaded.value = true;
+            base.events.emit('valuesLoaded');
+        });
     });
 
     // Spotify UI variables
@@ -94,7 +97,6 @@ export const useLibraryStore = defineStore("library", () => {
             ]);
 
         if (dbRecentPlays) recentPlays.value = dbRecentPlays;
-        console.log(dbOfflineCollections);
         if (dbOfflineCollections)
             offlineCollections.value = new Set(dbOfflineCollections);
         if (dbSaved) saved.value = dbSaved;
@@ -255,7 +257,6 @@ export const useLibraryStore = defineStore("library", () => {
 
         // function to add track at the correct spot, sorted by date
         const addTrack = (track: LikedTrack) => {
-            console.log("Adding new track from api", track);
             let spliceIndex = tracks.value.findIndex(
                 (localTrack) =>
                     localTrack.added_at_reverse > track.added_at_reverse,
@@ -279,7 +280,6 @@ export const useLibraryStore = defineStore("library", () => {
                 }
                 apiTrackIds.add(spotifyItem.track.id);
             }
-            console.log(apiTrackIds);
         }
         // find tracks that are in the local Set, but not in the api Set
         // if they are spotify tracks, they must have been removed from liked tracks
@@ -294,7 +294,6 @@ export const useLibraryStore = defineStore("library", () => {
             );
             db.delete("tracks", id).then();
         }
-        console.log({ removedFromLocal });
 
         localStorage.lastTracksLoad = Date.now();
         base.events.emit("refreshedTrack");
