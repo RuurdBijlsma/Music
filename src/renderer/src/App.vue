@@ -82,18 +82,16 @@
 
 <script lang="ts" setup>
 // todo
-// todo big refactor
-// ruurd login flow not working without refresh
-// big bug: trackbars are entirely broken after refresh, they are not cached!
-// bug: library.offlineCollections.has is not a function
+// finish change source and edit track refactor
+// setting for schedule dark/light mode
+// if bottom player is active set volume to full
+// ruurd login flow not working without refresh? test pls
 // periodic backup to server?
-// possibly replace color thief with something without vulnerabilities
 // playlists cachen
 // simple player en simple yt player samenvoegen
-// setting for schedule dark/light mode
 // show listen stats
 // generate a spotify wrapped / ruurd music wrapped
-// if bottom player is active set volume to full
+// possibly replace color thief with something without vulnerabilities
 // -----------------------------------------------------------
 // listen stats
 // - per song listen count
