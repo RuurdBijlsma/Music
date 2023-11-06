@@ -1,11 +1,10 @@
-import { ElectronAPI } from "@electron-toolkit/preload";
-import { AuthToken } from "../renderer/src/store/spotify-auth";
+import {ElectronAPI} from "@electron-toolkit/preload";
+import {AuthToken} from "../renderer/src/store/spotify-auth";
 
 declare global {
     interface Window {
         electron: ElectronAPI;
         api: {
-            searchYt: (query: string, results: number = 3) => Promise<any>,
             ytInfoById: (id: string) => Promise<any>,
             getDominantColor: (imgUrl: string) => Promise<any>,
             setPlatformPlaying: (value: boolean, darkTheme: boolean) => Promise<any>,
@@ -18,7 +17,7 @@ declare global {
             minimizeWindow: () => Promise<any>,
             toggleMaximize: () => Promise<any>,
             closeWindow: () => Promise<any>,
-            downloadYt: (filename: string, tags: any, imageFile: string) => Promise<any>,
+            downloadYt: (id: string, outPath: string, tags: any, imageFile: string) => Promise<any>,
             updateYtdlp: () => Promise<string>,
             checkTracksDownloaded: (filenames: string[]) => Promise<boolean>,
 

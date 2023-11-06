@@ -9,12 +9,14 @@ import type { DownloadState, YouTubeTrack } from "../scripts/types";
 import { executeCached } from "../scripts/utils";
 import { useSpotifyAuthStore } from "./spotify-auth";
 import { useTrackLoaderStore } from "./player/trackLoader";
+import { useSearchStore } from "./search";
 
 export const usePlatformStore = defineStore("platform", () => {
     const library = useLibraryStore();
     const base = useBaseStore();
     const player = usePlayerStore();
     const spotifyAuth = useSpotifyAuthStore();
+    const search = useSearchStore();
     const trackLoader = useTrackLoaderStore();
 
     let db: IDBPDatabase;
@@ -78,13 +80,6 @@ export const usePlatformStore = defineStore("platform", () => {
         return await checkFileExists(outPath);
     }
 
-    async function makeTempTrack(track: SpotifyApi.TrackObjectFull) {
-        let { outPath, filename } = trackToNames(track);
-        let tempDir = `${directories?.temp ?? ""}/${filename}.mp3`;
-        await window.api.copyFile(outPath, tempDir);
-        return tempDir;
-    }
-
     function trackToNames(track: SpotifyApi.TrackObjectFull) {
         let artistsString = track.artists.map((a) => a.name).join(", ");
         const isYouTubeTrack = track.id.startsWith("yt-");
@@ -124,33 +119,40 @@ export const usePlatformStore = defineStore("platform", () => {
         return result.path;
     }
 
+    async function queryToYtId(query: string) {
+        let results = await search.searchYouTubeRaw(query, 1);
+        if (results.length > 0) return results[0].id;
+        throw new Error("Couldn't find youtube video for query: " + query);
+    }
+
     async function downloadTrackFile(
         track: SpotifyApi.TrackObjectFull,
-        youtubeSource?: string,
+        ytId?: string,
         imgPath = track.album.images[0]?.url,
     ) {
+        let { outPath, query } = trackToNames(track);
+
+        // determine YT ID for track
         const isYouTubeTrack = track.id.startsWith("yt-");
+        ytId ??= isYouTubeTrack
+            ? track.id.substring(3)
+            : await queryToYtId(query);
 
-        let { filename, outPath } = trackToNames(track);
-
+        // receive progress events
         let fun: (p: number) => void;
         fun = (percent: number) => {
             base.events.emit(track.id + "progress", percent);
-            if (percent === 100) {
-                window.events.off(filename + "progress", fun);
-            }
+            if (percent === 100) window.events.off(ytId + "progress", fun);
         };
-        window.events.on(filename + "progress", fun);
+        window.events.on(ytId + "progress", fun);
 
+        // Create mp3 metadata tags
         let tags: any = {
             title: track.name,
             artist: track.artists.map((a) => a.name),
             disc: track.disc_number,
             track: track.track_number,
-            id: isYouTubeTrack ? track.id.substring(3) : undefined,
         };
-        if (youtubeSource !== undefined) tags.id = youtubeSource;
-
         if (track.hasOwnProperty("album")) {
             if (track.album.hasOwnProperty("name"))
                 tags.album = track.album.name;
@@ -158,13 +160,10 @@ export const usePlatformStore = defineStore("platform", () => {
                 //@ts-ignore
                 tags.year = new Date(track.album.release_date).getFullYear();
         }
-        let { id } = await window.api.downloadYt(filename, tags, imgPath ?? "");
-        if (base.sourceDialog.tempTrackOverride.trackId === track.id) {
-            outPath = await makeTempTrack(track);
-            base.sourceDialog.tempTrackOverride.trackId = "";
-        }
 
-        return { path: outPath, id };
+        // Download file
+        await window.api.downloadYt(ytId, outPath, tags, imgPath ?? "");
+        return { path: outPath, ytId };
     }
 
     async function getVolumeStats(trackPath: string) {

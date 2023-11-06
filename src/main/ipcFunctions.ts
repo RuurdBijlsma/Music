@@ -7,9 +7,6 @@ export function handleIpc(ipcMain: Electron.IpcMain, win: BrowserWindow) {
     const nf = new NodeFunctions(win);
     const auth = new AuthFunctions(win);
 
-    ipcMain.handle("searchYt", (_, query: string, results: number = 3) =>
-        nf.searchYouTube(query, results),
-    );
     ipcMain.handle("ytInfoById", (_, id: string) => nf.youTubeInfoById(id));
     ipcMain.handle("getDominantColor", (_, imgUrl: string) =>
         nf.getDominantColor(imgUrl),
@@ -34,8 +31,8 @@ export function handleIpc(ipcMain: Electron.IpcMain, win: BrowserWindow) {
     ipcMain.handle("updateYtdlp", () => nf.updateYtdlp());
     ipcMain.handle(
         "downloadYt",
-        async (_, filename: string, tags: any, imageFile: string) =>
-            nf.downloadYouTube(filename, tags, imageFile),
+        async (_, id: string, outPath: string, tags: any, imageFile: string) =>
+            nf.downloadYouTube(id, outPath, tags, imageFile),
     );
 
     ipcMain.handle("checkFileExists", (_, filename: string) =>

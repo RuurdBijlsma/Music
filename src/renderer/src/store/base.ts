@@ -134,10 +134,6 @@ export const useBaseStore = defineStore("base", () => {
         show: false,
         items: [] as YouTubeSearchResult[],
         loading: false,
-        tempTrackOverride: {
-            ytId: "",
-            trackId: "",
-        },
         spotifyTrack: null as SpotifyApi.TrackObjectFull | null,
         trackData: null as TrackData | null,
     });

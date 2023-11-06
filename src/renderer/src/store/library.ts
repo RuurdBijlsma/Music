@@ -476,11 +476,6 @@ export const useLibraryStore = defineStore("library", () => {
         ) {
             base.sourceDialog.show = false;
 
-            // base.sourceDialog.tempTrackOverride = {
-            //     ytId: ytId,
-            //     trackId: trackId,
-            // };
-            // await player.unload()
             await player.load(player.collection, trackData.track);
         }
     }

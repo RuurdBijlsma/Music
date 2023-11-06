@@ -1,10 +1,8 @@
-import {contextBridge, ipcRenderer} from "electron";
-import {electronAPI} from "@electron-toolkit/preload";
+import { contextBridge, ipcRenderer } from "electron";
+import { electronAPI } from "@electron-toolkit/preload";
 
 // Custom APIs for renderer
 const api = {
-    searchYt: (query: string, results: number = 3) =>
-        ipcRenderer.invoke("searchYt", query, results),
     ytInfoById: (id: string) => ipcRenderer.invoke("ytInfoById", id),
     getDominantColor: (imgUrl: string) =>
         ipcRenderer.invoke("getDominantColor", imgUrl),
@@ -19,8 +17,8 @@ const api = {
     getDirectories: () => ipcRenderer.invoke("getDirectories"),
     setTheme: (theme: "dark" | "light") =>
         ipcRenderer.invoke("setTheme", theme),
-    downloadYt: (filename: string, tags: any, imageFile: string) =>
-        ipcRenderer.invoke("downloadYt", filename, tags, imageFile),
+    downloadYt: (id: string, outPath: string, tags: any, imageFile: string) =>
+        ipcRenderer.invoke("downloadYt", id, outPath, tags, imageFile),
     updateYtdlp: () => ipcRenderer.invoke("updateYtdlp"),
 
     checkFileExists: (filename: string) =>
@@ -77,11 +75,10 @@ ipcRenderer.on("pause", () => events.emit("pause"));
 ipcRenderer.on("skip", (_, n: number) => events.emit("skip", n));
 ipcRenderer.on(
     "progress",
-    (_, data: { filename: string; progress: { percent: number } }) =>
-        events.emit(data.filename + "progress", data.progress.percent),
+    (_, data: { id: string; progress: { percent: number } }) =>
+        events.emit(data.id + "progress", data.progress.percent),
 );
 
-// Use `contextBridge` APIs to expose Electron APIs to renderer
 if (process.contextIsolated) {
     try {
         contextBridge.exposeInMainWorld("electron", electronAPI);
