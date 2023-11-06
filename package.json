@@ -46,7 +46,8 @@
         "vue-router": "^4.2.5",
         "vuetify": "^3.3.23",
         "youtube-search-api": "^1.2.1",
-        "yt-dlp-wrap": "^2.3.12"
+        "yt-dlp-wrap": "^2.3.12",
+        "replace-special-characters": "^1.2.7"
     },
     "devDependencies": {
         "@electron-toolkit/tsconfig": "^1.0.1",

@@ -124,6 +124,9 @@ export const usePlatformStore = defineStore("platform", () => {
     async function queryToYtId(query: string) {
         let results = await search.searchYouTubeRaw(query, 1);
         if (results.length > 0) return results[0].id;
+        results = await window.api.searchYtdlp(query, 1);
+        if (!Array.isArray(results)) results = [results];
+        if (results.length > 0) return results[0].id;
         throw new Error("Couldn't find youtube video for query: " + query);
     }
 

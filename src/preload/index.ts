@@ -4,6 +4,8 @@ import { electronAPI } from "@electron-toolkit/preload";
 // Custom APIs for renderer
 const api = {
     ytInfoById: (id: string) => ipcRenderer.invoke("ytInfoById", id),
+    searchYtdlp: (query: string, limit: number) =>
+        ipcRenderer.invoke("searchYtdlp", query, limit),
     getDominantColor: (imgUrl: string) =>
         ipcRenderer.invoke("getDominantColor", imgUrl),
     setPlatformPlaying: (value: boolean, darkTheme: boolean) =>

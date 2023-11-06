@@ -175,6 +175,7 @@ export const usePlayerStore = defineStore("player", () => {
         autoplay = true,
     ) {
         const _trackId = _track.id;
+        console.log(_trackId);
         // if track is already playing, exit
         if (isActive(_collection, _track)) return;
 

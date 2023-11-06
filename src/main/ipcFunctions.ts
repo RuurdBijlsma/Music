@@ -34,6 +34,9 @@ export function handleIpc(ipcMain: Electron.IpcMain, win: BrowserWindow) {
         async (_, id: string, outPath: string, tags: any, imageFile: string) =>
             nf.downloadYouTube(id, outPath, tags, imageFile),
     );
+    ipcMain.handle("searchYtdlp", async (_, query: string, limit: number) =>
+        nf.searchYtdlp(query, limit),
+    );
 
     ipcMain.handle("checkFileExists", (_, filename: string) =>
         nf.checkFileExists(filename),

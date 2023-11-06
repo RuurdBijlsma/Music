@@ -25,6 +25,7 @@ export const useStatsStore = defineStore("playerStats", () => {
         }, 1000);
     }
 
+    console.log({playing})
     watch(playing, () => {
         if (playing.value) {
             createStatsInterval();

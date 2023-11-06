@@ -242,6 +242,7 @@ async function addToPlaylist(playlistId: string, track: Item) {
 
 async function deleteTrack() {
     await player.deleteTrack(props.item as SpotifyApi.TrackObjectFull);
+    base.addSnack("Track file deleted");
     isDownloaded.value = false;
 }
 

@@ -1,11 +1,13 @@
 import {ElectronAPI} from "@electron-toolkit/preload";
 import {AuthToken} from "../renderer/src/store/spotify-auth";
+import {ipcRenderer} from "electron";
 
 declare global {
     interface Window {
         electron: ElectronAPI;
         api: {
             ytInfoById: (id: string) => Promise<any>,
+            searchYtdlp: (query: string,limit:number) => Promise<any>,
             getDominantColor: (imgUrl: string) => Promise<any>,
             setPlatformPlaying: (value: boolean, darkTheme: boolean) => Promise<any>,
             stopPlatformPlaying: () => Promise<any>,

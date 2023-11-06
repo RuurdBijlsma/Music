@@ -5,7 +5,7 @@ import os from "os";
 import type { BrowserWindow } from "electron";
 import { dialog, globalShortcut } from "electron";
 import type { Progress } from "yt-dlp-wrap";
-import child_process from "child_process";
+import child_process, { spawn } from "child_process";
 import ColorThief from "color-extr-thief";
 import { getContrastRatio, RGBToHex, RGBToHSL } from "./utils";
 import darkIcon from "../../resources/app-icon/dark-500.png?asset";
@@ -19,6 +19,7 @@ import lightPauseIcon from "../../resources/media-icon/light-pauseicon.png?asset
 import lightPrevIcon from "../../resources/media-icon/light-previcon.png?asset";
 import lightNextIcon from "../../resources/media-icon/light-nexticon.png?asset";
 import ffBinaries from "ffbinaries";
+import replaceSpecialCharacters from "replace-special-characters";
 
 const YTDlpWrap = require("yt-dlp-wrap").default;
 export default class NodeFunctions {
@@ -120,43 +121,33 @@ export default class NodeFunctions {
         destinationFolder = Directories.temp,
     ) {
         await this.waitBinaries;
-        return new Promise<string>(
-            (resolve, reject) => {
-                let args = [
-                    `${id}`,
-                    `-o`,
-                    `${path.join(
-                        destinationFolder,
-                        filename + ".temp.%(ext)s",
-                    )}`,
-                    `-x`,
-                    "--audio-format",
-                    "mp3",
-                    "--audio-quality",
-                    "0", //second-best audio quality
-                ];
-                this.ytdlp
-                    .exec(args)
-                    .on("progress", (progress: Progress) => {
-                        this.win.webContents.send("progress", {
-                            id,
-                            progress,
-                        });
-                    })
-                    .on("ytDlpEvent", (a: string, b: string) =>
-                        console.log(a, b),
-                    )
-                    .on("error", (error: Error) => reject(error))
-                    .on("close", () =>
-                        resolve(
-                            path.join(
-                                destinationFolder,
-                                filename + ".temp.mp3",
-                            ),
-                        ),
-                    );
-            },
-        );
+        return new Promise<string>((resolve, reject) => {
+            let args = [
+                `-o`,
+                `${path.join(destinationFolder, filename + ".temp.%(ext)s")}`,
+                `-x`,
+                "--audio-format",
+                "mp3",
+                "--audio-quality",
+                "0", //second-best audio quality
+                `https://www.youtube.com/watch?v=${id}`,
+            ];
+            this.ytdlp
+                .exec(args)
+                .on("progress", (progress: Progress) => {
+                    this.win.webContents.send("progress", {
+                        id,
+                        progress,
+                    });
+                })
+                .on("ytDlpEvent", (a: string, b: string) => console.log(a, b))
+                .on("error", (error: Error) => reject(error))
+                .on("close", () =>
+                    resolve(
+                        path.join(destinationFolder, filename + ".temp.mp3"),
+                    ),
+                );
+        });
     }
 
     async ffmpegMetadata(
@@ -250,7 +241,7 @@ export default class NodeFunctions {
 
     async youTubeInfoById(id: string) {
         await this.waitBinaries;
-        let args = [`${id}`, `--dump-json`];
+        let args = [`https://www.youtube.com/watch?v=${id}`, `--dump-json`];
         let stdout = await this.ytdlp.execPromise(args);
         try {
             // return stdout;
@@ -424,6 +415,51 @@ export default class NodeFunctions {
                     resolve(true);
                 }
             });
+        });
+    }
+
+    async searchYtdlp(query: string, limit = 3) {
+        return new Promise<any[]>(async (resolve) => {
+            query = replaceSpecialCharacters(query);
+            let args = [`ytsearch${limit}:"${query}"`, `--dump-json`];
+            if (process.platform === "win32") {
+                let command =
+                    "cmd /c chcp 65001>nul && " +
+                    [`${this.ytdlpPath}`, ...args]
+                        .map((a) =>
+                            a.includes(" ") && !a.includes('"')
+                                ? `"${a.replaceAll('"', '\\"')}"`
+                                : a,
+                        )
+                        .join(" ");
+                let proc = spawn(command, {
+                    shell: true,
+                });
+                let results: any[] = [];
+                proc.stdout.on("data", (data) => {
+                    let line = data.toString().trim();
+                    try {
+                        results.push(JSON.parse(line));
+                    } catch (e) {
+                        console.warn("[win] YTDLP Search parse error", e);
+                    }
+                });
+                proc.on("close", () => {
+                    resolve(results);
+                });
+            } else {
+                try {
+                    let result = await this.ytdlp.execPromise(args);
+                    resolve(
+                        result
+                            .split("\n")
+                            .filter((t) => t.trim().length > 0)
+                            .map(JSON.parse),
+                    );
+                } catch (e) {
+                    console.warn("[linux] YTDLP Search parse error", e);
+                }
+            }
         });
     }
 }
