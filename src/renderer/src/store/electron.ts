@@ -21,9 +21,11 @@ export const usePlatformStore = defineStore("platform", () => {
 
     let db: IDBPDatabase;
     baseDb.then(async (r) => (db = r));
-    let directories: { music: string; temp: string } | null = null;
+    const directories = ref(null as { music: string; temp: string } | null);
 
-    window.api.getDirectories().then((d) => (directories = d));
+    window.api.getDirectories().then((d) => {
+        directories.value = d;
+    });
 
     window.events.on("toggleFavorite", async () => {
         if (player.track !== null) {
@@ -88,7 +90,7 @@ export const usePlatformStore = defineStore("platform", () => {
                 ? `${track.name} [${track.id.substring(3)}]`
                 : `${track.name} - ${artistsString}`,
         );
-        let outPath = `${directories?.music ?? ""}/${filename}.mp3`;
+        let outPath = `${directories.value?.music ?? ""}/${filename}.mp3`;
         let query = `${artistsString} - ${track.name}`;
         return { cacheKey: `PTI-${filename}`, filename, outPath, query };
     }
@@ -129,8 +131,10 @@ export const usePlatformStore = defineStore("platform", () => {
         track: SpotifyApi.TrackObjectFull,
         ytId?: string,
         imgPath = track.album.images[0]?.url,
+        outPathOverwrite?: string,
     ) {
         let { outPath, query } = trackToNames(track);
+        if (outPathOverwrite) outPath = outPathOverwrite;
 
         // determine YT ID for track
         const isYouTubeTrack = track.id.startsWith("yt-");
@@ -375,5 +379,6 @@ export const usePlatformStore = defineStore("platform", () => {
         checkFileExists,
         getTrackJpg,
         getTrackFile,
+        directories,
     };
 });

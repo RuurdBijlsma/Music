@@ -9,6 +9,7 @@ import type {
     ItemType,
     LikedTrack,
 } from "../scripts/types";
+import { TrackData, YouTubeSearchResult } from "../scripts/types";
 import { usePlayerStore } from "./player/player";
 import { useSpotifyApiStore } from "./spotify-api";
 import { useSpotifyAuthStore } from "./spotify-auth";
@@ -61,6 +62,14 @@ export const useLibraryStore = defineStore("library", () => {
         title: "",
         artists: [""],
         durationRange: [0, 1],
+    });
+
+    const sourceDialog = ref({
+        show: false,
+        items: [] as YouTubeSearchResult[],
+        loading: false,
+        spotifyTrack: null as SpotifyApi.TrackObjectFull | null,
+        trackData: null as TrackData | null,
     });
 
     const userPlaylists = computed(() =>
@@ -441,9 +450,9 @@ export const useLibraryStore = defineStore("library", () => {
 
     async function chooseSource(track: SpotifyApi.TrackObjectFull) {
         if (player.playing) player.pause().then();
-        base.sourceDialog.show = true;
-        base.sourceDialog.loading = true;
-        base.sourceDialog.spotifyTrack = track;
+        sourceDialog.value.show = true;
+        sourceDialog.value.loading = true;
+        sourceDialog.value.spotifyTrack = track;
 
         const { query } = platform.trackToNames(track);
         let [options, trackData] = await Promise.all([
@@ -451,32 +460,37 @@ export const useLibraryStore = defineStore("library", () => {
             trackLoader.getFullTrackData(track),
         ]);
 
-        base.sourceDialog.loading = false;
-        base.sourceDialog.items = options;
-        base.sourceDialog.trackData = trackData;
+        sourceDialog.value.loading = false;
+        sourceDialog.value.items = options;
+        sourceDialog.value.trackData = trackData;
     }
 
     async function activateSource(ytId: string) {
-        let trackData = base.sourceDialog.trackData;
+        let trackData = sourceDialog.value.trackData;
         if (trackData === null) return;
         const trackId = trackData.track.id;
-        const { outPath } = platform.trackToNames(trackData.track);
+        const { outPath, query } = platform.trackToNames(trackData.track);
 
-        await platform.deleteFile(outPath);
+        if (await platform.checkFileExists(outPath))
+            await platform.deleteFile(outPath);
         trackData.metadata.youTubeSource = ytId;
         delete trackData.metadata.sourceDuration;
         delete trackData.metadata.trackBars;
-        delete trackData.metadata.youTubeSource;
-        console.log("Updating track metadata to ytId=", ytId);
+        delete trackData.metadata.volume;
+
         await db.put("trackMetadata", toRaw(trackData.metadata));
+        sourceDialog.value.show = false;
+        trackLoader.changeSourceTracks.set(trackData.track.id, query + ytId);
         if (
             player.track !== null &&
             player.collection !== null &&
             player.trackId === trackId
         ) {
-            base.sourceDialog.show = false;
+            let collection = player.collection;
+            player.collection = null;
+            player.track = null;
 
-            await player.load(player.collection, trackData.track);
+            await player.load(collection, trackData.track);
         }
     }
 
@@ -568,6 +582,7 @@ export const useLibraryStore = defineStore("library", () => {
         likedDbChecked,
         likedListKey,
         editTrack,
+        sourceDialog,
         applyEditChanges,
     };
 });

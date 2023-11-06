@@ -150,10 +150,8 @@ export const usePlayerStore = defineStore("player", () => {
         if (
             trackData.metadata.trackBars !== undefined &&
             isActive(_collection, trackData.track)
-        ) {
+        )
             canvasBars = trackData.metadata.trackBars.trackBars;
-            console.log(canvasBars);
-        }
 
         if (
             sourcePath !== trackData.path &&
@@ -198,7 +196,6 @@ export const usePlayerStore = defineStore("player", () => {
                 (r) => r.id === _collection.id,
             );
             if (recentIndex !== -1) library.recentPlays.splice(recentIndex, 1);
-            console.log("Adding to recent plays:", _collection);
             library.recentPlays.unshift(_collection);
             db.put("spotify", toRaw(library.recentPlays), "recentPlays").then();
         }
@@ -650,5 +647,6 @@ export const usePlayerStore = defineStore("player", () => {
         normalizeVolume,
         unload,
         initializeCanvas,
+        isActive,
     };
 });

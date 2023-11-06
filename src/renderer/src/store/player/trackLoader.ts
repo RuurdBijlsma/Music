@@ -15,6 +15,7 @@ export const useTrackLoaderStore = defineStore("trackLoader", () => {
     const platform = usePlatformStore();
     const library = useLibraryStore();
     const base = useBaseStore();
+    const changeSourceTracks = new Map<string, string>();
 
     function isLoadedTrackData(trackData: TrackData) {
         return (
@@ -25,23 +26,22 @@ export const useTrackLoaderStore = defineStore("trackLoader", () => {
         );
     }
 
-    let isLoading = new Set<string>();
-
     async function getTrackData(
         track: SpotifyApi.TrackObjectFull,
         onData: (data: TrackData) => any,
         collection: ItemCollection | undefined = undefined,
     ) {
-        let loadKey = (collection?.id ?? "") + track.id;
-        if (isLoading.has(loadKey)) return;
-        isLoading.add(loadKey);
-
         const db = await baseDb;
         let metadata: TrackMetadata | undefined = await db.get(
             "trackMetadata",
             track.id,
         );
         let trackPath = platform.trackToNames(track).outPath;
+        if (changeSourceTracks.has(track.id)) {
+            trackPath = `${platform.directories?.temp}/${changeSourceTracks.get(
+                track.id,
+            )}.mp3`;
+        }
         let fileExists = await platform.checkFileExists(trackPath);
 
         let likedInfo: undefined | LikedTrack;
@@ -52,16 +52,15 @@ export const useTrackLoaderStore = defineStore("trackLoader", () => {
         let trackData: TrackData = {
             path: trackPath,
             metadata: metadata ?? {
-                trackBars: getEmptyMetaTrackBars(),
                 id: track.id,
             },
             track,
             likedInfo,
         };
+        trackData.metadata.trackBars ??= getEmptyMetaTrackBars();
 
         const sendData = (data: TrackData) => {
             if (isLoadedTrackData(data)) {
-                isLoading.delete(loadKey);
                 // Done with calculations for track
                 db.put("trackMetadata", data.metadata);
             }
@@ -73,16 +72,14 @@ export const useTrackLoaderStore = defineStore("trackLoader", () => {
             sendData(trackData);
         } else {
             let { jpg, colors } = await platform.getTrackJpg(track);
-            console.log(
-                "Downloading track with metadata, ytId = ",
-                trackData.metadata.youTubeSource,
-            );
-            let { path, id } = await platform.downloadTrackFile(
+
+            let { path, ytId } = await platform.downloadTrackFile(
                 track,
                 trackData.metadata.youTubeSource,
                 jpg,
+                trackPath,
             );
-            trackData.metadata.youTubeSource = id;
+            trackData.metadata.youTubeSource = ytId;
             trackData.path = path;
             trackData.metadata.imageColor = colors;
             sendData(trackData);
@@ -103,8 +100,9 @@ export const useTrackLoaderStore = defineStore("trackLoader", () => {
         // Volume mean and peak
         async function volume() {
             // get volume stats and set to metadata en do sendData
-            trackData.metadata.volume =
-                await platform.getVolumeStats(trackPath);
+            trackData.metadata.volume = await platform.getVolumeStats(
+                trackData.path,
+            );
             return trackData;
         }
 
@@ -230,5 +228,6 @@ export const useTrackLoaderStore = defineStore("trackLoader", () => {
         getEmptyMetaTrackBars,
         isLoadedTrackData,
         getFullTrackData,
+        changeSourceTracks,
     };
 });

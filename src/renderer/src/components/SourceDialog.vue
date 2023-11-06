@@ -1,6 +1,6 @@
 <template>
     <v-dialog
-        v-model="base.sourceDialog.show"
+        v-model="sourceDialog.show"
         :class="{ dark: base.isDark }"
         :scrollable="true"
         width="auto"
@@ -12,19 +12,19 @@
             <v-divider></v-divider>
             <v-card-text
                 :style="{
-                    overflowY: base.sourceDialog.loading ? 'hidden' : 'auto',
-                    alignItems: base.sourceDialog.loading ? 'center' : 'left',
+                    overflowY: sourceDialog.loading ? 'hidden' : 'auto',
+                    alignItems: sourceDialog.loading ? 'center' : 'left',
                 }"
                 class="card-content"
             >
                 <v-progress-circular
-                    v-if="base.sourceDialog.loading"
+                    v-if="sourceDialog.loading"
                     indeterminate
                     size="100"
                 />
                 <template v-else>
                     <div
-                        v-for="(item, i) in base.sourceDialog.items"
+                        v-for="(item, i) in sourceDialog.items"
                         class="yt-card mb-5"
                     >
                         <v-img
@@ -77,7 +77,7 @@
                 <v-btn
                     :block="true"
                     :color="base.themeColor"
-                    @click="base.sourceDialog.show = false"
+                    @click="sourceDialog.show = false"
                     >Dismiss
                 </v-btn>
             </v-card-actions>
@@ -100,7 +100,7 @@ const theme = useTheme();
 const search = useSearchStore();
 const base = useBaseStore();
 const library = useLibraryStore();
-const { sourceDialog } = storeToRefs(base);
+const { sourceDialog } = storeToRefs(library);
 
 function activate(item: any) {
     library.activateSource(item.id);
