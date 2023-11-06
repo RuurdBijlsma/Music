@@ -45,7 +45,7 @@
         "vite-plugin-vuetify": "^1.0.2",
         "vue-chartjs": "^5.2.0",
         "vue-router": "^4.2.5",
-        "vuetify": "^3.3.22",
+        "vuetify": "^3.3.23",
         "youtube-search-api": "^1.2.1",
         "yt-dlp-wrap": "^2.3.12"
     },
@@ -54,14 +54,14 @@
         "@mdi/font": "^7.3.67",
         "@types/node": "^18.17.1",
         "@vitejs/plugin-vue": "^4.4.0",
-        "electron": "^27.0.1",
+        "electron": "^27.0.3",
         "electron-builder": "^24.6.4",
         "electron-vite": "^1.0.28",
         "less": "^4.2.0",
-        "prettier": "^3.0.3",
+        "prettier": "3.0.3",
         "typescript": "^5.2.2",
         "vite": "^4.5.0",
-        "vue": "^3.3.6",
+        "vue": "^3.3.7",
         "vue-tsc": "^1.8.19"
     }
 }

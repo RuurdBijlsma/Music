@@ -1,4 +1,4 @@
-import {defineStore} from "pinia";
+import { defineStore } from "pinia";
 import {
     ItemCollection,
     LikedTrack,
@@ -7,9 +7,9 @@ import {
     TrackData,
     TrackMetadata,
 } from "../../scripts/types";
-import {usePlatformStore} from "../electron";
-import {baseDb, useBaseStore} from "../base";
-import {useLibraryStore} from "../library";
+import { usePlatformStore } from "../electron";
+import { baseDb, useBaseStore } from "../base";
+import { useLibraryStore } from "../library";
 
 export const useTrackLoaderStore = defineStore("trackLoader", () => {
     const platform = usePlatformStore();
@@ -20,8 +20,7 @@ export const useTrackLoaderStore = defineStore("trackLoader", () => {
         return (
             trackData.metadata.volume !== undefined &&
             trackData.metadata.trackBars !== undefined &&
-            trackData.metadata.imageColor !== undefined &&
-            trackData.metadata.youTubeSource !== undefined
+            trackData.metadata.imageColor !== undefined
         );
     }
 
@@ -63,8 +62,8 @@ export const useTrackLoaderStore = defineStore("trackLoader", () => {
 
         // file does not exist, full metadata does
         if (!fileExists && metadata !== undefined) {
-            let {jpg, colors} = await platform.getTrackJpg(track);
-            let {path} = await platform.downloadTrackFile(
+            let { jpg, colors } = await platform.getTrackJpg(track);
+            let { path } = await platform.downloadTrackFile(
                 track,
                 metadata.youTubeSource,
                 jpg,
@@ -75,9 +74,9 @@ export const useTrackLoaderStore = defineStore("trackLoader", () => {
         }
 
         if (!fileExists) {
-            let {jpg, colors} = await platform.getTrackJpg(track);
+            let { jpg, colors } = await platform.getTrackJpg(track);
             trackData.metadata.imageColor = colors;
-            let {path, id} = await platform.downloadTrackFile(
+            let { path, id } = await platform.downloadTrackFile(
                 track,
                 undefined,
                 jpg,
@@ -110,19 +109,25 @@ export const useTrackLoaderStore = defineStore("trackLoader", () => {
         // Theme color
         (async () => {
             if (trackData.metadata.imageColor === undefined) {
-                let {colors} = await platform.getTrackJpg(track);
+                let { colors } = await platform.getTrackJpg(track);
                 trackData.metadata.imageColor = colors;
                 sendData(trackData);
             }
         })().then();
     }
 
-    async function getFullTrackData(track: SpotifyApi.TrackObjectFull, collection?: ItemCollection) {
-        return new Promise<TrackData>(resolve => {
-            getTrackData(track, (data) => {
-                if (isLoadedTrackData(data))
-                    resolve(data);
-            }, collection);
+    async function getFullTrackData(
+        track: SpotifyApi.TrackObjectFull,
+        collection?: ItemCollection,
+    ) {
+        return new Promise<TrackData>((resolve) => {
+            getTrackData(
+                track,
+                (data) => {
+                    if (isLoadedTrackData(data)) resolve(data);
+                },
+                collection,
+            );
         });
     }
 
@@ -174,10 +179,10 @@ export const useTrackLoaderStore = defineStore("trackLoader", () => {
             channelData = channelData.slice(
                 Math.floor(
                     (trackData.likedInfo.startTime / duration) *
-                    channelData.length,
+                        channelData.length,
                 ),
                 Math.ceil(trackData.likedInfo.endTime / duration) *
-                channelData.length,
+                    channelData.length,
             );
         }
 
@@ -208,5 +213,10 @@ export const useTrackLoaderStore = defineStore("trackLoader", () => {
         return bars;
     }
 
-    return {getTrackData, getEmptyMetaTrackBars, isLoadedTrackData, getFullTrackData};
+    return {
+        getTrackData,
+        getEmptyMetaTrackBars,
+        isLoadedTrackData,
+        getFullTrackData,
+    };
 });
