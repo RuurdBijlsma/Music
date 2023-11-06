@@ -40,7 +40,6 @@
         "iconv-lite": "^0.6.3",
         "idb": "^7.1.1",
         "pinia": "^2.1.7",
-        "replace-special-characters": "^1.2.7",
         "spotify-web-api-js": "^1.5.2",
         "vite-plugin-vuetify": "^1.0.2",
         "vue-chartjs": "^5.2.0",
