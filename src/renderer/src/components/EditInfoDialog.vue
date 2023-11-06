@@ -1,21 +1,21 @@
 <template>
     <v-dialog
-        :class="{ dark: base.isDark }"
         v-model="editDialog.show"
+        :class="{ dark: base.isDark }"
         :scrollable="true"
         width="auto"
     >
-        <div class="translucent" v-if="track">
+        <div v-if="track" class="translucent">
             <v-card-title>Edit Track Info</v-card-title>
-            <v-divider/>
+            <v-divider />
             <v-card-text>
                 <v-list-subheader class="mb-2">Title</v-list-subheader>
                 <v-text-field
                     v-model="editDialog.title"
-                    hide-details
-                    :single-line="true"
                     :color="base.themeColor"
+                    :single-line="true"
                     density="compact"
+                    hide-details
                 ></v-text-field>
 
                 <v-list-subheader class="mb-2 mt-4">Artists</v-list-subheader>
@@ -23,10 +23,10 @@
                     <v-text-field
                         v-for="(_, i) in editDialog.artists"
                         v-model="editDialog.artists[i]"
-                        hide-details
                         :color="base.themeColor"
                         :single-line="true"
                         density="compact"
+                        hide-details
                     >
                     </v-text-field>
                 </div>
@@ -37,44 +37,44 @@
                     :color="base.themeColor"
                     :max="track.duration_ms / 1000"
                     :min="0"
-                    :strict="true"
                     :step="0.1"
+                    :strict="true"
                 >
                     <template v-slot:prepend>
                         <v-text-field
                             v-model="editDialog.durationRange[0]"
-                            hide-details
-                            :single-line="true"
                             :color="base.themeColor"
-                            type="number"
-                            :step="0.1"
-                            :min="0"
                             :max="track.duration_ms / 1000"
+                            :min="0"
+                            :single-line="true"
+                            :step="0.1"
                             class="duration-input"
                             density="compact"
+                            hide-details
+                            type="number"
                         ></v-text-field>
                     </template>
                     <template v-slot:append>
                         <v-text-field
                             v-model="editDialog.durationRange[1]"
-                            hide-details
-                            :single-line="true"
-                            type="number"
                             :color="base.themeColor"
-                            :step="0.1"
-                            :min="0"
                             :max="track.duration_ms / 1000"
+                            :min="0"
+                            :single-line="true"
+                            :step="0.1"
                             class="duration-input"
                             density="compact"
+                            hide-details
+                            type="number"
                         ></v-text-field>
                     </template>
                 </v-range-slider>
                 <v-btn
+                    v-if="changesObject !== null"
                     :color="base.themeColor"
+                    prepend-icon="mdi-restore"
                     variant="tonal"
                     @click="revert"
-                    prepend-icon="mdi-restore"
-                    v-if="changesObject !== null"
                 >
                     Revert to original values
                 </v-btn>
@@ -82,12 +82,12 @@
             <v-divider class="mb-3"></v-divider>
             <v-card-item>
                 <simple-player
-                    :play-button-size="50"
-                    :track="track"
                     :color="base.themeColor"
-                    :insta-load="true"
                     :end-time="editDialog.durationRange[1]"
+                    :insta-load="true"
+                    :play-button-size="50"
                     :start-time="editDialog.durationRange[0]"
+                    :track="track"
                 ></simple-player>
             </v-card-item>
             <v-card-actions class="mt-1">
@@ -108,12 +108,12 @@
 </template>
 
 <script lang="ts" setup>
-import {baseDb, useBaseStore} from "../store/base";
-import {useLibraryStore} from "../store/library";
-import {computed, ref, watch} from "vue";
+import { baseDb, useBaseStore } from "../store/base";
+import { useLibraryStore } from "../store/library";
+import { computed, ref, watch } from "vue";
 import SimplePlayer from "./SimplePlayer.vue";
 import Spacer from "./Spacer.vue";
-import {TrackChanges} from "../scripts/types";
+import { TrackChanges } from "../scripts/types";
 
 const base = useBaseStore();
 const library = useLibraryStore();
@@ -143,12 +143,15 @@ function revert() {
 }
 
 async function applyChanges() {
-    if (editDialog.value.likedTrack !== null && await library.applyEditChanges(
-        editDialog.value.likedTrack,
-        editDialog.value.title,
-        editDialog.value.artists,
-        editDialog.value.durationRange
-    )) {
+    if (
+        editDialog.value.likedTrack !== null &&
+        (await library.applyEditChanges(
+            editDialog.value.likedTrack,
+            editDialog.value.title,
+            editDialog.value.artists,
+            editDialog.value.durationRange,
+        ))
+    ) {
         editDialog.value.show = false;
     } else {
         base.addSnack("Couldn't apply changes, can't find related track.");

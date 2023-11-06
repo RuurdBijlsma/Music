@@ -1,15 +1,20 @@
-import {defineStore} from "pinia";
-import {usePlatformStore} from "../electron";
-import {computed, ref, toRaw, watch} from "vue";
-import {baseDb, useBaseStore} from "../base";
-import type {IDBPDatabase} from "idb";
-import {useTheme} from "vuetify";
-import type {ItemCollection, TrackBars, TrackData} from "../../scripts/types";
-import {shuffleArray} from "../../scripts/utils";
-import {useLibraryStore} from "../library";
-import {randomNotFound} from "../../scripts/imageSources";
-import {useTrackLoaderStore} from "./trackLoader";
-import {useStatsStore} from "./playStats";
+import { defineStore } from "pinia";
+import { usePlatformStore } from "../electron";
+import { computed, ref, toRaw, watch } from "vue";
+import { baseDb, useBaseStore } from "../base";
+import type { IDBPDatabase } from "idb";
+import { useTheme } from "vuetify";
+import type {
+    ItemCollection,
+    TrackBars,
+    TrackData,
+    TrackMetadata,
+} from "../../scripts/types";
+import { shuffleArray } from "../../scripts/utils";
+import { useLibraryStore } from "../library";
+import { randomNotFound } from "../../scripts/imageSources";
+import { useTrackLoaderStore } from "./trackLoader";
+import { useStatsStore } from "./playStats";
 
 export const usePlayerStore = defineStore("player", () => {
     const base = useBaseStore();
@@ -22,8 +27,7 @@ export const usePlayerStore = defineStore("player", () => {
     let db: IDBPDatabase;
     baseDb.then(async (r) => {
         db = r;
-        if (!library.valuesLoaded)
-            await base.waitFor('valuesLoaded');
+        if (!library.valuesLoaded) await base.waitFor("valuesLoaded");
         let lastPlaying = library.recentPlays[0];
         if (lastPlaying !== undefined) {
             let t = track.value ?? lastPlaying.tracks[0];
@@ -51,8 +55,8 @@ export const usePlayerStore = defineStore("player", () => {
         (localStorage.getItem("trackInMemory") === null
             ? null
             : JSON.parse(
-                localStorage.trackInMemory,
-            )) as null | SpotifyApi.TrackObjectFull,
+                  localStorage.trackInMemory,
+              )) as null | SpotifyApi.TrackObjectFull,
     );
     const trackId = ref("");
     const repeat = ref(
@@ -170,7 +174,7 @@ export const usePlayerStore = defineStore("player", () => {
     ) {
         const _trackId = _track.id;
         // if track is already playing, exit
-        if (trackId.value === _trackId) return;
+        if (isActive(_collection, _track)) return;
 
         let isLoading = tracksLoading.has(_trackId);
         tracksLoading.add(_trackId);
@@ -230,7 +234,6 @@ export const usePlayerStore = defineStore("player", () => {
         addAudioEvents(playerElement);
         playerElement.autoplay = autoplay;
 
-
         if (!isTrackDataLoading.has(_trackId)) {
             isTrackDataLoading.add(_trackId);
             // getTrackData yields when new data is available
@@ -262,8 +265,15 @@ export const usePlayerStore = defineStore("player", () => {
 
     async function deleteTrack(deleteTrack: SpotifyApi.TrackObjectFull) {
         if (deleteTrack === null) return;
-        await db.delete("trackBars", deleteTrack.id);
         await platform.deleteTrackCache(deleteTrack);
+        // delete file, and remove metadata, so it can be recalculated for the new mp3 file
+        db.get("trackMetadata", deleteTrack.id).then((d?: TrackMetadata) => {
+            if (d === undefined) return;
+            delete d.sourceDuration;
+            delete d.trackBars;
+            delete d.volume;
+            db.put("trackMetadata", d).then();
+        });
         if (track.value?.id === deleteTrack.id) {
             await unload();
         }
@@ -374,7 +384,7 @@ export const usePlayerStore = defineStore("player", () => {
             canvas.height = 100;
             context = canvas.getContext("2d");
         }
-        let bars = activeTrackData?.metadata?.trackBars
+        let bars = activeTrackData?.metadata?.trackBars;
         if (bars && activeTrackData?.track === track.value)
             canvasBars = bars.trackBars;
     }
@@ -387,7 +397,7 @@ export const usePlayerStore = defineStore("player", () => {
         const defaultBarFill = theme.current.value.dark
             ? "rgba(255,255,255,0.4)"
             : "rgba(0,0,0,0.2)";
-        let {binSize, binWidth, barSpacing} = canvasBars;
+        let { binSize, binWidth, barSpacing } = canvasBars;
         context.clearRect(0, 0, canvas.width, canvas.height);
         let mapping = (x: number) => 2.14285714286 * x + 0.35714285714;
         let normalizer =
@@ -584,7 +594,7 @@ export const usePlayerStore = defineStore("player", () => {
             collection,
             collection.tracks[
                 Math.floor(Math.random() * collection.tracks.length)
-                ],
+            ],
         );
     }
 

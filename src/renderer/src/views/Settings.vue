@@ -8,9 +8,9 @@
         <h3 class="mb-3">Export</h3>
         <v-btn
             :block="true"
+            :color="base.themeColor"
             :loading="platform.exportMp3State.loading"
             class="mt-2"
-            :color="base.themeColor"
             prepend-icon="mdi-export"
             variant="tonal"
             @click="platform.exportLikedTracks"
@@ -44,21 +44,21 @@
         </template>
 
         <v-btn
-            class="mt-4"
-            :block="true"
             v-if="ruurdAuth.isLoggedIn"
-            :loading="exportLoading"
+            :append-icon="
+                exportResult === 'none'
+                    ? ''
+                    : exportResult === 'success'
+                    ? 'mdi-check-bold'
+                    : 'mdi-alert-circle-outline'
+            "
+            :block="true"
             :color="base.themeColor"
+            :loading="exportLoading"
+            class="mt-4"
             variant="tonal"
             @click="exportToServer"
-            :append-icon="
-                    exportResult === 'none'
-                        ? ''
-                        : exportResult === 'success'
-                        ? 'mdi-check-bold'
-                        : 'mdi-alert-circle-outline'
-                "
-        >Export data to server
+            >Export data to server
         </v-btn>
 
         <v-divider class="mt-3 mb-3" />
@@ -69,15 +69,15 @@
         </p>
         <v-switch
             v-model="player.normalizeVolume"
-            hide-details
             :color="base.themeColor"
+            hide-details
             label="Normalize volume"
         />
         <v-btn
-            :loading="updateLoading"
-            variant="tonal"
             :block="true"
             :color="base.themeColor"
+            :loading="updateLoading"
+            variant="tonal"
             @click="updateYtdlp"
             >Update YT-DLP
         </v-btn>

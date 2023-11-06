@@ -2,9 +2,9 @@
     <v-btn
         :color="color"
         :size="size"
+        :variant="variant"
         density="compact"
         icon
-        :variant="variant"
         @click="onClick"
     >
         <v-progress-circular
@@ -13,12 +13,12 @@
             :model-value="loadProgress"
             :size="Math.round(size * 0.7)"
         />
-        <v-icon :size="iconSize" v-else-if="playing">mdi-pause</v-icon>
-        <v-icon :size="iconSize" v-else>mdi-play</v-icon>
+        <v-icon v-else-if="playing" :size="iconSize">mdi-pause</v-icon>
+        <v-icon v-else :size="iconSize">mdi-play</v-icon>
     </v-btn>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import { PropType } from "vue";
 
 defineProps({
@@ -43,9 +43,9 @@ defineProps({
         type: Number,
         default: 24,
     },
-    color:{
+    color: {
         type: String,
-        default:'default',
+        default: "default",
     },
 });
 const emit = defineEmits(["click"]);
@@ -55,4 +55,4 @@ function onClick() {
 }
 </script>
 
-<style scoped lang="less"></style>
+<style lang="less" scoped></style>

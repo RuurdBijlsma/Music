@@ -151,6 +151,7 @@ async function checkTracksDownloaded() {
 }
 
 watch(route, () => checkTracksDownloaded());
+
 // checkTracksDownloaded();
 
 async function cancelDownload() {

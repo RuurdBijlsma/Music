@@ -9,9 +9,9 @@
                     <h2 class="card-title">{{ itemName }}</h2>
                 </router-link>
                 <p class="card-description mt-3">
-                    <template v-if="item.type !== 'album'">{{
-                        base.itemDescription(item)
-                    }}</template>
+                    <template v-if="item.type !== 'album'"
+                        >{{ base.itemDescription(item) }}
+                    </template>
                     <template v-else>{{ base.albumString(item) }}</template>
                 </p>
             </div>

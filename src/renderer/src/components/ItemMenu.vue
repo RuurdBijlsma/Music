@@ -1,10 +1,10 @@
 <template>
     <v-list density="compact">
         <v-list-subheader v-if="showDescriptor" class="descriptor"
-        >{{ descriptor }}
+            >{{ descriptor }}
         </v-list-subheader>
 
-        <v-divider v-if="showDescriptor"/>
+        <v-divider v-if="showDescriptor" />
 
         <v-list-item v-if="canLike" @click="library.toggleLike(item)">
             <template v-slot:prepend>
@@ -28,7 +28,7 @@
                             size="25"
                             width="2"
                         />
-                        <v-icon v-else icon="mdi-playlist-plus"/>
+                        <v-icon v-else icon="mdi-playlist-plus" />
                     </template>
                     <v-list-item-title>Add to playlist</v-list-item-title>
                 </v-list-item>
@@ -40,7 +40,7 @@
                 >
                     <template v-slot:prepend>
                         <v-avatar rounded>
-                            <v-img :src="base.itemImage(playlist)"/>
+                            <v-img :src="base.itemImage(playlist)" />
                         </v-avatar>
                     </template>
                     <v-list-item-title>{{ playlist.name }}</v-list-item-title>
@@ -64,7 +64,7 @@
                     size="25"
                     width="2"
                 />
-                <v-icon v-else icon="mdi-playlist-minus"/>
+                <v-icon v-else icon="mdi-playlist-minus" />
             </template>
             <v-list-item-title>
                 Remove from
@@ -78,7 +78,7 @@
             :to="`/radio?id=${base.radioId()}&seed_tracks=${item.id}`"
         >
             <template v-slot:prepend>
-                <v-icon icon="mdi-radio-tower"/>
+                <v-icon icon="mdi-radio-tower" />
             </template>
             <v-list-item-title>Go to track radio</v-list-item-title>
         </v-list-item>
@@ -89,7 +89,7 @@
             :to="`/radio?id=${base.radioId()}&seed_artists=${item.id}`"
         >
             <template v-slot:prepend>
-                <v-icon icon="mdi-radio-tower"/>
+                <v-icon icon="mdi-radio-tower" />
             </template>
             <v-list-item-title>Go to artist radio</v-list-item-title>
         </v-list-item>
@@ -100,12 +100,12 @@
             :to="base.itemUrl(item.album)"
         >
             <template v-slot:prepend>
-                <v-icon icon="mdi-album"/>
+                <v-icon icon="mdi-album" />
             </template>
             <v-list-item-title>Go to album</v-list-item-title>
         </v-list-item>
 
-        <v-divider v-if="item.type === 'track'"/>
+        <v-divider v-if="item.type === 'track'" />
 
         <v-list-item
             v-if="item.type === 'track'"
@@ -114,7 +114,7 @@
             @click="library.chooseSource(item)"
         >
             <v-list-item-title class="small-title"
-            >Change source
+                >Change source
             </v-list-item-title>
         </v-list-item>
         <v-list-item
@@ -128,46 +128,46 @@
             @click="deleteTrack"
         >
             <v-list-item-title class="small-title"
-            >Delete file
+                >Delete file
             </v-list-item-title>
         </v-list-item>
         <v-list-item
-            class="small-item"
-            density="compact"
             v-if="
                 item.type === 'track' &&
                 player.track !== null &&
                 isDownloaded &&
                 player.track.id === item.id
             "
+            class="small-item"
+            density="compact"
             @click="player.reloadCurrentTrack"
         >
             <v-list-item-title class="small-title"
-            >Reload file
+                >Reload file
             </v-list-item-title>
         </v-list-item>
         <v-list-item
+            v-if="item.type === 'track' && isLiked"
             class="small-item"
             density="compact"
-            v-if="item.type === 'track' && isLiked"
             @click="editTrack(item)"
         >
             <v-list-item-title class="small-title"
-            >Edit track
+                >Edit track
             </v-list-item-title>
         </v-list-item>
     </v-list>
 </template>
 
 <script lang="ts" setup>
-import type {PropType} from "vue";
-import {computed, onMounted, ref} from "vue";
-import {useBaseStore} from "../store/base";
-import {useLibraryStore} from "../store/library";
-import type {Item, ItemCollection} from "../scripts/types";
-import {usePlatformStore} from "../store/electron";
-import {usePlayerStore} from "../store/player/player";
-import {useRoute} from "vue-router";
+import type { PropType } from "vue";
+import { computed, onMounted, ref } from "vue";
+import { useBaseStore } from "../store/base";
+import { useLibraryStore } from "../store/library";
+import type { Item, ItemCollection } from "../scripts/types";
+import { usePlatformStore } from "../store/electron";
+import { usePlayerStore } from "../store/player/player";
+import { useRoute } from "vue-router";
 
 const props = defineProps({
     item: {
@@ -193,9 +193,8 @@ const canLike = computed(() => {
 });
 
 function editTrack(track: SpotifyApi.TrackObjectFull) {
-    let likedInfo = library.tracks.find(t => t.id === track.id);
-    if (likedInfo)
-        library.editTrack(likedInfo);
+    let likedInfo = library.tracks.find((t) => t.id === track.id);
+    if (likedInfo) library.editTrack(likedInfo);
 }
 
 onMounted(() => {

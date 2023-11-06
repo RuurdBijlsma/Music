@@ -3,7 +3,7 @@
         <div class="music-time-current">
             {{ base.msToReadable(currentTime * 1000) }}
         </div>
-        <div class="container" @mousedown="mouseDown" ref="seekContainer">
+        <div ref="seekContainer" class="container" @mousedown="mouseDown">
             <div class="progress-bar">
                 <div
                     :style="{
@@ -33,18 +33,18 @@ const props = defineProps({
         type: Number,
         required: true,
     },
-    color:{
-        type:String,
-        default:"default",
+    color: {
+        type: String,
+        default: "default",
     },
 });
 
-const getColor = computed(()=>{
-    if(props.color==='default'){
-        return base.isDark ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.7)';
+const getColor = computed(() => {
+    if (props.color === "default") {
+        return base.isDark ? "rgba(255, 255, 255, 0.7)" : "rgba(0, 0, 0, 0.7)";
     }
     return props.color;
-})
+});
 
 const emit = defineEmits(["seek"]);
 const base = useBaseStore();

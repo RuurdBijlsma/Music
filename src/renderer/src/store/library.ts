@@ -1,19 +1,20 @@
-import {defineStore} from "pinia";
-import {computed, ref, toRaw} from "vue";
-import {baseDb, useBaseStore} from "./base";
-import {usePlatformStore} from "./electron";
-import type {IDBPDatabase} from "idb";
+import { defineStore } from "pinia";
+import { computed, ref, toRaw } from "vue";
+import { baseDb, useBaseStore } from "./base";
+import { usePlatformStore } from "./electron";
+import type { IDBPDatabase } from "idb";
 import type {
     Item,
     ItemCollection,
     ItemType,
     LikedTrack,
 } from "../scripts/types";
-import {usePlayerStore} from "./player/player";
-import {useSpotifyApiStore} from "./spotify-api";
-import {useSpotifyAuthStore} from "./spotify-auth";
-import {randomUser} from "../scripts/imageSources";
-import {useSearchStore} from "./search";
+import { usePlayerStore } from "./player/player";
+import { useSpotifyApiStore } from "./spotify-api";
+import { useSpotifyAuthStore } from "./spotify-auth";
+import { randomUser } from "../scripts/imageSources";
+import { useSearchStore } from "./search";
+import { useTrackLoaderStore } from "./player/trackLoader";
 
 export const useLibraryStore = defineStore("library", () => {
     const platform = usePlatformStore();
@@ -22,14 +23,14 @@ export const useLibraryStore = defineStore("library", () => {
     const player = usePlayerStore();
     const spotify = useSpotifyApiStore();
     const spotifyAuth = useSpotifyAuthStore();
-
+    const trackLoader = useTrackLoaderStore();
     let valuesLoaded = ref(false);
     let db: IDBPDatabase;
     baseDb.then((r) => {
         db = r;
         loadValues().then(() => {
             valuesLoaded.value = true;
-            base.events.emit('valuesLoaded');
+            base.events.emit("valuesLoaded");
         });
     });
 
@@ -116,8 +117,7 @@ export const useLibraryStore = defineStore("library", () => {
             likedDbChecked = true;
             base.events.emit("likedDbCheck");
             if (!tracksCached) {
-                loadLikedTracks().then(() => {
-                });
+                loadLikedTracks().then(() => {});
             }
         });
 
@@ -270,7 +270,7 @@ export const useLibraryStore = defineStore("library", () => {
         let apiTrackIds = new Set<string>();
 
         for await (let batch of await spotify.retrieveArray(() =>
-            spotify.api.getMySavedTracks({limit: 50}),
+            spotify.api.getMySavedTracks({ limit: 50 }),
         )) {
             for (let spotifyItem of batch.items) {
                 if (spotifyItem.track.is_local) continue;
@@ -306,7 +306,7 @@ export const useLibraryStore = defineStore("library", () => {
         await spotifyAuth.awaitAuth();
 
         //Featured playlists
-        let featured = await spotify.api.getFeaturedPlaylists({limit: 50});
+        let featured = await spotify.api.getFeaturedPlaylists({ limit: 50 });
         view.value.homePage.featured = {
             title: featured.message,
             playlists: featured.playlists.items,
@@ -339,7 +339,7 @@ export const useLibraryStore = defineStore("library", () => {
         }
 
         //New releases
-        let newReleases = await spotify.api.getNewReleases({limit: 50});
+        let newReleases = await spotify.api.getNewReleases({ limit: 50 });
         view.value.homePage.newReleases = newReleases.albums.items;
         await db.put("spotify", toRaw(view.value), "view");
     }
@@ -372,9 +372,9 @@ export const useLibraryStore = defineStore("library", () => {
         // if ('buttonText' in item) return false;
         let liked = checkLiked(item.type, id);
         if (item.type === "track") {
+            let ytItem = item.id.startsWith("yt-");
             if (liked) {
-                // Spotify
-                await spotify.api.removeFromMySavedTracks([id]);
+                if (!ytItem) await spotify.api.removeFromMySavedTracks([id]);
 
                 db.delete("tracks", id).then();
                 tracks.value.splice(
@@ -390,7 +390,7 @@ export const useLibraryStore = defineStore("library", () => {
                 } as SpotifyApi.PlaylistTrackObject);
 
                 // Spotify
-                await spotify.api.addToMySavedTracks([id]);
+                if (!ytItem) await spotify.api.addToMySavedTracks([id]);
 
                 db.add("tracks", playlistObject).then();
                 tracks.value.unshift(playlistObject);
@@ -440,42 +440,48 @@ export const useLibraryStore = defineStore("library", () => {
     }
 
     async function chooseSource(track: SpotifyApi.TrackObjectFull) {
-        if (player.playing) player.pause();
+        if (player.playing) player.pause().then();
         base.sourceDialog.show = true;
         base.sourceDialog.loading = true;
         base.sourceDialog.spotifyTrack = track;
 
-        const {query} = platform.trackToNames(track);
-        let [options, selectedId] = await Promise.all([
+        const { query } = platform.trackToNames(track);
+        let [options, trackData] = await Promise.all([
             search.searchYouTubeRaw(query, 10),
-            db.get("trackYtId", track.id),
+            trackLoader.getFullTrackData(track),
         ]);
 
         base.sourceDialog.loading = false;
         base.sourceDialog.items = options;
-        base.sourceSelectedId = selectedId ?? "";
+        base.sourceDialog.trackData = trackData;
     }
 
-    async function activateSource(id: string) {
-        let spotifyTrack = base.sourceDialog.spotifyTrack;
-        if (spotifyTrack === null) return;
-        const trackId = spotifyTrack.id;
-        const {outPath} = platform.trackToNames(spotifyTrack);
-        await db.put("trackYtId", id, spotifyTrack.id);
+    async function activateSource(ytId: string) {
+        let trackData = base.sourceDialog.trackData;
+        if (trackData === null) return;
+        const trackId = trackData.track.id;
+        const { outPath } = platform.trackToNames(trackData.track);
+
         await platform.deleteFile(outPath);
-        await db.delete("trackBars", spotifyTrack.id);
+        trackData.metadata.youTubeSource = ytId;
+        delete trackData.metadata.sourceDuration;
+        delete trackData.metadata.trackBars;
+        delete trackData.metadata.youTubeSource;
+        console.log("Updating track metadata to ytId=", ytId);
+        await db.put("trackMetadata", toRaw(trackData.metadata));
         if (
             player.track !== null &&
             player.collection !== null &&
-            player.trackId === spotifyTrack.id
+            player.trackId === trackId
         ) {
             base.sourceDialog.show = false;
 
-            base.sourceDialog.tempTrackOverride = {
-                ytId: id,
-                trackId: trackId,
-            };
-            await player.load(player.collection, spotifyTrack);
+            // base.sourceDialog.tempTrackOverride = {
+            //     ytId: ytId,
+            //     trackId: trackId,
+            // };
+            // await player.unload()
+            await player.load(player.collection, trackData.track);
         }
     }
 
@@ -505,9 +511,11 @@ export const useLibraryStore = defineStore("library", () => {
     }
 
     async function editTrack(likedTrack: LikedTrack) {
-        let likedInfo = tracks.value.find(t => t.id === likedTrack.id);
+        let likedInfo = tracks.value.find((t) => t.id === likedTrack.id);
         if (!likedInfo)
-            return console.warn("You can only edit tracks in your liked tracks");
+            return console.warn(
+                "You can only edit tracks in your liked tracks",
+            );
         player.pause().then();
         editDialog.value.likedTrack = likedTrack;
         console.log(toRaw(editDialog.value.durationRange));
@@ -519,14 +527,21 @@ export const useLibraryStore = defineStore("library", () => {
         ];
     }
 
-    async function applyEditChanges(likedTrack: LikedTrack, name: string, artists: string[], durationRange: number[]) {
+    async function applyEditChanges(
+        likedTrack: LikedTrack,
+        name: string,
+        artists: string[],
+        durationRange: number[],
+    ) {
         likedTrack.track.name = name;
         likedTrack.artistString = artists.join(", ");
-        likedTrack.searchString = `${name.toLowerCase()} ${likedTrack.artistString}`;
+        likedTrack.searchString = `${name.toLowerCase()} ${
+            likedTrack.artistString
+        }`;
         likedTrack.title = name;
         likedTrack.startTime = durationRange[0];
         likedTrack.endTime = durationRange[1];
-        await db.put('tracks', likedTrack);
+        await db.put("tracks", likedTrack);
 
         return true;
     }

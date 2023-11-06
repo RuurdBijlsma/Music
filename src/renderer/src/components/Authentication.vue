@@ -8,16 +8,17 @@
             <v-window-item value="spotify">
                 <v-text-field
                     v-model="spotifyAuth.clientId"
+                    :color="base.themeColor"
                     class="mt-5"
                     density="compact"
                     hide-details
                     label="Spotify client ID"
                     variant="filled"
-                    :color="base.themeColor"
                 />
                 <v-text-field
                     v-model="spotifyAuth.secret"
                     :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
+                    :color="base.themeColor"
                     :type="showPassword ? 'text' : 'password'"
                     class="mt-5"
                     density="compact"
@@ -25,7 +26,6 @@
                     label="Spotify secret"
                     variant="filled"
                     @click:append="showPassword = !showPassword"
-                    :color="base.themeColor"
                 />
                 <v-btn
                     v-if="spotifyAuth.hasCredentials && !spotifyAuth.isLoggedIn"
@@ -72,34 +72,34 @@
                 <v-form v-else @submit.prevent="ruurdLogin">
                     <v-text-field
                         v-model="ruurdAuth.credentials.email"
-                        name="email"
-                        type="email"
+                        :color="base.themeColor"
                         class="mt-5"
                         density="compact"
                         hide-details
                         label="Email address"
+                        name="email"
+                        type="email"
                         variant="filled"
-                        :color="base.themeColor"
                     />
                     <v-text-field
-                        name="password"
                         :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
+                        :color="base.themeColor"
                         :type="showPassword ? 'text' : 'password'"
                         class="mt-5"
                         density="compact"
                         hide-details
                         label="Password"
+                        name="password"
                         variant="filled"
                         @click:append="showPassword = !showPassword"
-                        :color="base.themeColor"
                     />
                     <v-btn
+                        :color="base.themeColor"
+                        :loading="loginLoading"
                         class="mt-4"
                         prepend-icon="mdi-account"
-                        variant="tonal"
-                        :color="base.themeColor"
                         type="submit"
-                        :loading="loginLoading"
+                        variant="tonal"
                     >
                         Log in
                     </v-btn>
@@ -107,8 +107,8 @@
                 <div v-if="loginLoading">
                     <p class="sync-txt">Syncing data...</p>
                     <v-progress-linear
-                        rounded
                         :indeterminate="true"
+                        rounded
                     ></v-progress-linear>
                 </div>
             </v-window-item>

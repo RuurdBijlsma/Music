@@ -1,17 +1,18 @@
-import {defineStore} from "pinia";
-import {IDBPDatabase, IDBPObjectStore, openDB, StoreNames} from "idb";
-import {computed, ref} from "vue";
-import {useTheme} from "vuetify";
+import { defineStore } from "pinia";
+import { IDBPDatabase, IDBPObjectStore, openDB, StoreNames } from "idb";
+import { computed, ref } from "vue";
+import { useTheme } from "vuetify";
 import type {
     DataExport,
     Item,
     ItemCollection,
+    TrackData,
     YouTubeSearchResult,
 } from "../scripts/types";
-import {deltaE, hexToRgb} from "../scripts/utils";
-import {EventEmitter} from "events";
-import {randomNotFound} from "../scripts/imageSources";
-import {useRuurdAuthStore} from "./ruurd-auth";
+import { deltaE, hexToRgb } from "../scripts/utils";
+import { EventEmitter } from "events";
+import { randomNotFound } from "../scripts/imageSources";
+import { useRuurdAuthStore } from "./ruurd-auth";
 
 function createStore(
     db: IDBPDatabase,
@@ -62,9 +63,9 @@ export const baseDb = openDB("base", 6, {
         createStore(db, transaction, "trackStats");
         createStore(db, transaction, "collectionStats");
         createStore(db, transaction, "statistics");
-        createStore(db, transaction, "trackMetadata", {keyPath: "id"});
+        createStore(db, transaction, "trackMetadata", { keyPath: "id" });
 
-        createStore(db, transaction, "tracks", {keyPath: "id"}, [
+        createStore(db, transaction, "tracks", { keyPath: "id" }, [
             {
                 name: "searchString",
                 keyPath: "searchString",
@@ -138,8 +139,8 @@ export const useBaseStore = defineStore("base", () => {
             trackId: "",
         },
         spotifyTrack: null as SpotifyApi.TrackObjectFull | null,
+        trackData: null as TrackData | null,
     });
-    const sourceSelectedId = ref("");
 
     const windowWidth = ref(window.innerWidth);
     const windowHeight = ref(window.innerHeight);
@@ -196,7 +197,7 @@ export const useBaseStore = defineStore("base", () => {
             return result;
         };
 
-        let cleanLocalStorage = {...localStorage};
+        let cleanLocalStorage = { ...localStorage };
         delete cleanLocalStorage.trackInMemory;
         delete cleanLocalStorage.blurBgSource;
         delete cleanLocalStorage.lastRoute;
@@ -206,16 +207,12 @@ export const useBaseStore = defineStore("base", () => {
             idb: {
                 artistStats: await getObjectStore("artistStats"),
                 collectionStats: await getObjectStore("collectionStats"),
-                imageColor: await getObjectStore("imageColor"),
-                nameToId: await getObjectStore("nameToId"),
                 //@ts-ignore
                 spotify: await getObjectStore("spotify"),
                 //@ts-ignore
                 statistics: await getObjectStore("statistics"),
-                trackBars: await getObjectStore("trackBars"),
-                trackEdits: await getObjectStore("trackEdits"),
                 trackStats: await getObjectStore("trackStats"),
-                trackVolumeStats: await getObjectStore("trackVolumeStats"),
+                trackMetadata: await db.getAll("trackMetadata"),
                 tracks: await db.getAll("tracks"),
             },
         };
@@ -232,7 +229,12 @@ export const useBaseStore = defineStore("base", () => {
             object: { [key: string]: any },
         ) => {
             if (!object)
-                return console.warn('[import error]', storeName, 'value is not defined', object);
+                return console.warn(
+                    "[import error]",
+                    storeName,
+                    "value is not defined",
+                    object,
+                );
             const tx = db.transaction(storeName, "readwrite");
             const store = tx.objectStore(storeName);
 
@@ -252,7 +254,12 @@ export const useBaseStore = defineStore("base", () => {
         await putStoreObject("trackStats", idb.trackStats);
         const putStoreArray = (storeName: string, array: any[]) => {
             if (!array)
-                return console.warn('[import error]', storeName, 'value is not defined', array);
+                return console.warn(
+                    "[import error]",
+                    storeName,
+                    "value is not defined",
+                    array,
+                );
             const tx = db.transaction([storeName], "readwrite");
             const store = tx.objectStore(storeName);
 
@@ -443,7 +450,6 @@ export const useBaseStore = defineStore("base", () => {
         setContextMenuItem,
         contextMenu,
         sourceDialog,
-        sourceSelectedId,
         contrastToForeground,
         themeTooSimilarToFg,
         itemCollection,

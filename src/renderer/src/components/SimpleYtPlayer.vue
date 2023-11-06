@@ -1,12 +1,12 @@
 <template>
     <template v-if="isLoaded">
         <play-button
-            @click="togglePlay"
-            :loading="loading"
             :load-progress="loadProgress"
+            :loading="loading"
             :playing="playing"
             :size="30"
             density="compact"
+            @click="togglePlay"
         ></play-button>
     </template>
     <v-btn
@@ -26,10 +26,10 @@
 
 <script lang="ts" setup>
 import SimpleProgressBar from "./SimpleProgressBar.vue";
-import type {PropType} from "vue";
-import {onUnmounted, ref} from "vue";
-import {usePlatformStore} from "../store/electron";
-import {useBaseStore} from "../store/base";
+import type { PropType } from "vue";
+import { onUnmounted, ref } from "vue";
+import { usePlatformStore } from "../store/electron";
+import { useBaseStore } from "../store/base";
 import PlayButton from "./PlayButton.vue";
 
 defineProps({

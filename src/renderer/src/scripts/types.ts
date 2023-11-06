@@ -103,12 +103,14 @@ export interface MetaTrackBars {
     binWidth: number;
     barSpacing: number;
     barCount: number;
+    empty: boolean;
 }
-export interface TrackData{
-    path:string,
-    track:SpotifyApi.TrackObjectFull,
-    metadata:TrackMetadata,
-    likedInfo?: LikedTrack,
+
+export interface TrackData {
+    path: string;
+    track: SpotifyApi.TrackObjectFull;
+    metadata: TrackMetadata;
+    likedInfo?: LikedTrack;
 }
 
 export interface LikedTrack extends SpotifyApi.PlaylistTrackObject {
@@ -200,7 +202,7 @@ export interface DataExport {
                 listenMinutes: number;
             };
         };
-        trackMetadata:TrackMetadata[],
+        trackMetadata: TrackMetadata[];
         tracks: LikedTrack[];
     };
 }

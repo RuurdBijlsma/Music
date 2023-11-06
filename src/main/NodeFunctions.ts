@@ -3,13 +3,13 @@ import path from "path";
 import sadFs from "fs";
 import fs from "fs/promises";
 import os from "os";
-import type {BrowserWindow} from "electron";
-import {dialog, globalShortcut} from "electron";
-import type {Progress} from "yt-dlp-wrap";
-import child_process, {spawn} from "child_process";
+import type { BrowserWindow } from "electron";
+import { dialog, globalShortcut } from "electron";
+import type { Progress } from "yt-dlp-wrap";
+import child_process, { spawn } from "child_process";
 import * as https from "https";
 import ColorThief from "color-extr-thief";
-import {getContrastRatio, RGBToHex, RGBToHSL} from "./utils";
+import { getContrastRatio, RGBToHex, RGBToHSL } from "./utils";
 import darkIcon from "../../resources/app-icon/dark-500.png?asset";
 import lightIcon from "../../resources/app-icon/light-500.png?asset";
 import darkPlayIcon from "../../resources/media-icon/dark-playicon.png?asset";
@@ -21,7 +21,7 @@ import lightPauseIcon from "../../resources/media-icon/light-pauseicon.png?asset
 import lightPrevIcon from "../../resources/media-icon/light-previcon.png?asset";
 import lightNextIcon from "../../resources/media-icon/light-nexticon.png?asset";
 import replaceSpecialCharacters from "replace-special-characters";
-import ffBinaries from 'ffbinaries';
+import ffBinaries from "ffbinaries";
 
 const YTDlpWrap = require("yt-dlp-wrap").default;
 export default class NodeFunctions {
@@ -42,7 +42,7 @@ export default class NodeFunctions {
         nextIcon: any;
         prevIcon: any;
     } | null;
-    private thumbButtons = {dark: false, playing: false, show: false};
+    private thumbButtons = { dark: false, playing: false, show: false };
     private waitBinaries: Promise<void>;
 
     constructor(win: BrowserWindow) {
@@ -114,7 +114,7 @@ export default class NodeFunctions {
         await fs.rename(middleOut, finalOut);
         fs.unlink(downloadResult.outPath).then();
 
-        return {outPath: finalOut, id: downloadResult.id};
+        return { outPath: finalOut, id: downloadResult.id };
     }
 
     async downloadYtByQuery(
@@ -156,10 +156,7 @@ export default class NodeFunctions {
                 proc.stdout.on("data", (data) => {
                     let line = data.toString().trim();
                     if (id === "" && line.includes("watch?v=")) {
-                        id = line
-                            .split("watch?v=")[1]
-                            .split("\n")[0]
-                            .trim();
+                        id = line.split("watch?v=")[1].split("\n")[0].trim();
                     }
                     if (line.startsWith("[download]")) {
                         let parts = line.split(" ").filter((t) => t.length > 0);
@@ -169,7 +166,7 @@ export default class NodeFunctions {
                         );
                         this.win.webContents.send("progress", {
                             filename,
-                            progress: {percent},
+                            progress: { percent },
                         });
                     }
                 });
@@ -237,7 +234,7 @@ export default class NodeFunctions {
                     "--audio-format",
                     "mp3",
                     "--audio-quality",
-                    "1", //second-best audio quality
+                    "0", //second-best audio quality
                 ];
                 this.ytdlp
                     .exec(args)
@@ -273,7 +270,7 @@ export default class NodeFunctions {
                         response.pipe(file);
                         file.on("finish", function () {
                             file.close(() =>
-                                resolve({outPath: destinationFile, id: ""}),
+                                resolve({ outPath: destinationFile, id: "" }),
                             );
                         });
                     })
@@ -309,7 +306,7 @@ export default class NodeFunctions {
 
             child_process.exec(command, (error, stdout, stderr) => {
                 if (error) return reject(error);
-                resolve({err: stderr, out: stdout});
+                resolve({ err: stderr, out: stdout });
             });
         });
     }
@@ -324,7 +321,7 @@ export default class NodeFunctions {
                             .join("; ")
                             .replace(/"/g, '\\"')}"`,
                     );
-                    // for (let part of tags[tag])
+                // for (let part of tags[tag])
                 //     result.push(`-metadata ${tag}="${part}"`);
                 else
                     result.push(
@@ -336,12 +333,16 @@ export default class NodeFunctions {
     }
 
     async getFfmpegBinaries() {
-        return new Promise<void>(resolve => {
-            ffBinaries.downloadBinaries(['ffmpeg', 'ffprobe'], {
-                quiet: false,
-                destination: Directories.files
-            }, () => resolve());
-        })
+        return new Promise<void>((resolve) => {
+            ffBinaries.downloadBinaries(
+                ["ffmpeg", "ffprobe"],
+                {
+                    quiet: false,
+                    destination: Directories.files,
+                },
+                () => resolve(),
+            );
+        });
     }
 
     async getBinaries() {
@@ -385,7 +386,7 @@ export default class NodeFunctions {
 
             child_process.exec(
                 command,
-                {maxBuffer: 10 * 1024 * 1024},
+                { maxBuffer: 10 * 1024 * 1024 },
                 (error, stdout) => {
                     if (error) return reject(error);
                     try {
@@ -398,7 +399,7 @@ export default class NodeFunctions {
                         );
                     } catch (e: any) {
                         console.error("YTDL PARSE ERROR", e, stdout);
-                        reject({error, e});
+                        reject({ error, e });
                     }
                     // resolve(outFile);
                 },
@@ -444,7 +445,7 @@ export default class NodeFunctions {
 
             child_process.exec(command, (error, stdout, stderr) => {
                 if (error) return reject(error);
-                resolve({err: stderr, out: stdout});
+                resolve({ err: stderr, out: stdout });
             });
         });
     }
@@ -464,7 +465,7 @@ export default class NodeFunctions {
             let acceptableThemeColors: { rgb: number[]; hsl: number[] }[] = [];
             for (let i = 0; i < contrasts.length; i++) {
                 if (contrasts[i] > minimumContrast) {
-                    acceptableThemeColors.push({rgb: rgbs[i], hsl: hsls[i]});
+                    acceptableThemeColors.push({ rgb: rgbs[i], hsl: hsls[i] });
                 }
             }
             if (acceptableThemeColors.length === 0) {
@@ -513,7 +514,7 @@ export default class NodeFunctions {
                 icon: theme === "dark" ? darkNextIcon : lightNextIcon,
                 click: () => this.win.webContents.send("skip", 1),
             };
-            return {playIcon, pauseIcon, prevIcon, nextIcon};
+            return { playIcon, pauseIcon, prevIcon, nextIcon };
         };
 
         this.darkIcons = getIcons("dark");

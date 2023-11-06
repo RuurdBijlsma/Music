@@ -2,13 +2,13 @@
     <div class="simple-player">
         <template v-if="isLoaded">
             <play-button
-                @click="togglePlay"
-                :loading="loading"
-                :load-progress="loadProgress"
                 :color="color"
+                :load-progress="loadProgress"
+                :loading="loading"
                 :playing="playing"
                 :size="playButtonSize"
                 density="compact"
+                @click="togglePlay"
             ></play-button>
         </template>
         <v-btn
@@ -19,8 +19,8 @@
             @click="load(track)"
         ></v-btn>
         <simple-progress-bar
-            :color="color"
             v-if="isLoaded"
+            :color="color"
             :current-time="currentTime - startTime"
             :duration="duration"
             @seek="seek"
@@ -28,7 +28,7 @@
     </div>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import { computed, onUnmounted, PropType, ref, watch } from "vue";
 import { usePlatformStore } from "../store/electron";
 import { useBaseStore } from "../store/base";
@@ -171,7 +171,7 @@ if (props.instaLoad) {
 }
 </script>
 
-<style scoped lang="less">
+<style lang="less" scoped>
 .simple-player {
     display: flex;
     align-items: center;

@@ -38,7 +38,7 @@
                                 {{ item.length.simpleText }}
                             </p>
                             <p
-                                v-if="sourceSelectedId === item.id"
+                                v-if="youtubeSource === item.id"
                                 class="selected"
                             >
                                 Active
@@ -57,7 +57,7 @@
                             <spacer></spacer>
                             <div class="actions mt-4">
                                 <v-btn
-                                    v-if="sourceSelectedId !== item.id"
+                                    v-if="youtubeSource !== item.id"
                                     variant="tonal"
                                     @click="activate(item)"
                                 >
@@ -89,7 +89,7 @@
 import { useBaseStore } from "../store/base";
 import { useTheme } from "vuetify";
 import { useSearchStore } from "../store/search";
-import { ref, watch } from "vue";
+import { computed, ref, watch } from "vue";
 import { storeToRefs } from "pinia";
 import SimpleYtPlayer from "./SimpleYtPlayer.vue";
 import { useLibraryStore } from "../store/library";
@@ -100,20 +100,15 @@ const theme = useTheme();
 const search = useSearchStore();
 const base = useBaseStore();
 const library = useLibraryStore();
-const { sourceSelectedId, sourceDialog } = storeToRefs(base);
+const { sourceDialog } = storeToRefs(base);
 
 function activate(item: any) {
-    sourceSelectedId.value = item.id;
     library.activateSource(item.id);
 }
 
 function getImg(item: YouTubeSearchResult) {
     return item.thumbnail.thumbnails[item.thumbnail.thumbnails.length - 1].url;
 }
-
-watch(sourceSelectedId, () => {
-    console.log("ssid", sourceSelectedId.value);
-});
 
 let lastSourceTrackId = "";
 const spotifyTracks = ref([] as SpotifyApi.TrackObjectFull[]);
@@ -124,6 +119,10 @@ watch(
     },
 );
 onTracksChange();
+
+const youtubeSource = computed(
+    () => sourceDialog.value.trackData?.metadata.youTubeSource,
+);
 
 function onTracksChange() {
     if (

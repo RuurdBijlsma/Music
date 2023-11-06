@@ -20,17 +20,27 @@ export const useTrackLoaderStore = defineStore("trackLoader", () => {
         return (
             trackData.metadata.volume !== undefined &&
             trackData.metadata.trackBars !== undefined &&
+            !trackData.metadata.trackBars.empty &&
             trackData.metadata.imageColor !== undefined
         );
     }
+
+    let isLoading = new Set<string>();
 
     async function getTrackData(
         track: SpotifyApi.TrackObjectFull,
         onData: (data: TrackData) => any,
         collection: ItemCollection | undefined = undefined,
     ) {
+        let loadKey = (collection?.id ?? "") + track.id;
+        if (isLoading.has(loadKey)) return;
+        isLoading.add(loadKey);
+
         const db = await baseDb;
-        let metadata: TrackMetadata = await db.get("trackMetadata", track.id);
+        let metadata: TrackMetadata | undefined = await db.get(
+            "trackMetadata",
+            track.id,
+        );
         let trackPath = platform.trackToNames(track).outPath;
         let fileExists = await platform.checkFileExists(trackPath);
 
@@ -51,69 +61,67 @@ export const useTrackLoaderStore = defineStore("trackLoader", () => {
 
         const sendData = (data: TrackData) => {
             if (isLoadedTrackData(data)) {
+                isLoading.delete(loadKey);
                 // Done with calculations for track
                 db.put("trackMetadata", data.metadata);
             }
             onData(data);
         };
 
-        // all data is available
-        if (metadata !== undefined && fileExists) return sendData(trackData);
-
-        // file does not exist, full metadata does
-        if (!fileExists && metadata !== undefined) {
+        // send initial track data, who knows what's available in the metadata
+        if (fileExists) {
+            sendData(trackData);
+        } else {
             let { jpg, colors } = await platform.getTrackJpg(track);
-            let { path } = await platform.downloadTrackFile(
-                track,
-                metadata.youTubeSource,
-                jpg,
+            console.log(
+                "Downloading track with metadata, ytId = ",
+                trackData.metadata.youTubeSource,
             );
-            trackData.path = path;
-            trackData.metadata.imageColor = colors;
-            return sendData(trackData);
-        }
-
-        if (!fileExists) {
-            let { jpg, colors } = await platform.getTrackJpg(track);
-            trackData.metadata.imageColor = colors;
             let { path, id } = await platform.downloadTrackFile(
                 track,
-                undefined,
+                trackData.metadata.youTubeSource,
                 jpg,
             );
-            trackData.path = path;
             trackData.metadata.youTubeSource = id;
+            trackData.path = path;
+            trackData.metadata.imageColor = colors;
             sendData(trackData);
         }
 
         // Track Bars
-        (async () => {
+        async function trackBars() {
             // get track bars and set to metadata en do sendData
             let bars = await calculateTrackBars(trackData);
             if (bars === undefined) {
                 base.addSnack("Oops, can't calculate trackbars");
             } else {
                 trackData.metadata.trackBars = makeMetaTrackBars(bars);
-                sendData(trackData);
             }
-        })().then();
+            return trackData;
+        }
 
         // Volume mean and peak
-        (async () => {
+        async function volume() {
             // get volume stats and set to metadata en do sendData
             trackData.metadata.volume =
                 await platform.getVolumeStats(trackPath);
-            sendData(trackData);
-        })().then();
+            return trackData;
+        }
 
         // Theme color
-        (async () => {
-            if (trackData.metadata.imageColor === undefined) {
-                let { colors } = await platform.getTrackJpg(track);
-                trackData.metadata.imageColor = colors;
-                sendData(trackData);
-            }
-        })().then();
+        async function imageColor() {
+            let { colors } = await platform.getTrackJpg(track);
+            trackData.metadata.imageColor = colors;
+            return trackData;
+        }
+
+        const emptyBars =
+            trackData.metadata.trackBars === undefined ||
+            trackData.metadata.trackBars.empty;
+        if (emptyBars) trackBars().then(sendData);
+        if (trackData.metadata.imageColor === undefined)
+            imageColor().then(sendData);
+        if (trackData.metadata.volume === undefined) volume().then(sendData);
     }
 
     async function getFullTrackData(
@@ -136,25 +144,29 @@ export const useTrackLoaderStore = defineStore("trackLoader", () => {
     const barSpacing = 1;
     const barCount = canvasWidth / (binWidth + barSpacing);
 
-    function makeMetaTrackBars(trackBars: TrackBars) {
+    function makeMetaTrackBars(trackBars: TrackBars, empty = false) {
         return {
             barCount,
             barSpacing,
             binWidth,
             canvasWidth,
             trackBars,
+            empty,
         };
     }
 
     function getEmptyMetaTrackBars(): MetaTrackBars {
-        return makeMetaTrackBars({
-            binSize: 1,
-            binWidth,
-            barSpacing,
-            binPos: new Array<number>(barCount).fill(0.02),
-            binNeg: new Array<number>(barCount).fill(-0.02),
-            maxVolume: 1,
-        });
+        return makeMetaTrackBars(
+            {
+                binSize: 1,
+                binWidth,
+                barSpacing,
+                binPos: new Array<number>(barCount).fill(0.02),
+                binNeg: new Array<number>(barCount).fill(-0.02),
+                maxVolume: 1,
+            },
+            true,
+        );
     }
 
     async function calculateTrackBars(trackData: TrackData) {

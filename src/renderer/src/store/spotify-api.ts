@@ -1,18 +1,20 @@
-import {defineStore} from "pinia";
-import {baseDb} from "./base";
+import { defineStore } from "pinia";
+import { baseDb } from "./base";
 import SpotifyWebApi from "spotify-web-api-js";
-import {useLibraryStore} from "./library";
-import {useSpotifyAuthStore} from "./spotify-auth";
-import {Item} from "../scripts/types";
-import {executeCached} from "../scripts/utils";
+import { useLibraryStore } from "./library";
+import { useSpotifyAuthStore } from "./spotify-auth";
+import { Item } from "../scripts/types";
+import { executeCached } from "../scripts/utils";
+import { toRaw } from "vue";
 import AvailableGenreSeedsResponse = SpotifyApi.AvailableGenreSeedsResponse;
-import {toRaw} from "vue";
 
 export const useSpotifyApiStore = defineStore("spotify-api", () => {
     const library = useLibraryStore();
     const spotifyAuth = useSpotifyAuthStore();
 
-    async function getItemTracks(item: Item): Promise<SpotifyApi.TrackObjectFull[]> {
+    async function getItemTracks(
+        item: Item,
+    ): Promise<SpotifyApi.TrackObjectFull[]> {
         if (item.type === "playlist") {
             if (item.tracks.items === undefined) {
                 item = await getPlaylist(item.id);
@@ -31,7 +33,7 @@ export const useSpotifyApiStore = defineStore("spotify-api", () => {
             for (let track of tracks) {
                 //@ts-ignore
                 track.album = {
-                    images: [...item.images].map(i => toRaw(i)),
+                    images: [...item.images].map((i) => toRaw(i)),
                 };
             }
             return tracks;
@@ -47,7 +49,7 @@ export const useSpotifyApiStore = defineStore("spotify-api", () => {
         if (object === null) return false;
 
         let getKeyPath: Function;
-        getKeyPath = ({keys: keyPath = [], o}: { keys: any; o: any }) => {
+        getKeyPath = ({ keys: keyPath = [], o }: { keys: any; o: any }) => {
             if (
                 o !== null &&
                 o.hasOwnProperty("next") &&
@@ -69,7 +71,7 @@ export const useSpotifyApiStore = defineStore("spotify-api", () => {
             return [false, keyPath.slice(0, -1)];
         };
 
-        let [success, keyPath] = getKeyPath({o: object});
+        let [success, keyPath] = getKeyPath({ o: object });
 
         if (!success) return false;
         return (r: any) => {
@@ -104,7 +106,9 @@ export const useSpotifyApiStore = defineStore("spotify-api", () => {
     const getPlaylist = async (id: string) => {
         await spotifyAuth.awaitAuth();
         let playlist = await api.getPlaylist(id);
-        playlist.tracks.items = playlist.tracks.items.filter(t => !t.is_local);
+        playlist.tracks.items = playlist.tracks.items.filter(
+            (t) => !t.is_local,
+        );
         return playlist;
     };
     const getAlbum = async (id: string) => {
@@ -164,7 +168,7 @@ export const useSpotifyApiStore = defineStore("spotify-api", () => {
         await baseDb;
 
         let [categories, genresResponse] = await Promise.all([
-            api.getCategories({limit: 50}),
+            api.getCategories({ limit: 50 }),
             getCachedGenres(),
         ]);
 
@@ -174,12 +178,12 @@ export const useSpotifyApiStore = defineStore("spotify-api", () => {
                 .map((w) => w.substring(0, 1).toUpperCase() + w.substring(1))
                 .join(" "),
         );
-        return {categories: categories.categories.items, genres};
+        return { categories: categories.categories.items, genres };
     };
 
     const getCategory = async (id: string) => {
         await baseDb;
-        let playlists = await api.getCategoryPlaylists(id, {limit: 50});
+        let playlists = await api.getCategoryPlaylists(id, { limit: 50 });
         return {
             category: await api.getCategory(id),
             playlists: playlists.playlists
@@ -220,7 +224,7 @@ export const useSpotifyApiStore = defineStore("spotify-api", () => {
             let tracks = options["seed_tracks"].split(",");
             if (tracks.length === 1) firstTrack = await api.getTrack(tracks[0]);
         }
-        options = {...options, limit: firstTrack ? 99 : 100};
+        options = { ...options, limit: firstTrack ? 99 : 100 };
         let radio = await api.getRecommendations(options);
         if (firstTrack) radio.tracks.unshift(firstTrack);
 

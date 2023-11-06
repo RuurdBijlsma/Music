@@ -15,9 +15,9 @@
             </v-btn>
         </template>
         <v-card v-if="collection" class="card-bg">
-            <v-card-title class="card-title">{{
-                collection.name
-            }}</v-card-title>
+            <v-card-title class="card-title"
+                >{{ collection.name }}
+            </v-card-title>
             <v-divider />
             <track-list
                 v-if="player.queue.length < 200"

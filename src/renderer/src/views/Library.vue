@@ -5,26 +5,26 @@
                 :active="tab === 'tracks'"
                 variant="text"
                 @click="tab = 'tracks'"
-                >Tracks</v-btn
-            >
+                >Tracks
+            </v-btn>
             <v-btn
                 :active="tab === 'albums'"
                 variant="text"
                 @click="tab = 'albums'"
-                >Albums</v-btn
-            >
+                >Albums
+            </v-btn>
             <v-btn
                 :active="tab === 'artists'"
                 variant="text"
                 @click="tab = 'artists'"
-                >Artists</v-btn
-            >
+                >Artists
+            </v-btn>
             <v-btn
                 :active="tab === 'playlists'"
                 variant="text"
                 @click="tab = 'playlists'"
-                >Playlists</v-btn
-            >
+                >Playlists
+            </v-btn>
         </div>
         <v-window v-model="tab">
             <v-window-item value="tracks">

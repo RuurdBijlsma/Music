@@ -57,8 +57,8 @@
                         size="25"
                     ></v-progress-circular>
                     <v-icon v-else-if="player.playing" size="30"
-                        >mdi-pause</v-icon
-                    >
+                        >mdi-pause
+                    </v-icon>
                     <v-icon v-else size="30">mdi-play</v-icon>
                 </v-btn>
                 <v-btn

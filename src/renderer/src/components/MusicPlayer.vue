@@ -48,12 +48,13 @@
                     variant="text"
                     @click="player.skip(-1)"
                 ></v-btn>
-                <play-button :loading="player.loading"
-                             :load-progress="player.loadProgress"
-                             :playing="player.playing"
-                             :size="60"
-                             :icon-size="30"
-                             @click="player.togglePlay"
+                <play-button
+                    :icon-size="30"
+                    :load-progress="player.loadProgress"
+                    :loading="player.loading"
+                    :playing="player.playing"
+                    :size="60"
+                    @click="player.togglePlay"
                 ></play-button>
                 <v-btn
                     icon="mdi-skip-next"

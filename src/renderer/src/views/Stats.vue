@@ -4,8 +4,8 @@
         <v-divider class="mt-5" />
         <line-chart
             :data="data"
-            data-label="Minutes listened"
             :labels="labels"
+            data-label="Minutes listened"
         />
     </div>
 </template>

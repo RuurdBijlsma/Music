@@ -6,9 +6,11 @@ import { usePlatformStore } from "./electron";
 import { useSpotifyApiStore } from "./spotify-api";
 import { useRouter } from "vue-router";
 import type {
-    LikedTrack,
     ItemCollection,
-    SearchResult, YouTubeSearchResult, YouTubeTrack
+    LikedTrack,
+    SearchResult,
+    YouTubeSearchResult,
+    YouTubeTrack,
 } from "../scripts/types";
 import { Ref, ref, watch } from "vue";
 import { usePlayerStore } from "./player/player";
