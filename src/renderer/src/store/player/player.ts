@@ -394,6 +394,7 @@ export const usePlayerStore = defineStore("player", () => {
     }
 
     let renderedBars = trackLoader.getEmptyMetaTrackBars().trackBars;
+    let renderedNormalizer = 1;
 
     function renderProgress() {
         requestAnimationFrame(renderProgress);
@@ -409,12 +410,15 @@ export const usePlayerStore = defineStore("player", () => {
         let mapping = (x: number) => 2.14285714286 * x + 0.35714285714;
         let normalizer =
             mapping(normalizeVolume.value ? volumeNormalizer.value : 0.3) * 0.7;
+        let normDiff = normalizer - renderedNormalizer;
+        renderedNormalizer += normDiff / 20;
+        if (Math.abs(normDiff) < 0.005) renderedNormalizer = normalizer;
 
         for (let i = 0; i < canvasBars.binPos.length; i++) {
             let posDiff = canvasBars.binPos[i] - renderedBars.binPos[i];
             let negDiff = canvasBars.binNeg[i] - renderedBars.binNeg[i];
-            renderedBars.binPos[i] += posDiff / 50;
-            renderedBars.binNeg[i] += negDiff / 50;
+            renderedBars.binPos[i] += posDiff / 20;
+            renderedBars.binNeg[i] += negDiff / 20;
             if (Math.abs(posDiff) < 0.005) {
                 renderedBars.binPos[i] = canvasBars.binPos[i];
                 renderedBars.binNeg[i] = canvasBars.binNeg[i];
@@ -425,8 +429,8 @@ export const usePlayerStore = defineStore("player", () => {
                 ((canvasBars.binPos.length * timePercent) | 0) === i;
             let barPartFill = (canvasBars.binPos.length * timePercent) % 1;
 
-            let binPos = renderedBars.binPos[i] * normalizer;
-            let binNeg = renderedBars.binNeg[i] * normalizer;
+            let binPos = renderedBars.binPos[i] * renderedNormalizer;
+            let binNeg = renderedBars.binNeg[i] * renderedNormalizer;
             let posHeight = binPos * canvas.height;
             let negHeight = -binNeg * canvas.height;
             let x = ((binWidth + barSpacing) * i) | 0;
