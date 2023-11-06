@@ -139,7 +139,10 @@ export const usePlayerStore = defineStore("player", () => {
             );
         }
 
-        if (trackData.metadata.imageColor !== undefined) {
+        if (
+            trackData.metadata.imageColor !== undefined &&
+            isActive(_collection, trackData.track)
+        ) {
             base.themeColorDark = trackData.metadata.imageColor.dark;
             base.themeColorLight = trackData.metadata.imageColor.light;
         }
@@ -149,6 +152,7 @@ export const usePlayerStore = defineStore("player", () => {
             isActive(_collection, trackData.track)
         ) {
             canvasBars = trackData.metadata.trackBars.trackBars;
+            console.log(canvasBars);
         }
 
         if (
@@ -389,30 +393,42 @@ export const usePlayerStore = defineStore("player", () => {
             canvasBars = bars.trackBars;
     }
 
+    let renderedBars = trackLoader.getEmptyMetaTrackBars().trackBars;
+
     function renderProgress() {
         requestAnimationFrame(renderProgress);
         if (context === null || canvasBars === null || canvas === null) return;
 
-        let mouseHoverBar = canvasBars.binPos.length * mouseHoverPercent.value;
+        let mouseHoverBarIndex =
+            canvasBars.binPos.length * mouseHoverPercent.value;
         const defaultBarFill = theme.current.value.dark
             ? "rgba(255,255,255,0.4)"
             : "rgba(0,0,0,0.2)";
-        let { binSize, binWidth, barSpacing } = canvasBars;
+        let { binWidth, barSpacing } = canvasBars;
         context.clearRect(0, 0, canvas.width, canvas.height);
         let mapping = (x: number) => 2.14285714286 * x + 0.35714285714;
         let normalizer =
             mapping(normalizeVolume.value ? volumeNormalizer.value : 0.3) * 0.7;
 
         for (let i = 0; i < canvasBars.binPos.length; i++) {
+            let posDiff = canvasBars.binPos[i] - renderedBars.binPos[i];
+            let negDiff = canvasBars.binNeg[i] - renderedBars.binNeg[i];
+            renderedBars.binPos[i] += posDiff / 50;
+            renderedBars.binNeg[i] += negDiff / 50;
+            if (Math.abs(posDiff) < 0.005) {
+                renderedBars.binPos[i] = canvasBars.binPos[i];
+                renderedBars.binNeg[i] = canvasBars.binNeg[i];
+            }
+
             let timePercent = currentTime.value / duration.value;
             let isActiveBar =
                 ((canvasBars.binPos.length * timePercent) | 0) === i;
             let barPartFill = (canvasBars.binPos.length * timePercent) % 1;
 
-            let binPos = canvasBars.binPos[i] * normalizer;
-            let binNeg = canvasBars.binNeg[i] * normalizer;
-            let posHeight = (binPos / binSize) * canvas.height;
-            let negHeight = (-binNeg / binSize) * canvas.height;
+            let binPos = renderedBars.binPos[i] * normalizer;
+            let binNeg = renderedBars.binNeg[i] * normalizer;
+            let posHeight = binPos * canvas.height;
+            let negHeight = -binNeg * canvas.height;
             let x = ((binWidth + barSpacing) * i) | 0;
 
             context.fillStyle = defaultBarFill;
@@ -422,7 +438,7 @@ export const usePlayerStore = defineStore("player", () => {
             let h = negHeight + posHeight;
             let y = (canvas.height / 2 - negHeight) | 0;
             if (mouseActive.value || mouseHover.value) {
-                let mouseDistanceToBar = Math.abs(mouseHoverBar - i);
+                let mouseDistanceToBar = Math.abs(mouseHoverBarIndex - i);
                 let addedHeight = mouseActive.value
                     ? 10 - mouseDistanceToBar * 2
                     : 7 - mouseDistanceToBar / 1.7;

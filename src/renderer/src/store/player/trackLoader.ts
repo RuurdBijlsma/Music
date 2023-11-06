@@ -216,8 +216,8 @@ export const useTrackLoaderStore = defineStore("trackLoader", () => {
             if (i % binSize === binSize - 1) {
                 if (Math.abs(binPos - binNeg) > bars.maxVolume)
                     bars.maxVolume = binPos - binNeg;
-                bars.binPos.push(binPos);
-                bars.binNeg.push(binNeg);
+                bars.binPos.push(binPos / binSize);
+                bars.binNeg.push(binNeg / binSize);
                 binPos = 0;
                 binNeg = 0;
             }
