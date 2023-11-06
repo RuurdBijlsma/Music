@@ -82,7 +82,8 @@
 
 <script lang="ts" setup>
 // todo
-// finish change source and edit track refactor
+// fix collect minute stats
+// finish change edit track refactor
 // setting for schedule dark/light mode
 // if bottom player is active set volume to full
 // ruurd login flow not working without refresh? test pls
