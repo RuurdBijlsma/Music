@@ -1,38 +1,25 @@
-import { defineStore, storeToRefs } from "pinia";
+import { defineStore } from "pinia";
 import { ItemCollection } from "../../scripts/types";
-import { toRaw, watch } from "vue";
+import { toRaw } from "vue";
 import { usePlayerStore } from "./player";
 import { baseDb } from "../base";
 
 export const useStatsStore = defineStore("playerStats", () => {
     const player = usePlayerStore();
-    const { playing } = storeToRefs(player);
-    let statsInterval = 0;
     let intervalSeconds = 30;
     const collectStatsPeriod = 60;
 
-    function createStatsInterval() {
-        if (!playing.value) return;
-        // @ts-ignore
-        statsInterval = setInterval(() => {
-            if (
-                intervalSeconds++ % collectStatsPeriod === 0 &&
-                player.track !== null &&
-                player.collection !== null
-            ) {
-                collectMinuteStats(player.collection, player.track).then();
-            }
-        }, 1000);
-    }
-
-    console.log({playing})
-    watch(playing, () => {
-        if (playing.value) {
-            createStatsInterval();
-        } else {
-            clearInterval(statsInterval);
+    setInterval(() => {
+        if (
+            player.playing &&
+            intervalSeconds++ % collectStatsPeriod === 0 &&
+            player.track !== null &&
+            player.collection !== null
+        ) {
+            console.log("Collect minute stats");
+            collectMinuteStats(player.collection, player.track).then();
         }
-    });
+    }, 1000);
 
     const emptyTrackStats = (track: SpotifyApi.TrackObjectFull) => ({
         track: toRaw(track),
