@@ -83,14 +83,11 @@
 <script lang="ts" setup>
 // todo
 // remove button to add yt track to playlist (not possible)
-// theme color isn't applied quickly after loading a track
-// fix collect minute stats
-// finish change edit track refactor
 // setting for schedule dark/light mode
 // if bottom player is active set volume to full
 // ruurd login flow not working without refresh? test pls
 // periodic backup to server?
-// playlists cachen
+// playlists cachen?
 // simple player en simple yt player samenvoegen
 // show listen stats
 // generate a spotify wrapped / ruurd music wrapped
