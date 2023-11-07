@@ -324,7 +324,7 @@ export const usePlatformStore = defineStore("platform", () => {
                             ),
                         ),
                     );
-                    await processFunc(tracks.map((t) => t.path));
+                    await processFunc(tracks.map((t) => t?.path ?? ""));
                     if (state.value.canceled) {
                         downloadState.value.delete(key);
                         return;
