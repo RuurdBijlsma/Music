@@ -82,6 +82,8 @@
 
 <script lang="ts" setup>
 // todo
+// remove button to add yt track to playlist (not possible)
+// theme color isn't applied quickly after loading a track
 // fix collect minute stats
 // finish change edit track refactor
 // setting for schedule dark/light mode

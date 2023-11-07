@@ -58,6 +58,8 @@ export const useLibraryStore = defineStore("library", () => {
 
     const editDialog = ref({
         show: false,
+        loading: false,
+        trackData: null as null | TrackData,
         likedTrack: null as null | LikedTrack,
         title: "",
         artists: [""],
@@ -527,13 +529,19 @@ export const useLibraryStore = defineStore("library", () => {
             );
         player.pause().then();
         editDialog.value.likedTrack = likedTrack;
-        console.log(toRaw(editDialog.value.durationRange));
-        editDialog.value.show = true;
         console.log(editDialog.value);
         editDialog.value.durationRange = [
             likedInfo.startTime ?? 0,
             likedInfo.endTime ?? likedTrack.track.duration_ms / 1000,
         ];
+        editDialog.value.title = likedTrack.track.name;
+        editDialog.value.artists = likedTrack.track.artists.map((a) => a.name);
+        editDialog.value.show = true;
+        editDialog.value.loading = true;
+        editDialog.value.trackData = await trackLoader.getFullTrackData(
+            likedTrack.track,
+        );
+        editDialog.value.loading = false;
     }
 
     async function applyEditChanges(
@@ -543,14 +551,31 @@ export const useLibraryStore = defineStore("library", () => {
         durationRange: number[],
     ) {
         likedTrack.track.name = name;
+        likedTrack.title = name;
+        if (likedTrack.track.artists.length === artists.length)
+            for (let i = 0; i < artists.length; i++)
+                likedTrack.track.artists[i].name = artists[i];
         likedTrack.artistString = artists.join(", ");
         likedTrack.searchString = `${name.toLowerCase()} ${
             likedTrack.artistString
         }`;
-        likedTrack.title = name;
         likedTrack.startTime = durationRange[0];
         likedTrack.endTime = durationRange[1];
-        await db.put("tracks", likedTrack);
+        console.log("pout", toRaw(likedTrack));
+        await db.put("tracks", toRaw(likedTrack));
+
+        if (
+            player.track !== null &&
+            player.collection !== null &&
+            player.trackId === likedTrack.track.id
+        ) {
+            let collection = player.collection;
+            player.collection = null;
+            player.track = null;
+            player.sourcePath = "";
+
+            await player.load(collection, likedTrack.track);
+        }
 
         return true;
     }

@@ -120,7 +120,7 @@ export const usePlayerStore = defineStore("player", () => {
         );
     }
 
-    let sourcePath = "";
+    const sourcePath = ref("");
     let activeTrackData: TrackData | undefined = undefined;
 
     function playTrackData(_collection: ItemCollection, trackData: TrackData) {
@@ -154,14 +154,15 @@ export const usePlayerStore = defineStore("player", () => {
             canvasBars = trackData.metadata.trackBars.trackBars;
 
         if (
-            sourcePath !== trackData.path &&
+            trackData.path !== undefined &&
+            sourcePath.value !== trackData.path &&
             isActive(_collection, trackData.track)
         ) {
             duration.value =
                 trackData.metadata.sourceDuration ??
                 trackData.track.duration_ms / 1000;
 
-            sourcePath = trackData.path;
+            sourcePath.value = trackData.path;
             playerElement.src = trackData.path;
 
             if (trackData.likedInfo?.startTime)
@@ -174,6 +175,14 @@ export const usePlayerStore = defineStore("player", () => {
         _track: SpotifyApi.TrackObjectFull,
         autoplay = true,
     ) {
+        if (
+            trackId.value === _track.id &&
+            collection.value?.id !== _collection.id
+        ) {
+            // load same track in different collection
+            // so set source path to "", otherwise the track won't reload
+            sourcePath.value = "";
+        }
         const _trackId = _track.id;
         console.log(_trackId);
         // if track is already playing, exit
@@ -247,6 +256,7 @@ export const usePlayerStore = defineStore("player", () => {
                     (trackData) => {
                         if (trackLoader.isLoadedTrackData(trackData))
                             isTrackDataLoading.delete(_trackId);
+
                         playTrackData(_collection, trackData);
                         tracksLoading.delete(_trackId);
                     },
@@ -338,13 +348,15 @@ export const usePlayerStore = defineStore("player", () => {
             }
             // If it's a liked track and the currently playing track duration does not match the stored duration
             // update it in the db and the list
+            // but don't use endTime-startTime for this
             if (
                 activeTrackData.likedInfo !== undefined &&
                 Math.abs(
                     activeTrackData.likedInfo.track.duration_ms / 1000 - dur,
                 ) > 1
             ) {
-                activeTrackData.likedInfo.track.duration_ms = dur * 1000;
+                activeTrackData.likedInfo.track.duration_ms =
+                    element.duration * 1000;
                 db.put("tracks", toRaw(activeTrackData.likedInfo)).then();
             }
             duration.value = dur;
@@ -649,5 +661,6 @@ export const usePlayerStore = defineStore("player", () => {
         unload,
         initializeCanvas,
         isActive,
+        sourcePath,
     };
 });

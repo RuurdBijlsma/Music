@@ -36,13 +36,15 @@ export const useTrackLoaderStore = defineStore("trackLoader", () => {
             "trackMetadata",
             track.id,
         );
-        let trackPath = platform.trackToNames(track).outPath;
+        let trackPath: string | undefined =
+            platform.trackToNames(track).outPath;
         if (changeSourceTracks.has(track.id)) {
             trackPath = `${platform.directories?.temp}/${changeSourceTracks.get(
                 track.id,
             )}.mp3`;
         }
         let fileExists = await platform.checkFileExists(trackPath);
+        if (!fileExists) trackPath = undefined;
 
         let likedInfo: undefined | LikedTrack;
         if (collection && collection.id === "liked") {
@@ -72,6 +74,8 @@ export const useTrackLoaderStore = defineStore("trackLoader", () => {
             sendData(trackData);
         } else {
             let { jpg, colors } = await platform.getTrackJpg(track);
+            trackData.metadata.imageColor = colors;
+            sendData(trackData);
 
             let { path, ytId } = await platform.downloadTrackFile(
                 track,
@@ -81,8 +85,12 @@ export const useTrackLoaderStore = defineStore("trackLoader", () => {
             );
             trackData.metadata.youTubeSource = ytId;
             trackData.path = path;
-            trackData.metadata.imageColor = colors;
             sendData(trackData);
+        }
+
+        if (trackData.path === undefined) {
+            console.warn("why is path undefined", trackData);
+            throw new Error("Track path is undefined");
         }
 
         // Track Bars
@@ -99,6 +107,7 @@ export const useTrackLoaderStore = defineStore("trackLoader", () => {
 
         // Volume mean and peak
         async function volume() {
+            if (trackData.path === undefined) return trackData;
             // get volume stats and set to metadata en do sendData
             trackData.metadata.volume = await platform.getVolumeStats(
                 trackData.path,
@@ -168,10 +177,11 @@ export const useTrackLoaderStore = defineStore("trackLoader", () => {
     }
 
     async function calculateTrackBars(trackData: TrackData) {
+        if (!trackData.path) return;
         let audioContext = new AudioContext();
         let response = await fetch(trackData.path);
         if (!response.ok) {
-            return undefined;
+            return;
         }
         let decoded = await audioContext.decodeAudioData(
             await response.arrayBuffer(),

@@ -10,7 +10,8 @@ export interface YouTubeTrack {
     duration: number;
     channel: string;
     title: string;
-    thumbnails: { url: string; height: number; width: number }[];
+    thumbnails?: { url: string; height: number; width: number }[];
+    thumbnail:string,
 }
 
 export interface YouTubeSearchResult {
@@ -107,7 +108,7 @@ export interface MetaTrackBars {
 }
 
 export interface TrackData {
-    path: string;
+    path?: string;
     track: SpotifyApi.TrackObjectFull;
     metadata: TrackMetadata;
     likedInfo?: LikedTrack;

@@ -5,7 +5,13 @@
         :scrollable="true"
         width="auto"
     >
-        <div v-if="track" class="translucent">
+        <div class="edit-loading" v-if="editDialog.loading">
+            <v-progress-circular :indeterminate="true" />
+        </div>
+        <div
+            v-else-if="editDialog.likedTrack && editDialog.trackData && track"
+            class="translucent"
+        >
             <v-card-title>Edit Track Info</v-card-title>
             <v-divider />
             <v-card-text>
@@ -70,7 +76,7 @@
                     </template>
                 </v-range-slider>
                 <v-btn
-                    v-if="changesObject !== null"
+                    v-if="revertPossible"
                     :color="base.themeColor"
                     prepend-icon="mdi-restore"
                     variant="tonal"
@@ -78,6 +84,7 @@
                 >
                     Revert to original values
                 </v-btn>
+                <div v-else class="button-space"></div>
             </v-card-text>
             <v-divider class="mb-3"></v-divider>
             <v-card-item>
@@ -108,38 +115,38 @@
 </template>
 
 <script lang="ts" setup>
-import { baseDb, useBaseStore } from "../store/base";
+import { useBaseStore } from "../store/base";
 import { useLibraryStore } from "../store/library";
-import { computed, ref, watch } from "vue";
+import { computed } from "vue";
 import SimplePlayer from "./SimplePlayer.vue";
 import Spacer from "./Spacer.vue";
-import { TrackChanges } from "../scripts/types";
 
 const base = useBaseStore();
 const library = useLibraryStore();
 const editDialog = computed(() => library.editDialog);
-const track = computed(() => library.editDialog.likedTrack?.track);
-const changesObject = ref(null as TrackChanges | null);
-watch(track, async () => {
-    if (!track.value) return;
-    editDialog.value.title = track.value.name;
-    editDialog.value.artists = track.value.artists.map((a) => a.name);
+const likedTrack = computed(() => library.editDialog.likedTrack);
+const track = computed(() => likedTrack.value?.track);
 
-    let db = await baseDb;
-    changesObject.value = (await db.get("trackEdits", track.value.id)) ?? null;
+const revertPossible = computed(() => {
+    if (!likedTrack.value) return false;
+    return (
+        editDialog.value.title !== likedTrack.value.original.name ||
+        editDialog.value.artists.toString() !==
+            likedTrack.value.original.artists.toString() ||
+        editDialog.value.durationRange[0] !== 0 ||
+        editDialog.value.durationRange[1] !==
+            likedTrack.value.track.duration_ms / 1000
+    );
 });
 
 function revert() {
-    if (changesObject.value === null) return;
+    if (likedTrack.value === null) return;
     editDialog.value.durationRange = [
         0,
-        Math.max(
-            changesObject.value.original.endTime,
-            (track.value?.duration_ms ?? 0) / 1000,
-        ),
+        likedTrack.value.track.duration_ms / 1000,
     ];
-    editDialog.value.artists = changesObject.value.original.artists;
-    editDialog.value.title = changesObject.value.original.title;
+    editDialog.value.artists = likedTrack.value.original.artists;
+    editDialog.value.title = likedTrack.value.original.name;
 }
 
 async function applyChanges() {
@@ -174,6 +181,10 @@ async function applyChanges() {
 
 .duration-input {
     width: 100px;
+}
+
+.button-space {
+    height: 36px;
 }
 
 h1,

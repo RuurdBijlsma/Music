@@ -69,6 +69,7 @@ export const useSearchStore = defineStore("search", () => {
             let id = match[1];
             searchValue.value = "";
             let track = await ytIdToTrack(id);
+            showSuggestions.value = false;
             await player.load(
                 {
                     tracks: [track],
@@ -237,7 +238,7 @@ export const useSearchStore = defineStore("search", () => {
                 },
             ],
             album: {
-                images: ytResult.thumbnails,
+                images: ytResult.thumbnails ?? [{ url: ytResult.thumbnail }],
                 type: "album",
                 id: ytResult.playlistId,
                 href: "",
@@ -311,6 +312,7 @@ export const useSearchStore = defineStore("search", () => {
 
     async function ytIdToTrack(id: string) {
         let rawResult = await platform.youTubeInfoById(id);
+        console.log({ rawResult });
         return ytResultToTrack(rawResult);
     }
 
