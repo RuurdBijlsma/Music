@@ -82,7 +82,6 @@
 
 <script lang="ts" setup>
 // todo
-// remove button to add yt track to playlist (not possible)
 // if bottom player is active set volume to full
 // ruurd login flow not working without refresh? test pls
 // -- for 6.5.0 --

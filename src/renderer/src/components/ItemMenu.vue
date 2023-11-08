@@ -19,7 +19,7 @@
 
         <v-menu location="left">
             <template v-slot:activator="{ props }">
-                <v-list-item v-if="item.type === 'track'" v-bind="props">
+                <v-list-item v-if="item.type === 'track' && !item.id.startsWith('yt-')" v-bind="props">
                     <template v-slot:prepend>
                         <v-progress-circular
                             v-if="loadAddPlaylist"
