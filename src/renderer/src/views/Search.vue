@@ -5,10 +5,9 @@
         </h1>
         <div v-if="r.liked.loading || r.liked.tracks.length > 0">
             <v-divider class="mt-5 mb-3" />
-            <h2 class="mb-3 text-center">
+            <h2 class="mb-3 center-title">
                 <v-icon
                     class="mr-1"
-                    color="white"
                     icon="mdi-thumb-up"
                     size="25"
                 />
@@ -26,7 +25,7 @@
         <h4 v-else>No liked tracks found</h4>
         <div>
             <v-divider class="mt-5 mb-3" />
-            <h2 class="mb-3 text-center">
+            <h2 class="mb-3 center-title">
                 <v-icon color="green" icon="mdi-spotify" />
                 Spotify
             </h2>
@@ -43,7 +42,7 @@
             </div>
             <h4 v-else>No tracks found</h4>
 
-            <h3 class="mb-3 text-center">Albums</h3>
+            <h3 class="mb-3 center-title">Albums</h3>
             <template
                 v-if="r.spotify.data.albums.length > 0 || r.spotify.loading"
             >
@@ -64,7 +63,7 @@
             </template>
             <h4 v-else>No albums found</h4>
 
-            <h3 class="mb-3 text-center">Artists</h3>
+            <h3 class="mb-3 center-title">Artists</h3>
             <template
                 v-if="r.spotify.data.artists.length > 0 || r.spotify.loading"
             >
@@ -79,7 +78,7 @@
             </template>
             <h4 v-else>No artists found</h4>
 
-            <h3 class="mb-3 text-center">Playlists</h3>
+            <h3 class="mb-3 center-title">Playlists</h3>
             <template
                 v-if="r.spotify.data.playlists.length > 0 || r.spotify.loading"
             >
@@ -96,7 +95,7 @@
         </div>
         <div>
             <v-divider class="mt-5 mb-3" />
-            <h2 class="mb-3 text-center">
+            <h2 class="mb-3 center-title">
                 <v-icon color="red" icon="mdi-youtube" />
                 YouTube
             </h2>
@@ -199,7 +198,12 @@ init();
 .query {
     font-weight: bold;
 }
-
+.center-title{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
 .center-loader {
     width: 100%;
     display: flex;
