@@ -316,7 +316,7 @@ export const usePlatformStore = defineStore("platform", () => {
         downloadState.value.set(key, state);
 
         (async () => {
-            let batchSize = 1;
+            let batchSize = 10;
             for (let i = 0; i < tracks.length; i += batchSize) {
                 state.value.downloaded = i;
                 let batch = tracks.slice(i, i + batchSize);

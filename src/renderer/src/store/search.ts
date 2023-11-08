@@ -302,8 +302,8 @@ export const useSearchStore = defineStore("search", () => {
                 ).items.filter((i) => i.type === "video");
             },
             "ytsearch" + query + limit,
-            1,
-            // 1000 * 60 * 60 * 24 * 7,
+            // 1,
+            1000 * 60 * 60 * 24 * 7,
         );
     }
 
