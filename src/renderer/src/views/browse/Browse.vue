@@ -59,7 +59,7 @@ import { useSpotifyApiStore } from "../../store/spotify-api";
 import { ref } from "vue";
 import { executeCached } from "../../scripts/utils";
 import { baseDb, useBaseStore } from "../../store/base";
-import {useUIStore} from "../../store/UIStore";
+import { useUIStore } from "../../store/UIStore";
 
 const base = useBaseStore();
 const ui = useUIStore();

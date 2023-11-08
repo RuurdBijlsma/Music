@@ -124,7 +124,7 @@ import BottomMusicPlayer from "./components/BottomMusicPlayer.vue";
 //@ts-ignore
 import coverImage from "../assets/cover.jpg?asset";
 import EditInfoDialog from "./components/EditInfoDialog.vue";
-import {useUIStore} from "./store/UIStore";
+import { useUIStore } from "./store/UIStore";
 
 const base = useBaseStore();
 const ui = useUIStore();

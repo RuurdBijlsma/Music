@@ -94,11 +94,11 @@ import SimpleYtPlayer from "./SimpleYtPlayer.vue";
 import { useLibraryStore } from "../store/library";
 import { YouTubeSearchResult } from "../scripts/types";
 import Spacer from "./Spacer.vue";
-import {useUIStore} from "../store/UIStore";
+import { useUIStore } from "../store/UIStore";
 
 const theme = useTheme();
 const search = useSearchStore();
-const ui = useUIStore()
+const ui = useUIStore();
 const library = useLibraryStore();
 const { sourceDialog } = storeToRefs(library);
 

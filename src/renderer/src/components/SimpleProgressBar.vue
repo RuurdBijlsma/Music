@@ -23,7 +23,7 @@
 <script lang="ts" setup>
 import { useBaseStore } from "../store/base";
 import { computed, onMounted, onUnmounted, ref } from "vue";
-import {useUIStore} from "../store/UIStore";
+import { useUIStore } from "../store/UIStore";
 
 const props = defineProps({
     duration: {

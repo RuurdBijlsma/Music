@@ -1,12 +1,11 @@
 import { defineStore } from "pinia";
 import { usePlatformStore } from "./electron";
 import { useTheme } from "vuetify";
-import { computed, ref, watch } from "vue";
+import { computed, Ref, ref, watch } from "vue";
 import { deltaE, executeCached, hexToRgb } from "../scripts/utils";
-import { baseDb, useBaseStore } from "./base";
+import { baseDb } from "./base";
 
 export const useUIStore = defineStore("UI", () => {
-    const base = useBaseStore();
     const platform = usePlatformStore();
     const theme = useTheme();
 
@@ -18,12 +17,12 @@ export const useUIStore = defineStore("UI", () => {
     };
     window.addEventListener("resize", onWindowResize, false);
 
-    const themeColorDark = ref(
+    const themeColorDark: Ref<string> = ref(
         localStorage.getItem("themeColorDark") === null
             ? "#FFFFFF"
             : localStorage.themeColorDark,
     );
-    const themeColorLight = ref(
+    const themeColorLight: Ref<string> = ref(
         localStorage.getItem("themeColorLight") === null
             ? "#000000"
             : localStorage.themeColorLight,
@@ -61,16 +60,15 @@ export const useUIStore = defineStore("UI", () => {
     );
     watch(themeIndex, () => {
         localStorage.theme = themeOptions[themeIndex.value];
-        console.log("Change theme", themeIndex.value, localStorage.theme);
         applyThemeFromLocalStorage().then();
     });
     let scheduleTimeout = 0;
-    const lightOnTime = ref(
+    const lightOnTime: Ref<string> = ref(
         localStorage.getItem("lightOnTime") === null
             ? "07:00"
             : localStorage.lightOnTime,
     );
-    const darkOnTime = ref(
+    const darkOnTime: Ref<string> = ref(
         localStorage.getItem("darkOnTime") === null
             ? "19:00"
             : localStorage.darkOnTime,
@@ -103,8 +101,6 @@ export const useUIStore = defineStore("UI", () => {
         sun.value.set = sunset;
         sun.value.rise = sunrise;
         sun.value.isNightTime = isNightTime;
-        console.log("IS NIGHT", isNightTime);
-        console.log({ sunset, sunrise });
     }
 
     updateSunStats().then();
@@ -159,10 +155,6 @@ export const useUIStore = defineStore("UI", () => {
                         msUntilLight < msUntilDark ? "dark" : "light";
                     msToSwitch = Math.min(msUntilDark, msUntilLight);
                 }
-                console.log(
-                    "Time to next sun event",
-                    base.msToReadable(msToSwitch),
-                );
                 clearTimeout(scheduleTimeout);
                 // check theme calculations again after sunrise or sunset
                 // @ts-ignore
@@ -185,10 +177,8 @@ export const useUIStore = defineStore("UI", () => {
         sunset.setDate(now.getDate());
         const day = 1000 * 60 * 60 * 24;
         while (now > sunset) sunset = new Date(+sunset + day);
-        console.log("Next sunset", sunset);
         sunrise.setDate(now.getDate());
         while (now > sunrise) sunrise = new Date(+sunrise + day);
-        console.log("Next sunrise", sunrise);
         // if next sunset is tomorrow, then we are past today's sunset, so it is night
         // if next sunrise is today, then it is very early, so it is night
         let isNightTime =
@@ -208,7 +198,6 @@ export const useUIStore = defineStore("UI", () => {
         let locationInfo = await (
             await fetch(`https://tools.keycdn.com/geo.json?host=${ip}`)
         ).json();
-        console.log({ locationInfo, ip });
         let lat = locationInfo.data.geo.latitude;
         let lon = locationInfo.data.geo.longitude;
         // Use the Sunrise Sunset API to get the data
@@ -216,7 +205,6 @@ export const useUIStore = defineStore("UI", () => {
         const response = await fetch(url);
         if (!response.ok) throw new Error("NOT OK" + response.statusText);
         const data = await response.json();
-        console.log("sunData", data);
 
         // Return an object with the sunrise and sunset times as Date objects
         return {

@@ -17,7 +17,7 @@ import {
     Tooltip,
 } from "chart.js";
 import { useTheme } from "vuetify";
-import {useUIStore} from "../store/UIStore";
+import { useUIStore } from "../store/UIStore";
 
 const ui = useUIStore();
 Chart.register(

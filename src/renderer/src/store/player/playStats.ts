@@ -16,7 +16,6 @@ export const useStatsStore = defineStore("playerStats", () => {
             player.track !== null &&
             player.collection !== null
         ) {
-            console.log("Collect minute stats");
             collectMinuteStats(player.collection, player.track).then();
         }
     }, 1000);

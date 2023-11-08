@@ -112,7 +112,7 @@ import LikeButton from "./LikeButton.vue";
 import QueueButton from "./QueueButton.vue";
 import ItemMenu from "./ItemMenu.vue";
 import CompactProgressBar from "./CompactProgressBar.vue";
-import {useUIStore} from "../store/UIStore";
+import { useUIStore } from "../store/UIStore";
 
 const player = usePlayerStore();
 const base = useBaseStore();

@@ -6,11 +6,7 @@
         <div v-if="r.liked.loading || r.liked.tracks.length > 0">
             <v-divider class="mt-5 mb-3" />
             <h2 class="mb-3 center-title">
-                <v-icon
-                    class="mr-1"
-                    icon="mdi-thumb-up"
-                    size="25"
-                />
+                <v-icon class="mr-1" icon="mdi-thumb-up" size="25" />
                 Liked Tracks
             </h2>
             <div class="add-margin">
@@ -198,12 +194,14 @@ init();
 .query {
     font-weight: bold;
 }
-.center-title{
+
+.center-title {
     display: flex;
     justify-content: center;
     align-items: center;
     gap: 10px;
 }
+
 .center-loader {
     width: 100%;
     display: flex;

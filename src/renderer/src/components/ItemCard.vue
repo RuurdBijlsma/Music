@@ -38,7 +38,7 @@ import type { PropType } from "vue";
 import { computed } from "vue";
 import ItemPlayButton from "./ItemPlayButton.vue";
 import { randomLiked, randomNotFound } from "../scripts/imageSources";
-import {useUIStore} from "../store/UIStore";
+import { useUIStore } from "../store/UIStore";
 
 const base = useBaseStore();
 const ui = useUIStore();

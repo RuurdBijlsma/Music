@@ -18,7 +18,7 @@
         <track-list-virtual
             v-if="collection !== null"
             :collection="collection"
-            :height="(base.windowHeight - subtractFromHeight).toString()"
+            :height="(ui.windowHeight - subtractFromHeight).toString()"
             :tracks="collection.tracks"
             padding-top="0"
         />
@@ -33,13 +33,15 @@ import TrackListVirtual from "../../components/TrackListVirtual.vue";
 import { storeToRefs } from "pinia";
 import type { ItemCollection } from "../../scripts/types";
 import CollectionButtons from "../../components/CollectionButtons.vue";
+import { useUIStore } from "../../store/UIStore";
 
 const library = useLibraryStore();
 const { tracks } = storeToRefs(library);
 const base = useBaseStore();
+const ui = useUIStore();
 
 const subtractFromHeight = computed(() => {
-    return base.windowWidth <= 930 ? 358 : 188;
+    return ui.windowWidth <= 930 ? 358 : 188;
 });
 
 const collection = computed(() => {

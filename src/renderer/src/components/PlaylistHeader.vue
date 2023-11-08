@@ -34,7 +34,7 @@ import type { ItemCollection } from "../scripts/types";
 import GlowImage from "../components/GlowImage.vue";
 import CollectionButtons from "./CollectionButtons.vue";
 import Spacer from "./Spacer.vue";
-import {useUIStore} from "../store/UIStore";
+import { useUIStore } from "../store/UIStore";
 
 const props = defineProps({
     collection: {

@@ -287,7 +287,7 @@ export const usePlatformStore = defineStore("platform", () => {
 
     const downloadState = ref(new Map<string, Ref<DownloadState>>());
 
-    function fileSize(file:string){
+    function fileSize(file: string) {
         return window.api.fileSize(file);
     }
 
@@ -320,7 +320,6 @@ export const usePlatformStore = defineStore("platform", () => {
             for (let i = 0; i < tracks.length; i += batchSize) {
                 state.value.downloaded = i;
                 let batch = tracks.slice(i, i + batchSize);
-                console.log(batch[0])
                 try {
                     let tracks = await Promise.all(
                         batch.map((track) =>
@@ -388,6 +387,6 @@ export const usePlatformStore = defineStore("platform", () => {
         getTrackJpg,
         getTrackFile,
         directories,
-        fileSize
+        fileSize,
     };
 });

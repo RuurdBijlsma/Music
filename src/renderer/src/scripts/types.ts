@@ -11,7 +11,7 @@ export interface YouTubeTrack {
     channel: string;
     title: string;
     thumbnails?: { url: string; height: number; width: number }[];
-    thumbnail:string,
+    thumbnail: string;
 }
 
 export interface YouTubeSearchResult {

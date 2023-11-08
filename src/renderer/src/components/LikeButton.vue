@@ -16,7 +16,7 @@ import type { PropType } from "vue";
 import { computed, ref } from "vue";
 import type { Item } from "../scripts/types";
 import { useLibraryStore } from "../store/library";
-import {useUIStore} from "../store/UIStore";
+import { useUIStore } from "../store/UIStore";
 
 const ui = useUIStore();
 const library = useLibraryStore();
@@ -46,8 +46,7 @@ const color = computed(() =>
 );
 const fill = computed(
     () =>
-        isLiked.value &&
-        (props.variant !== "color" || ui.themeTooSimilarToFg),
+        isLiked.value && (props.variant !== "color" || ui.themeTooSimilarToFg),
 );
 
 let likedLoading = ref(false);

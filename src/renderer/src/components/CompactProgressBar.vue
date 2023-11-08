@@ -22,7 +22,7 @@
 <script lang="ts" setup>
 import { usePlayerStore } from "../store/player/player";
 import { computed, onMounted, onUnmounted } from "vue";
-import {useUIStore} from "../store/UIStore";
+import { useUIStore } from "../store/UIStore";
 
 const player = usePlayerStore();
 const ui = useUIStore();

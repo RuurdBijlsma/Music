@@ -5,7 +5,7 @@
         :scrollable="true"
         width="auto"
     >
-        <div class="edit-loading" v-if="editDialog.loading">
+        <div v-if="editDialog.loading" class="edit-loading">
             <v-progress-circular :indeterminate="true" />
         </div>
         <div
@@ -120,7 +120,7 @@ import { useLibraryStore } from "../store/library";
 import { computed } from "vue";
 import SimplePlayer from "./SimplePlayer.vue";
 import Spacer from "./Spacer.vue";
-import {useUIStore} from "../store/UIStore";
+import { useUIStore } from "../store/UIStore";
 
 const base = useBaseStore();
 const ui = useUIStore();

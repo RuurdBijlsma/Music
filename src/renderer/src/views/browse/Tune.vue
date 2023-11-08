@@ -67,7 +67,7 @@ import { useSpotifyApiStore } from "../../store/spotify-api";
 import { Ref, ref } from "vue";
 import { useBaseStore } from "../../store/base";
 import { useRouter } from "vue-router";
-import {useUIStore} from "../../store/UIStore";
+import { useUIStore } from "../../store/UIStore";
 
 const spotify = useSpotifyApiStore();
 const base = useBaseStore();

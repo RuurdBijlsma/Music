@@ -49,11 +49,13 @@
 
                     <v-chip-group
                         v-model="ui.themeIndex"
+                        :color="ui.themeColor"
                         class="chip-group"
                         mandatory
-                        :color="ui.themeColor"
                     >
-                        <v-chip class="theme-chip" v-for="opt in ui.themeOptions.slice(0, 3)"
+                        <v-chip
+                            v-for="opt in ui.themeOptions.slice(0, 3)"
+                            class="theme-chip"
                             >{{ base.caps(opt) }}
                         </v-chip>
                     </v-chip-group>

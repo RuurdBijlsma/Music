@@ -9,11 +9,11 @@
         <div class="theme-chips">
             <v-chip-group
                 v-model="ui.themeIndex"
-                class="chip-group"
                 :color="ui.themeColor"
+                class="chip-group"
                 mandatory
             >
-                <v-chip class="theme-chip" v-for="opt in ui.themeOptions"
+                <v-chip v-for="opt in ui.themeOptions" class="theme-chip"
                     >{{ base.caps(opt) }}
                 </v-chip>
             </v-chip-group>
@@ -27,26 +27,26 @@
                 hide-details
             ></v-switch>
             <template v-if="!ui.useSunSchedule">
-                <label for="light-picker" class="mr-3"
-                >Turn on light theme</label
+                <label class="mr-3" for="light-picker"
+                    >Turn on light theme</label
                 >
                 <input
-                    v-model="ui.lightOnTime"
-                    type="time"
                     id="light-picker"
-                    min="00:00"
+                    v-model="ui.lightOnTime"
                     max="24:00"
+                    min="00:00"
                     required
+                    type="time"
                 />
                 <div class="mt-3 mb-3" />
-                <label for="dark-picker" class="mr-3">Turn on dark theme</label>
+                <label class="mr-3" for="dark-picker">Turn on dark theme</label>
                 <input
-                    v-model="ui.darkOnTime"
-                    type="time"
                     id="dark-picker"
-                    min="00:00"
+                    v-model="ui.darkOnTime"
                     max="24:00"
+                    min="00:00"
                     required
+                    type="time"
                 />
             </template>
         </div>

@@ -315,7 +315,6 @@ export const useSearchStore = defineStore("search", () => {
 
     async function ytIdToTrack(id: string) {
         let rawResult = await platform.youTubeInfoById(id);
-        console.log({ rawResult });
         return ytResultToTrack(rawResult);
     }
 

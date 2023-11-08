@@ -9,7 +9,7 @@
         <track-list-virtual
             v-else
             :collection="collection"
-            :height="base.windowHeight.toString()"
+            :height="ui.windowHeight.toString()"
         >
             <playlist-header :collection="collection" />
         </track-list-virtual>
@@ -26,9 +26,11 @@ import TrackList from "../../components/TrackList.vue";
 import PlaylistHeader from "../../components/PlaylistHeader.vue";
 import { useSpotifyApiStore } from "../../store/spotify-api";
 import { storeToRefs } from "pinia";
+import { useUIStore } from "../../store/UIStore";
 
 const route = useRoute();
 const base = useBaseStore();
+const ui = useUIStore();
 const library = useLibraryStore();
 const spotify = useSpotifyApiStore();
 const playlist = ref(null as null | SpotifyApi.PlaylistObjectFull);

@@ -46,7 +46,7 @@ import { computed } from "vue";
 import type { Item } from "../scripts/types";
 import Spacer from "./Spacer.vue";
 import ItemPlayButton from "./ItemPlayButton.vue";
-import {useUIStore} from "../store/UIStore";
+import { useUIStore } from "../store/UIStore";
 
 const base = useBaseStore();
 const ui = useUIStore();

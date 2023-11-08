@@ -75,7 +75,6 @@ export const useTrackLoaderStore = defineStore("trackLoader", () => {
             trackData.metadata.imageColor = colors;
             sendData(trackData);
 
-            console.log("Downloading track to ", trackPath);
             let { path, ytId } = await platform.downloadTrackFile(
                 track,
                 trackData.metadata.youTubeSource,

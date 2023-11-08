@@ -130,7 +130,7 @@ import QueueButton from "./QueueButton.vue";
 import ItemMenu from "./ItemMenu.vue";
 import Spacer from "./Spacer.vue";
 import PlayButton from "./PlayButton.vue";
-import {useUIStore} from "../store/UIStore";
+import { useUIStore } from "../store/UIStore";
 
 const player = usePlayerStore();
 const base = useBaseStore();
@@ -139,7 +139,7 @@ const elWidth = ref(0);
 const musicContainer = ref(null);
 
 let volumeBeforeMute = 1;
-const lowWindow = computed(() => base.windowHeight < 820);
+const lowWindow = computed(() => ui.windowHeight < 820);
 
 function handleScroll(e: WheelEvent) {
     let newVolume = player.volume - e.deltaY / 3000;

@@ -8,8 +8,16 @@
             <v-window-item value="spotify">
                 <div v-if="spotifyAuth.isLoggedIn" class="logged-in">
                     <v-avatar>
-                        <v-img v-if="library.userInfo.avatar" :src="library.userInfo.avatar"></v-img>
-                        <v-icon v-else icon="mdi-spotify" color="green" size="35"></v-icon>
+                        <v-img
+                            v-if="library.userInfo.avatar"
+                            :src="library.userInfo.avatar"
+                        ></v-img>
+                        <v-icon
+                            v-else
+                            color="green"
+                            icon="mdi-spotify"
+                            size="35"
+                        ></v-icon>
                     </v-avatar>
                     <v-card-text>
                         <h3>{{ library.userInfo.name }}</h3>
@@ -19,7 +27,7 @@
                         <v-btn
                             :color="ui.themeColor"
                             @click="spotifyAuth.logout()"
-                        >Logout
+                            >Logout
                         </v-btn>
                     </v-card-actions>
                 </div>
@@ -46,14 +54,17 @@
                         @click:append="showPassword = !showPassword"
                     />
                     <v-btn
-                        v-if="spotifyAuth.hasCredentials && !spotifyAuth.isLoggedIn"
+                        v-if="
+                            spotifyAuth.hasCredentials &&
+                            !spotifyAuth.isLoggedIn
+                        "
                         class="mt-4"
                         color="green"
                         variant="tonal"
                         @click="spotifyAuth.login()"
                     >
                         <v-icon class="mr-2" color="green" size="25"
-                        >mdi-spotify
+                            >mdi-spotify
                         </v-icon>
                         Log in
                     </v-btn>
@@ -130,7 +141,7 @@ import { useSpotifyAuthStore } from "../store/spotify-auth";
 import { useBaseStore } from "../store/base";
 import { useRuurdAuthStore } from "../store/ruurd-auth";
 import { DataExport } from "../scripts/types";
-import {useUIStore} from "../store/UIStore";
+import { useUIStore } from "../store/UIStore";
 
 const base = useBaseStore();
 const ui = useUIStore();

@@ -59,10 +59,10 @@ import { storeToRefs } from "pinia";
 import { useRoute } from "vue-router";
 import { ref } from "vue";
 import { useTheme } from "vuetify";
-import {useUIStore} from "../store/UIStore";
+import { useUIStore } from "../store/UIStore";
 
 const player = usePlayerStore();
-const ui = useUIStore()
+const ui = useUIStore();
 const theme = useTheme();
 const route = useRoute();
 const { collection } = storeToRefs(player);

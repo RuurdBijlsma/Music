@@ -160,7 +160,6 @@ export const usePlayerStore = defineStore("player", () => {
             sourcePath.value !== trackData.path &&
             isActive(_collection, trackData.track)
         ) {
-            console.log("Playing track file", trackData.path);
             duration.value =
                 trackData.metadata.sourceDuration ??
                 trackData.track.duration_ms / 1000;
@@ -168,15 +167,8 @@ export const usePlayerStore = defineStore("player", () => {
             sourcePath.value = trackData.path;
             playerElement.src = trackData.path;
 
-            if (trackData.likedInfo?.startTime) {
-                console.log("START TIME SET", trackData.likedInfo?.startTime);
+            if (trackData.likedInfo?.startTime)
                 playerElement.currentTime = trackData.likedInfo?.startTime;
-            } else {
-                console.log(
-                    "START TIME NOT SET",
-                    trackData.likedInfo?.startTime,
-                );
-            }
         }
     }
 
@@ -351,11 +343,6 @@ export const usePlayerStore = defineStore("player", () => {
             // If it's a liked track and the currently playing track duration does not match the stored duration
             // update it in the db and the list
             // but don't use endTime-startTime for this
-            console.log("duration", element.duration);
-            console.log(
-                "liked track duration",
-                activeTrackData.likedInfo?.track?.duration_ms,
-            );
             if (
                 activeTrackData.likedInfo !== undefined &&
                 Math.abs(
@@ -363,10 +350,6 @@ export const usePlayerStore = defineStore("player", () => {
                         element.duration,
                 ) > 1
             ) {
-                console.log(
-                    "Updating track duration_ms to",
-                    element.duration * 1000,
-                );
                 activeTrackData.likedInfo.track.duration_ms =
                     element.duration * 1000;
                 db.put("tracks", toRaw(activeTrackData.likedInfo)).then();

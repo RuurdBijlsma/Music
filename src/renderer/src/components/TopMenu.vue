@@ -51,7 +51,7 @@ import { usePlatformStore } from "../store/electron";
 import iconUrlDark from "../../assets/app-icon/dark-500.png?asset";
 //@ts-ignore
 import iconUrlLight from "../../assets/app-icon/light-500.png?asset";
-import {useUIStore} from "../store/UIStore";
+import { useUIStore } from "../store/UIStore";
 
 const ui = useUIStore();
 const platform = usePlatformStore();

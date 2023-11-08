@@ -494,7 +494,10 @@ export const useLibraryStore = defineStore("library", () => {
             delete likedInfo.startTime;
             delete likedInfo.endTime;
             await db.put("tracks", toRaw(likedInfo));
-            console.warn("Removing end & start time from likedInfo because the source file changed.",likedInfo);
+            console.warn(
+                "Removing end & start time from likedInfo because the source file changed.",
+                likedInfo,
+            );
         }
 
         sourceDialog.value.show = false;
@@ -543,10 +546,8 @@ export const useLibraryStore = defineStore("library", () => {
             return console.warn(
                 "You can only edit tracks in your liked tracks",
             );
-        console.log("EDIT TRACK");
         player.pause().then();
         editDialog.value.likedTrack = likedTrack;
-        console.log(editDialog.value);
         editDialog.value.durationRange = [
             likedInfo.startTime ?? 0,
             likedInfo.endTime ?? likedTrack.track.duration_ms / 1000,
@@ -578,7 +579,6 @@ export const useLibraryStore = defineStore("library", () => {
         }`;
         likedTrack.startTime = durationRange[0];
         likedTrack.endTime = durationRange[1];
-        console.log("pout", toRaw(likedTrack));
         await db.put("tracks", toRaw(likedTrack));
 
         if (

@@ -145,7 +145,7 @@ export const useSpotifyAuthStore = defineStore("spotify-auth", () => {
         localStorage.tokens = JSON.stringify(toRaw(tokens.value));
         await db.delete("spotify", "library");
         await db.delete("spotify", "view");
-        await db.clear('cache');
+        await db.clear("cache");
 
         clearTimeout(tokenTimeout);
         platform.resetSpotifyLogin();

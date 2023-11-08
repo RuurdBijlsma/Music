@@ -51,7 +51,6 @@ app.whenReady().then(() => {
             if (details.url.includes("tools.keycdn.com/geo.json")) {
                 details.requestHeaders["User-Agent"] =
                     "keycdn-tools:https://github.com/RuurdBijlsma/Music";
-                console.log("changing header for ", details);
             }
             // Continue the request with the modified headers
             callback({ cancel: false, requestHeaders: details.requestHeaders });
