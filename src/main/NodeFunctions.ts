@@ -389,8 +389,19 @@ export default class NodeFunctions {
         await fs.copyFile(from, to);
     }
 
-    deleteFile(filename: string) {
-        return fs.unlink(filename);
+    deleteFile(file: string) {
+        return fs.unlink(file);
+    }
+
+    async fileSize(file: string) {
+        if (await this.checkFileExists(file)) {
+            // Get the file stats using a promise
+            const stats = await fs.stat(file);
+            // Return the file size
+            return stats.size;
+        } else {
+            return -1;
+        }
     }
 
     async updateYtdlp(): Promise<string> {

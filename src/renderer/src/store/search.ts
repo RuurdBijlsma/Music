@@ -208,7 +208,8 @@ export const useSearchStore = defineStore("search", () => {
             type: "track",
             name: ytSearchResult.title.replaceAll('"', ""),
             id: `yt-${ytSearchResult.id}`,
-            duration_ms: hmsToSeconds(ytSearchResult.length.simpleText) * 1000,
+            duration_ms:
+                hmsToSeconds(ytSearchResult.length?.simpleText ?? 0) * 1000,
             popularity: 80,
         };
     }
@@ -301,7 +302,8 @@ export const useSearchStore = defineStore("search", () => {
                 ).items.filter((i) => i.type === "video");
             },
             "ytsearch" + query + limit,
-            1000 * 60 * 60 * 24 * 7,
+            1,
+            // 1000 * 60 * 60 * 24 * 7,
         );
     }
 

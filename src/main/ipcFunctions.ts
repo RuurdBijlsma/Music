@@ -38,8 +38,11 @@ export function handleIpc(ipcMain: Electron.IpcMain, win: BrowserWindow) {
         nf.searchYtdlp(query, limit),
     );
 
-    ipcMain.handle("checkFileExists", (_, filename: string) =>
-        nf.checkFileExists(filename),
+    ipcMain.handle("fileSize", (_, file: string) =>
+        nf.fileSize(file),
+    );
+    ipcMain.handle("checkFileExists", (_, file: string) =>
+        nf.checkFileExists(file),
     );
     ipcMain.handle("copyIfExists", (_, fromPath: string, toDirectory: string) =>
         nf.copyIfExists(fromPath, toDirectory),
@@ -47,8 +50,8 @@ export function handleIpc(ipcMain: Electron.IpcMain, win: BrowserWindow) {
     ipcMain.handle("copyFile", (_, from: string, to: string) =>
         nf.copyFile(from, to),
     );
-    ipcMain.handle("deleteFile", (_, filename: string) =>
-        nf.deleteFile(filename),
+    ipcMain.handle("deleteFile", (_, file: string) =>
+        nf.deleteFile(file),
     );
     ipcMain.handle("checkTracksDownloaded", (_, filenames: string[]) =>
         nf.checkTracksDownloaded(filenames),

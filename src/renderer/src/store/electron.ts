@@ -287,6 +287,10 @@ export const usePlatformStore = defineStore("platform", () => {
 
     const downloadState = ref(new Map<string, Ref<DownloadState>>());
 
+    function fileSize(file:string){
+        return window.api.fileSize(file);
+    }
+
     function downloadTracks(
         key: string,
         tracks: SpotifyApi.TrackObjectFull[],
@@ -384,5 +388,6 @@ export const usePlatformStore = defineStore("platform", () => {
         getTrackJpg,
         getTrackFile,
         directories,
+        fileSize
     };
 });

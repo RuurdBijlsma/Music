@@ -23,6 +23,7 @@ declare global {
             updateYtdlp: () => Promise<string>,
             checkTracksDownloaded: (filenames: string[]) => Promise<boolean>,
 
+            fileSize: (file: string) => Promise<number>,
             checkFileExists: (filename: string) => Promise<any>,
             deleteFile: (filename: string) => Promise<any>,
             copyIfExists: (fromPath: string, toDirectory: string) => Promise<any>,

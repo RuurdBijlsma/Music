@@ -41,8 +41,10 @@ export const useTrackLoaderStore = defineStore("trackLoader", () => {
                 track.id,
             )}.mp3`;
         }
-        let fileExists = await platform.checkFileExists(trackPath);
+        let fileSize = await platform.fileSize(trackPath);
+        let fileExists = fileSize !== -1;
         if (!fileExists) trackPath = undefined;
+        console.log("FILESIZE", fileSize);
 
         let likedInfo: undefined | LikedTrack = library.tracks.find(
             (t) => t.id === track.id,
@@ -92,12 +94,22 @@ export const useTrackLoaderStore = defineStore("trackLoader", () => {
 
         // Track Bars
         async function trackBars() {
-            // get track bars and set to metadata en do sendData
-            let bars = await calculateTrackBars(trackData);
-            if (bars === undefined) {
-                base.addSnack("Oops, can't calculate trackbars");
+            if (fileSize > 300000000) {
+                console.warn(
+                    "File is too big to generate track bars",
+                    fileSize,
+                );
+                let bars = getEmptyMetaTrackBars();
+                bars.empty = false;
+                trackData.metadata.trackBars = bars;
             } else {
-                trackData.metadata.trackBars = makeMetaTrackBars(bars);
+                // get track bars and set to metadata en do sendData
+                let bars = await calculateTrackBars(trackData);
+                if (bars === undefined) {
+                    base.addSnack("Oops, can't calculate trackbars");
+                } else {
+                    trackData.metadata.trackBars = makeMetaTrackBars(bars);
+                }
             }
             return trackData;
         }

@@ -23,16 +23,18 @@ const api = {
         ipcRenderer.invoke("downloadYt", id, outPath, tags, imageFile),
     updateYtdlp: () => ipcRenderer.invoke("updateYtdlp"),
 
-    checkFileExists: (filename: string) =>
-        ipcRenderer.invoke("checkFileExists", filename),
-    deleteFile: (filename: string) =>
-        ipcRenderer.invoke("deleteFile", filename),
+    fileSize: (file: string) =>
+        ipcRenderer.invoke("fileSize", file),
+    checkFileExists: (file: string) =>
+        ipcRenderer.invoke("checkFileExists", file),
+    deleteFile: (file: string) =>
+        ipcRenderer.invoke("deleteFile", file),
     copyIfExists: (fromPath: string, toDirectory: string) =>
         ipcRenderer.invoke("copyIfExists", fromPath, toDirectory),
     copyFile: (from: string, to: string) =>
         ipcRenderer.invoke("copyFile", from, to),
-    checkTracksDownloaded: (filenames: string[]) =>
-        ipcRenderer.invoke("checkTracksDownloaded", filenames),
+    checkTracksDownloaded: (files: string[]) =>
+        ipcRenderer.invoke("checkTracksDownloaded", files),
 
     firstLogin: (spotifyAuth: {
         hasCredentials: boolean;
