@@ -40,18 +40,17 @@ export const useTrackLoaderStore = defineStore("trackLoader", () => {
             trackPath = `${platform.directories?.temp}/${changeSourceTracks.get(
                 track.id,
             )}.mp3`;
+            console.warn("Using temp track path", trackPath);
         }
         let fileSize = await platform.fileSize(trackPath);
         let fileExists = fileSize !== -1;
-        if (!fileExists) trackPath = undefined;
-        console.log("FILESIZE", fileSize);
 
         let likedInfo: undefined | LikedTrack = library.tracks.find(
             (t) => t.id === track.id,
         );
 
         let trackData: TrackData = {
-            path: trackPath,
+            path: fileExists ? trackPath : undefined,
             metadata: metadata ?? {
                 id: track.id,
             },
@@ -76,6 +75,7 @@ export const useTrackLoaderStore = defineStore("trackLoader", () => {
             trackData.metadata.imageColor = colors;
             sendData(trackData);
 
+            console.log("Downloading track to ", trackPath);
             let { path, ytId } = await platform.downloadTrackFile(
                 track,
                 trackData.metadata.youTubeSource,

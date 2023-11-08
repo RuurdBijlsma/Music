@@ -487,6 +487,16 @@ export const useLibraryStore = defineStore("library", () => {
         delete trackData.metadata.volume;
 
         await db.put("trackMetadata", toRaw(trackData.metadata));
+
+        let likedInfo = tracks.value.find((t) => t.id === trackId);
+        if (likedInfo !== undefined) {
+            // remove end and start time from liked info
+            delete likedInfo.startTime;
+            delete likedInfo.endTime;
+            await db.put("tracks", toRaw(likedInfo));
+            console.warn("Removing end & start time from likedInfo because the source file changed.",likedInfo);
+        }
+
         sourceDialog.value.show = false;
         trackLoader.changeSourceTracks.set(trackData.track.id, query + ytId);
         if (

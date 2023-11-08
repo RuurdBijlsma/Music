@@ -209,7 +209,8 @@ export const useSearchStore = defineStore("search", () => {
             name: ytSearchResult.title.replaceAll('"', ""),
             id: `yt-${ytSearchResult.id}`,
             duration_ms:
-                hmsToSeconds(ytSearchResult.length?.simpleText ?? 0) * 1000,
+                hmsToSeconds(ytSearchResult.length?.simpleText ?? "0:00") *
+                1000,
             popularity: 80,
         };
     }
