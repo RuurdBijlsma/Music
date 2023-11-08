@@ -82,9 +82,6 @@
 
 <script lang="ts" setup>
 // todo
-// ruurd login flow not working without refresh? test pls
-// -- for 6.5.0 --
-// setting for schedule dark/light mode
 // periodic backup to server?
 // playlists cachen?
 // simple player en simple yt player samenvoegen
