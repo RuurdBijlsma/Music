@@ -95,6 +95,7 @@ export const useUIStore = defineStore("UI", () => {
         sun.value.set = sunset;
         sun.value.rise = sunrise;
         sun.value.isNightTime = isNightTime;
+        console.log("IS NIGHT", isNightTime);
         console.log({ sunset, sunrise });
     }
 
@@ -180,7 +181,11 @@ export const useUIStore = defineStore("UI", () => {
         sunrise.setDate(now.getDate());
         while (now > sunrise) sunrise = new Date(+sunrise + day);
         console.log("Next sunrise", sunrise);
-        let isNightTime = now < sunrise || now > sunset;
+        // if next sunset is tomorrow, then we are past today's sunset, so it is night
+        // if next sunrise is today, then it is very early, so it is night
+        let isNightTime =
+            sunset.getDate() > now.getDate() ||
+            sunrise.getDate() === now.getDate();
         return {
             isNightTime,
             sunset,
