@@ -190,12 +190,9 @@ async function ruurdLogin(e: SubmitEvent) {
             )
         ).json();
         await base.importData(data as DataExport);
+        localStorage.lastRoute = "/";
         if (!spotifyAuth.isLoggedIn) {
-            await spotifyAuth.loadValues();
-        }
-
-        if (!spotifyAuth.isLoggedIn) {
-            tab.value = "spotify";
+            location.reload();
         }
     } catch (e: any) {
         base.addSnack("Login failed: " + e.message);

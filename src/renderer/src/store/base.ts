@@ -154,8 +154,6 @@ export const useBaseStore = defineStore("base", () => {
         };
 
         let cleanLocalStorage = { ...localStorage };
-        delete cleanLocalStorage.trackInMemory;
-        delete cleanLocalStorage.blurBgSource;
         delete cleanLocalStorage.lastRoute;
 
         return {
