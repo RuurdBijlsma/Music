@@ -82,6 +82,8 @@
 
 <script lang="ts" setup>
 // todo
+// de track `Harps & Cords, Morgan Beck - I'm Fine` is te lang om te decoden
+// zet limiet op decode audio, 2 uur misschien?
 // remove button to add yt track to playlist (not possible)
 // if bottom player is active set volume to full
 // ruurd login flow not working without refresh? test pls
