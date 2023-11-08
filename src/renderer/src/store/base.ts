@@ -106,14 +106,6 @@ export const useBaseStore = defineStore("base", () => {
         item: null as any,
     });
 
-    const windowWidth = ref(window.innerWidth);
-    const windowHeight = ref(window.innerHeight);
-    const onWindowResize = () => {
-        windowWidth.value = window.innerWidth;
-        windowHeight.value = window.innerHeight;
-    };
-    window.addEventListener("resize", onWindowResize, false);
-
     async function exportToServer() {
         if (!ruurdAuth.isLoggedIn) {
             addSnack(
@@ -416,8 +408,6 @@ export const useBaseStore = defineStore("base", () => {
         events,
         waitFor,
         addSnack,
-        windowHeight,
-        windowWidth,
         encodeUrlName,
         caps,
         exportToServer,

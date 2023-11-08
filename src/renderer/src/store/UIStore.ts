@@ -10,6 +10,14 @@ export const useUIStore = defineStore("UI", () => {
     const platform = usePlatformStore();
     const theme = useTheme();
 
+    const windowWidth = ref(window.innerWidth);
+    const windowHeight = ref(window.innerHeight);
+    const onWindowResize = () => {
+        windowWidth.value = window.innerWidth;
+        windowHeight.value = window.innerHeight;
+    };
+    window.addEventListener("resize", onWindowResize, false);
+
     const themeColorDark = ref(
         localStorage.getItem("themeColorDark") === null
             ? "#FFFFFF"
@@ -230,5 +238,7 @@ export const useUIStore = defineStore("UI", () => {
         useSunSchedule,
         lightOnTime,
         darkOnTime,
+        windowWidth,
+        windowHeight,
     };
 });

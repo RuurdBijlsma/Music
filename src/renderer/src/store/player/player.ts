@@ -80,11 +80,11 @@ export const usePlayerStore = defineStore("player", () => {
             ? false
             : localStorage.normalizeVolume === "true",
     );
-    const realVolume = computed(() =>
-        normalizeVolume.value
-            ? volume.value * volumeNormalizer.value
-            : volume.value,
-    );
+    const realVolume = computed(() => {
+        // when bottom music player is enabled, volume cant be changed so always use full volume
+        let vol = ui.windowWidth <= 930 ? 1 : volume.value;
+        return normalizeVolume.value ? vol * volumeNormalizer.value : vol;
+    });
 
     watch(
         normalizeVolume,
@@ -359,7 +359,8 @@ export const usePlayerStore = defineStore("player", () => {
             if (
                 activeTrackData.likedInfo !== undefined &&
                 Math.abs(
-                    activeTrackData.likedInfo.track.duration_ms / 1000 - element.duration,
+                    activeTrackData.likedInfo.track.duration_ms / 1000 -
+                        element.duration,
                 ) > 1
             ) {
                 console.log(

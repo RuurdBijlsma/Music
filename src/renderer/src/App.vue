@@ -20,7 +20,7 @@
             <div class="fake-top-menu" />
             <left-navigation />
             <bottom-music-player
-                v-if="base.windowWidth <= 930 && base.dbLoaded"
+                v-if="ui.windowWidth <= 930 && base.dbLoaded"
                 :style="{
                     transform:
                         player.track === null
@@ -46,7 +46,7 @@
                 v-if="base.dbLoaded"
                 :style="{
                     width:
-                        base.windowWidth <= 930
+                        ui.windowWidth <= 930
                             ? 'calc(100% - 70px)'
                             : player.track === null
                             ? 'calc(100% - 90px)'
@@ -82,7 +82,6 @@
 
 <script lang="ts" setup>
 // todo
-// if bottom player is active set volume to full
 // ruurd login flow not working without refresh? test pls
 // -- for 6.5.0 --
 // setting for schedule dark/light mode
