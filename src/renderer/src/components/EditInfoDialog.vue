@@ -1,7 +1,7 @@
 <template>
     <v-dialog
         v-model="editDialog.show"
-        :class="{ dark: base.isDark }"
+        :class="{ dark: ui.isDark }"
         :scrollable="true"
         width="auto"
     >
@@ -18,7 +18,7 @@
                 <v-list-subheader class="mb-2">Title</v-list-subheader>
                 <v-text-field
                     v-model="editDialog.title"
-                    :color="base.themeColor"
+                    :color="ui.themeColor"
                     :single-line="true"
                     density="compact"
                     hide-details
@@ -29,7 +29,7 @@
                     <v-text-field
                         v-for="(_, i) in editDialog.artists"
                         v-model="editDialog.artists[i]"
-                        :color="base.themeColor"
+                        :color="ui.themeColor"
                         :single-line="true"
                         density="compact"
                         hide-details
@@ -40,7 +40,7 @@
                 <v-list-subheader class="mb-2 mt-4">Duration</v-list-subheader>
                 <v-range-slider
                     v-model="editDialog.durationRange"
-                    :color="base.themeColor"
+                    :color="ui.themeColor"
                     :max="track.duration_ms / 1000"
                     :min="0"
                     :step="0.1"
@@ -49,7 +49,7 @@
                     <template v-slot:prepend>
                         <v-text-field
                             v-model="editDialog.durationRange[0]"
-                            :color="base.themeColor"
+                            :color="ui.themeColor"
                             :max="track.duration_ms / 1000"
                             :min="0"
                             :single-line="true"
@@ -63,7 +63,7 @@
                     <template v-slot:append>
                         <v-text-field
                             v-model="editDialog.durationRange[1]"
-                            :color="base.themeColor"
+                            :color="ui.themeColor"
                             :max="track.duration_ms / 1000"
                             :min="0"
                             :single-line="true"
@@ -77,7 +77,7 @@
                 </v-range-slider>
                 <v-btn
                     v-if="revertPossible"
-                    :color="base.themeColor"
+                    :color="ui.themeColor"
                     prepend-icon="mdi-restore"
                     variant="tonal"
                     @click="revert"
@@ -89,7 +89,7 @@
             <v-divider class="mb-3"></v-divider>
             <v-card-item>
                 <simple-player
-                    :color="base.themeColor"
+                    :color="ui.themeColor"
                     :end-time="editDialog.durationRange[1]"
                     :insta-load="true"
                     :play-button-size="50"
@@ -100,7 +100,7 @@
             <v-card-actions class="mt-1">
                 <spacer></spacer>
                 <v-btn
-                    :color="base.themeColor"
+                    :color="ui.themeColor"
                     variant="tonal"
                     @click="applyChanges"
                 >
@@ -120,8 +120,10 @@ import { useLibraryStore } from "../store/library";
 import { computed } from "vue";
 import SimplePlayer from "./SimplePlayer.vue";
 import Spacer from "./Spacer.vue";
+import {useUIStore} from "../store/UIStore";
 
 const base = useBaseStore();
+const ui = useUIStore();
 const library = useLibraryStore();
 const editDialog = computed(() => library.editDialog);
 const likedTrack = computed(() => library.editDialog.likedTrack);

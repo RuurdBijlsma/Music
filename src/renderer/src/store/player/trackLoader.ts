@@ -1,6 +1,5 @@
 import { defineStore } from "pinia";
 import {
-    ItemCollection,
     LikedTrack,
     MetaTrackBars,
     TrackBars,
@@ -29,7 +28,6 @@ export const useTrackLoaderStore = defineStore("trackLoader", () => {
     async function getTrackData(
         track: SpotifyApi.TrackObjectFull,
         onData: (data: TrackData) => any,
-        collection: ItemCollection | undefined = undefined,
     ) {
         const db = await baseDb;
         let metadata: TrackMetadata | undefined = await db.get(
@@ -46,10 +44,9 @@ export const useTrackLoaderStore = defineStore("trackLoader", () => {
         let fileExists = await platform.checkFileExists(trackPath);
         if (!fileExists) trackPath = undefined;
 
-        let likedInfo: undefined | LikedTrack;
-        if (collection && collection.id === "liked") {
-            likedInfo = library.tracks.find((t) => t.id === track.id);
-        }
+        let likedInfo: undefined | LikedTrack = library.tracks.find(
+            (t) => t.id === track.id,
+        );
 
         let trackData: TrackData = {
             path: trackPath,
@@ -131,18 +128,11 @@ export const useTrackLoaderStore = defineStore("trackLoader", () => {
         if (trackData.metadata.volume === undefined) volume().then(sendData);
     }
 
-    async function getFullTrackData(
-        track: SpotifyApi.TrackObjectFull,
-        collection?: ItemCollection,
-    ) {
+    async function getFullTrackData(track: SpotifyApi.TrackObjectFull) {
         return new Promise<TrackData>((resolve) => {
-            getTrackData(
-                track,
-                (data) => {
-                    if (isLoadedTrackData(data)) resolve(data);
-                },
-                collection,
-            );
+            getTrackData(track, (data) => {
+                if (isLoadedTrackData(data)) resolve(data);
+            });
         });
     }
 

@@ -1,9 +1,7 @@
 import { defineStore } from "pinia";
 import { IDBPDatabase, IDBPObjectStore, openDB, StoreNames } from "idb";
-import { computed, ref } from "vue";
-import { useTheme } from "vuetify";
+import { ref } from "vue";
 import type { DataExport, Item, ItemCollection } from "../scripts/types";
-import { deltaE, hexToRgb } from "../scripts/utils";
 import { EventEmitter } from "events";
 import { randomNotFound } from "../scripts/imageSources";
 import { useRuurdAuthStore } from "./ruurd-auth";
@@ -90,32 +88,16 @@ export const baseDb = openDB("base", 6, {
 });
 
 export const useBaseStore = defineStore("base", () => {
-    const theme = useTheme();
     const ruurdAuth = useRuurdAuthStore();
     const dbLoaded = ref(false);
     const events = new EventEmitter();
     baseDb.then(async () => {
         dbLoaded.value = true;
     });
-    const themeColorDark = ref("#FFFFFF");
-    const themeColorLight = ref("#000000");
-    const themeColor = computed(() =>
-        theme.global.name.value === "dark"
-            ? themeColorDark.value
-            : themeColorLight.value,
-    );
-    const contrastToForeground = computed(() => {
-        let themeRgb = hexToRgb(themeColor.value);
-        let fgRgb = hexToRgb(theme.current.value.colors["on-background"]);
-
-        return deltaE(themeRgb, fgRgb);
-    });
-    const themeTooSimilarToFg = computed(() => contrastToForeground.value < 17);
 
     const snackbars = ref(
         [] as { open: boolean; text: string; timeout: number }[],
     );
-    const isDark = computed(() => theme.current.value.dark);
 
     const contextMenu = ref({
         x: 0,
@@ -426,13 +408,8 @@ export const useBaseStore = defineStore("base", () => {
         msToReadable,
         approximateDuration,
         albumString,
-        themeColor,
-        themeColorDark,
-        themeColorLight,
         setContextMenuItem,
         contextMenu,
-        contrastToForeground,
-        themeTooSimilarToFg,
         itemCollection,
         snackbars,
         dbLoaded,
@@ -443,7 +420,6 @@ export const useBaseStore = defineStore("base", () => {
         windowWidth,
         encodeUrlName,
         caps,
-        isDark,
         exportToServer,
         importData,
     };

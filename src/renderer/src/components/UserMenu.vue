@@ -48,15 +48,14 @@
                     </v-list-item-title>
 
                     <v-chip-group
-                        v-model="chosenTheme"
+                        v-model="ui.themeIndex"
                         class="chip-group"
-                        color="primary"
                         mandatory
-                        selected-class="text-deep-primary"
+                        :color="ui.themeColor"
                     >
-                        <v-chip class="theme-chip">Light</v-chip>
-                        <v-chip class="theme-chip">Dark</v-chip>
-                        <v-chip class="theme-chip">System</v-chip>
+                        <v-chip class="theme-chip" v-for="opt in ui.themeOptions.slice(0, 3)"
+                            >{{ base.caps(opt) }}
+                        </v-chip>
                     </v-chip-group>
                 </div>
             </v-list-item>
@@ -89,50 +88,22 @@ import { useSpotifyAuthStore } from "../store/spotify-auth";
 import { ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import { useTheme } from "vuetify";
-import { usePlatformStore } from "../store/electron";
 import { randomUser } from "../scripts/imageSources";
+import { useUIStore } from "../store/UIStore";
+import { useBaseStore } from "../store/base";
 
 const library = useLibraryStore();
 const spotifyAuth = useSpotifyAuthStore();
 const route = useRoute();
 const theme = useTheme();
-const platform = usePlatformStore();
+const base = useBaseStore();
+const ui = useUIStore();
 
-const themeOptions = ["light", "dark", "system"];
-const chosenTheme = ref(2);
 const dropdownOpen = ref(false);
 
 watch(route, () => {
     dropdownOpen.value = false;
 });
-watch(chosenTheme, () => {
-    localStorage.theme = themeOptions[chosenTheme.value];
-    applyTheme();
-});
-
-function applyTheme() {
-    if (localStorage.getItem("theme") !== null)
-        chosenTheme.value = themeOptions.indexOf(localStorage.theme);
-    if (
-        localStorage.getItem("theme") !== null &&
-        localStorage.theme !== "system"
-    ) {
-        theme.global.name.value = localStorage.theme;
-    } else {
-        if (
-            window.matchMedia &&
-            window.matchMedia("(prefers-color-scheme: dark)").matches
-        ) {
-            // dark mode
-            theme.global.name.value = "dark";
-        } else {
-            theme.global.name.value = "light";
-        }
-    }
-    platform.setTheme(theme.global.name.value as "light" | "dark");
-}
-
-applyTheme();
 
 window
     .matchMedia("(prefers-color-scheme: dark)")

@@ -18,12 +18,12 @@
             <spacer />
             <div class="buttons mt-3">
                 <item-play-button
-                    :color="base.themeColor"
+                    :color="ui.themeColor"
                     :item="item"
                     class="mr-3"
                 />
                 <item-play-button
-                    :color="base.themeColor"
+                    :color="ui.themeColor"
                     :item="item"
                     :shuffle="true"
                 />
@@ -46,8 +46,10 @@ import { computed } from "vue";
 import type { Item } from "../scripts/types";
 import Spacer from "./Spacer.vue";
 import ItemPlayButton from "./ItemPlayButton.vue";
+import {useUIStore} from "../store/UIStore";
 
 const base = useBaseStore();
+const ui = useUIStore();
 const props = defineProps({
     item: {
         type: Object as PropType<Item>,

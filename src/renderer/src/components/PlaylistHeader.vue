@@ -12,7 +12,7 @@
         <p class="playlist-stats">
             Created by
             <router-link
-                :style="{ color: base.themeColor }"
+                :style="{ color: ui.themeColor }"
                 :to="base.itemUrl(playlist.owner)"
                 class="user-url"
                 >{{ playlist.owner.display_name }}
@@ -34,6 +34,7 @@ import type { ItemCollection } from "../scripts/types";
 import GlowImage from "../components/GlowImage.vue";
 import CollectionButtons from "./CollectionButtons.vue";
 import Spacer from "./Spacer.vue";
+import {useUIStore} from "../store/UIStore";
 
 const props = defineProps({
     collection: {
@@ -42,6 +43,7 @@ const props = defineProps({
     },
 });
 const base = useBaseStore();
+const ui = useUIStore();
 
 const followerString = computed(() => {
     if (playlist.value === null) return "0 followers";

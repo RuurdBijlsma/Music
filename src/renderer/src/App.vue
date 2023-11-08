@@ -1,5 +1,5 @@
 <template>
-    <v-app :class="{ dark: base.isDark }" class="root">
+    <v-app :class="{ dark: ui.isDark }" class="root">
         <div
             :style="{
                 backgroundImage: `linear-gradient(rgb(var(--v-theme-background), 0.5), rgb(var(--v-theme-background))), url('${blurBgSrc}')`,
@@ -83,15 +83,21 @@
 <script lang="ts" setup>
 // todo
 // remove button to add yt track to playlist (not possible)
-// setting for schedule dark/light mode
 // if bottom player is active set volume to full
 // ruurd login flow not working without refresh? test pls
+// -- for 6.5.0 --
+// setting for schedule dark/light mode
 // periodic backup to server?
 // playlists cachen?
 // simple player en simple yt player samenvoegen
 // show listen stats
 // generate a spotify wrapped / ruurd music wrapped
 // possibly replace color thief with something without vulnerabilities
+// clear cache button in settings
+// save theme color in localstorage
+// offline mode
+//  - in normal use cache every spotify request, only in offline mode use the cache instead of making request
+//  - don't auto update liked songs
 // -----------------------------------------------------------
 // listen stats
 // - per song listen count
@@ -120,8 +126,10 @@ import BottomMusicPlayer from "./components/BottomMusicPlayer.vue";
 //@ts-ignore
 import coverImage from "../assets/cover.jpg?asset";
 import EditInfoDialog from "./components/EditInfoDialog.vue";
+import {useUIStore} from "./store/UIStore";
 
 const base = useBaseStore();
+const ui = useUIStore();
 const player = usePlayerStore();
 const initialBg = coverImage;
 const blurBgSrc = computed(() => {

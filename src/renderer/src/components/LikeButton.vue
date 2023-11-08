@@ -12,13 +12,13 @@
 </template>
 
 <script lang="ts" setup>
-import { useBaseStore } from "../store/base";
 import type { PropType } from "vue";
 import { computed, ref } from "vue";
 import type { Item } from "../scripts/types";
 import { useLibraryStore } from "../store/library";
+import {useUIStore} from "../store/UIStore";
 
-const base = useBaseStore();
+const ui = useUIStore();
 const library = useLibraryStore();
 
 const props = defineProps({
@@ -41,13 +41,13 @@ const isLiked = computed(() =>
 );
 const color = computed(() =>
     props.variant !== "no-theme" && (props.variant === "fill" || isLiked.value)
-        ? base.themeColor
+        ? ui.themeColor
         : "default",
 );
 const fill = computed(
     () =>
         isLiked.value &&
-        (props.variant !== "color" || base.themeTooSimilarToFg),
+        (props.variant !== "color" || ui.themeTooSimilarToFg),
 );
 
 let likedLoading = ref(false);

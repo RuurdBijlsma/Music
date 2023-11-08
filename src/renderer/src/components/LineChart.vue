@@ -16,10 +16,10 @@ import {
     Title,
     Tooltip,
 } from "chart.js";
-import { useBaseStore } from "../store/base";
 import { useTheme } from "vuetify";
+import {useUIStore} from "../store/UIStore";
 
-const base = useBaseStore();
+const ui = useUIStore();
 Chart.register(
     Title,
     Tooltip,
@@ -80,7 +80,7 @@ const chartData = computed(() => ({
         {
             label: props.dataLabel,
             data: props.data,
-            borderColor: base.themeColor,
+            borderColor: ui.themeColor,
         },
     ],
 }));

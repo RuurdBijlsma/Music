@@ -31,9 +31,9 @@
         <div class="third-section">
             <div class="music-controls">
                 <v-btn
-                    :color="player.shuffle ? base.themeColor : 'default'"
+                    :color="player.shuffle ? ui.themeColor : 'default'"
                     :variant="
-                        base.themeTooSimilarToFg && player.shuffle
+                        ui.themeTooSimilarToFg && player.shuffle
                             ? 'tonal'
                             : 'text'
                     "
@@ -68,9 +68,9 @@
                     @click="player.skip(1)"
                 ></v-btn>
                 <v-btn
-                    :color="player.repeat ? base.themeColor : 'default'"
+                    :color="player.repeat ? ui.themeColor : 'default'"
                     :variant="
-                        base.themeTooSimilarToFg && player.repeat
+                        ui.themeTooSimilarToFg && player.repeat
                             ? 'tonal'
                             : 'text'
                     "
@@ -112,9 +112,11 @@ import LikeButton from "./LikeButton.vue";
 import QueueButton from "./QueueButton.vue";
 import ItemMenu from "./ItemMenu.vue";
 import CompactProgressBar from "./CompactProgressBar.vue";
+import {useUIStore} from "../store/UIStore";
 
 const player = usePlayerStore();
 const base = useBaseStore();
+const ui = useUIStore();
 const musicContainer = ref(null);
 </script>
 

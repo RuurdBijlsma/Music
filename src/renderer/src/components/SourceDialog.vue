@@ -1,7 +1,7 @@
 <template>
     <v-dialog
         v-model="sourceDialog.show"
-        :class="{ dark: base.isDark }"
+        :class="{ dark: ui.isDark }"
         :scrollable="true"
         width="auto"
     >
@@ -76,7 +76,7 @@
             <v-card-actions>
                 <v-btn
                     :block="true"
-                    :color="base.themeColor"
+                    :color="ui.themeColor"
                     @click="sourceDialog.show = false"
                     >Dismiss
                 </v-btn>
@@ -86,7 +86,6 @@
 </template>
 
 <script lang="ts" setup>
-import { useBaseStore } from "../store/base";
 import { useTheme } from "vuetify";
 import { useSearchStore } from "../store/search";
 import { computed, ref, watch } from "vue";
@@ -95,10 +94,11 @@ import SimpleYtPlayer from "./SimpleYtPlayer.vue";
 import { useLibraryStore } from "../store/library";
 import { YouTubeSearchResult } from "../scripts/types";
 import Spacer from "./Spacer.vue";
+import {useUIStore} from "../store/UIStore";
 
 const theme = useTheme();
 const search = useSearchStore();
-const base = useBaseStore();
+const ui = useUIStore()
 const library = useLibraryStore();
 const { sourceDialog } = storeToRefs(library);
 

@@ -6,7 +6,7 @@
                 Want to create your own radio?
             </h2>
             <v-btn
-                :color="base.themeColor"
+                :color="ui.themeColor"
                 class="generate-button mt-3"
                 to="/tune"
                 variant="tonal"
@@ -59,8 +59,10 @@ import { useSpotifyApiStore } from "../../store/spotify-api";
 import { ref } from "vue";
 import { executeCached } from "../../scripts/utils";
 import { baseDb, useBaseStore } from "../../store/base";
+import {useUIStore} from "../../store/UIStore";
 
 const base = useBaseStore();
+const ui = useUIStore();
 const spotify = useSpotifyApiStore();
 const genres = ref(null as null | string[]);
 const categories = ref(null as null | SpotifyApi.CategoryObject[]);

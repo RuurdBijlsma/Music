@@ -3,7 +3,7 @@
         <v-sheet class="progress-bg" rounded>
             <div
                 :style="{
-                    backgroundColor: base.themeColor,
+                    backgroundColor: ui.themeColor,
                     width: fillPercent + '%',
                 }"
                 class="progress-filled"
@@ -11,7 +11,7 @@
             <div
                 :style="{
                     left: `calc(${fillPercent}% - 5px)`,
-                    backgroundColor: base.themeColor,
+                    backgroundColor: ui.themeColor,
                 }"
                 class="progress-thumb"
             ></div>
@@ -22,10 +22,10 @@
 <script lang="ts" setup>
 import { usePlayerStore } from "../store/player/player";
 import { computed, onMounted, onUnmounted } from "vue";
-import { useBaseStore } from "../store/base";
+import {useUIStore} from "../store/UIStore";
 
 const player = usePlayerStore();
-const base = useBaseStore();
+const ui = useUIStore();
 let seekDown = false;
 
 const fillPercent = computed(

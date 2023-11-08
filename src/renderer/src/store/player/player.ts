@@ -15,9 +15,11 @@ import { useLibraryStore } from "../library";
 import { randomNotFound } from "../../scripts/imageSources";
 import { useTrackLoaderStore } from "./trackLoader";
 import { useStatsStore } from "./playStats";
+import {useUIStore} from "../UIStore";
 
 export const usePlayerStore = defineStore("player", () => {
     const base = useBaseStore();
+    const ui = useUIStore();
     const theme = useTheme();
     const platform = usePlatformStore();
     const library = useLibraryStore();
@@ -143,8 +145,8 @@ export const usePlayerStore = defineStore("player", () => {
             trackData.metadata.imageColor !== undefined &&
             isActive(_collection, trackData.track)
         ) {
-            base.themeColorDark = trackData.metadata.imageColor.dark;
-            base.themeColorLight = trackData.metadata.imageColor.light;
+            ui.themeColorDark = trackData.metadata.imageColor.dark;
+            ui.themeColorLight = trackData.metadata.imageColor.light;
         }
 
         if (
@@ -165,8 +167,12 @@ export const usePlayerStore = defineStore("player", () => {
             sourcePath.value = trackData.path;
             playerElement.src = trackData.path;
 
-            if (trackData.likedInfo?.startTime)
+            if (trackData.likedInfo?.startTime) {
+                console.log("START TIME SET", trackData.likedInfo?.startTime)
                 playerElement.currentTime = trackData.likedInfo?.startTime;
+            }else{
+                console.log("START TIME NOT SET", trackData.likedInfo?.startTime)
+            }
         }
     }
 
@@ -175,14 +181,6 @@ export const usePlayerStore = defineStore("player", () => {
         _track: SpotifyApi.TrackObjectFull,
         autoplay = true,
     ) {
-        if (
-            trackId.value === _track.id &&
-            collection.value?.id !== _collection.id
-        ) {
-            // load same track in different collection
-            // so set source path to "", otherwise the track won't reload
-            sourcePath.value = "";
-        }
         const _trackId = _track.id;
         console.log(_trackId);
         // if track is already playing, exit
@@ -214,6 +212,7 @@ export const usePlayerStore = defineStore("player", () => {
         _track = toRaw(_track);
         track.value = _track;
         trackId.value = _trackId;
+        sourcePath.value = "";
 
         // if track is being loaded by other call to `load`
         // exit here because the track and collection values do need to be set
@@ -259,8 +258,7 @@ export const usePlayerStore = defineStore("player", () => {
 
                         playTrackData(_collection, trackData);
                         tracksLoading.delete(_trackId);
-                    },
-                    _collection,
+                    }
                 )
                 .then();
         }
@@ -277,6 +275,9 @@ export const usePlayerStore = defineStore("player", () => {
 
     async function deleteTrack(deleteTrack: SpotifyApi.TrackObjectFull) {
         if (deleteTrack === null) return;
+        if(track.value?.id===deleteTrack.id) {
+            await unload();
+        }
         await platform.deleteTrackCache(deleteTrack);
         // delete file, and remove metadata, so it can be recalculated for the new mp3 file
         db.get("trackMetadata", deleteTrack.id).then((d?: TrackMetadata) => {
@@ -286,15 +287,14 @@ export const usePlayerStore = defineStore("player", () => {
             delete d.volume;
             db.put("trackMetadata", d).then();
         });
-        if (track.value?.id === deleteTrack.id) {
-            await unload();
-        }
     }
 
     async function reloadCurrentTrack() {
         if (track.value === null || collection.value === null) return;
-        await deleteTrack(track.value);
-        await load(collection.value, track.value);
+        let col = collection.value;
+        let _track = track.value
+        await deleteTrack(_track);
+        await load(col, _track);
     }
 
     async function unload() {
@@ -304,8 +304,8 @@ export const usePlayerStore = defineStore("player", () => {
             localStorage.removeItem("trackInMemory");
         });
 
-        base.themeColorDark = "#FFFFFF";
-        base.themeColorLight = "#000000";
+        ui.themeColorDark = "#FFFFFF";
+        ui.themeColorLight = "#000000";
         playerElement.src = "";
         duration.value = 1;
         currentTime.value = 0;
@@ -314,6 +314,7 @@ export const usePlayerStore = defineStore("player", () => {
         collection.value = null;
         track.value = null;
         trackId.value = "";
+        sourcePath.value='';
 
         canvasBars = trackLoader.getEmptyMetaTrackBars().trackBars;
         platform.stopPlatformPlaying();
@@ -447,7 +448,7 @@ export const usePlayerStore = defineStore("player", () => {
 
             context.fillStyle = defaultBarFill;
             if (x / canvas.width < currentTime.value / duration.value)
-                context.fillStyle = base.themeColor;
+                context.fillStyle = ui.themeColor;
 
             let h = negHeight + posHeight;
             let y = (canvas.height / 2 - negHeight) | 0;

@@ -16,6 +16,7 @@ import { useSpotifyAuthStore } from "./spotify-auth";
 import { randomUser } from "../scripts/imageSources";
 import { useSearchStore } from "./search";
 import { useTrackLoaderStore } from "./player/trackLoader";
+import { executeCached } from "../scripts/utils";
 
 export const useLibraryStore = defineStore("library", () => {
     const platform = usePlatformStore();
@@ -145,9 +146,14 @@ export const useLibraryStore = defineStore("library", () => {
     }
 
     async function refreshUserInfo() {
-        await baseDb;
+        await spotifyAuth.awaitAuth();
 
-        let me = await spotify.getMe();
+        let me = await executeCached<SpotifyApi.CurrentUsersProfileResponse>(
+            db,
+            spotify.getMe,
+            "spotify-me",
+            1000 * 60 * 60 * 24 * 31,
+        );
         userInfo.value = {
             id: me.id,
             name: me.display_name ?? me.email,
@@ -527,6 +533,7 @@ export const useLibraryStore = defineStore("library", () => {
             return console.warn(
                 "You can only edit tracks in your liked tracks",
             );
+        console.log("EDIT TRACK");
         player.pause().then();
         editDialog.value.likedTrack = likedTrack;
         console.log(editDialog.value);

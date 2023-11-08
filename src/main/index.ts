@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain } from "electron";
+import { app, BrowserWindow, ipcMain, session } from "electron";
 import { join } from "path";
 import { electronApp, is, optimizer } from "@electron-toolkit/utils";
 import icon from "../../resources/app-icon/dark-500.png?asset";
@@ -46,6 +46,18 @@ function createWindow(): void {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
+    session.defaultSession.webRequest.onBeforeSendHeaders(
+        (details, callback) => {
+            if (details.url.includes("tools.keycdn.com/geo.json")) {
+                details.requestHeaders["User-Agent"] =
+                    "keycdn-tools:https://github.com/RuurdBijlsma/Music";
+                console.log("changing header for ", details);
+            }
+            // Continue the request with the modified headers
+            callback({ cancel: false, requestHeaders: details.requestHeaders });
+        },
+    );
+
     // Set app user model id for windows
     electronApp.setAppUserModelId("dev.ruurd.music");
 

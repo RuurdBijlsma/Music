@@ -23,6 +23,7 @@
 <script lang="ts" setup>
 import { useBaseStore } from "../store/base";
 import { computed, onMounted, onUnmounted, ref } from "vue";
+import {useUIStore} from "../store/UIStore";
 
 const props = defineProps({
     duration: {
@@ -41,13 +42,14 @@ const props = defineProps({
 
 const getColor = computed(() => {
     if (props.color === "default") {
-        return base.isDark ? "rgba(255, 255, 255, 0.7)" : "rgba(0, 0, 0, 0.7)";
+        return ui.isDark ? "rgba(255, 255, 255, 0.7)" : "rgba(0, 0, 0, 0.7)";
     }
     return props.color;
 });
 
 const emit = defineEmits(["seek"]);
 const base = useBaseStore();
+const ui = useUIStore();
 const seekContainer = ref(null as null | HTMLElement);
 
 const percent = computed(

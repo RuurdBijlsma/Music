@@ -7,7 +7,7 @@
         <v-select
             v-model="seedGenres"
             :chips="true"
-            :color="base.themeColor"
+            :color="ui.themeColor"
             :items="genres"
             :multiple="true"
             class="top-select"
@@ -16,7 +16,7 @@
         <div v-for="option in options" class="option">
             <v-switch
                 v-model="option.active"
-                :color="base.themeColor"
+                :color="ui.themeColor"
                 :inset="true"
                 :label="base.caps(option.name)"
                 hide-details
@@ -26,7 +26,7 @@
                 <v-select
                     v-if="option.select"
                     v-model="option.value"
-                    :color="base.themeColor"
+                    :color="ui.themeColor"
                     :items="option.select"
                     :label="option.name"
                     class="select-input"
@@ -36,7 +36,7 @@
                 <v-slider
                     v-else
                     v-model="option.value"
-                    :color="base.themeColor"
+                    :color="ui.themeColor"
                     :label="option.name"
                     :max="option.max"
                     :min="option.min"
@@ -50,7 +50,7 @@
         </div>
         <v-btn
             :block="true"
-            :color="base.themeColor"
+            :color="ui.themeColor"
             class="mt-8"
             small
             variant="tonal"
@@ -67,9 +67,11 @@ import { useSpotifyApiStore } from "../../store/spotify-api";
 import { Ref, ref } from "vue";
 import { useBaseStore } from "../../store/base";
 import { useRouter } from "vue-router";
+import {useUIStore} from "../../store/UIStore";
 
 const spotify = useSpotifyApiStore();
 const base = useBaseStore();
+const ui = useUIStore();
 const router = useRouter();
 
 const options: Ref<any> = ref([
@@ -233,8 +235,7 @@ async function generate() {
 
 <style scoped>
 .tune {
-    padding: 30px;
-    padding-top: 80px;
+    padding: 80px 30px 30px;
 }
 
 .description {

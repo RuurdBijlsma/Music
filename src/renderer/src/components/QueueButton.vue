@@ -37,13 +37,13 @@
             />
             <v-card-actions v-if="collection.to !== ''">
                 <v-btn
-                    :color="base.themeColor"
+                    :color="ui.themeColor"
                     :disabled="route.path === collection.to"
                     :to="collection.to"
                 >
                     Go to {{ collection.buttonText }}
                 </v-btn>
-                <v-btn :color="base.themeColor" @click="scrollToTrack">
+                <v-btn :color="ui.themeColor" @click="scrollToTrack">
                     Scroll to track
                 </v-btn>
             </v-card-actions>
@@ -56,13 +56,13 @@ import TrackListVirtual from "./TrackListVirtual.vue";
 import TrackList from "./TrackList.vue";
 import { usePlayerStore } from "../store/player/player";
 import { storeToRefs } from "pinia";
-import { useBaseStore } from "../store/base";
 import { useRoute } from "vue-router";
 import { ref } from "vue";
 import { useTheme } from "vuetify";
+import {useUIStore} from "../store/UIStore";
 
 const player = usePlayerStore();
-const base = useBaseStore();
+const ui = useUIStore()
 const theme = useTheme();
 const route = useRoute();
 const { collection } = storeToRefs(player);

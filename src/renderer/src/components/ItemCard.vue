@@ -10,7 +10,7 @@
             class="image"
         >
             <item-play-button
-                :color="base.themeColor"
+                :color="ui.themeColor"
                 :item="item"
                 class="play-button"
                 variant="elevated"
@@ -38,8 +38,10 @@ import type { PropType } from "vue";
 import { computed } from "vue";
 import ItemPlayButton from "./ItemPlayButton.vue";
 import { randomLiked, randomNotFound } from "../scripts/imageSources";
+import {useUIStore} from "../store/UIStore";
 
 const base = useBaseStore();
+const ui = useUIStore();
 const props = defineProps({
     item: {
         type: Object as PropType<Item | ItemCollection>,

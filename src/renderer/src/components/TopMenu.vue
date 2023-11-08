@@ -2,7 +2,7 @@
     <div class="menu">
         <div class="logo">
             <v-img
-                :src="base.isDark ? iconUrlDark : iconUrlLight"
+                :src="ui.isDark ? iconUrlDark : iconUrlLight"
                 height="30"
                 width="30"
             ></v-img>
@@ -51,9 +51,9 @@ import { usePlatformStore } from "../store/electron";
 import iconUrlDark from "../../assets/app-icon/dark-500.png?asset";
 //@ts-ignore
 import iconUrlLight from "../../assets/app-icon/light-500.png?asset";
-import { useBaseStore } from "../store/base";
+import {useUIStore} from "../store/UIStore";
 
-const base = useBaseStore();
+const ui = useUIStore();
 const platform = usePlatformStore();
 </script>
 

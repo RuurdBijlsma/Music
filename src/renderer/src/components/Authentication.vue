@@ -1,60 +1,67 @@
 <template>
     <v-card :flat="true" color="transparent">
-        <v-tabs v-model="tab" :color="base.themeColor" align-tabs="center">
+        <v-tabs v-model="tab" :color="ui.themeColor" align-tabs="center">
             <v-tab value="spotify">Spotify Account</v-tab>
             <v-tab value="ruurd-account">Ruurd Account</v-tab>
         </v-tabs>
         <v-window v-model="tab">
             <v-window-item value="spotify">
-                <v-text-field
-                    v-model="spotifyAuth.clientId"
-                    :color="base.themeColor"
-                    class="mt-5"
-                    density="compact"
-                    hide-details
-                    label="Spotify client ID"
-                    variant="filled"
-                />
-                <v-text-field
-                    v-model="spotifyAuth.secret"
-                    :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
-                    :color="base.themeColor"
-                    :type="showPassword ? 'text' : 'password'"
-                    class="mt-5"
-                    density="compact"
-                    hide-details
-                    label="Spotify secret"
-                    variant="filled"
-                    @click:append="showPassword = !showPassword"
-                />
-                <v-btn
-                    v-if="spotifyAuth.hasCredentials && !spotifyAuth.isLoggedIn"
-                    class="mt-4"
-                    color="green"
-                    variant="tonal"
-                    @click="spotifyAuth.login()"
-                >
-                    <v-icon class="mr-2" color="green" size="25"
-                        >mdi-spotify
-                    </v-icon>
-                    Log in
-                </v-btn>
-                <div v-if="spotifyAuth.isLoggedIn" class="mt-3">
-                    <v-avatar color="primary">
-                        <v-img
-                            v-if="library.userInfo.avatar"
-                            :src="library.userInfo.avatar"
-                        ></v-img>
-                        <span v-else>{{ library.userInfo.name[0] }}</span>
+                <div v-if="spotifyAuth.isLoggedIn" class="logged-in">
+                    <v-avatar>
+                        <v-img v-if="library.userInfo.avatar" :src="library.userInfo.avatar"></v-img>
+                        <v-icon v-else icon="mdi-spotify" color="green" size="35"></v-icon>
                     </v-avatar>
-                    <span class="ml-4"
-                        >You are logged in {{ library.userInfo.name }}</span
-                    >
+                    <v-card-text>
+                        <h3>{{ library.userInfo.name }}</h3>
+                        <p>{{ library.userInfo.mail }}</p>
+                    </v-card-text>
+                    <v-card-actions>
+                        <v-btn
+                            :color="ui.themeColor"
+                            @click="spotifyAuth.logout()"
+                        >Logout
+                        </v-btn>
+                    </v-card-actions>
                 </div>
+                <template v-else>
+                    <v-text-field
+                        v-model="spotifyAuth.clientId"
+                        :color="ui.themeColor"
+                        class="mt-5"
+                        density="compact"
+                        hide-details
+                        label="Spotify client ID"
+                        variant="filled"
+                    />
+                    <v-text-field
+                        v-model="spotifyAuth.secret"
+                        :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
+                        :color="ui.themeColor"
+                        :type="showPassword ? 'text' : 'password'"
+                        class="mt-5"
+                        density="compact"
+                        hide-details
+                        label="Spotify secret"
+                        variant="filled"
+                        @click:append="showPassword = !showPassword"
+                    />
+                    <v-btn
+                        v-if="spotifyAuth.hasCredentials && !spotifyAuth.isLoggedIn"
+                        class="mt-4"
+                        color="green"
+                        variant="tonal"
+                        @click="spotifyAuth.login()"
+                    >
+                        <v-icon class="mr-2" color="green" size="25"
+                        >mdi-spotify
+                        </v-icon>
+                        Log in
+                    </v-btn>
+                </template>
             </v-window-item>
             <v-window-item value="ruurd-account">
                 <div v-if="ruurdAuth.isLoggedIn" class="logged-in">
-                    <v-avatar :color="base.themeColor">
+                    <v-avatar :color="ui.themeColor">
                         {{ ruurdAuth.credentials.name[0] }}
                     </v-avatar>
                     <v-card-text>
@@ -63,7 +70,7 @@
                     </v-card-text>
                     <v-card-actions>
                         <v-btn
-                            :color="base.themeColor"
+                            :color="ui.themeColor"
                             @click="ruurdAuth.logout()"
                             >Logout
                         </v-btn>
@@ -72,7 +79,7 @@
                 <v-form v-else @submit.prevent="ruurdLogin">
                     <v-text-field
                         v-model="ruurdAuth.credentials.email"
-                        :color="base.themeColor"
+                        :color="ui.themeColor"
                         class="mt-5"
                         density="compact"
                         hide-details
@@ -83,7 +90,7 @@
                     />
                     <v-text-field
                         :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
-                        :color="base.themeColor"
+                        :color="ui.themeColor"
                         :type="showPassword ? 'text' : 'password'"
                         class="mt-5"
                         density="compact"
@@ -94,7 +101,7 @@
                         @click:append="showPassword = !showPassword"
                     />
                     <v-btn
-                        :color="base.themeColor"
+                        :color="ui.themeColor"
                         :loading="loginLoading"
                         class="mt-4"
                         prepend-icon="mdi-account"
@@ -123,8 +130,10 @@ import { useSpotifyAuthStore } from "../store/spotify-auth";
 import { useBaseStore } from "../store/base";
 import { useRuurdAuthStore } from "../store/ruurd-auth";
 import { DataExport } from "../scripts/types";
+import {useUIStore} from "../store/UIStore";
 
 const base = useBaseStore();
+const ui = useUIStore();
 const library = useLibraryStore();
 const spotifyAuth = useSpotifyAuthStore();
 const ruurdAuth = useRuurdAuthStore();
@@ -192,6 +201,7 @@ async function ruurdLogin(e: SubmitEvent) {
 
 .logged-in h3 {
     text-align: left;
+    font-weight: 500;
 }
 
 .sync-txt {
