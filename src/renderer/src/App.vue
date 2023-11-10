@@ -83,7 +83,7 @@
 <script lang="ts" setup>
 // todo
 // periodic backup to server?
-// playlists cachen?
+// playlists cachen?@
 // simple player en simple yt player samenvoegen
 // show listen stats
 // generate a spotify wrapped / ruurd music wrapped
