@@ -129,6 +129,10 @@ export interface LikedTrack extends SpotifyApi.PlaylistTrackObject {
     endTime?: number;
 }
 
+export interface SpotifyTrack extends SpotifyApi.TrackObjectFull{
+    is_local?:boolean,
+}
+
 export interface TrackMetadata {
     sourceDuration?: number;
     id: string;

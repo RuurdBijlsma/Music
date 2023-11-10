@@ -8,6 +8,7 @@ import type {
     ItemCollection,
     ItemType,
     LikedTrack,
+    SpotifyTrack,
 } from "../scripts/types";
 import { TrackData, YouTubeSearchResult } from "../scripts/types";
 import { usePlayerStore } from "./player/player";
@@ -236,7 +237,9 @@ export const useLibraryStore = defineStore("library", () => {
         return tracks.value.length > 0;
     }
 
-    function enhancePlaylistObject(item: SpotifyApi.PlaylistTrackObject) {
+    function enhancePlaylistObject(
+        item: SpotifyApi.PlaylistTrackObject | SpotifyApi.SavedTrackObject,
+    ) {
         let track = item.track as SpotifyApi.TrackObjectFull;
         let artistString = track.artists
             .map((a: SpotifyApi.ArtistObjectSimplified) => a.name)
@@ -285,18 +288,21 @@ export const useLibraryStore = defineStore("library", () => {
 
         let localTrackIds = new Set(tracks.value.map((t) => t.id));
         let apiTrackIds = new Set<string>();
+        let apiTracks: { [key: string]: SpotifyApi.SavedTrackObject } = {};
 
-        for await (let batch of await spotify.retrieveArray(() =>
-            spotify.api.getMySavedTracks({ limit: 50 }),
+        for await (let batch of await spotify.retrieveArray<SpotifyApi.UsersSavedTracksResponse>(
+            () => spotify.api.getMySavedTracks({ limit: 50 }),
         )) {
             for (let spotifyItem of batch.items) {
-                if (spotifyItem.track.is_local) continue;
+                let spotifyTrack: SpotifyTrack = spotifyItem.track;
+                if (spotifyTrack.is_local) continue;
                 if (!localTrackIds.has(spotifyItem.track.id)) {
                     // track exists in api list, not in local list
                     // so add it at the start of local tracks list
                     addTrack(enhancePlaylistObject(spotifyItem));
                 }
                 apiTrackIds.add(spotifyItem.track.id);
+                apiTracks[spotifyItem.track.id] = spotifyItem;
             }
         }
         // find tracks that are in the local Set, but not in the api Set
@@ -311,6 +317,34 @@ export const useLibraryStore = defineStore("library", () => {
                 1,
             );
             db.delete("tracks", id).then();
+        }
+
+        // fix ordering of tracks
+        let changedTracks: LikedTrack[] = [];
+        for (let localTrack of tracks.value) {
+            // skip over youtube tracks when determining reordering during update
+            if (
+                localTrack.id.startsWith("yt-") ||
+                !apiTracks.hasOwnProperty(localTrack.id)
+            )
+                continue;
+            let apiTrack = apiTracks[localTrack.id];
+            if (localTrack.added_at === apiTrack.added_at) continue;
+            localTrack.added_at = apiTrack.added_at;
+            localTrack.added_at_reverse =
+                10000000000000 - +new Date(apiTrack.added_at);
+            changedTracks.push(localTrack);
+        }
+        if (changedTracks.length > 0) {
+            console.warn(
+                "Tracks arent in order, updating order",
+                changedTracks.map((t) => t.title),
+            );
+            const tx = db.transaction("tracks", "readwrite");
+            for (let likedTrack of changedTracks)
+                tx.store.put(toRaw(likedTrack));
+            await tx.done;
+            tracks.value = await db.getAllFromIndex("tracks", "newToOld");
         }
 
         localStorage.lastTracksLoad = Date.now();

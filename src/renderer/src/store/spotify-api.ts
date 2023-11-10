@@ -80,7 +80,7 @@ export const useSpotifyApiStore = defineStore("spotify-api", () => {
         };
     }
 
-    async function* retrieveArray(apiFunction: Function) {
+    async function* retrieveArray<T>(apiFunction: Function):AsyncGenerator<T> {
         let getData = () => apiFunction();
 
         while (true) {
@@ -99,7 +99,7 @@ export const useSpotifyApiStore = defineStore("spotify-api", () => {
             let nextUrl = pageObject(result).next;
             if (nextUrl === undefined) console.warn("next url is undefined");
 
-            getData = () => api.getGeneric(nextUrl);
+            getData = () => api.getGeneric(nextUrl) as Promise<T[]>;
         }
     }
 
