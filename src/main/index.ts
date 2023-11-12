@@ -3,18 +3,6 @@ import { join } from "path";
 import { electronApp, is, optimizer } from "@electron-toolkit/utils";
 import icon from "../../resources/app-icon/dark-500.png?asset";
 import { handleIpc } from "./ipcFunctions";
-import { autoUpdater } from "electron-updater";
-
-async function configUpdater() {
-    setInterval(
-        () => {
-            autoUpdater.checkForUpdatesAndNotify();
-        },
-        1000 * 60 * 60,
-    );
-    autoUpdater.checkForUpdatesAndNotify().then();
-    autoUpdater.on("error", (e) => console.error("[auto updater]", e));
-}
 
 function createWindow(): void {
     // Create the browser window.
@@ -52,7 +40,6 @@ function createWindow(): void {
     if (isDev) mainWindow.webContents.openDevTools();
 
     handleIpc(ipcMain, mainWindow);
-    configUpdater();
 }
 
 // This method will be called when Electron has finished

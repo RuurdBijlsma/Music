@@ -20,6 +20,7 @@ import lightPrevIcon from "../../resources/media-icon/light-previcon.png?asset";
 import lightNextIcon from "../../resources/media-icon/light-nexticon.png?asset";
 import ffBinaries from "ffbinaries";
 import replaceSpecialCharacters from "replace-special-characters";
+import { autoUpdater } from "electron-updater";
 
 const YTDlpWrap = require("yt-dlp-wrap").default;
 export default class NodeFunctions {
@@ -351,6 +352,43 @@ export default class NodeFunctions {
 
         this.darkIcons = getIcons("dark");
         this.lightIcons = getIcons("light");
+
+        // check for updates after 5 seconds
+        setTimeout(() => this.configUpdater(), 5000);
+    }
+
+    webLog(...args: any[]) {
+        console.log("[WEBLOG]", ...args);
+        this.win.webContents.send("log", ...args);
+    }
+
+    configUpdater() {
+        setInterval(
+            () => autoUpdater.checkForUpdatesAndNotify().then(),
+            1000 * 60 * 60,
+        );
+        autoUpdater.checkForUpdatesAndNotify().then();
+        autoUpdater.on("error", (e) => this.webLog("[auto updater] error:", e));
+        autoUpdater.on("checking-for-update", () =>
+            this.webLog("[auto updater] checking for update:"),
+        );
+        autoUpdater.on("update-available", (e) =>
+            this.webLog("[auto updater] update-available:", e),
+        );
+        autoUpdater.on("update-not-available", (e) =>
+            this.webLog("[auto updater] update-not-available:", e),
+        );
+        autoUpdater.on("download-progress", (e) =>
+            this.webLog("[auto updater] download-progress:", e),
+        );
+        autoUpdater.on("update-downloaded", (e) =>
+            this.webLog("[auto updater] update-downloaded:", e),
+        );
+
+        this.webLog("SETTING INTERVAL")
+        setInterval(() => {
+            this.webLog("TESTING WEBLOG", "hoi", 5);
+        }, 1000 * 5);
     }
 
     setPlatformPlaying(playing: boolean, darkTheme: boolean) {
@@ -396,7 +434,7 @@ export default class NodeFunctions {
 
     async getFileContents(file: string) {
         try {
-            return await fs.readFile(file,'utf8');
+            return await fs.readFile(file, "utf8");
         } catch (err) {
             return null;
         }
@@ -528,7 +566,7 @@ export default class NodeFunctions {
         }
     }
 
-    getAppVersion(){
+    getAppVersion() {
         return app.getVersion();
     }
 }
