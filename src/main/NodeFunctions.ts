@@ -358,7 +358,6 @@ export default class NodeFunctions {
     }
 
     webLog(...args: any[]) {
-        console.log("[WEBLOG]", ...args);
         this.win.webContents.send("log", ...args);
     }
 
@@ -384,11 +383,6 @@ export default class NodeFunctions {
         autoUpdater.on("update-downloaded", (e) =>
             this.webLog("[auto updater] update-downloaded:", e),
         );
-
-        this.webLog("SETTING INTERVAL")
-        setInterval(() => {
-            this.webLog("TESTING WEBLOG", "hoi", 5);
-        }, 1000 * 5);
     }
 
     setPlatformPlaying(playing: boolean, darkTheme: boolean) {

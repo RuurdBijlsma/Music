@@ -123,7 +123,6 @@ export const useBaseStore = defineStore("base", () => {
     checkAutoBackup().then();
 
     async function checkAutoBackup() {
-        console.log({ isDev });
         if (!autoBackup.value || isDev) return;
         let lastBackup = 0;
         if (!isNaN(+localStorage.lastAutoBackup))
@@ -150,20 +149,17 @@ export const useBaseStore = defineStore("base", () => {
             .toISOString()
             .substring(0, 10)}.json`;
         let result = await window.api.getSaveFilePath(filename, "Export");
-        console.log(result);
         if (result.canceled) return false;
 
         let outputPath = result.filePath;
         let data = await dataPromise;
         let fileString = JSON.stringify(data);
         await window.api.saveStringToFile(outputPath, fileString);
-        console.log({ outputPath, data });
         return true;
     }
 
     async function importFromFile() {
         let result = await window.api.getOpenFilePath("Import");
-        console.log(result);
         if (result.canceled) return false;
 
         try {
@@ -174,7 +170,6 @@ export const useBaseStore = defineStore("base", () => {
                 console.warn("File contents empty", result.filePath);
                 return false;
             }
-            console.log(fileContents);
             let data = JSON.parse(fileContents);
             await importData(data as DataExport);
             return true;
