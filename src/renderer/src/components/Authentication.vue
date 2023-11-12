@@ -140,7 +140,6 @@ import { useLibraryStore } from "../store/library";
 import { useSpotifyAuthStore } from "../store/spotify-auth";
 import { useBaseStore } from "../store/base";
 import { useRuurdAuthStore } from "../store/ruurd-auth";
-import { DataExport } from "../scripts/types";
 import { useUIStore } from "../store/UIStore";
 
 const base = useBaseStore();
@@ -181,19 +180,7 @@ async function ruurdLogin(e: SubmitEvent) {
         ruurdAuth.credentials.email = email.toString();
         ruurdAuth.credentials.password = password.toString();
         ruurdAuth.credentials.name = user.name;
-
-        let data = await (
-            await fetch(
-                "https://api.ruurd.dev/drive/get/" +
-                    encodeURI("ruurd-music-data.json"),
-                fetchOptions,
-            )
-        ).json();
-        await base.importData(data as DataExport);
-        localStorage.lastRoute = "/";
-        if (!spotifyAuth.isLoggedIn) {
-            location.reload();
-        }
+        base.importFromServer();
     } catch (e: any) {
         base.addSnack("Login failed: " + e.message);
     }

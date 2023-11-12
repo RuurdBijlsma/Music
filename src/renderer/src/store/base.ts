@@ -1,10 +1,11 @@
 import { defineStore } from "pinia";
 import { IDBPDatabase, IDBPObjectStore, openDB, StoreNames } from "idb";
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import type { DataExport, Item, ItemCollection } from "../scripts/types";
 import { EventEmitter } from "events";
 import { randomNotFound } from "../scripts/imageSources";
 import { useRuurdAuthStore } from "./ruurd-auth";
+import { useSpotifyAuthStore } from "./spotify-auth";
 
 function createStore(
     db: IDBPDatabase,
@@ -89,8 +90,20 @@ export const baseDb = openDB("base", 6, {
 
 export const useBaseStore = defineStore("base", () => {
     const ruurdAuth = useRuurdAuthStore();
+    const spotifyAuth = useSpotifyAuthStore();
     const dbLoaded = ref(false);
     const events = new EventEmitter();
+    const isDev = !location.href.startsWith("file://");
+    const autoBackup = ref(
+        localStorage.getItem("autoBackup") === null
+            ? false
+            : localStorage.autoBackup === "true",
+    );
+    watch(autoBackup, () => {
+        localStorage.autoBackup = autoBackup.value;
+        if (autoBackup.value) checkAutoBackup().then();
+    });
+
     baseDb.then(async () => {
         dbLoaded.value = true;
     });
@@ -105,6 +118,71 @@ export const useBaseStore = defineStore("base", () => {
         show: false,
         item: null as any,
     });
+
+    setInterval(() => checkAutoBackup(), 1000 * 60 * 60);
+    checkAutoBackup().then();
+
+    async function checkAutoBackup() {
+        console.log({ isDev });
+        if (!autoBackup.value || isDev) return;
+        let lastBackup = 0;
+        if (!isNaN(+localStorage.lastAutoBackup))
+            lastBackup = +localStorage.lastAutoBackup;
+
+        let now = Date.now();
+        let difference = now - lastBackup;
+        if (difference < 1000 * 60 * 60 * 24) return;
+
+        console.info(
+            "Doing an auto backup! last one was at ",
+            new Date(lastBackup),
+        );
+        await exportToServer();
+        localStorage.lastAutoBackup = now;
+    }
+
+    async function exportToFile() {
+        let dataPromise = getDataExport();
+        dataPromise.then();
+
+        let now = new Date();
+        let filename = `RuurdMusicExport-${now
+            .toISOString()
+            .substring(0, 10)}.json`;
+        let result = await window.api.getSaveFilePath(filename, "Export");
+        console.log(result);
+        if (result.canceled) return false;
+
+        let outputPath = result.filePath;
+        let data = await dataPromise;
+        let fileString = JSON.stringify(data);
+        await window.api.saveStringToFile(outputPath, fileString);
+        console.log({ outputPath, data });
+        return true;
+    }
+
+    async function importFromFile() {
+        let result = await window.api.getOpenFilePath("Import");
+        console.log(result);
+        if (result.canceled) return false;
+
+        try {
+            let fileContents = await window.api.getFileContents(
+                result.filePaths[0],
+            );
+            if (fileContents === null) {
+                console.warn("File contents empty", result.filePath);
+                return false;
+            }
+            console.log(fileContents);
+            let data = JSON.parse(fileContents);
+            await importData(data as DataExport);
+            return true;
+        } catch (e: any) {
+            console.error(e);
+            return false;
+        }
+    }
 
     async function exportToServer() {
         if (!ruurdAuth.isLoggedIn) {
@@ -226,6 +304,35 @@ export const useBaseStore = defineStore("base", () => {
         };
         await putStoreArray("tracks", idb.tracks);
         await putStoreArray("trackMetadata", idb.trackMetadata);
+
+        if (!spotifyAuth.isLoggedIn) {
+            localStorage.lastRoute = "/";
+            location.reload();
+        }
+    }
+
+    async function importFromServer() {
+        if (!ruurdAuth.isLoggedIn) {
+            addSnack(
+                "You must be logged in to a Ruurd Account before being able to import from server.",
+            );
+            return false;
+        }
+        let data = await (
+            await fetch(
+                "https://api.ruurd.dev/drive/get/" +
+                    encodeURI("ruurd-music-data.json"),
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ auth: ruurdAuth.credentials }),
+                },
+            )
+        ).json();
+        await importData(data as DataExport);
+        return true;
     }
 
     function approximateDuration(millis: number) {
@@ -410,5 +517,10 @@ export const useBaseStore = defineStore("base", () => {
         caps,
         exportToServer,
         importData,
+        isDev,
+        importFromServer,
+        exportToFile,
+        importFromFile,
+        autoBackup,
     };
 });

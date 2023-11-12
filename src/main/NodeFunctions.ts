@@ -3,7 +3,7 @@ import path from "path";
 import fs from "fs/promises";
 import os from "os";
 import type { BrowserWindow } from "electron";
-import { dialog, globalShortcut } from "electron";
+import { app, dialog, globalShortcut } from "electron";
 import type { Progress } from "yt-dlp-wrap";
 import child_process, { spawn } from "child_process";
 import ColorThief from "color-extr-thief";
@@ -379,6 +379,50 @@ export default class NodeFunctions {
         });
     }
 
+    async getOpenFilePath(buttonLabel = "Open", filterJson = true) {
+        let defaultPath = app.getPath("documents");
+        let filters = filterJson
+            ? [
+                  { name: "JSON Files", extensions: ["json"] },
+                  { name: "All Files", extensions: ["*"] },
+              ]
+            : [];
+        return await dialog.showOpenDialog(this.win, {
+            defaultPath,
+            filters,
+            buttonLabel,
+        });
+    }
+
+    async getFileContents(file: string) {
+        try {
+            return await fs.readFile(file,'utf8');
+        } catch (err) {
+            return null;
+        }
+    }
+
+    async getSaveFilePath(
+        defaultFilename?: string,
+        buttonLabel = "Save",
+        filterJson = true,
+    ) {
+        let dir = app.getPath("documents");
+        let defaultPath = dir;
+        if (defaultFilename) defaultPath = path.join(dir, defaultFilename);
+        let filters = filterJson
+            ? [
+                  { name: "JSON Files", extensions: ["json"] },
+                  { name: "All Files", extensions: ["*"] },
+              ]
+            : [];
+        return await dialog.showSaveDialog(this.win, {
+            defaultPath,
+            filters,
+            buttonLabel,
+        });
+    }
+
     async copyIfExists(fromPath: string, toDirectory: string) {
         let copyTarget = path.join(toDirectory, path.basename(fromPath));
         if (!(await this.checkFileExists(copyTarget)))
@@ -472,5 +516,15 @@ export default class NodeFunctions {
                 }
             }
         });
+    }
+
+    async saveStringToFile(filePath: string, contents: string) {
+        try {
+            await fs.writeFile(filePath, contents);
+            return true;
+        } catch (err) {
+            console.error(err);
+            return false;
+        }
     }
 }

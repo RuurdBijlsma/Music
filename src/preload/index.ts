@@ -12,6 +12,19 @@ const api = {
         ipcRenderer.invoke("setPlatformPlaying", value, darkTheme),
     stopPlatformPlaying: () => ipcRenderer.invoke("stopPlatformPlaying"),
     getOutputDirectory: () => ipcRenderer.invoke("getOutputDirectory"),
+    getSaveFilePath: (
+        filename?: string,
+        buttonLabel = "Save",
+        filterJson = true,
+    ) =>
+        ipcRenderer.invoke(
+            "getSaveFilePath",
+            filename,
+            buttonLabel,
+            filterJson,
+        ),
+    getOpenFilePath: (buttonLabel = "Save", filterJson = true) =>
+        ipcRenderer.invoke("getOpenFilePath", buttonLabel, filterJson),
     downloadAsJpg: (imgUrl: string) =>
         ipcRenderer.invoke("downloadAsJpg", imgUrl),
     getVolumeStats: (trackFile: string) =>
@@ -23,18 +36,20 @@ const api = {
         ipcRenderer.invoke("downloadYt", id, outPath, tags, imageFile),
     updateYtdlp: () => ipcRenderer.invoke("updateYtdlp"),
 
-    fileSize: (file: string) =>
-        ipcRenderer.invoke("fileSize", file),
+    fileSize: (file: string) => ipcRenderer.invoke("fileSize", file),
     checkFileExists: (file: string) =>
         ipcRenderer.invoke("checkFileExists", file),
-    deleteFile: (file: string) =>
-        ipcRenderer.invoke("deleteFile", file),
+    deleteFile: (file: string) => ipcRenderer.invoke("deleteFile", file),
     copyIfExists: (fromPath: string, toDirectory: string) =>
         ipcRenderer.invoke("copyIfExists", fromPath, toDirectory),
     copyFile: (from: string, to: string) =>
         ipcRenderer.invoke("copyFile", from, to),
     checkTracksDownloaded: (files: string[]) =>
         ipcRenderer.invoke("checkTracksDownloaded", files),
+    saveStringToFile: (file: string, contents: string) =>
+        ipcRenderer.invoke("saveStringToFile", file, contents),
+    getFileContents: (file: string) =>
+        ipcRenderer.invoke("getFileContents", file),
 
     firstLogin: (spotifyAuth: {
         hasCredentials: boolean;

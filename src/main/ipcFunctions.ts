@@ -18,6 +18,16 @@ export function handleIpc(ipcMain: Electron.IpcMain, win: BrowserWindow) {
     );
     ipcMain.handle("stopPlatformPlaying", (_) => nf.stopPlatformPlaying());
     ipcMain.handle("getOutputDirectory", (_) => nf.getOutputDirectory());
+    ipcMain.handle(
+        "getSaveFilePath",
+        (_, filename?: string, buttonLabel = "Save", filterJson = true) =>
+            nf.getSaveFilePath(filename, buttonLabel, filterJson),
+    );
+    ipcMain.handle(
+        "getOpenFilePath",
+        (_, buttonLabel = "Save", filterJson = true) =>
+            nf.getOpenFilePath(buttonLabel, filterJson),
+    );
     ipcMain.handle("downloadAsJpg", (_, imgUrl: string) =>
         nf.downloadAsJpg(imgUrl),
     );
@@ -38,9 +48,7 @@ export function handleIpc(ipcMain: Electron.IpcMain, win: BrowserWindow) {
         nf.searchYtdlp(query, limit),
     );
 
-    ipcMain.handle("fileSize", (_, file: string) =>
-        nf.fileSize(file),
-    );
+    ipcMain.handle("fileSize", (_, file: string) => nf.fileSize(file));
     ipcMain.handle("checkFileExists", (_, file: string) =>
         nf.checkFileExists(file),
     );
@@ -50,11 +58,15 @@ export function handleIpc(ipcMain: Electron.IpcMain, win: BrowserWindow) {
     ipcMain.handle("copyFile", (_, from: string, to: string) =>
         nf.copyFile(from, to),
     );
-    ipcMain.handle("deleteFile", (_, file: string) =>
-        nf.deleteFile(file),
-    );
+    ipcMain.handle("deleteFile", (_, file: string) => nf.deleteFile(file));
     ipcMain.handle("checkTracksDownloaded", (_, filenames: string[]) =>
         nf.checkTracksDownloaded(filenames),
+    );
+    ipcMain.handle("saveStringToFile", (_, file: string, contents: string) =>
+        nf.saveStringToFile(file, contents),
+    );
+    ipcMain.handle("getFileContents", (_, file: string) =>
+        nf.getFileContents(file),
     );
 
     ipcMain.handle(

@@ -52,7 +52,7 @@
         </div>
         <v-divider class="mt-3 mb-3" />
 
-        <h3 class="mb-3">Export</h3>
+        <h3 class="mb-3">Backup & restore</h3>
         <v-btn
             :block="true"
             :color="ui.themeColor"
@@ -90,23 +90,57 @@
             </v-btn>
         </template>
 
-        <v-btn
-            v-if="ruurdAuth.isLoggedIn"
-            :append-icon="
-                exportResult === 'none'
-                    ? ''
-                    : exportResult === 'success'
-                    ? 'mdi-check-bold'
-                    : 'mdi-alert-circle-outline'
-            "
-            :block="true"
+        <div class="file-buttons mt-3" v-if="ruurdAuth.isLoggedIn">
+            <v-btn
+                :append-icon="
+                    exportResult === 'none'
+                        ? ''
+                        : exportResult === 'success'
+                        ? 'mdi-check-bold'
+                        : 'mdi-alert-circle-outline'
+                "
+                :color="ui.themeColor"
+                :loading="exportLoading"
+                variant="tonal"
+                @click="exportToServer"
+                >Backup to server
+            </v-btn>
+            <v-btn
+                :color="ui.themeColor"
+                :loading="importLoading"
+                variant="tonal"
+                @click="importFromServer"
+            >
+                Restore from server
+            </v-btn>
+        </div>
+
+        <div class="file-buttons mt-3">
+            <v-btn
+                :color="ui.themeColor"
+                :loading="exportFileLoading"
+                variant="tonal"
+                @click="exportToFile"
+            >
+                Backup to file
+            </v-btn>
+            <v-btn
+                :color="ui.themeColor"
+                :loading="importFileLoading"
+                variant="tonal"
+                @click="importFromFile"
+            >
+                Restore from file
+            </v-btn>
+        </div>
+
+        <v-switch
             :color="ui.themeColor"
-            :loading="exportLoading"
-            class="mt-4"
-            variant="tonal"
-            @click="exportToServer"
-            >Export data to server
-        </v-btn>
+            v-if="ruurdAuth.isLoggedIn"
+            hide-details
+            label="Daily automatic backup to server"
+            v-model="base.autoBackup"
+        />
 
         <v-divider class="mt-3 mb-3" />
         <h3 class="mb-3">Audio settings</h3>
@@ -161,6 +195,9 @@ const downloadState = computed(
 );
 
 const exportLoading = ref(false);
+const importLoading = ref(false);
+const exportFileLoading = ref(false);
+const importFileLoading = ref(false);
 const exportResult = ref("none" as "none" | "failed" | "success");
 
 const sunTimes = computed(() => {
@@ -179,9 +216,40 @@ async function exportToServer() {
         let result = await base.exportToServer();
         exportResult.value = result ? "success" : "failed";
     } catch (e: any) {
-        base.addSnack("Export to server failed: ", e.message);
+        base.addSnack("Backup to server failed: ", e.message);
     }
     exportLoading.value = false;
+}
+
+async function importFromServer() {
+    importLoading.value = true;
+    try {
+        await base.importFromServer();
+    } catch (e: any) {
+        base.addSnack("Restore from server failed: ", e.message);
+    }
+    importLoading.value = false;
+}
+
+async function exportToFile() {
+    exportFileLoading.value = true;
+    try {
+        await base.exportToFile();
+    } catch (e: any) {
+        base.addSnack("Backup to file failed: ", e.message);
+    }
+    exportFileLoading.value = false;
+}
+
+async function importFromFile() {
+    importFileLoading.value = true;
+    let result = await base.importFromFile();
+    if (result) {
+        base.addSnack("Restored backup from file");
+    } else {
+        base.addSnack("Restore from file failed");
+    }
+    importFileLoading.value = false;
 }
 
 async function updateYtdlp() {
@@ -196,6 +264,13 @@ async function updateYtdlp() {
     padding: 30px;
 }
 
+h2,
+h3,
+h4,
+h5 {
+    font-weight: 500;
+}
+
 .update-result {
     font-family: monospace;
     margin-top: 20px;
@@ -206,5 +281,15 @@ async function updateYtdlp() {
 .theme-chips {
     display: flex;
     justify-content: center;
+}
+
+.file-buttons {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.file-buttons > * {
+    flex-grow: 1;
 }
 </style>
