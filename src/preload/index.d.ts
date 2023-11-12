@@ -24,7 +24,8 @@ declare global {
             updateYtdlp: () => Promise<string>,
             checkTracksDownloaded: (filenames: string[]) => Promise<boolean>,
             saveStringToFile: (file: string, contents: string) => Promise<boolean>,
-            getFileContents: (file: string) => Promise<string|null>,
+            getFileContents: (file: string) => Promise<string | null>,
+            getAppVersion: () => Promise<string>,
 
             fileSize: (file: string) => Promise<number>,
             checkFileExists: (filename: string) => Promise<any>,

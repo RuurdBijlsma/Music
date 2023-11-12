@@ -527,4 +527,8 @@ export default class NodeFunctions {
             return false;
         }
     }
+
+    getAppVersion(){
+        return app.getVersion();
+    }
 }

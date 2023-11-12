@@ -1,5 +1,4 @@
 import { contextBridge, ipcRenderer } from "electron";
-import { electronAPI } from "@electron-toolkit/preload";
 
 // Custom APIs for renderer
 const api = {
@@ -58,6 +57,7 @@ const api = {
         secret: string;
     }) => ipcRenderer.invoke("firstLogin", spotifyAuth),
     resetSpotifyLogin: () => ipcRenderer.invoke("resetSpotifyLogin"),
+    getAppVersion: () => ipcRenderer.invoke("getAppVersion"),
 
     minimizeWindow: () => ipcRenderer.send("win:invoke", "min"),
     toggleMaximize: () => ipcRenderer.send("win:invoke", "max"),
@@ -100,7 +100,6 @@ ipcRenderer.on(
 
 if (process.contextIsolated) {
     try {
-        contextBridge.exposeInMainWorld("electron", electronAPI);
         contextBridge.exposeInMainWorld("api", api);
         contextBridge.exposeInMainWorld("events", events);
     } catch (error) {

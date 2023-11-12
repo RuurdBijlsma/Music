@@ -170,6 +170,10 @@
         >
             {{ updateResult }}
         </v-sheet>
+
+        <div class="version-string mt-10">
+            <span class="mr-2">Ruurd Music</span><span class="bold-version">v{{ appVersion }}</span>
+        </div>
     </div>
 </template>
 
@@ -187,6 +191,8 @@ const platform = usePlatformStore();
 const base = useBaseStore();
 const ruurdAuth = useRuurdAuthStore();
 const ui = useUIStore();
+const appVersion = ref("");
+window.api.getAppVersion().then((r) => (appVersion.value = r));
 
 const updateLoading = ref(false);
 const updateResult = ref("");
@@ -291,5 +297,16 @@ h5 {
 
 .file-buttons > * {
     flex-grow: 1;
+}
+
+.version-string {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0.6;
+    font-weight: 300;
+}
+.bold-version{
+    font-weight: 500;
 }
 </style>

@@ -68,6 +68,7 @@ export function handleIpc(ipcMain: Electron.IpcMain, win: BrowserWindow) {
     ipcMain.handle("getFileContents", (_, file: string) =>
         nf.getFileContents(file),
     );
+    ipcMain.handle("getAppVersion", (_) => nf.getAppVersion());
 
     ipcMain.handle(
         "firstLogin",
