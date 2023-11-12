@@ -12,6 +12,12 @@ Music player built with Electron, Vue 3, and Vuetify.
     * Browse categories, such as workout, where you can find many workout playlists
 * Generate a custom radio, based on given genres and many more options
 
+## How to use
+
+Create a Spotify api project with one of the redirect urls being: http://localhost:38900
+
+On startup of the application fill in your api keys and log in. 
+
 ### Liked tracks
 
 ![Liked tracks](/.gh/liked-tracks.png?raw=true "Homepage")
