@@ -80,7 +80,7 @@ export const useSpotifyApiStore = defineStore("spotify-api", () => {
         };
     }
 
-    async function* retrieveArray<T>(apiFunction: Function):AsyncGenerator<T> {
+    async function* retrieveArray<T>(apiFunction: Function): AsyncGenerator<T> {
         let getData = () => apiFunction();
 
         while (true) {
@@ -244,6 +244,15 @@ export const useSpotifyApiStore = defineStore("spotify-api", () => {
         );
     };
 
+    async function getTrackFeatures(trackId: string) {
+        return await executeCached<SpotifyApi.AudioFeaturesObject>(
+            await baseDb,
+            () => api.getAudioFeaturesForTrack(trackId),
+            "audioFeatures" + trackId,
+            1000 * 60 * 60 * 24 * 365 * 1000,
+        );
+    }
+
     return {
         getPlaylist,
         getAlbum,
@@ -265,5 +274,6 @@ export const useSpotifyApiStore = defineStore("spotify-api", () => {
         getGenres,
         getRadioTracks,
         getCachedArtists,
+        getTrackFeatures,
     };
 });

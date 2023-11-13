@@ -82,8 +82,7 @@
 
 <script lang="ts" setup>
 // todo
-// periodic backup to server?
-// playlists cachen?@
+// bug: witte flits op reload van de white theme
 // simple player en simple yt player samenvoegen
 // show listen stats
 // generate a spotify wrapped / ruurd music wrapped

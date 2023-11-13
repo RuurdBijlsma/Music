@@ -129,8 +129,8 @@ export interface LikedTrack extends SpotifyApi.PlaylistTrackObject {
     endTime?: number;
 }
 
-export interface SpotifyTrack extends SpotifyApi.TrackObjectFull{
-    is_local?:boolean,
+export interface SpotifyTrack extends SpotifyApi.TrackObjectFull {
+    is_local?: boolean;
 }
 
 export interface TrackMetadata {
@@ -148,24 +148,52 @@ export interface TrackMetadata {
     youTubeSource?: string;
 }
 
+export interface ArtistStat {
+    id: string;
+    artist: SpotifyApi.ArtistObjectSimplified;
+
+    skips: number;
+    listenMinutes: number;
+    history: { [key: string]: number };
+}
+
+export interface CollectionStat {
+    id: string;
+    name: string;
+    context?: Item;
+    to: string;
+    buttonText: string;
+
+    skips: number;
+    listenMinutes: number;
+}
+
+export interface TrackStat {
+    id: string;
+    track: SpotifyApi.TrackObjectFull;
+
+    listenCount: number;
+    skips: number;
+    listenMinutes: number;
+}
+
+export interface Statistics {
+    historyMinutes: { [key: string]: number };
+    listenCount: number;
+    listenMinutes: number;
+    popularityHistory: {
+        [key: string]: { listenCount: number; popularitySum: 1017 };
+    };
+    skips: number;
+}
+
 export interface DataExport {
     localStorage: { [key: string]: string };
     idb: {
-        artistStats: {
-            [key: string]: {
-                name: string;
-                skips: number;
-                listenMinutes: number;
-                history: { [key: string]: number };
-            };
-        };
-        collectionStats: {
-            [key: string]: {
-                name: string;
-                skips: number;
-                listenMinutes: number;
-            };
-        };
+        artistStats: ArtistStat[];
+        collectionStats: CollectionStat[];
+        trackStats: TrackStat[];
+        statistics: Statistics;
         spotify: {
             library: {
                 playlist: SpotifyApi.PlaylistObjectFull[];
@@ -188,23 +216,6 @@ export interface DataExport {
                 artist: any;
                 category: any;
                 user: any;
-            };
-        };
-        statistics: {
-            historyMinutes: { [key: string]: number };
-            listenCount: number;
-            listenMinutes: number;
-            popularityHistory: {
-                [key: string]: { listenCount: number; popularitySum: 1017 };
-            };
-            skips: number;
-        };
-        trackStats: {
-            [key: string]: {
-                track: SpotifyApi.TrackObjectFull;
-                listenCount: number;
-                skips: number;
-                listenMinutes: number;
             };
         };
         trackMetadata: TrackMetadata[];

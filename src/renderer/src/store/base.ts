@@ -35,26 +35,25 @@ function createStore(
     return store;
 }
 
-export const baseDb = openDB("base", 6, {
+export const baseDb = openDB("base", 10, {
     upgrade(db, _, __, transaction) {
-        if (db.objectStoreNames.contains("trackBars"))
-            db.deleteObjectStore("trackBars");
-        if (db.objectStoreNames.contains("trackVolumeStats"))
-            db.deleteObjectStore("trackVolumeStats");
-        if (db.objectStoreNames.contains("trackEdits"))
-            db.deleteObjectStore("trackEdits");
-        if (db.objectStoreNames.contains("ytTracks"))
-            db.deleteObjectStore("ytTracks");
-        if (db.objectStoreNames.contains("nameToId"))
-            db.deleteObjectStore("nameToId");
-        if (db.objectStoreNames.contains("imageColor"))
-            db.deleteObjectStore("imageColor");
-
         createStore(db, transaction, "spotify");
         createStore(db, transaction, "cache");
-        createStore(db, transaction, "artistStats");
-        createStore(db, transaction, "trackStats");
-        createStore(db, transaction, "collectionStats");
+
+        createStore(db, transaction, "artistStats", { keyPath: "id" }, [
+            { name: "listenMinutes", keyPath: "listenMinutes", unique: false },
+            { name: "skips", keyPath: "skips", unique: false },
+        ]);
+        createStore(db, transaction, "trackStats", { keyPath: "id" }, [
+            { name: "listenMinutes", keyPath: "listenMinutes", unique: false },
+            { name: "listenCount", keyPath: "listenCount", unique: false },
+            { name: "skips", keyPath: "skips", unique: false },
+        ]);
+        createStore(db, transaction, "collectionStats", { keyPath: "id" }, [
+            { name: "listenMinutes", keyPath: "listenMinutes", unique: false },
+            { name: "skips", keyPath: "skips", unique: false },
+        ]);
+
         createStore(db, transaction, "statistics");
         createStore(db, transaction, "trackMetadata", { keyPath: "id" });
 
@@ -232,13 +231,13 @@ export const useBaseStore = defineStore("base", () => {
         return {
             localStorage: cleanLocalStorage,
             idb: {
-                artistStats: await getObjectStore("artistStats"),
-                collectionStats: await getObjectStore("collectionStats"),
+                artistStats: await db.getAll("artistStats"),
+                collectionStats: await db.getAll("collectionStats"),
+                trackStats: await db.getAll("trackStats"),
                 //@ts-ignore
                 spotify: await getObjectStore("spotify"),
                 //@ts-ignore
                 statistics: await getObjectStore("statistics"),
-                trackStats: await getObjectStore("trackStats"),
                 trackMetadata: await db.getAll("trackMetadata"),
                 tracks: await db.getAll("tracks"),
             },
