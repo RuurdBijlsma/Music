@@ -36,9 +36,19 @@ export function getThemeFromLocalStorage() {
         case "schedule":
             let lightTime: string, darkTime: string;
             if (localStorage.useSunSchedule === "true") {
+                if (
+                    localStorage.getItem("sunriseTime") === null ||
+                    localStorage.getItem("sunsetTime") === null
+                )
+                    break;
                 lightTime = localStorage.sunriseTime;
                 darkTime = localStorage.sunsetTime;
             } else {
+                if (
+                    localStorage.getItem("lightOnTime") === null ||
+                    localStorage.getItem("darkOnTime") === null
+                )
+                    break;
                 lightTime = localStorage.lightOnTime;
                 darkTime = localStorage.darkOnTime;
             }
@@ -46,7 +56,6 @@ export function getThemeFromLocalStorage() {
                 lightTime,
                 darkTime,
             );
-            console.log({ msUntilLight, msUntilDark });
             themeString = msUntilLight < msUntilDark ? "dark" : "light";
             msToSwitch = Math.min(msUntilDark, msUntilLight);
     }
