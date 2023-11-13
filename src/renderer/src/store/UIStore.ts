@@ -1,5 +1,4 @@
 import { defineStore } from "pinia";
-import { usePlatformStore } from "./electron";
 import { useTheme } from "vuetify";
 import { computed, Ref, ref, watch } from "vue";
 import { deltaE, executeCached, hexToRgb } from "../scripts/utils";
@@ -7,7 +6,6 @@ import { baseDb } from "./base";
 import { getThemeFromLocalStorage } from "../scripts/theme";
 
 export const useUIStore = defineStore("UI", () => {
-    const platform = usePlatformStore();
     const theme = useTheme();
 
     const windowWidth = ref(window.innerWidth);
