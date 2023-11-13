@@ -90,7 +90,7 @@
             </v-btn>
         </template>
 
-        <div class="file-buttons mt-3" v-if="ruurdAuth.isLoggedIn">
+        <div v-if="ruurdAuth.isLoggedIn" class="file-buttons mt-3">
             <v-btn
                 :append-icon="
                     exportResult === 'none'
@@ -135,11 +135,11 @@
         </div>
 
         <v-switch
-            :color="ui.themeColor"
             v-if="ruurdAuth.isLoggedIn"
+            v-model="base.autoBackup"
+            :color="ui.themeColor"
             hide-details
             label="Daily automatic backup to server"
-            v-model="base.autoBackup"
         />
 
         <v-divider class="mt-3 mb-3" />
@@ -172,7 +172,8 @@
         </v-sheet>
 
         <div class="version-string mt-10">
-            <span class="mr-2">Ruurd Music</span><span class="bold-version">v{{ appVersion }}</span>
+            <span class="mr-2">Ruurd Music</span
+            ><span class="bold-version">v{{ appVersion }}</span>
         </div>
     </div>
 </template>
@@ -207,12 +208,7 @@ const importFileLoading = ref(false);
 const exportResult = ref("none" as "none" | "failed" | "success");
 
 const sunTimes = computed(() => {
-    let rise = ui.sun.rise.toLocaleTimeString();
-    let set = ui.sun.set.toLocaleTimeString();
-    return ` (${rise.substring(0, rise.length - 3)} - ${set.substring(
-        0,
-        set.length - 3,
-    )})`;
+    return ` (${ui.sun.rise} - ${ui.sun.set})`;
 });
 
 async function exportToServer() {
@@ -306,7 +302,8 @@ h5 {
     opacity: 0.6;
     font-weight: 300;
 }
-.bold-version{
+
+.bold-version {
     font-weight: 500;
 }
 </style>

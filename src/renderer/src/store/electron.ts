@@ -227,10 +227,6 @@ export const usePlatformStore = defineStore("platform", () => {
         return window.api.checkFileExists(file);
     }
 
-    async function setTheme(theme: "dark" | "light") {
-        window.api.setTheme(theme);
-    }
-
     async function minimize() {
         window.api.minimizeWindow();
     }
@@ -363,7 +359,6 @@ export const usePlatformStore = defineStore("platform", () => {
 
     return {
         downloadTrackFile,
-        setTheme,
         close,
         toggleMaximize,
         minimize,

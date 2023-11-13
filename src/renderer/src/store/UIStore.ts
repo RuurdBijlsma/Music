@@ -4,6 +4,7 @@ import { useTheme } from "vuetify";
 import { computed, Ref, ref, watch } from "vue";
 import { deltaE, executeCached, hexToRgb } from "../scripts/utils";
 import { baseDb } from "./base";
+import { getThemeFromLocalStorage } from "../scripts/theme";
 
 export const useUIStore = defineStore("UI", () => {
     const platform = usePlatformStore();
@@ -81,11 +82,19 @@ export const useUIStore = defineStore("UI", () => {
         localStorage.darkOnTime = darkOnTime.value;
         applyThemeFromLocalStorage().then();
     });
-
     const sun = ref({
-        set: new Date("2023-01-01T07:00:00"),
-        rise: new Date("2023-01-01T19:00:00"),
-        isNightTime: false,
+        set:
+            localStorage.getItem("sunsetTime") === null
+                ? "19:00"
+                : localStorage.sunsetTime,
+        rise:
+            localStorage.getItem("sunriseTime") === null
+                ? "05:00"
+                : localStorage.sunriseTime,
+    });
+    watch(sun, () => {
+        localStorage.sunsetTime = sun.value.set;
+        localStorage.sunriseTime = sun.value.rise;
     });
     const useSunSchedule = ref(
         localStorage.getItem("useSunSchedule") === null
@@ -96,99 +105,53 @@ export const useUIStore = defineStore("UI", () => {
         localStorage.useSunSchedule = useSunSchedule.value;
     });
 
-    async function updateSunStats() {
-        let { sunset, sunrise, isNightTime } = await getNextSunEvents();
-        sun.value.set = sunset;
-        sun.value.rise = sunrise;
-        sun.value.isNightTime = isNightTime;
-    }
-
-    updateSunStats().then();
-
     applyThemeFromLocalStorage().then();
 
     async function applyThemeFromLocalStorage() {
-        if (localStorage.getItem("theme") === null)
-            localStorage.theme = "system";
-        switch (localStorage.theme) {
-            case "dark":
-            case "light":
-                theme.global.name.value = localStorage.theme;
-                break;
-            case "system":
-                theme.global.name.value = window.matchMedia(
-                    "(prefers-color-scheme: dark)",
-                ).matches
-                    ? "dark"
-                    : "light";
-                break;
-            case "schedule":
-                let msToSwitch = 1000 * 60 * 60;
-                let now = new Date();
-                if (useSunSchedule.value) {
-                    await updateSunStats();
-                    theme.global.name.value = sun.value.isNightTime
-                        ? "dark"
-                        : "light";
-                    let nextEvent = new Date(
-                        Math.min(+sun.value.set, +sun.value.rise),
-                    );
-                    msToSwitch = +nextEvent - +now;
-                } else {
-                    let nowHours = now.getHours();
-                    let nowMinutes = now.getMinutes();
-                    let [darkHours, darkMinutes] = darkOnTime.value
-                        .split(":")
-                        .map((p) => +p);
-                    let [lightHours, lightMinutes] = lightOnTime.value
-                        .split(":")
-                        .map((p) => +p);
-                    let msUntilDark =
-                        (darkHours - nowHours) * 60 * 60 * 1000 +
-                        (darkMinutes - nowMinutes) * 60 * 1000;
-                    let msUntilLight =
-                        (lightHours - nowHours) * 60 * 60 * 1000 +
-                        (lightMinutes - nowMinutes) * 60 * 1000;
-                    if (msUntilDark <= 0) msUntilDark += 1000 * 60 * 60 * 24;
-                    if (msUntilLight <= 0) msUntilLight += 1000 * 60 * 60 * 24;
-                    theme.global.name.value =
-                        msUntilLight < msUntilDark ? "dark" : "light";
-                    msToSwitch = Math.min(msUntilDark, msUntilLight);
-                }
-                clearTimeout(scheduleTimeout);
-                // check theme calculations again after sunrise or sunset
-                // @ts-ignore
-                scheduleTimeout = setTimeout(
-                    () => applyThemeFromLocalStorage(),
-                    msToSwitch,
-                );
+        if (useSunSchedule.value) {
+            let sunriseTime = localStorage.sunriseTime;
+            updateSunStats().then(() => {
+                // if update sun stats changed the sun times, reset the timeout
+                if (sun.value.rise !== sunriseTime)
+                    applyThemeFromLocalStorage();
+            });
         }
-        platform.setTheme(theme.global.name.value as "light" | "dark").then();
+        let { themeString, msToSwitch } = getThemeFromLocalStorage();
+        theme.global.name.value = themeString;
+        if (msToSwitch !== -1) {
+            clearTimeout(scheduleTimeout);
+            // check theme calculations again after sunrise or sunset
+            // @ts-ignore
+            scheduleTimeout = setTimeout(
+                () => applyThemeFromLocalStorage(),
+                msToSwitch,
+            );
+        }
+        window.api.setTheme(themeString).then();
     }
 
-    async function getNextSunEvents() {
+    async function updateSunStats() {
         // get sunset, cache result 7 days
         let { sunset, sunrise } = await executeCached<{
             sunrise: Date;
             sunset: Date;
         }>(await baseDb, getRawSunTimes, `sunTimes`, 1000 * 60 * 60 * 24 * 7);
-        let now = new Date();
-        // bring sunset date to current day
-        sunset.setDate(now.getDate());
-        const day = 1000 * 60 * 60 * 24;
-        while (now > sunset) sunset = new Date(+sunset + day);
-        sunrise.setDate(now.getDate());
-        while (now > sunrise) sunrise = new Date(+sunrise + day);
-        // if next sunset is tomorrow, then we are past today's sunset, so it is night
-        // if next sunrise is today, then it is very early, so it is night
-        let isNightTime =
-            sunset.getDate() > now.getDate() ||
-            sunrise.getDate() === now.getDate();
-        return {
-            isNightTime,
-            sunset,
-            sunrise,
+        // format the datetime to 16:27
+        let sunsetTime = sunset.toLocaleString("nl-NL", {
+            timeStyle: "short",
+            hour12: false,
+        });
+        let sunriseTime = sunrise.toLocaleString("nl-NL", {
+            timeStyle: "short",
+            hour12: false,
+        });
+
+        sun.value = {
+            set: sunsetTime,
+            rise: sunriseTime,
         };
+
+        return [sunriseTime, sunsetTime];
     }
 
     async function getRawSunTimes() {
