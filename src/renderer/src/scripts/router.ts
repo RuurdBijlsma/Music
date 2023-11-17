@@ -34,6 +34,7 @@ const routes = [
     },
     { path: "/tune", component: () => import("../views/browse/Tune.vue") },
     { path: "/radio", component: () => import("../views/browse/Radio.vue") },
+    { path: "/wrapped", component: () => import("../views/Wrapped.vue") },
 ];
 
 const router = createRouter({

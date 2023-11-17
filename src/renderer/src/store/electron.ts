@@ -312,11 +312,12 @@ export const usePlatformStore = defineStore("platform", () => {
         downloadState.value.set(key, state);
 
         (async () => {
-            let batchSize = 10;
+            let batchSize = 1;
             for (let i = 0; i < tracks.length; i += batchSize) {
                 state.value.downloaded = i;
                 let batch = tracks.slice(i, i + batchSize);
                 try {
+                    console.log(batch[0]);
                     let tracks = await Promise.all(
                         batch.map((track) =>
                             trackLoader.getFullTrackData(

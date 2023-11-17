@@ -175,6 +175,17 @@ export interface TrackStat {
     listenCount: number;
     skips: number;
     listenMinutes: number;
+    skipPercentage?: number;
+}
+
+export interface Notification {
+    show?: boolean;
+    icon?: string;
+    title: string;
+    description: string;
+    dismissText:string,
+    viewText:string,
+    action: Function;
 }
 
 export interface Statistics {

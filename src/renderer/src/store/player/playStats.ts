@@ -14,8 +14,8 @@ export const useStatsStore = defineStore("playerStats", () => {
     const player = usePlayerStore();
     const spotify = useSpotifyApiStore();
 
-    let intervalSeconds = 30;
-    const collectStatsPeriod = 60;
+    let intervalSeconds = 5;
+    const collectStatsPeriod = 10;
 
     setInterval(() => {
         if (
@@ -221,15 +221,16 @@ export const useStatsStore = defineStore("playerStats", () => {
     generateWrapStats().then();
 
     async function generateWrapStats() {
+        // TOP LISTENED STUFF
         let topArtists = await getTopFromIndex<ArtistStat>(
             "artistStats",
             "listenMinutes",
-            10,
+            5,
         );
         let topCollections = await getTopFromIndex<CollectionStat>(
             "collectionStats",
             "listenMinutes",
-            10,
+            5,
         );
         let topTracks = await getTopFromIndex<TrackStat>(
             "trackStats",
@@ -237,6 +238,35 @@ export const useStatsStore = defineStore("playerStats", () => {
             10,
         );
         console.log({ topArtists, topCollections, topTracks });
+        // MOST SKIPPED STUFF
+        let skipArtists = await getTopFromIndex<ArtistStat>(
+            "artistStats",
+            "skips",
+            5,
+        );
+        let skipTracks = await getTopFromIndex<TrackStat>(
+            "trackStats",
+            "skips",
+            100,
+        );
+        skipTracks = skipTracks
+            .map((s) => ({
+                ...s,
+                skipPercentage: s.skips / s.listenCount,
+            }))
+            .sort((a, b) => b.skipPercentage - a.skipPercentage)
+            .slice(0,10);
+        console.log({ skipArtists, skipTracks });
+
+        const db = await baseDb;
+        let statValues = await db.getAll("statistics");
+        let statKeys = await db.getAllKeys("statistics");
+let statistics = statKeys.reduce(
+    (acc, key, i) => ({ ...acc, [key.toString()]: statValues[i] }),
+    {},
+);
+        console.log(statistics);
+        return {topArtists, topCollections, topTracks,skipArtists, skipTracks, statistics}
     }
 
     return { collectSkipStat, collectTrackStat };

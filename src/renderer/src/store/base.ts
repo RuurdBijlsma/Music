@@ -1,11 +1,17 @@
 import { defineStore } from "pinia";
 import { IDBPDatabase, IDBPObjectStore, openDB, StoreNames } from "idb";
-import { ref, watch } from "vue";
-import type { DataExport, Item, ItemCollection } from "../scripts/types";
+import { Ref, ref, watch } from "vue";
+import type {
+    DataExport,
+    Item,
+    ItemCollection,
+    Notification,
+} from "../scripts/types";
 import { EventEmitter } from "events";
 import { randomNotFound } from "../scripts/imageSources";
 import { useRuurdAuthStore } from "./ruurd-auth";
 import { useSpotifyAuthStore } from "./spotify-auth";
+import router from "../scripts/router";
 
 function createStore(
     db: IDBPDatabase,
@@ -117,6 +123,32 @@ export const useBaseStore = defineStore("base", () => {
         show: false,
         item: null as any,
     });
+
+    const notifications: Ref<Notification[]> = ref([]);
+    function checkWrapNotification() {
+        let now = new Date();
+        let lsKey = "wrapped" + now.getFullYear();
+        if (
+            true ||
+            (now.getMonth() === 11 && localStorage.getItem(lsKey) === null)
+        ) {
+            addNotification({
+                title: "Your Music Wrapped is ready!",
+                description: "View statistics about your listening behaviour, see your top artists, tracks, and more.",
+                icon: "mdi-music-box-multiple",
+                dismissText: 'Later',
+                viewText:"View now",
+                action: () => router.push("/wrapped"),
+            });
+        }
+    }
+
+    checkWrapNotification();
+
+    function addNotification(options: Notification) {
+        options.show = true;
+        notifications.value.push(options);
+    }
 
     setInterval(() => checkAutoBackup(), 1000 * 60 * 60);
     checkAutoBackup().then();
@@ -516,5 +548,7 @@ export const useBaseStore = defineStore("base", () => {
         exportToFile,
         importFromFile,
         autoBackup,
+        notifications,
+        addNotification,
     };
 });

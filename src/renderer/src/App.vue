@@ -60,6 +60,11 @@
                         <component :is="Component" />
                     </transition>
                 </router-view>
+                <div class="notifications">
+                    <template v-for="notification in base.notifications">
+                        <notification v-if="notification.show" :notification="notification"/>
+                    </template>
+                </div>
             </div>
         </div>
         <source-dialog />
@@ -82,7 +87,6 @@
 
 <script lang="ts" setup>
 // todo
-// bug: witte flits op reload van de white theme
 // simple player en simple yt player samenvoegen
 // show listen stats
 // generate a spotify wrapped / ruurd music wrapped
@@ -121,6 +125,7 @@ import BottomMusicPlayer from "./components/BottomMusicPlayer.vue";
 import coverImage from "../assets/cover.jpg?asset";
 import EditInfoDialog from "./components/EditInfoDialog.vue";
 import { useUIStore } from "./store/UIStore";
+import Notification from "./components/Notification.vue";
 
 const base = useBaseStore();
 const ui = useUIStore();
@@ -278,6 +283,16 @@ body {
         left: 70px;
         bottom: 0;
     }
+}
+
+.notifications {
+    position: fixed;
+    right: 10px;
+    bottom: 10px;
+    width: calc(100% - 90px);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
 
 h1,
