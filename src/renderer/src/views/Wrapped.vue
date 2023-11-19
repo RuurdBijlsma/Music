@@ -8,16 +8,13 @@
 </template>
 
 <script setup lang="ts">
-import { useRoute } from "vue-router";
-import {useUIStore} from "../store/UIStore";
+import { useUIStore } from "../store/UIStore";
 
-const route = useRoute();
 const ui = useUIStore();
 
 function init() {
     let lsKey = "wrapped" + new Date().getFullYear();
     localStorage[lsKey] = "true";
-
 }
 
 init();
@@ -29,7 +26,7 @@ init();
     display: flex;
     justify-content: center;
     flex-direction: column;
-    padding-right:20px;
+    padding-right: 20px;
 }
 
 h1 {

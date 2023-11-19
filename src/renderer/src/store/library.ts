@@ -321,6 +321,7 @@ export const useLibraryStore = defineStore("library", () => {
 
         // fix ordering of tracks
         let changedTracks: LikedTrack[] = [];
+        let missingAlbumTracks: LikedTrack[] = [];
         for (let localTrack of tracks.value) {
             // skip over youtube tracks when determining reordering during update
             if (
@@ -328,12 +329,39 @@ export const useLibraryStore = defineStore("library", () => {
                 !apiTracks.hasOwnProperty(localTrack.id)
             )
                 continue;
+            if (localTrack.track.album === null) {
+                console.log(
+                    "Liked track album not present, getting from spotify api",
+                );
+                missingAlbumTracks.push(localTrack);
+            }
             let apiTrack = apiTracks[localTrack.id];
             if (localTrack.added_at === apiTrack.added_at) continue;
             localTrack.added_at = apiTrack.added_at;
             localTrack.added_at_reverse =
                 10000000000000 - +new Date(apiTrack.added_at);
             changedTracks.push(localTrack);
+        }
+        if (missingAlbumTracks.length > 0) {
+            let fixedTracks: SpotifyTrack[] = [];
+            for (let i = 0; i < missingAlbumTracks.length; i += 10) {
+                let ids = missingAlbumTracks.slice(i, i + 10).map((t) => t.id);
+                console.log("GET SLICE", ids);
+                let newTracks = await spotify.api
+                    .getTracks(ids)
+                    .then((i) => i.tracks);
+                fixedTracks = fixedTracks.concat(newTracks);
+            }
+            if (missingAlbumTracks.length === fixedTracks.length) {
+                const tx = db.transaction("tracks", "readwrite");
+                for (let i = 0; i < fixedTracks.length; i++) {
+                    missingAlbumTracks[i].track = fixedTracks[i];
+                    tx.store.put(toRaw(missingAlbumTracks[i]));
+                    console.log("Fixed", missingAlbumTracks[i].track.id);
+                }
+                await tx.done;
+                console.log("Put fixed tracks in DB!");
+            }
         }
         if (changedTracks.length > 0) {
             console.warn(
