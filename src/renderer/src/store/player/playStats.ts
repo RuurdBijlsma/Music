@@ -14,8 +14,8 @@ export const useStatsStore = defineStore("playerStats", () => {
     const player = usePlayerStore();
     const spotify = useSpotifyApiStore();
 
-    let intervalSeconds = 5;
-    const collectStatsPeriod = 10;
+    let intervalSeconds = 30;
+    const collectStatsPeriod = 60;
 
     setInterval(() => {
         if (
