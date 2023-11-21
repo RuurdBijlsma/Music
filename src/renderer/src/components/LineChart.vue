@@ -1,9 +1,20 @@
 <template>
-    <Line :data="chartData" :options="chartOptions" class="line-chart"></Line>
+    <Line
+        v-if="type === 'line'"
+        :data="chartData"
+        :options="chartOptions"
+        class="line-chart"
+    ></Line>
+    <Bar
+        v-else-if="type === 'bar'"
+        :data="chartData"
+        :options="chartOptions"
+        class="line-chart"
+    ></Bar>
 </template>
 
 <script lang="ts" setup>
-import { Line } from "vue-chartjs";
+import { Bar, Line } from "vue-chartjs";
 import { computed, PropType } from "vue";
 import {
     BarElement,
@@ -13,11 +24,14 @@ import {
     LinearScale,
     LineElement,
     PointElement,
+    TimeScale,
     Title,
     Tooltip,
 } from "chart.js";
 import { useTheme } from "vuetify";
 import { useUIStore } from "../store/UIStore";
+import "chartjs-adapter-date-fns";
+import {format} from 'date-fns'
 
 const ui = useUIStore();
 Chart.register(
@@ -29,34 +43,52 @@ Chart.register(
     LinearScale,
     PointElement,
     LineElement,
+    TimeScale,
 );
 const theme = useTheme();
 
 const props = defineProps({
     labels: {
-        type: [] as PropType<string[]>,
+        type: Array,
         required: true,
     },
     data: {
-        type: [] as PropType<number[]>,
+        type: Array,
         required: true,
     },
     dataLabel: {
         type: String,
         required: true,
     },
+    type: {
+        type: String as PropType<"line" | "bar">,
+        default: "line",
+    },
 });
-
 const letterColor = computed(() =>
     theme.current.value.dark ? "255,255,255" : "0,0,0",
 );
 
 const chartOptions = computed(() => ({
+    plugins: {
+        tooltip: {
+            callbacks: {
+                title: (context) => {
+                    let date = new Date(context[0].parsed.x)
+                    return format(date, 'dd MMM yyyy');
+                },
+            },
+        },
+    },
     responsive: true,
     tension: 0.2,
     color: `rgba(${letterColor.value}, .8)`,
     scales: {
         x: {
+            type: "time",
+            time: {
+                unit: "day",
+            },
             ticks: {
                 color: `rgba(${letterColor.value}, .8)`,
             },
@@ -80,7 +112,8 @@ const chartData = computed(() => ({
         {
             label: props.dataLabel,
             data: props.data,
-            borderColor: ui.themeColor,
+            borderColor: `rgba(${letterColor.value}, .8)`,
+            backgroundColor: ui.themeColor,
         },
     ],
 }));

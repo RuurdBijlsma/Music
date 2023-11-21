@@ -3,6 +3,7 @@
         <h1>Listen stats</h1>
         <v-divider class="mt-5" />
         <line-chart
+            type="bar"
             :data="data"
             :labels="labels"
             data-label="Minutes listened"
@@ -15,14 +16,14 @@ import LineChart from "../components/LineChart.vue";
 import { baseDb } from "../store/base";
 import { ref } from "vue";
 
-const labels = ref([] as string[]);
+const labels = ref([] as Date[]);
 const data = ref([] as number[]);
 
 async function init() {
     let db = await baseDb;
     let result = await db.get("statistics", "historyMinutes");
     if (!result) return;
-    labels.value = Object.keys(result);
+    labels.value = Object.keys(result).map(k=>new Date(k));
     data.value = Object.values(result);
 }
 
