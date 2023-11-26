@@ -2,13 +2,13 @@
     <Line
         v-if="type === 'line'"
         :data="chartJsData"
-        :options="chartOptions"
+        :options="chartOptions as any"
         class="line-chart"
     ></Line>
     <Bar
         v-else-if="type === 'bar'"
         :data="chartJsData"
-        :options="chartOptions"
+        :options="chartOptions as any"
         class="line-chart"
     ></Bar>
 </template>
