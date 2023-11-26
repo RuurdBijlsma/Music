@@ -87,12 +87,11 @@
 
 <script lang="ts" setup>
 // todo
+// iets met de filter knop op /library/tracks doen
+// playlist create en delete?
 // simple player en simple yt player samenvoegen
 // possibly replace color thief with something without vulnerabilities
 // clear cache button in settings
-// offline mode
-//  - in normal use cache every spotify request, only in offline mode use the cache instead of making request
-//  - don't auto update liked songs
 
 import TopMenu from "./components/TopMenu.vue";
 import MusicPlayer from "./components/MusicPlayer.vue";

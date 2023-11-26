@@ -266,6 +266,7 @@ export const useLibraryStore = defineStore("library", () => {
     }
 
     async function loadLikedTracks() {
+        if(base.offlineMode) return;
         await baseDb;
 
         if (isRefreshing.value["track"]) {
