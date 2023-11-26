@@ -150,7 +150,6 @@ export const useLibraryStore = defineStore("library", () => {
         await spotifyAuth.awaitAuth();
 
         let me = await executeCached<SpotifyApi.CurrentUsersProfileResponse>(
-            db,
             spotify.getMe,
             "spotify-me",
             1000 * 60 * 60 * 24 * 31,

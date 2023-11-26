@@ -191,7 +191,6 @@ export const usePlatformStore = defineStore("platform", () => {
 
     async function youTubeInfoById(id: string) {
         return await executeCached<YouTubeTrack>(
-            db,
             async () => {
                 let ytr = await window.api.ytInfoById(id);
                 let r = ytr[0];

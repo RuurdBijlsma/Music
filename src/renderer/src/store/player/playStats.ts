@@ -3,6 +3,7 @@ import {
     ArtistStat,
     CollectionStat,
     ItemCollection,
+    Statistics,
     TrackStat,
 } from "../../scripts/types";
 import { toRaw } from "vue";
@@ -172,7 +173,7 @@ export const useStatsStore = defineStore("playerStats", () => {
             addToHistoryMinutes(today, "mode", stats.mode),
             addToHistoryMinutes(today, "speechiness", stats.speechiness),
             addToHistoryMinutes(today, "tempo", stats.tempo),
-            addToHistoryMinutes(today, "time_signature", stats.time_signature),
+            addToHistoryMinutes(today, "timeSignature", stats.time_signature),
             addToHistoryMinutes(today, "valence", stats.valence),
         ]);
     }
@@ -220,12 +221,12 @@ export const useStatsStore = defineStore("playerStats", () => {
 
     generateWrapStats().then();
 
-    async function generateWrapStats() {
+    async function generateWrapStats(trackLimit=10, artistLimit=5) {
         // TOP LISTENED STUFF
         let topArtists = await getTopFromIndex<ArtistStat>(
             "artistStats",
             "listenMinutes",
-            5,
+            artistLimit,
         );
         let topCollections = await getTopFromIndex<CollectionStat>(
             "collectionStats",
@@ -235,39 +236,46 @@ export const useStatsStore = defineStore("playerStats", () => {
         let topTracks = await getTopFromIndex<TrackStat>(
             "trackStats",
             "listenMinutes",
-            10,
+            trackLimit,
         );
         console.log({ topArtists, topCollections, topTracks });
         // MOST SKIPPED STUFF
         let skipArtists = await getTopFromIndex<ArtistStat>(
             "artistStats",
             "skips",
-            5,
+            artistLimit,
         );
         let skipTracks = await getTopFromIndex<TrackStat>(
             "trackStats",
             "skips",
-            100,
+            trackLimit*10,
         );
         skipTracks = skipTracks
             .map((s) => ({
                 ...s,
-                skipPercentage: s.skips / s.listenCount,
+                skipPercentage: Math.min(100, (100 * s.skips) / s.listenCount),
             }))
             .sort((a, b) => b.skipPercentage - a.skipPercentage)
-            .slice(0,10);
+            .slice(0, trackLimit);
         console.log({ skipArtists, skipTracks });
 
         const db = await baseDb;
         let statValues = await db.getAll("statistics");
         let statKeys = await db.getAllKeys("statistics");
-let statistics = statKeys.reduce(
-    (acc, key, i) => ({ ...acc, [key.toString()]: statValues[i] }),
-    {},
-);
+        let statistics = statKeys.reduce(
+            (acc, key, i) => ({ ...acc, [key.toString()]: statValues[i] }),
+            {},
+        ) as Statistics;
         console.log(statistics);
-        return {topArtists, topCollections, topTracks,skipArtists, skipTracks, statistics}
+        return {
+            topArtists,
+            topCollections,
+            topTracks,
+            skipArtists,
+            skipTracks,
+            statistics,
+        };
     }
 
-    return { collectSkipStat, collectTrackStat };
+    return { collectSkipStat, collectTrackStat, generateWrapStats };
 });

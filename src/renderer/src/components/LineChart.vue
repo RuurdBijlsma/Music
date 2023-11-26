@@ -1,13 +1,13 @@
 <template>
     <Line
         v-if="type === 'line'"
-        :data="chartData"
+        :data="chartJsData"
         :options="chartOptions"
         class="line-chart"
     ></Line>
     <Bar
         v-else-if="type === 'bar'"
-        :data="chartData"
+        :data="chartJsData"
         :options="chartOptions"
         class="line-chart"
     ></Bar>
@@ -31,7 +31,8 @@ import {
 import { useTheme } from "vuetify";
 import { useUIStore } from "../store/UIStore";
 import "chartjs-adapter-date-fns";
-import {format} from 'date-fns'
+import { format } from "date-fns";
+import type { ChartData } from "../scripts/types";
 
 const ui = useUIStore();
 Chart.register(
@@ -48,16 +49,8 @@ Chart.register(
 const theme = useTheme();
 
 const props = defineProps({
-    labels: {
-        type: Array,
-        required: true,
-    },
-    data: {
-        type: Array,
-        required: true,
-    },
-    dataLabel: {
-        type: String,
+    chartData: {
+        type: Object as PropType<ChartData>,
         required: true,
     },
     type: {
@@ -74,8 +67,8 @@ const chartOptions = computed(() => ({
         tooltip: {
             callbacks: {
                 title: (context) => {
-                    let date = new Date(context[0].parsed.x)
-                    return format(date, 'dd MMM yyyy');
+                    let date = new Date(context[0].parsed.x);
+                    return format(date, "dd MMM yyyy");
                 },
             },
         },
@@ -85,6 +78,10 @@ const chartOptions = computed(() => ({
     color: `rgba(${letterColor.value}, .8)`,
     scales: {
         x: {
+            title: {
+                display: props.chartData.xAxis,
+                text: props.chartData.xAxis,
+            },
             type: "time",
             time: {
                 unit: "day",
@@ -97,6 +94,10 @@ const chartOptions = computed(() => ({
             },
         },
         y: {
+            title: {
+                display: props.chartData.yAxis,
+                text: props.chartData.yAxis,
+            },
             ticks: {
                 color: `rgba(${letterColor.value}, .8)`,
             },
@@ -106,14 +107,14 @@ const chartOptions = computed(() => ({
         },
     },
 }));
-const chartData = computed(() => ({
-    labels: props.labels,
+const chartJsData = computed(() => ({
+    labels: props.chartData.labels,
     datasets: [
         {
-            label: props.dataLabel,
-            data: props.data,
-            borderColor: `rgba(${letterColor.value}, .8)`,
-            backgroundColor: ui.themeColor,
+            label: props.chartData.dataLabel,
+            data: props.chartData.values,
+            borderColor: ui.themeColor,
+            backgroundColor: `rgba(${letterColor.value}, .8)`,
         },
     ],
 }));

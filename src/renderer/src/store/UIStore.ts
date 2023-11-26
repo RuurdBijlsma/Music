@@ -2,7 +2,6 @@ import { defineStore } from "pinia";
 import { useTheme } from "vuetify";
 import { computed, Ref, ref, watch } from "vue";
 import { deltaE, executeCached, hexToRgb } from "../scripts/utils";
-import { baseDb } from "./base";
 import { getThemeFromLocalStorage } from "../scripts/theme";
 
 export const useUIStore = defineStore("UI", () => {
@@ -133,7 +132,7 @@ export const useUIStore = defineStore("UI", () => {
         let { sunset, sunrise } = await executeCached<{
             sunrise: Date;
             sunset: Date;
-        }>(await baseDb, getRawSunTimes, `sunTimes`, 1000 * 60 * 60 * 24 * 7);
+        }>(getRawSunTimes, `sunTimes`, 1000 * 60 * 60 * 24 * 7);
         // format the datetime to 16:27
         let sunsetTime = sunset.toLocaleString("nl-NL", {
             timeStyle: "short",

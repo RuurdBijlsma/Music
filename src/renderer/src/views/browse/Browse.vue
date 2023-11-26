@@ -58,7 +58,7 @@
 import { useSpotifyApiStore } from "../../store/spotify-api";
 import { ref } from "vue";
 import { executeCached } from "../../scripts/utils";
-import { baseDb, useBaseStore } from "../../store/base";
+import { useBaseStore } from "../../store/base";
 import { useUIStore } from "../../store/UIStore";
 
 const base = useBaseStore();
@@ -72,7 +72,6 @@ async function refresh() {
         categories: Array<SpotifyApi.CategoryObject>;
         genres: Array<string>;
     }>(
-        await baseDb,
         async () => await spotify.getBrowsePage(),
         "browsePage",
         1000 * 60 * 60 * 24,

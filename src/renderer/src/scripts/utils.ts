@@ -1,3 +1,5 @@
+import { baseDb } from "../store/base";
+
 export function hexToRgb(hex: string) {
     if (hex.length === 4) {
         hex = `#${hex[1]}${hex[1]}${hex[2]}${hex[2]}${hex[3]}${hex[3]}`;
@@ -93,16 +95,19 @@ export function shuffleArray<T>(array: T[]): T[] {
 }
 
 export async function executeCached<T>(
-    db,
     fun,
     cacheKey,
     expireTime,
+    useCache = true,
 ): Promise<T> {
-    let ytCache = await db.get("cache", cacheKey);
-    if (ytCache) {
-        if (ytCache.expiryDate < Date.now())
-            db.delete("cache", cacheKey).then();
-        else return ytCache.result;
+    const db = await baseDb;
+    if (useCache) {
+        let cache = await db.get("cache", cacheKey);
+        if (cache) {
+            if (cache.expiryDate < Date.now())
+                db.delete("cache", cacheKey).then();
+            else return cache.result;
+        }
     }
     let result = await fun();
     db.put(

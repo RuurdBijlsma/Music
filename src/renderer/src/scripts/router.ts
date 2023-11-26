@@ -7,7 +7,6 @@ import { baseDb } from "../store/base";
 const routes = [
     { path: "/", component: Home },
     { path: "/settings", component: () => import("../views/Settings.vue") },
-    { path: "/stats", component: () => import("../views/Stats.vue") },
     { path: "/browse", component: () => import("../views/browse/Browse.vue") },
     {
         path: "/playlist/:name/:id",

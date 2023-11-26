@@ -289,7 +289,6 @@ export const useSearchStore = defineStore("search", () => {
 
     async function searchYouTubeRaw(query: string, limit = 10) {
         return await executeCached<YouTubeSearchResult[]>(
-            db,
             async () => {
                 return (
                     await YouTubeSearchAPI.GetListByKeyword(
@@ -320,7 +319,6 @@ export const useSearchStore = defineStore("search", () => {
 
     async function searchSpotify(query: string) {
         return await executeCached<SpotifyApi.SearchResponse>(
-            db,
             async () => {
                 await baseDb;
                 return await spotify.search(query, [

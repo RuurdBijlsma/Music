@@ -125,19 +125,19 @@ export const useBaseStore = defineStore("base", () => {
     });
 
     const notifications: Ref<Notification[]> = ref([]);
+
     function checkWrapNotification() {
         let now = new Date();
         let lsKey = "wrapped" + now.getFullYear();
-        if (
-            true ||
-            (now.getMonth() === 11 && localStorage.getItem(lsKey) === null)
-        ) {
+        if (now.getMonth() !== 11) localStorage.removeItem(lsKey);
+        if (now.getMonth() === 11 && localStorage.getItem(lsKey) === null) {
             addNotification({
                 title: "Your Music Wrapped is ready!",
-                description: "View statistics about your listening behaviour, see your top artists, tracks, and more.",
+                description:
+                    "View statistics about your listening behaviour, see your top artists, tracks, and more.",
                 icon: "mdi-music-box-multiple",
-                dismissText: 'Later',
-                viewText:"View now",
+                dismissText: "Later",
+                viewText: "View now",
                 action: () => router.push("/wrapped"),
             });
         }

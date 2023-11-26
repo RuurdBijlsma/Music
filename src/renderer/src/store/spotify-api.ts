@@ -115,9 +115,13 @@ export const useSpotifyApiStore = defineStore("spotify-api", () => {
         await baseDb;
         return api.getAlbum(id);
     };
-    const getArtist = async (id: string) => {
-        await baseDb;
-        return api.getArtist(id);
+    const getArtist = async (id: string, useCache = false) => {
+        return executeCached<SpotifyApi.SingleArtistResponse>(
+            () => api.getArtist(id),
+            "artist" + id,
+            1000 * 60 * 60 * 24 * 365 * 5,
+            useCache,
+        );
     };
     const getArtistAlbums = async (id: string) => {
         await baseDb;
@@ -139,9 +143,13 @@ export const useSpotifyApiStore = defineStore("spotify-api", () => {
         await baseDb;
         return api.getUserPlaylists(id);
     };
-    const getTrack = async (id: string) => {
-        await baseDb;
-        return api.getTrack(id);
+    const getTrack = async (id: string, useCache = false) => {
+        return executeCached<SpotifyApi.SingleTrackResponse>(
+            () => api.getTrack(id),
+            "artist" + id,
+            1000 * 60 * 60 * 24 * 365 * 5,
+            useCache,
+        );
     };
     const getMe = async () => {
         await baseDb;
@@ -193,7 +201,6 @@ export const useSpotifyApiStore = defineStore("spotify-api", () => {
 
     const getCachedGenres = async () => {
         return await executeCached<AvailableGenreSeedsResponse>(
-            await baseDb,
             async () => {
                 return await api.getAvailableGenreSeeds();
             },
@@ -235,7 +242,6 @@ export const useSpotifyApiStore = defineStore("spotify-api", () => {
 
     const getCachedArtists = async (ids: string[]) => {
         return await executeCached<SpotifyApi.ArtistObjectFull[]>(
-            await baseDb,
             async () => {
                 return (await api.getArtists(ids)).artists;
             },
@@ -246,7 +252,6 @@ export const useSpotifyApiStore = defineStore("spotify-api", () => {
 
     async function getTrackFeatures(trackId: string) {
         return await executeCached<SpotifyApi.AudioFeaturesObject>(
-            await baseDb,
             () => api.getAudioFeaturesForTrack(trackId),
             "audioFeatures" + trackId,
             1000 * 60 * 60 * 24 * 365 * 1000,

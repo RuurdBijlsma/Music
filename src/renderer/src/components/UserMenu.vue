@@ -62,7 +62,7 @@
                 </div>
             </v-list-item>
             <v-divider class="mb-2"></v-divider>
-            <v-list-item to="/stats">
+            <v-list-item to="/wrapped">
                 <v-list-item-title class="small-item">
                     <v-icon class="mr-2" icon="mdi-chart-timeline-variant" />
                     Statistics

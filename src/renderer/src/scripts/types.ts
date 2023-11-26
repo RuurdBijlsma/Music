@@ -86,6 +86,7 @@ export type CollectionType =
     | "playlist"
     | "album"
     | "category"
+    | "wrapped"
     | "youtube";
 export type ItemType = "track" | "playlist" | "album" | "artist" | "category";
 
@@ -183,8 +184,8 @@ export interface Notification {
     icon?: string;
     title: string;
     description: string;
-    dismissText:string,
-    viewText:string,
+    dismissText: string;
+    viewText: string;
     action: Function;
 }
 
@@ -192,10 +193,49 @@ export interface Statistics {
     historyMinutes: { [key: string]: number };
     listenCount: number;
     listenMinutes: number;
-    popularityHistory: {
-        [key: string]: { listenCount: number; popularitySum: 1017 };
-    };
     skips: number;
+    popularity: {
+        [key: string]: { minutes: number; sum: number };
+    };
+    acousticness: {
+        [key: string]: { minutes: number; sum: number };
+    };
+    danceability: {
+        [key: string]: { minutes: number; sum: number };
+    };
+    duration: {
+        [key: string]: { minutes: number; sum: number };
+    };
+    energy: {
+        [key: string]: { minutes: number; sum: number };
+    };
+    instrumentalness: {
+        [key: string]: { minutes: number; sum: number };
+    };
+    key: {
+        [key: string]: { minutes: number; sum: number };
+    };
+    liveness: {
+        [key: string]: { minutes: number; sum: number };
+    };
+    loudness: {
+        [key: string]: { minutes: number; sum: number };
+    };
+    mode: {
+        [key: string]: { minutes: number; sum: number };
+    };
+    speechiness: {
+        [key: string]: { minutes: number; sum: number };
+    };
+    tempo: {
+        [key: string]: { minutes: number; sum: number };
+    };
+    timeSignature: {
+        [key: string]: { minutes: number; sum: number };
+    };
+    valence: {
+        [key: string]: { minutes: number; sum: number };
+    };
 }
 
 export interface DataExport {
@@ -232,4 +272,12 @@ export interface DataExport {
         trackMetadata: TrackMetadata[];
         tracks: LikedTrack[];
     };
+}
+
+export interface ChartData {
+    labels: Date[];
+    values: number[];
+    dataLabel: string;
+    xAxis?: string;
+    yAxis?: string;
 }
