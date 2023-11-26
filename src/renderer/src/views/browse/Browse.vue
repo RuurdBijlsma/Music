@@ -68,11 +68,8 @@ const genres = ref(null as null | string[]);
 const categories = ref(null as null | SpotifyApi.CategoryObject[]);
 
 async function refresh() {
-    const result = await executeCached<{
-        categories: Array<SpotifyApi.CategoryObject>;
-        genres: Array<string>;
-    }>(
-        async () => await spotify.getBrowsePage(),
+    const result = await executeCached(
+        () => spotify.getBrowsePage(),
         "browsePage",
         1000 * 60 * 60 * 24,
     );

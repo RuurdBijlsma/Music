@@ -5,6 +5,7 @@
             Track{{ tracks.length === 1 ? "" : "s" }} •
             {{ base.approximateDuration(totalDurationMs) }}
             <v-btn
+                v-if="!base.offlineMode"
                 :loading="library.isRefreshing.track"
                 class="refresh-button"
                 density="compact"

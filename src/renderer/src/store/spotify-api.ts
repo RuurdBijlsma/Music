@@ -13,12 +13,12 @@ export const useSpotifyApiStore = defineStore("spotify-api", () => {
     const base = useBaseStore();
     const api = new SpotifyWebApi();
 
-    const get = async <T>(
+    const get = <T>(
         fun: (...args: any) => T,
         args: any[] = [],
         useCache = false,
     ) =>
-        await executeCached(
+        executeCached(
             () => fun(...args),
             fun.toString() + JSON.stringify(args),
             1000 * 60 * 60 * 24 * 365 * 10,
@@ -121,30 +121,31 @@ export const useSpotifyApiStore = defineStore("spotify-api", () => {
         );
         return playlist;
     };
-    const getAlbum = (id: string) => get(api.getAlbum, [id]);
-    const getArtist = (id: string, useCache = false) =>
-        get(api.getArtist, [id], useCache);
-    const getArtistAlbums = (id: string) => get(api.getArtistAlbums, [id]);
-    const getArtistRelatedArtists = (id: string) =>
-        get(api.getArtistRelatedArtists, [id]);
-    const getArtistTopTracks = (id: string) =>
-        get(api.getArtistTopTracks, [id, library.userInfo.country]);
-    const getUser = (id: string) => get(api.getUser, [id]);
-    const getTrack = (id: string, useCache = false) =>
-        get(api.getTrack, [id], useCache);
-    const getMe = () => get(api.getMe);
-    const getMySavedTracks = (options: Object | undefined = undefined) =>
-        get(api.getMySavedTracks, [options]);
-    const search = (
+    const getAlbum = async (id: string) => await get(api.getAlbum, [id]);
+    const getArtist = async (id: string, useCache = false) =>
+        await get(api.getArtist, [id], useCache);
+    const getArtistAlbums = async (id: string) =>
+        await get(api.getArtistAlbums, [id]);
+    const getArtistRelatedArtists = async (id: string) =>
+        await get(api.getArtistRelatedArtists, [id]);
+    const getArtistTopTracks = async (id: string) =>
+        await get(api.getArtistTopTracks, [id, library.userInfo.country]);
+    const getUser = async (id: string) => await get(api.getUser, [id]);
+    const getTrack = async (id: string, useCache = false) =>
+        await get(api.getTrack, [id], useCache);
+    const getMe = async () => await get(api.getMe);
+    const getMySavedTracks = async (options: Object | undefined = undefined) =>
+        await get(api.getMySavedTracks, [options]);
+    const search = async (
         query: string,
         types: ("playlist" | "album" | "artist" | "track")[],
         options:
             | SpotifyApi.SearchForItemParameterObject
             | undefined = undefined,
-    ) => get(api.search, [query, types, options]);
+    ) => await get(api.search, [query, types, options]);
 
-    const getBrowsePage = () =>
-        get(async () => {
+    const getBrowsePage = async () =>
+        await get(async () => {
             let [categories, genresResponse] = await Promise.all([
                 api.getCategories({ limit: 50 }),
                 getCachedGenres(),
@@ -161,8 +162,8 @@ export const useSpotifyApiStore = defineStore("spotify-api", () => {
             return { categories: categories.categories.items, genres };
         });
 
-    const getCategory = (id: string) =>
-        get(async () => {
+    const getCategory = async (id: string) =>
+        await get(async () => {
             await baseDb;
             let playlists = await api.getCategoryPlaylists(id, {
                 limit: 50,
@@ -174,15 +175,15 @@ export const useSpotifyApiStore = defineStore("spotify-api", () => {
             };
         }, [id]);
 
-    const getCachedGenres = () =>
-        executeCached(
+    const getCachedGenres = async () =>
+        await executeCached(
             () => api.getAvailableGenreSeeds(),
             "seed-genres",
             1000 * 60 * 60 * 24,
         );
 
     const getGenres = async () =>
-        get(async () =>
+        await get(async () =>
             (await getCachedGenres()).genres.map((genre) =>
                 genre
                     .split("-")
@@ -194,7 +195,7 @@ export const useSpotifyApiStore = defineStore("spotify-api", () => {
         );
 
     const getRadioTracks = async (options: any) =>
-        get(async () => {
+        await get(async () => {
             const db = await baseDb;
             let dbKey = "radio" + JSON.stringify(options);
             if (options.id) {
@@ -218,7 +219,7 @@ export const useSpotifyApiStore = defineStore("spotify-api", () => {
         }, [options]);
 
     const getCachedArtists = async (ids: string[]) =>
-        get(() =>
+        await get(() =>
             executeCached(
                 async () => (await api.getArtists(ids)).artists,
                 "artists" + JSON.stringify(ids),
@@ -226,19 +227,19 @@ export const useSpotifyApiStore = defineStore("spotify-api", () => {
             ),
         );
 
-    const getTrackFeatures = (trackId: string) =>
-        get(api.getAudioFeaturesForTrack, [trackId], true);
+    const getTrackFeatures = async (trackId: string) =>
+        await get(api.getAudioFeaturesForTrack, [trackId], true);
 
-    const getFeaturedPlaylists = (options?: Object) =>
-        get(api.getFeaturedPlaylists, [options]);
-    const getMySavedAlbums = (options?: Object) =>
-        get(api.getMySavedAlbums, [options]);
-    const getFollowedArtists = (options?: Object) =>
-        get(api.getFollowedArtists, [options]);
-    const getUserPlaylists = (id: string, options?: Object) =>
-        get(api.getUserPlaylists, [id, options]);
-    const getNewReleases = (options?: Object) =>
-        get(api.getNewReleases, [options]);
+    const getFeaturedPlaylists = async (options?: Object) =>
+        await get(api.getFeaturedPlaylists, [options]);
+    const getMySavedAlbums = async (options?: Object) =>
+        await get(api.getMySavedAlbums, [options]);
+    const getFollowedArtists = async (options?: Object) =>
+        await get(api.getFollowedArtists, [options]);
+    const getUserPlaylists = async (id: string, options?: Object) =>
+        await get(api.getUserPlaylists, [id, options]);
+    const getNewReleases = async (options?: Object) =>
+        await get(api.getNewReleases, [options]);
 
     return {
         getNewReleases,

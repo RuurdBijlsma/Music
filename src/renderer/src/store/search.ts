@@ -288,7 +288,7 @@ export const useSearchStore = defineStore("search", () => {
     }
 
     async function searchYouTubeRaw(query: string, limit = 10) {
-        return await executeCached<YouTubeSearchResult[]>(
+        return await executeCached(
             async () => {
                 return (
                     await YouTubeSearchAPI.GetListByKeyword(
@@ -299,9 +299,11 @@ export const useSearchStore = defineStore("search", () => {
                             type: "video",
                         },
                     )
-                ).items.filter((i) => i.type === "video" && !i.isLive);
+                ).items.filter(
+                    (i) => i.type === "video" && !i.isLive,
+                ) as YouTubeSearchResult[];
             },
-            "ytsearch" + query + limit,
+            "yt-search" + query + limit,
             // 1,
             1000 * 60 * 60 * 24 * 7,
         );
@@ -318,16 +320,9 @@ export const useSearchStore = defineStore("search", () => {
     }
 
     async function searchSpotify(query: string) {
-        return await executeCached<SpotifyApi.SearchResponse>(
-            async () => {
-                await baseDb;
-                return await spotify.search(query, [
-                    "album",
-                    "artist",
-                    "playlist",
-                    "track",
-                ]);
-            },
+        return await executeCached(
+            () =>
+                spotify.search(query, ["album", "artist", "playlist", "track"]),
             "sp" + query,
             1000 * 60 * 5,
         );

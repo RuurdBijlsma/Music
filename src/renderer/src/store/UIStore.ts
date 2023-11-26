@@ -129,10 +129,11 @@ export const useUIStore = defineStore("UI", () => {
 
     async function updateSunStats() {
         // get sunset, cache result 7 days
-        let { sunset, sunrise } = await executeCached<{
-            sunrise: Date;
-            sunset: Date;
-        }>(getRawSunTimes, `sunTimes`, 1000 * 60 * 60 * 24 * 7);
+        let { sunset, sunrise } = await executeCached(
+            getRawSunTimes,
+            `sunTimes`,
+            1000 * 60 * 60 * 24 * 7,
+        );
         // format the datetime to 16:27
         let sunsetTime = sunset.toLocaleString("nl-NL", {
             timeStyle: "short",
