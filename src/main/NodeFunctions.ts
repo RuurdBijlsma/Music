@@ -1,6 +1,7 @@
 import Directories from "./Directories";
 import path from "path";
 import fs from "fs/promises";
+import badFs from "fs";
 import os from "os";
 import type { BrowserWindow } from "electron";
 import { app, dialog, globalShortcut } from "electron";
@@ -21,6 +22,7 @@ import lightNextIcon from "../../resources/media-icon/light-nexticon.png?asset";
 import ffBinaries from "ffbinaries";
 import replaceSpecialCharacters from "replace-special-characters";
 import { autoUpdater } from "electron-updater";
+import * as https from "https";
 
 const YTDlpWrap = require("yt-dlp-wrap").default;
 export default class NodeFunctions {
@@ -269,6 +271,27 @@ export default class NodeFunctions {
                 resolve(outFile);
             });
         });
+    }
+
+    downloadFile(url: string, destinationFile: string) {
+        return new Promise<void>(
+            (resolve, reject) => {
+                const file = badFs.createWriteStream(destinationFile);
+                https
+                    .get(url, (response) => {
+                        response.pipe(file);
+                        file.on("finish", () => {
+                            file.close(() =>
+                                resolve(),
+                            );
+                        });
+                    })
+                    .on("error", (err) => {
+                        fs.unlink(destinationFile);
+                        reject(err);
+                    });
+            },
+        );
     }
 
     async getVolumeStats(trackFile: string) {

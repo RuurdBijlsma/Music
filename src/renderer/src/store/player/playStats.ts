@@ -8,15 +8,16 @@ import {
 } from "../../scripts/types";
 import { toRaw } from "vue";
 import { usePlayerStore } from "./player";
-import { baseDb } from "../base";
+import { baseDb, useBaseStore } from "../base";
 import { useSpotifyApiStore } from "../spotify-api";
 
 export const useStatsStore = defineStore("playerStats", () => {
     const player = usePlayerStore();
     const spotify = useSpotifyApiStore();
+    const base = useBaseStore();
 
-    let intervalSeconds = 30;
-    const collectStatsPeriod = 60;
+    let intervalSeconds = base.isDev ? 5 : 30;
+    const collectStatsPeriod = base.isDev ? 10 : 60;
 
     setInterval(() => {
         if (
@@ -221,7 +222,7 @@ export const useStatsStore = defineStore("playerStats", () => {
 
     generateWrapStats().then();
 
-    async function generateWrapStats(trackLimit=10, artistLimit=5) {
+    async function generateWrapStats(trackLimit = 10, artistLimit = 5) {
         // TOP LISTENED STUFF
         let topArtists = await getTopFromIndex<ArtistStat>(
             "artistStats",
@@ -248,7 +249,7 @@ export const useStatsStore = defineStore("playerStats", () => {
         let skipTracks = await getTopFromIndex<TrackStat>(
             "trackStats",
             "skips",
-            trackLimit*10,
+            trackLimit * 10,
         );
         skipTracks = skipTracks
             .map((s) => ({

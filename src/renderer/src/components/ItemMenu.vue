@@ -6,7 +6,7 @@
 
         <v-divider v-if="showDescriptor" />
 
-        <v-list-item v-if="canLike" @click="library.toggleLike(item)">
+        <v-list-item v-if="canLike && !base.offlineMode" @click="library.toggleLike(item)">
             <template v-slot:prepend>
                 <v-icon v-if="isLiked" icon="mdi-heart"></v-icon>
                 <v-icon v-else icon="mdi-heart-outline"></v-icon>
@@ -17,7 +17,7 @@
             <v-list-item-title v-else>Add to library</v-list-item-title>
         </v-list-item>
 
-        <v-menu location="left">
+        <v-menu location="left" v-if="!base.offlineMode">
             <template v-slot:activator="{ props }">
                 <v-list-item
                     v-if="item.type === 'track' && !item.id.startsWith('yt-')"
@@ -111,7 +111,7 @@
         <v-divider v-if="item.type === 'track'" />
 
         <v-list-item
-            v-if="item.type === 'track'"
+            v-if="!base.offlineMode && item.type === 'track'"
             class="small-item"
             density="compact"
             @click="library.chooseSource(item)"
@@ -136,6 +136,7 @@
         </v-list-item>
         <v-list-item
             v-if="
+                !base.offlineMode &&
                 item.type === 'track' &&
                 player.track !== null &&
                 isDownloaded &&

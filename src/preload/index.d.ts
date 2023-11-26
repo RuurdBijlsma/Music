@@ -26,6 +26,7 @@ declare global {
             saveStringToFile: (file: string, contents: string) => Promise<boolean>,
             getFileContents: (file: string) => Promise<string | null>,
             getAppVersion: () => Promise<string>,
+            downloadFile: (url: string, file: string) => Promise<string>,
 
             fileSize: (file: string) => Promise<number>,
             checkFileExists: (filename: string) => Promise<any>,

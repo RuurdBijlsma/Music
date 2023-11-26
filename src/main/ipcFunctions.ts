@@ -68,6 +68,9 @@ export function handleIpc(ipcMain: Electron.IpcMain, win: BrowserWindow) {
     ipcMain.handle("getFileContents", (_, file: string) =>
         nf.getFileContents(file),
     );
+    ipcMain.handle("downloadFile", (_, url: string, file: string) =>
+        nf.downloadFile(url, file),
+    );
     ipcMain.handle("getAppVersion", (_) => nf.getAppVersion());
 
     ipcMain.handle(

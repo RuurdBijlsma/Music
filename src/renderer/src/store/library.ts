@@ -149,7 +149,7 @@ export const useLibraryStore = defineStore("library", () => {
     async function refreshUserInfo() {
         await spotifyAuth.awaitAuth();
 
-        let me = await executeCached<SpotifyApi.CurrentUsersProfileResponse>(
+        let me = await executeCached(
             spotify.getMe,
             "spotify-me",
             1000 * 60 * 60 * 24 * 31,
@@ -188,15 +188,15 @@ export const useLibraryStore = defineStore("library", () => {
         switch (type) {
             case "playlist":
                 retrieval = () =>
-                    spotify.api.getUserPlaylists(userInfo.value.id, {
+                    spotify.getUserPlaylists(userInfo.value.id, {
                         limit: 50,
                     });
                 break;
             case "album":
-                retrieval = () => spotify.api.getMySavedAlbums();
+                retrieval = () => spotify.getMySavedAlbums();
                 break;
             case "artist":
-                retrieval = () => spotify.api.getFollowedArtists();
+                retrieval = () => spotify.getFollowedArtists();
                 page = (r) => r.artists;
                 break;
         }
@@ -384,7 +384,7 @@ export const useLibraryStore = defineStore("library", () => {
         await spotifyAuth.awaitAuth();
 
         //Featured playlists
-        let featured = await spotify.api.getFeaturedPlaylists({ limit: 50 });
+        let featured = await spotify.getFeaturedPlaylists({ limit: 50 });
         view.value.homePage.featured = {
             title: featured.message,
             playlists: featured.playlists.items,
@@ -417,7 +417,7 @@ export const useLibraryStore = defineStore("library", () => {
         }
 
         //New releases
-        let newReleases = await spotify.api.getNewReleases({ limit: 50 });
+        let newReleases = await spotify.getNewReleases({ limit: 50 });
         view.value.homePage.newReleases = newReleases.albums.items;
         await db.put("spotify", toRaw(view.value), "view");
     }

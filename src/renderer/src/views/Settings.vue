@@ -5,6 +5,15 @@
         <authentication />
         <v-divider class="mt-3 mb-3" />
 
+        <v-btn
+            :color="ui.themeColor"
+            :block="true"
+            variant="tonal"
+            @click="setOfflineMode(!base.offlineMode)"
+            :text="(base.offlineMode ? 'disable' : 'enable') + ` Offline Mode`"
+        />
+        <v-divider class="mt-3 mb-3" />
+
         <h3 class="mb-3">Theme</h3>
         <div class="theme-chips">
             <v-chip-group
@@ -258,6 +267,11 @@ async function updateYtdlp() {
     updateLoading.value = true;
     updateResult.value = await platform.updateYtdlp();
     updateLoading.value = false;
+}
+
+function setOfflineMode(v: boolean) {
+    base.offlineMode = v;
+    location.reload();
 }
 </script>
 

@@ -5,7 +5,7 @@ export interface YouTubeTrack {
     playlist: string;
     playlistId: string;
     viewCount: number;
-    uploadDate: string;
+    uploadDate: Date;
     id: string;
     duration: number;
     channel: string;

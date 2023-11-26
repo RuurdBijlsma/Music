@@ -73,6 +73,12 @@ export const usePlatformStore = defineStore("platform", () => {
         return fileNamify(file).substring(0, 150).replaceAll("#", "!");
     }
 
+    async function downloadFile(url: string, filePath: string) {
+        if (await checkFileExists(filePath)) return false;
+        await window.api.downloadFile(url, filePath);
+        return true;
+    }
+
     async function deleteFile(filename: string) {
         await window.api.deleteFile(filename);
     }
@@ -190,7 +196,7 @@ export const usePlatformStore = defineStore("platform", () => {
     }
 
     async function youTubeInfoById(id: string) {
-        return await executeCached<YouTubeTrack>(
+        return await executeCached(
             async () => {
                 let ytr = await window.api.ytInfoById(id);
                 let r = ytr[0];
@@ -215,7 +221,7 @@ export const usePlatformStore = defineStore("platform", () => {
                             6,
                         )}-${r.upload_date.substring(6, 8)}`,
                     ),
-                };
+                } as YouTubeTrack;
             },
             "ytId" + id,
             1000 * 60 * 60 * 24 * 365,
@@ -383,5 +389,6 @@ export const usePlatformStore = defineStore("platform", () => {
         getTrackFile,
         directories,
         fileSize,
+        downloadFile,
     };
 });

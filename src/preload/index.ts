@@ -1,4 +1,4 @@
-import {contextBridge, ipcRenderer} from "electron";
+import { contextBridge, ipcRenderer } from "electron";
 
 // Custom APIs for renderer
 const api = {
@@ -58,6 +58,8 @@ const api = {
     }) => ipcRenderer.invoke("firstLogin", spotifyAuth),
     resetSpotifyLogin: () => ipcRenderer.invoke("resetSpotifyLogin"),
     getAppVersion: () => ipcRenderer.invoke("getAppVersion"),
+    downloadFile: (url: string, file: string) =>
+        ipcRenderer.invoke("downloadFile", url, file),
 
     minimizeWindow: () => ipcRenderer.send("win:invoke", "min"),
     toggleMaximize: () => ipcRenderer.send("win:invoke", "max"),

@@ -1,5 +1,6 @@
 <template>
     <v-btn
+        v-if="!base.offlineMode"
         :color="color"
         :icon="iconButton"
         :loading="likedLoading"
@@ -17,7 +18,9 @@ import { computed, ref } from "vue";
 import type { Item } from "../scripts/types";
 import { useLibraryStore } from "../store/library";
 import { useUIStore } from "../store/UIStore";
+import { useBaseStore } from "../store/base";
 
+const base = useBaseStore();
 const ui = useUIStore();
 const library = useLibraryStore();
 

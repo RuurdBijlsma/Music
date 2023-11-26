@@ -95,9 +95,9 @@ export function shuffleArray<T>(array: T[]): T[] {
 }
 
 export async function executeCached<T>(
-    fun,
-    cacheKey,
-    expireTime,
+    fun: () => T,
+    cacheKey: string,
+    expireTime: number,
     useCache = true,
 ): Promise<T> {
     const db = await baseDb;
