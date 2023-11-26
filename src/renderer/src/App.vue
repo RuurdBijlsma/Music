@@ -88,28 +88,11 @@
 <script lang="ts" setup>
 // todo
 // simple player en simple yt player samenvoegen
-// show listen stats
-// generate a spotify wrapped / ruurd music wrapped
 // possibly replace color thief with something without vulnerabilities
 // clear cache button in settings
-// save theme color in localstorage
 // offline mode
 //  - in normal use cache every spotify request, only in offline mode use the cache instead of making request
 //  - don't auto update liked songs
-// -----------------------------------------------------------
-// listen stats
-// - per song listen count
-// - minuten geluistered optellen
-//      - per artiest
-//      - collection? (discover weekly, liked, etc)
-//      - grafiek / bar graph maken van luister minuten over time
-// - Wrapped maken
-//      - Top artiesten in jaar
-//      - Top songs in jaar
-//      - Meest geskipte liedjes, skip percentage en absoluut nummer
-//      - Meest geskipte artiesten
-// - skip rate voor alle liedjes laten zien
-// - track popularity running average grafiek laten zien
 
 import TopMenu from "./components/TopMenu.vue";
 import MusicPlayer from "./components/MusicPlayer.vue";
