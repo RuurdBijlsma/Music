@@ -130,8 +130,8 @@
                 class="item-stat track-list-item-parent"
                 v-for="({ track, skipPercentage }, i) of tracksSkip"
                 :class="{
-                    'odd-item': !isActive(track.id) && i % 2 === 0,
-                    active: isActive(track.id),
+                    'odd-item': !isActiveSkip(track.id) && i % 2 === 0,
+                    active: isActiveSkip(track.id),
                 }"
             >
                 <p class="item-rank">{{ i + 1 }}</p>
@@ -213,7 +213,11 @@ async function generate() {
         await stats.generateWrapStats(trackLimit.value, artistLimit.value);
 
     let artists = await Promise.all(
-        topArtists.map((a) => spotify.getArtist(a.id, true)),
+        topArtists.map((a) =>
+            a.id.startsWith("yt-")
+                ? (a.artist as SpotifyApi.ArtistObjectFull)
+                : spotify.getArtist(a.id, true),
+        ),
     );
     artistsTop.value = artists.map((artist, i) => ({
         artist,
@@ -280,6 +284,8 @@ const skipCollection = computed(() => {
 });
 const isActive = (id: string) =>
     player.trackId === id && (player.collection?.id ?? "") === "wrapped";
+const isActiveSkip = (id: string) =>
+    player.trackId === id && (player.collection?.id ?? "") === "wrapped-skip";
 
 init();
 </script>
