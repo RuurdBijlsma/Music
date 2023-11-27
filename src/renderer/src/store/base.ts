@@ -12,8 +12,6 @@ import { randomNotFound } from "../scripts/imageSources";
 import { useRuurdAuthStore } from "./ruurd-auth";
 import { useSpotifyAuthStore } from "./spotify-auth";
 import router from "../scripts/router";
-import filenamify from "filenamify";
-import { usePlatformStore } from "./electron";
 
 function createStore(
     db: IDBPDatabase,
@@ -98,7 +96,6 @@ export const baseDb = openDB("base", 10, {
 export const useBaseStore = defineStore("base", () => {
     const ruurdAuth = useRuurdAuthStore();
     const spotifyAuth = useSpotifyAuthStore();
-    const platform = usePlatformStore();
 
     const dbLoaded = ref(false);
     const events = new EventEmitter();
@@ -423,31 +420,7 @@ export const useBaseStore = defineStore("base", () => {
         return str[0].toUpperCase() + str.slice(1);
     }
 
-    const itemImage = (item: Item | any) => {
-        let url = rawItemImage(item);
-        let filename = filenamify(item.id ?? url);
-        if (platform.directories?.temp === undefined) return url;
-
-        let tempDir = platform.directories?.temp.replaceAll("\\", "/");
-        let filePath = tempDir + "/" + filename;
-        if (offlineMode.value) {
-            return "file:///" + filePath;
-        } else {
-            // cache for offline
-            platform.downloadFile(url, filePath).then((v) => {
-                if (!v) return;
-                console.log(
-                    "Downloaded image from url",
-                    url,
-                    "To file",
-                    filePath,
-                );
-            });
-        }
-        return url;
-    };
-
-    function rawItemImage(item: Item) {
+    function itemImage(item: Item) {
         let image;
         if (item.type === "track") {
             image = item?.album?.images?.[0]?.url;

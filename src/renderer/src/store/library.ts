@@ -18,10 +18,12 @@ import { randomUser } from "../scripts/imageSources";
 import { useSearchStore } from "./search";
 import { useTrackLoaderStore } from "./player/trackLoader";
 import { executeCached } from "../scripts/utils";
+import { useRouter } from "vue-router";
 
 export const useLibraryStore = defineStore("library", () => {
     const platform = usePlatformStore();
     const search = useSearchStore();
+    const router = useRouter();
     const base = useBaseStore();
     const player = usePlayerStore();
     const spotify = useSpotifyApiStore();
@@ -57,6 +59,15 @@ export const useLibraryStore = defineStore("library", () => {
     const viewedPlaylistRefreshRequired = ref(false);
     let likedDbChecked = false;
     const likedListKey = ref(0);
+
+    const playlistDialog = ref({
+        show: false,
+        title: "",
+        description: "",
+        isPublic: true,
+        isCollaborative: false,
+        startTrack: null as SpotifyApi.TrackObjectFull | null,
+    });
 
     const editDialog = ref({
         show: false,
@@ -266,7 +277,7 @@ export const useLibraryStore = defineStore("library", () => {
     }
 
     async function loadLikedTracks() {
-        if(base.offlineMode) return;
+        if (base.offlineMode) return;
         await baseDb;
 
         if (isRefreshing.value["track"]) {
@@ -659,7 +670,27 @@ export const useLibraryStore = defineStore("library", () => {
         return true;
     }
 
+    async function createPlaylistFromDialog() {
+        if (playlistDialog.value.startTrack === null) return false;
+
+        let playlist = await spotify.api.createPlaylist(userInfo.value.id, {
+            name: playlistDialog.value.title,
+            description: playlistDialog.value.description,
+            collaborative: playlistDialog.value.isCollaborative,
+            public: playlistDialog.value.isPublic,
+        });
+        await addToPlaylist(playlist.id, playlistDialog.value.startTrack);
+        spotify
+            .getPlaylist(playlist.id)
+            .then((p) => saved.value.playlist.unshift(p));
+
+        playlistDialog.value.show = false;
+        await router.push(base.itemUrl(playlist));
+        return true;
+    }
+
     return {
+        createPlaylistFromDialog,
         addToPlaylist,
         removeFromPlaylist,
         refreshHomePage,
@@ -688,5 +719,6 @@ export const useLibraryStore = defineStore("library", () => {
         editTrack,
         sourceDialog,
         applyEditChanges,
+        playlistDialog,
     };
 });

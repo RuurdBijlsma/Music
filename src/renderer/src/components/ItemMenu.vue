@@ -6,7 +6,10 @@
 
         <v-divider v-if="showDescriptor" />
 
-        <v-list-item v-if="canLike && !base.offlineMode" @click="library.toggleLike(item)">
+        <v-list-item
+            v-if="canLike && !base.offlineMode"
+            @click="library.toggleLike(item)"
+        >
             <template v-slot:prepend>
                 <v-icon v-if="isLiked" icon="mdi-heart"></v-icon>
                 <v-icon v-else icon="mdi-heart-outline"></v-icon>
@@ -37,6 +40,12 @@
                 </v-list-item>
             </template>
             <v-list density="compact">
+                <v-list-item
+                    prepend-icon="mdi-playlist-plus"
+                    @click="createPlaylist()"
+                >
+                    <v-list-item-title>Create playlist</v-list-item-title>
+                </v-list-item>
                 <v-list-item
                     v-for="playlist in library.userPlaylists"
                     @click="addToPlaylist(playlist.id, item as Item)"
@@ -195,6 +204,12 @@ const loadRemovePlaylist = ref(false);
 const canLike = computed(() => {
     return "type" in props.item && props.item.type !== "liked";
 });
+
+function createPlaylist() {
+    library.playlistDialog.show = true;
+    library.playlistDialog.startTrack =
+        props.item as SpotifyApi.TrackObjectFull;
+}
 
 function editTrack(track: SpotifyApi.TrackObjectFull) {
     let likedInfo = library.tracks.find((t) => t.id === track.id);

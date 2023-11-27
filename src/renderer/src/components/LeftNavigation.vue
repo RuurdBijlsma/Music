@@ -177,7 +177,7 @@ const playlistsExpanded = ref(false);
 .pinned-playlists {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 5px;
     align-items: center;
     transform-origin: top center;
     transition:

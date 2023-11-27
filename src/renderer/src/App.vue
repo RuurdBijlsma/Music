@@ -70,6 +70,7 @@
         <source-dialog />
         <edit-info-dialog />
         <item-context-menu />
+        <create-playlist-dialog/>
         <v-snackbar
             v-for="snack in base.snackbars"
             v-model="snack.open"
@@ -108,6 +109,7 @@ import coverImage from "../assets/cover.jpg?asset";
 import EditInfoDialog from "./components/EditInfoDialog.vue";
 import { useUIStore } from "./store/UIStore";
 import Notification from "./components/Notification.vue";
+import CreatePlaylistDialog from "./components/CreatePlaylistDialog.vue";
 
 const base = useBaseStore();
 const ui = useUIStore();
