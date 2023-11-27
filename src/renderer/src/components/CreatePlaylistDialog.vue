@@ -11,6 +11,7 @@
             <v-divider class="mb-4"></v-divider>
 
             <v-list-item
+                v-if="playlistDialog.startTrack"
                 class="mb-2"
                 :prepend-avatar="base.itemImage(playlistDialog.startTrack)"
             >
