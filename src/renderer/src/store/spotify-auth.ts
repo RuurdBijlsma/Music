@@ -6,7 +6,7 @@ import { useLibraryStore } from "./library";
 import { useSpotifyApiStore } from "./spotify-api";
 import { useRouter } from "vue-router";
 import { usePlayerStore } from "./player/player";
-import { randomUser } from "../scripts/imageSources";
+import { randomUser } from "../scripts/image-sources";
 import { baseDb } from "../scripts/database";
 import { persistentRef } from "../scripts/utils";
 

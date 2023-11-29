@@ -36,7 +36,7 @@ import type { Item, ItemCollection } from "../../scripts/types";
 import type { PropType } from "vue";
 import { computed } from "vue";
 import ItemPlayButton from "./ItemPlayButton.vue";
-import { randomLiked, randomNotFound } from "../../scripts/imageSources";
+import { randomLiked, randomNotFound } from "../../scripts/image-sources";
 import { useUIStore } from "../../store/UI/UIStore";
 import {
     albumString,

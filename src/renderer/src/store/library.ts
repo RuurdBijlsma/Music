@@ -13,7 +13,7 @@ import type {
 import { usePlayerStore } from "./player/player";
 import { useSpotifyApiStore } from "./spotify-api";
 import { useSpotifyAuthStore } from "./spotify-auth";
-import { randomUser } from "../scripts/imageSources";
+import { randomUser } from "../scripts/image-sources";
 import { useSearchStore } from "./search";
 import { useTrackLoaderStore } from "./player/trackLoader";
 import { executeCached, persistentRef } from "../scripts/utils";

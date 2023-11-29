@@ -55,9 +55,9 @@
                             size="36px"
                         />
                         <router-link
-                            no-style
                             :to="itemUrl(artist)"
                             class="flex-grow-1"
+                            no-style
                             >{{ artist.name }}
                         </router-link>
                         <p class="minutes-stat align-right">
@@ -67,15 +67,22 @@
                             mins
                         </p>
                         <v-btn
-                            @click="toggleChart(artist.id)"
-                            icon="mdi-chart-line-variant"
                             density="compact"
+                            icon="mdi-chart-line-variant"
                             variant="text"
+                            @click="toggleChart(artist.id)"
                         />
                     </v-list-item-title>
                 </v-list-item>
                 <div v-if="expandedArtists.has(artist.id)">
-                    <line-chart :chart-data="artistChart(`Minutes listened to ${artist.name}`, history)"/>
+                    <line-chart
+                        :chart-data="
+                            artistChart(
+                                `Minutes listened to ${artist.name}`,
+                                history,
+                            )
+                        "
+                    />
                 </div>
             </template>
         </v-list>
@@ -243,7 +250,7 @@ function toggleChart(artistId: string) {
     }
 }
 
-function artistChart(label:string, history: { [key: string]: number }) {
+function artistChart(label: string, history: { [key: string]: number }) {
     return {
         labels: Object.keys(history).map((k) => new Date(k)),
         values: Object.values(history),

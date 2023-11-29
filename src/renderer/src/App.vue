@@ -67,9 +67,6 @@
 </template>
 
 <script lang="ts" setup>
-// todo
-// show individual artist stats graph
-
 import TopMenu from "./components/main-ui/TopMenu.vue";
 import MusicPlayer from "./components/player/MusicPlayer.vue";
 import SearchSuggestions from "./components/search/SearchSuggestions.vue";

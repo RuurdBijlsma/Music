@@ -12,7 +12,7 @@ import type {
 } from "../../scripts/types";
 import { persistentRef, shuffleArray } from "../../scripts/utils";
 import { useLibraryStore } from "../library";
-import { randomNotFound } from "../../scripts/imageSources";
+import { randomNotFound } from "../../scripts/image-sources";
 import { useTrackLoaderStore } from "./trackLoader";
 import { useStatsStore } from "./playStats";
 import { useUIStore } from "../UI/UIStore";

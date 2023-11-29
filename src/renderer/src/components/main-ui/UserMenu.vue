@@ -91,7 +91,7 @@ import { useSpotifyAuthStore } from "../../store/spotify-auth";
 import { ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import { useTheme } from "vuetify";
-import { randomUser } from "../../scripts/imageSources";
+import { randomUser } from "../../scripts/image-sources";
 import { useUIStore } from "../../store/UI/UIStore";
 import { caps } from "../../scripts/utils";
 

@@ -1,5 +1,5 @@
 import { Item, ItemCollection } from "./types";
-import { randomNotFound } from "./imageSources";
+import { randomNotFound } from "./image-sources";
 import { caps, encodeUrlName } from "./utils";
 
 export function albumString(item: SpotifyApi.AlbumObjectFull | any) {

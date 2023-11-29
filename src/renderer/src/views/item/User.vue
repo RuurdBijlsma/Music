@@ -31,7 +31,7 @@ import { useRoute } from "vue-router";
 import GlowImage from "../../components/GlowImage.vue";
 import ItemCard from "../../components/item/ItemCard.vue";
 import { useSpotifyApiStore } from "../../store/spotify-api";
-import { randomUser } from "../../scripts/imageSources";
+import { randomUser } from "../../scripts/image-sources";
 
 const route = useRoute();
 const library = useLibraryStore();
