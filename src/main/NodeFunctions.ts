@@ -7,7 +7,7 @@ import type { BrowserWindow } from "electron";
 import { app, dialog, globalShortcut } from "electron";
 import type { Progress } from "yt-dlp-wrap";
 import child_process, { spawn } from "child_process";
-import ColorThief from "color-extr-thief";
+import ColorThief from "colorthief";
 import { getContrastRatio, RGBToHex, RGBToHSL } from "./utils";
 import darkIcon from "../../resources/app-icon/dark-500.png?asset";
 import lightIcon from "../../resources/app-icon/light-500.png?asset";
