@@ -1,5 +1,5 @@
 import { Ref, ref, toRaw, watch } from "vue";
-import {baseDb} from "./database";
+import { baseDb } from "./database";
 
 export function hexToRgb(hex: string) {
     if (hex.length === 4) {
@@ -184,6 +184,9 @@ export function persistentRef<T>(
         fromString = (v) => JSON.parse(v);
         toString = (v) => JSON.stringify(toRaw(v));
     }
+
+    if (localStorage.getItem(storeKey) === null)
+        localStorage[storeKey] = toString(startValue);
     let result: Ref<T> = ref(
         localStorage.getItem(storeKey) === null
             ? startValue

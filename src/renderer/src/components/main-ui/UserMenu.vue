@@ -48,13 +48,14 @@
                     </v-list-item-title>
 
                     <v-chip-group
-                        v-model="ui.themeIndex"
+                        v-model="ui.themeString"
                         :color="ui.themeColor"
                         class="chip-group"
                         mandatory
                     >
                         <v-chip
                             v-for="opt in ui.themeOptions.slice(0, 3)"
+                            :value="opt"
                             class="theme-chip"
                             >{{ caps(opt) }}
                         </v-chip>

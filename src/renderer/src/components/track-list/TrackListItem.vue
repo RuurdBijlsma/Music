@@ -11,7 +11,7 @@
             width="70"
         >
             <v-img
-                v-if="track.album.images.length > 0"
+                v-if="track.album?.images?.length > 0"
                 :cover="true"
                 :src="itemImage(track)"
                 class="track-img"

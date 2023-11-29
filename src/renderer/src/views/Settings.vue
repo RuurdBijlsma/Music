@@ -17,17 +17,20 @@
         <h3 class="mb-3">Theme</h3>
         <div class="theme-chips">
             <v-chip-group
-                v-model="ui.themeIndex"
+                v-model="ui.themeString"
                 :color="ui.themeColor"
                 class="chip-group"
                 mandatory
             >
-                <v-chip v-for="opt in ui.themeOptions" class="theme-chip"
+                <v-chip
+                    v-for="opt in ui.themeOptions"
+                    class="theme-chip"
+                    :value="opt"
                     >{{ caps(opt) }}
                 </v-chip>
             </v-chip-group>
         </div>
-        <div v-if="ui.themeOptions[ui.themeIndex] === 'schedule'">
+        <div v-if="ui.themeString === 'schedule'">
             <h4 class="mt-3">Schedule theme</h4>
             <v-switch
                 v-model="ui.useSunSchedule"
@@ -221,17 +224,17 @@ import { computed, ref } from "vue";
 import { useRuurdAuthStore } from "../store/ruurd-auth";
 import { useUIStore } from "../store/UI/UIStore";
 import { storeToRefs } from "pinia";
-import {useDialogStore} from "../store/UI/dialogStore";
-import {useBackupStore} from "../store/backupStore";
-import {useUpdateStore} from "../store/UI/update";
-import {caps} from "../scripts/utils";
+import { useDialogStore } from "../store/UI/dialogStore";
+import { useBackupStore } from "../store/backupStore";
+import { useUpdateStore } from "../store/UI/update";
+import { caps } from "../scripts/utils";
 
 const player = usePlayerStore();
 const platform = usePlatformStore();
 const base = useBaseStore();
-const update = useUpdateStore()
+const update = useUpdateStore();
 const dialog = useDialogStore();
-const backup = useBackupStore()
+const backup = useBackupStore();
 const ruurdAuth = useRuurdAuthStore();
 const ui = useUIStore();
 const appVersion = ref("");

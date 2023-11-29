@@ -690,7 +690,14 @@ export const useLibraryStore = defineStore("library", () => {
         tracks.value = await getSortedTracksFromDB();
     }
 
+    async function fixTrackAlbum(track: SpotifyApi.TrackObjectFull) {
+        let fixed = await spotify.getTrack(track.id, true);
+        track.album = fixed.album;
+        return track;
+    }
+
     return {
+        fixTrackAlbum,
         activeSort,
         reverseSort,
         sortLiked,

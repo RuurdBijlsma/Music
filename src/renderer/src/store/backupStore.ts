@@ -173,11 +173,8 @@ export const useBackupStore = defineStore("backup", () => {
         };
         let idb = data.idb;
         let db = await baseDb;
-        await putStoreObject("artistStats", idb.artistStats);
-        await putStoreObject("collectionStats", idb.collectionStats);
         await putStoreObject("spotify", idb.spotify);
         await putStoreObject("statistics", idb.statistics);
-        await putStoreObject("trackStats", idb.trackStats);
         const putStoreArray = (storeName: string, array: any[]) => {
             if (!array)
                 return console.warn(
@@ -196,6 +193,9 @@ export const useBackupStore = defineStore("backup", () => {
 
             return new Promise((resolve) => (tx.oncomplete = resolve));
         };
+        await putStoreArray("artistStats", idb.artistStats);
+        await putStoreArray("collectionStats", idb.collectionStats);
+        await putStoreArray("trackStats", idb.trackStats);
         await putStoreArray("tracks", idb.tracks);
         await putStoreArray("trackMetadata", idb.trackMetadata);
 

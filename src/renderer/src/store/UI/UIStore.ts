@@ -40,11 +40,7 @@ export const useUIStore = defineStore("UI", () => {
     const themeOptions = ["light", "dark", "system", "schedule"];
 
     const themeString = persistentRef("theme", "system");
-    const themeIndex = ref(themeOptions.indexOf(themeString.value));
-    watch(themeIndex, () => {
-        themeString.value = themeOptions[themeIndex.value];
-        applyThemeFromLocalStorage().then();
-    });
+    watch(themeString, () => applyThemeFromLocalStorage().then());
     let scheduleTimeout = 0;
     const lightOnTime = persistentRef("lightOnTime", "07:00");
     const darkOnTime = persistentRef("darkOnTime", "19:00");
@@ -59,12 +55,13 @@ export const useUIStore = defineStore("UI", () => {
         true,
     );
     const useSunSchedule = persistentRef("useSunSchedule", false);
+    watch(useSunSchedule, () => applyThemeFromLocalStorage().then());
 
     applyThemeFromLocalStorage().then();
 
     async function applyThemeFromLocalStorage() {
         if (useSunSchedule.value) {
-            let sunriseTime = localStorage.sunriseTime;
+            let sunriseTime = sun.value.rise;
             updateSunStats().then(() => {
                 // if update sun stats changed the sun times, reset the timeout
                 if (sun.value.rise !== sunriseTime)
@@ -72,6 +69,7 @@ export const useUIStore = defineStore("UI", () => {
             });
         }
         let { themeString, msToSwitch } = getThemeFromLocalStorage();
+        console.log("Applied from LS", themeString, msToSwitch);
         theme.global.name.value = themeString;
         if (msToSwitch !== -1) {
             clearTimeout(scheduleTimeout);
@@ -139,7 +137,6 @@ export const useUIStore = defineStore("UI", () => {
         contrastToForeground,
         themeTooSimilarToFg,
         isDark,
-        themeIndex,
         themeOptions,
         sun,
         useSunSchedule,
@@ -147,5 +144,6 @@ export const useUIStore = defineStore("UI", () => {
         darkOnTime,
         windowWidth,
         windowHeight,
+        themeString,
     };
 });

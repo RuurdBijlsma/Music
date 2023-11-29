@@ -3,6 +3,7 @@
         <v-tabs v-model="tab" :color="ui.themeColor" align-tabs="center">
             <v-tab value="spotify">Spotify Account</v-tab>
             <v-tab value="ruurd-account">Ruurd Account</v-tab>
+            <v-tab value="from-file">From File</v-tab>
         </v-tabs>
         <v-window v-model="tab">
             <v-window-item value="spotify">
@@ -69,6 +70,16 @@
                         Log in
                     </v-btn>
                 </template>
+            </v-window-item>
+            <v-window-item value="from-file">
+                <v-btn
+                    :color="ui.themeColor"
+                    :loading="importFileLoading"
+                    variant="tonal"
+                    @click="importFromFile"
+                >
+                    Restore from file
+                </v-btn>
             </v-window-item>
             <v-window-item value="ruurd-account">
                 <div v-if="ruurdAuth.isLoggedIn" class="logged-in">
@@ -154,6 +165,19 @@ const tab = ref("spotify");
 const showPassword = ref(false);
 const loginLoading = ref(false);
 
+const importFileLoading = ref(false);
+
+async function importFromFile() {
+    importFileLoading.value = true;
+    let result = await backup.importFromFile();
+    if (result) {
+        dialog.addSnack("Restored backup from file");
+    } else {
+        dialog.addSnack("Restore from file failed");
+    }
+    importFileLoading.value = false;
+}
+
 async function ruurdLogin(e: SubmitEvent) {
     loginLoading.value = true;
     let form = e.currentTarget as HTMLFormElement;
@@ -182,7 +206,7 @@ async function ruurdLogin(e: SubmitEvent) {
         ruurdAuth.credentials.email = email.toString();
         ruurdAuth.credentials.password = password.toString();
         ruurdAuth.credentials.name = user.name;
-        backup.importFromServer().then();
+        await backup.importFromServer();
     } catch (e: any) {
         dialog.addSnack("Login failed: " + e.message);
     }

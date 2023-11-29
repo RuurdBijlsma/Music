@@ -36,13 +36,10 @@ export function getThemeFromLocalStorage() {
         case "schedule":
             let lightTime: string, darkTime: string;
             if (localStorage.useSunSchedule === "true") {
-                if (
-                    localStorage.getItem("sunriseTime") === null ||
-                    localStorage.getItem("sunsetTime") === null
-                )
-                    break;
-                lightTime = localStorage.sunriseTime;
-                darkTime = localStorage.sunsetTime;
+                if (localStorage.getItem("sunTimes") === null) break;
+                let {rise, set} = JSON.parse(localStorage.sunTimes);
+                lightTime = rise;
+                darkTime = set;
             } else {
                 if (
                     localStorage.getItem("lightOnTime") === null ||

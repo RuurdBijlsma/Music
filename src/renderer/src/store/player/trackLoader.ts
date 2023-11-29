@@ -8,8 +8,8 @@ import {
 } from "../../scripts/types";
 import { usePlatformStore } from "../electron";
 import { useLibraryStore } from "../library";
-import {baseDb} from "../../scripts/database";
-import {useDialogStore} from "../UI/dialogStore";
+import { baseDb } from "../../scripts/database";
+import { useDialogStore } from "../UI/dialogStore";
 
 export const useTrackLoaderStore = defineStore("trackLoader", () => {
     const platform = usePlatformStore();
@@ -49,7 +49,7 @@ export const useTrackLoaderStore = defineStore("trackLoader", () => {
         let likedInfo: undefined | LikedTrack = library.tracks.find(
             (t) => t.id === track.id,
         );
-
+        if (track.album === null) await library.fixTrackAlbum(track);
         let trackData: TrackData = {
             path: fileExists ? trackPath : undefined,
             metadata: metadata ?? {

@@ -36,10 +36,10 @@ export function itemImage(item: Item) {
 }
 
 export function itemUrl(item: Item | any) {
+    if (item === null) return "";
     if ("buttonText" in item) {
         return item.to;
     }
-    if (item === null) return "";
     let type = item.type || "category";
     let name = type === "user" ? item.display_name : item.name;
     name ??= "";

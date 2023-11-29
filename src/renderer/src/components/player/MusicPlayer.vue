@@ -119,22 +119,25 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onMounted, onUnmounted, ref } from "vue";
+import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 import GlowImage from "../GlowImage.vue";
 import { usePlayerStore } from "../../store/player/player";
 import ArtistsSpan from "../ArtistsSpan.vue";
-import ProgressBar from "./ProgressBar.vue";
 import LikeButton from "../item/LikeButton.vue";
 import QueueButton from "../QueueButton.vue";
 import ItemMenu from "../item/ItemMenu.vue";
 import Spacer from "../Spacer.vue";
 import PlayButton from "./PlayButton.vue";
 import { useUIStore } from "../../store/UI/UIStore";
-import {msToReadable} from "../../scripts/utils";
-import {itemImage} from "../../scripts/item-utils";
+import { msToReadable } from "../../scripts/utils";
+import { itemImage } from "../../scripts/item-utils";
+import ProgressBar from "./ProgressBar.vue";
+import { storeToRefs } from "pinia";
 
 const player = usePlayerStore();
 const ui = useUIStore();
+
+const { windowWidth } = storeToRefs(ui);
 const elWidth = ref(0);
 const musicContainer = ref(null);
 
@@ -162,15 +165,12 @@ function checkElWidth() {
 }
 
 let interval = 0;
+watch(windowWidth, () => checkElWidth());
+checkElWidth();
 onMounted(() => {
-    window.addEventListener("resize", checkElWidth);
-    checkElWidth();
     interval = window.setInterval(() => checkElWidth(), 100);
 });
-onUnmounted(() => {
-    clearInterval(interval);
-    window.removeEventListener("resize", checkElWidth);
-});
+onUnmounted(() => clearInterval(interval));
 </script>
 
 <style lang="less" scoped>
