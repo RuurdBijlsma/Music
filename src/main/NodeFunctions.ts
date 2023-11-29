@@ -390,7 +390,7 @@ export default class NodeFunctions {
             this.webLog("[auto updater]", "error", e),
         );
         autoUpdater.on("checking-for-update", () =>
-            this.webLog("[auto updater]", "checking-for-update",true),
+            this.webLog("[auto updater]", "checking-for-update", true),
         );
         autoUpdater.on("update-available", (e) =>
             this.webLog("[auto updater]", "update-available", e),

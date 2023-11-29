@@ -112,8 +112,8 @@ import QueueButton from "../QueueButton.vue";
 import ItemMenu from "../item/ItemMenu.vue";
 import CompactProgressBar from "./CompactProgressBar.vue";
 import { useUIStore } from "../../store/UI/UIStore";
-import {itemImage} from "../../scripts/item-utils";
-import {msToReadable} from "../../scripts/utils";
+import { itemImage } from "../../scripts/item-utils";
+import { msToReadable } from "../../scripts/utils";
 
 const player = usePlayerStore();
 const ui = useUIStore();

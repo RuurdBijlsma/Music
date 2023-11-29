@@ -12,8 +12,8 @@
 
             <v-list-item
                 v-if="dialog.playlist.startTrack"
-                class="mb-2"
                 :prepend-avatar="itemImage(dialog.playlist.startTrack)"
+                class="mb-2"
             >
                 <v-list-item-title
                     >{{ dialog.playlist.startTrack.name }}
@@ -29,22 +29,22 @@
 
             <v-form @submit.prevent="createPlaylist">
                 <v-text-field
+                    v-model="dialog.playlist.title"
+                    :color="ui.themeColor"
                     hide-details
                     label="Title"
-                    :color="ui.themeColor"
-                    v-model="dialog.playlist.title"
                 ></v-text-field>
                 <v-textarea
+                    v-model="dialog.playlist.description"
+                    :color="ui.themeColor"
                     hide-details
                     label="Description"
-                    :color="ui.themeColor"
-                    v-model="dialog.playlist.description"
                 ></v-textarea>
                 <v-chip-group
-                    class="mt-3 mb-3"
+                    v-model="chips"
                     :color="ui.themeColor"
                     :mandatory="true"
-                    v-model="chips"
+                    class="mt-3 mb-3"
                 >
                     <v-chip prepend-icon="mdi-earth">Public</v-chip>
                     <v-chip prepend-icon="mdi-share-variant"
@@ -53,11 +53,11 @@
                     <v-chip prepend-icon="mdi-lock-outline">Private</v-chip>
                 </v-chip-group>
                 <v-btn
+                    :block="true"
+                    :color="ui.themeColor"
                     :loading="loading"
                     type="submit"
-                    :block="true"
                     variant="tonal"
-                    :color="ui.themeColor"
                 >
                     Create Playlist
                 </v-btn>
@@ -71,8 +71,8 @@ import { useLibraryStore } from "../../store/library";
 import { useUIStore } from "../../store/UI/UIStore";
 import ArtistsSpan from "../ArtistsSpan.vue";
 import { ref, watch } from "vue";
-import {useDialogStore} from "../../store/UI/dialogStore";
-import {itemImage} from "../../scripts/item-utils";
+import { useDialogStore } from "../../store/UI/dialogStore";
+import { itemImage } from "../../scripts/item-utils";
 
 const library = useLibraryStore();
 const ui = useUIStore();

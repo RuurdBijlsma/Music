@@ -1,6 +1,6 @@
 <template>
-    <v-card class="notification" :color="ui.themeColor">
-        <div class="notification-icon" v-if="notification.icon">
+    <v-card :color="ui.themeColor" class="notification">
+        <div v-if="notification.icon" class="notification-icon">
             <v-icon :icon="notification.icon"></v-icon>
         </div>
         <div class="notification-text">
@@ -18,7 +18,7 @@
     </v-card>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import { useUIStore } from "../../store/UI/UIStore";
 import { PropType } from "vue";
 import { Notification } from "../../scripts/types";
@@ -38,7 +38,7 @@ function doAction() {
 }
 </script>
 
-<style scoped lang="less">
+<style lang="less" scoped>
 .notification {
     height: 80px;
     display: flex;

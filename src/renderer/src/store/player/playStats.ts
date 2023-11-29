@@ -10,7 +10,7 @@ import { toRaw } from "vue";
 import { usePlayerStore } from "./player";
 import { useBaseStore } from "../base";
 import { useSpotifyApiStore } from "../spotify-api";
-import {baseDb} from "../../scripts/database";
+import { baseDb } from "../../scripts/database";
 
 export const useStatsStore = defineStore("playerStats", () => {
     const player = usePlayerStore();

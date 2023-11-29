@@ -20,7 +20,7 @@
             <v-list-item-title v-else>Add to library</v-list-item-title>
         </v-list-item>
 
-        <v-menu location="left" v-if="!base.offlineMode">
+        <v-menu v-if="!base.offlineMode" location="left">
             <template v-slot:activator="{ props }">
                 <v-list-item
                     v-if="item.type === 'track' && !item.id.startsWith('yt-')"

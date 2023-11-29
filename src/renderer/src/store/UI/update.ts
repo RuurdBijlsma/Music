@@ -50,5 +50,5 @@ export const useUpdateStore = defineStore("update", () => {
         }
     });
 
-    return {updateState};
+    return { updateState };
 });

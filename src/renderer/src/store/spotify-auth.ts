@@ -27,12 +27,16 @@ export const useSpotifyAuthStore = defineStore("spotify-auth", () => {
 
     const secret = persistentRef("secret", "");
     const clientId = persistentRef("clientId", "");
-    let tokens = persistentRef<AuthToken>("tokens", {
-        code: null,
-        access: null,
-        refresh: null,
-        expiryDate: null,
-    },true);
+    let tokens = persistentRef<AuthToken>(
+        "tokens",
+        {
+            code: null,
+            access: null,
+            refresh: null,
+            expiryDate: null,
+        },
+        true,
+    );
     if (tokens.value.access !== null) checkAuth().then();
     const hasCredentials = computed(
         () => secret.value.length === 32 && clientId.value.length === 32,

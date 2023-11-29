@@ -6,11 +6,11 @@
         <v-divider class="mt-3 mb-3" />
 
         <v-btn
-            :color="ui.themeColor"
             :block="true"
+            :color="ui.themeColor"
+            :text="(base.offlineMode ? 'disable' : 'enable') + ` Offline Mode`"
             variant="tonal"
             @click="setOfflineMode(!base.offlineMode)"
-            :text="(base.offlineMode ? 'disable' : 'enable') + ` Offline Mode`"
         />
         <v-divider class="mt-3 mb-3" />
 
@@ -24,8 +24,8 @@
             >
                 <v-chip
                     v-for="opt in ui.themeOptions"
-                    class="theme-chip"
                     :value="opt"
+                    class="theme-chip"
                     >{{ caps(opt) }}
                 </v-chip>
             </v-chip-group>
@@ -190,17 +190,17 @@
             </div>
             <div v-if="!updateState.latest" class="not-latest">
                 <v-divider class="mt-3 mb-1"></v-divider>
-                <div class="update-info" v-if="!updateState.downloaded">
+                <div v-if="!updateState.downloaded" class="update-info">
                     Downloading update
                     <v-progress-circular
-                        class="ml-2"
+                        :indeterminate="updateState.progress.percent === 0"
+                        :model-value="updateState.progress.percent"
                         :size="20"
                         :width="1"
-                        :model-value="updateState.progress.percent"
-                        :indeterminate="updateState.progress.percent === 0"
+                        class="ml-2"
                     />
                 </div>
-                <div class="update-info" v-else>Update downloaded</div>
+                <div v-else class="update-info">Update downloaded</div>
                 <div>
                     <h3>
                         Release notes for

@@ -13,10 +13,15 @@ import type {
 } from "../scripts/types";
 import { Ref, ref, watch } from "vue";
 import { usePlayerStore } from "./player/player";
-import {encodeUrlName, executeCached, hmsToSeconds, persistentRef} from "../scripts/utils";
+import {
+    encodeUrlName,
+    executeCached,
+    hmsToSeconds,
+    persistentRef,
+} from "../scripts/utils";
 import YouTubeSearchAPI from "youtube-search-api";
-import {baseDb} from "../scripts/database";
-import {useDialogStore} from "./UI/dialogStore";
+import { baseDb } from "../scripts/database";
+import { useDialogStore } from "./UI/dialogStore";
 
 export const useSearchStore = defineStore("search", () => {
     const platform = usePlatformStore();
@@ -26,7 +31,7 @@ export const useSearchStore = defineStore("search", () => {
     const dialog = useDialogStore();
     const player = usePlayerStore();
 
-    let recentSearches = persistentRef<string[]>('recentSearch', []);
+    let recentSearches = persistentRef<string[]>("recentSearch", []);
 
     let db: IDBPDatabase;
     baseDb.then((r) => (db = r));

@@ -97,7 +97,7 @@
 import { useRoute } from "vue-router";
 import { ref } from "vue";
 import { useLibraryStore } from "../../store/library";
-import {itemImage, itemUrl} from "../../scripts/item-utils";
+import { itemImage, itemUrl } from "../../scripts/item-utils";
 
 const route = useRoute();
 const library = useLibraryStore();

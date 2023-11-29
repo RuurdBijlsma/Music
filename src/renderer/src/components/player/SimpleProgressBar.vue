@@ -23,7 +23,7 @@
 <script lang="ts" setup>
 import { computed, onMounted, onUnmounted, ref } from "vue";
 import { useUIStore } from "../../store/UI/UIStore";
-import {msToReadable} from "../../scripts/utils";
+import { msToReadable } from "../../scripts/utils";
 
 const props = defineProps({
     duration: {

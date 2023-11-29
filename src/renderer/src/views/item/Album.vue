@@ -13,10 +13,7 @@
                 <h1>{{ album.name }}</h1>
                 <h2 class="artist-names">
                     <template v-for="(artist, i) in album.artists">
-                        <router-link
-                            :to="itemUrl(artist)"
-                            class="user-url"
-                        >
+                        <router-link :to="itemUrl(artist)" class="user-url">
                             {{ artist.name }}
                         </router-link>
                         <span v-if="i < album.artists.length - 1">, </span>
@@ -49,8 +46,8 @@ import CollectionButtons from "../../components/CollectionButtons.vue";
 import { usePlayerStore } from "../../store/player/player";
 import { useSpotifyApiStore } from "../../store/spotify-api";
 import Spacer from "../../components/Spacer.vue";
-import {itemCollection, itemImage, itemUrl} from "../../scripts/item-utils";
-import {approximateDuration} from "../../scripts/utils";
+import { itemCollection, itemImage, itemUrl } from "../../scripts/item-utils";
+import { approximateDuration } from "../../scripts/utils";
 
 const route = useRoute();
 const router = useRouter();

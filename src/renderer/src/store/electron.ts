@@ -10,8 +10,8 @@ import { executeCached } from "../scripts/utils";
 import { useSpotifyAuthStore } from "./spotify-auth";
 import { useTrackLoaderStore } from "./player/trackLoader";
 import { useSearchStore } from "./search";
-import {baseDb} from "../scripts/database";
-import {useDialogStore} from "./UI/dialogStore";
+import { baseDb } from "../scripts/database";
+import { useDialogStore } from "./UI/dialogStore";
 
 export const usePlatformStore = defineStore("platform", () => {
     const library = useLibraryStore();

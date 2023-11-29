@@ -31,7 +31,7 @@ import { usePlayerStore } from "../../store/player/player";
 import { useSpotifyApiStore } from "../../store/spotify-api";
 import { Item, ItemCollection } from "../../scripts/types";
 import { computed, PropType, ref } from "vue";
-import {itemCollection} from "../../scripts/item-utils";
+import { itemCollection } from "../../scripts/item-utils";
 
 const player = usePlayerStore();
 const spotify = useSpotifyApiStore();

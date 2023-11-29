@@ -34,7 +34,7 @@ import TrackList from "../../components/track-list/TrackList.vue";
 import { useSpotifyApiStore } from "../../store/spotify-api";
 import CollectionButtons from "../../components/CollectionButtons.vue";
 import ArtistsSpan from "../../components/ArtistsSpan.vue";
-import {approximateDuration} from "../../scripts/utils";
+import { approximateDuration } from "../../scripts/utils";
 
 const route = useRoute();
 const spotify = useSpotifyApiStore();

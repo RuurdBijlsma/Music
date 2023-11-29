@@ -93,7 +93,7 @@ import { useRoute } from "vue-router";
 import { useTheme } from "vuetify";
 import { randomUser } from "../../scripts/imageSources";
 import { useUIStore } from "../../store/UI/UIStore";
-import {caps} from "../../scripts/utils";
+import { caps } from "../../scripts/utils";
 
 const library = useLibraryStore();
 const spotifyAuth = useSpotifyAuthStore();

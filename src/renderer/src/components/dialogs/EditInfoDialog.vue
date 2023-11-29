@@ -120,7 +120,7 @@ import { computed } from "vue";
 import SimplePlayer from "../player/SimplePlayer.vue";
 import Spacer from "../Spacer.vue";
 import { useUIStore } from "../../store/UI/UIStore";
-import {useDialogStore} from "../../store/UI/dialogStore";
+import { useDialogStore } from "../../store/UI/dialogStore";
 
 const dialog = useDialogStore();
 const ui = useUIStore();

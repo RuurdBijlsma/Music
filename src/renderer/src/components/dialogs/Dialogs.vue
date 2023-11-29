@@ -24,7 +24,7 @@
     </v-snackbar>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import SourceDialog from "./SourceDialog.vue";
 import ItemContextMenu from "./ItemContextMenu.vue";
 import EditInfoDialog from "./EditInfoDialog.vue";
@@ -35,7 +35,7 @@ import Notification from "./Notification.vue";
 const dialog = useDialogStore();
 </script>
 
-<style scoped lang="less">
+<style lang="less" scoped>
 .notifications {
     position: fixed;
     right: 10px;

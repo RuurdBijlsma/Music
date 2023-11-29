@@ -54,9 +54,9 @@ import ArtistsSpan from "../ArtistsSpan.vue";
 import ItemMenu from "../item/ItemMenu.vue";
 import type { ItemCollection } from "../../scripts/types";
 import Spacer from "../Spacer.vue";
-import {msToReadable} from "../../scripts/utils";
-import {itemImage} from "../../scripts/item-utils";
-import {useDialogStore} from "../../store/UI/dialogStore";
+import { msToReadable } from "../../scripts/utils";
+import { itemImage } from "../../scripts/item-utils";
+import { useDialogStore } from "../../store/UI/dialogStore";
 
 const props = defineProps({
     track: {

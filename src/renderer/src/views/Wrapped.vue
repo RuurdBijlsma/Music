@@ -39,15 +39,15 @@
             </div>
             <v-list-item
                 v-for="({ artist, minutes }, i) of artistsTop"
+                :to="itemUrl(artist)"
+                rounded
                 @click.right="
                     dialog.setContextMenuItem($event as MouseEvent, artist)
                 "
-                rounded
-                :to="itemUrl(artist)"
             >
                 <v-list-item-title class="item-stat">
                     <p class="item-rank">{{ i + 1 }}</p>
-                    <v-avatar size="36px" :image="itemImage(artist)" />
+                    <v-avatar :image="itemImage(artist)" size="36px" />
                     <p class="flex-grow-1">{{ artist.name }}</p>
                     <p class="minutes-stat">
                         <span class="font-weight-bold">{{
@@ -71,19 +71,19 @@
                 <p class="minutes-stat">Listened minutes</p>
             </div>
             <div
-                class="item-stat track-list-item-parent"
                 v-for="({ track, listenMinutes }, i) of tracksTop"
                 :class="{
                     'odd-item': !isActive(track.id) && i % 2 === 0,
                     active: isActive(track.id),
                 }"
+                class="item-stat track-list-item-parent"
             >
                 <p class="item-rank">{{ i + 1 }}</p>
                 <track-list-item
-                    class="track-list-item"
                     :collection="collection"
                     :index="i"
                     :track="track"
+                    class="track-list-item"
                 />
                 <p class="minutes-stat">
                     <span class="font-weight-bold">
@@ -100,18 +100,18 @@
             Music taste over time
         </h2>
         <v-chip-group
-            :color="ui.themeColor"
-            :multiple="true"
-            :mandatory="true"
-            class="mb-5"
             v-model="shownCharts"
+            :color="ui.themeColor"
+            :mandatory="true"
+            :multiple="true"
+            class="mb-5"
         >
             <v-chip v-for="chart in charts">{{ chart.dataLabel }}</v-chip>
         </v-chip-group>
         <template v-for="(chart, i) in charts">
             <div v-if="shownCharts.includes(i)">
                 <h3 class="subtitle">{{ chart.dataLabel }}</h3>
-                <line-chart class="mb-5" :chart-data="chart" type="line" />
+                <line-chart :chart-data="chart" class="mb-5" type="line" />
             </div>
         </template>
 
@@ -127,21 +127,21 @@
                 <p class="minutes-stat">Skip percentage</p>
             </div>
             <div
-                class="item-stat track-list-item-parent"
                 v-for="({ track, skipPercentage }, i) of tracksSkip"
                 :class="{
                     'odd-item': !isActiveSkip(track.id) && i % 2 === 0,
                     active: isActiveSkip(track.id),
                 }"
+                class="item-stat track-list-item-parent"
             >
                 <p class="item-rank">{{ i + 1 }}</p>
                 <track-list-item
-                    class="track-list-item"
                     :collection="skipCollection"
                     :index="i"
                     :track="track"
+                    class="track-list-item"
                 />
-                <p class="minutes-stat" v-if="skipPercentage !== undefined">
+                <p v-if="skipPercentage !== undefined" class="minutes-stat">
                     <span class="font-weight-bold">
                         {{ skipPercentage.toLocaleString() }}
                     </span>
@@ -151,29 +151,29 @@
         </div>
         <h3 class="subtitle">Wrapped settings</h3>
         <v-text-field
-            type="number"
-            :min="0"
-            :max="500"
-            :color="ui.themeColor"
-            label="Shown track limit"
-            hide-details
             v-model="trackLimit"
+            :color="ui.themeColor"
+            :max="500"
+            :min="0"
+            hide-details
+            label="Shown track limit"
+            type="number"
             @change="generate"
         />
         <v-text-field
-            type="number"
-            :min="0"
-            :max="500"
-            :color="ui.themeColor"
-            label="Shown track limit"
-            hide-details
             v-model="artistLimit"
+            :color="ui.themeColor"
+            :max="500"
+            :min="0"
+            hide-details
+            label="Shown track limit"
+            type="number"
             @change="generate"
         />
     </div>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import LineChart from "../components/LineChart.vue";
 import { computed, ref } from "vue";
 import { useStatsStore } from "../store/player/playStats";
@@ -182,9 +182,9 @@ import { useUIStore } from "../store/UI/UIStore";
 import { useSpotifyApiStore } from "../store/spotify-api";
 import TrackListItem from "../components/track-list/TrackListItem.vue";
 import { usePlayerStore } from "../store/player/player";
-import {useDialogStore} from "../store/UI/dialogStore";
-import {itemImage, itemUrl} from "../scripts/item-utils";
-import {caps} from "../scripts/utils";
+import { useDialogStore } from "../store/UI/dialogStore";
+import { itemImage, itemUrl } from "../scripts/item-utils";
+import { caps } from "../scripts/utils";
 
 const stats = useStatsStore();
 const dialog = useDialogStore();
@@ -292,7 +292,7 @@ const isActiveSkip = (id: string) =>
 init();
 </script>
 
-<style scoped lang="less">
+<style lang="less" scoped>
 .wrapped {
     padding-top: 70px;
     display: flex;

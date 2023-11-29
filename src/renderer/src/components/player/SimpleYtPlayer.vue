@@ -1,5 +1,5 @@
 <template>
-    <simple-player class="player" :auto-play="true" :track="track" />
+    <simple-player :auto-play="true" :track="track" class="player" />
 </template>
 
 <script lang="ts" setup>

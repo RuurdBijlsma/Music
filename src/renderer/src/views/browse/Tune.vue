@@ -67,9 +67,9 @@ import { useSpotifyApiStore } from "../../store/spotify-api";
 import { Ref, ref } from "vue";
 import { useRouter } from "vue-router";
 import { useUIStore } from "../../store/UI/UIStore";
-import {radioId} from "../../scripts/item-utils";
-import {useDialogStore} from "../../store/UI/dialogStore";
-import {caps} from "../../scripts/utils";
+import { radioId } from "../../scripts/item-utils";
+import { useDialogStore } from "../../store/UI/dialogStore";
+import { caps } from "../../scripts/utils";
 
 const spotify = useSpotifyApiStore();
 const ui = useUIStore();

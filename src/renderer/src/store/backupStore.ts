@@ -6,7 +6,7 @@ import { useDialogStore } from "./UI/dialogStore";
 import { useRuurdAuthStore } from "./ruurd-auth";
 import { useSpotifyAuthStore } from "./spotify-auth";
 import { persistentRef } from "../scripts/utils";
-import {watch} from "vue";
+import { watch } from "vue";
 
 export const useBackupStore = defineStore("backup", () => {
     const base = useBaseStore();

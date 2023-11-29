@@ -2,7 +2,7 @@ import { createRouter, createWebHashHistory } from "vue-router";
 import Home from "../views/Home.vue";
 import { watch } from "vue";
 import { useSpotifyAuthStore } from "../store/spotify-auth";
-import {baseDb} from "./database";
+import { baseDb } from "./database";
 
 const routes = [
     { path: "/", component: Home },

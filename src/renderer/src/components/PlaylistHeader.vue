@@ -34,8 +34,8 @@ import GlowImage from "../components/GlowImage.vue";
 import CollectionButtons from "./CollectionButtons.vue";
 import Spacer from "./Spacer.vue";
 import { useUIStore } from "../store/UI/UIStore";
-import {approximateDuration} from "../scripts/utils";
-import {itemImage, itemUrl} from "../scripts/item-utils";
+import { approximateDuration } from "../scripts/utils";
+import { itemImage, itemUrl } from "../scripts/item-utils";
 
 const props = defineProps({
     collection: {

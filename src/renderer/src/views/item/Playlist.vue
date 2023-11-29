@@ -26,7 +26,7 @@ import PlaylistHeader from "../../components/PlaylistHeader.vue";
 import { useSpotifyApiStore } from "../../store/spotify-api";
 import { storeToRefs } from "pinia";
 import { useUIStore } from "../../store/UI/UIStore";
-import {itemCollection} from "../../scripts/item-utils";
+import { itemCollection } from "../../scripts/item-utils";
 
 const route = useRoute();
 const ui = useUIStore();

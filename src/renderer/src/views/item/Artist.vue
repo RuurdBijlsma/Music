@@ -59,9 +59,9 @@ import TrackList from "../../components/track-list/TrackList.vue";
 import CollectionButtons from "../../components/CollectionButtons.vue";
 import { useSpotifyApiStore } from "../../store/spotify-api";
 import Spacer from "../../components/Spacer.vue";
-import {baseDb} from "../../scripts/database";
-import {itemCollection, itemImage} from "../../scripts/item-utils";
-import {useDialogStore} from "../../store/UI/dialogStore";
+import { baseDb } from "../../scripts/database";
+import { itemCollection, itemImage } from "../../scripts/item-utils";
+import { useDialogStore } from "../../store/UI/dialogStore";
 
 const route = useRoute();
 const dialog = useDialogStore();

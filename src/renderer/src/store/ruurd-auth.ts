@@ -1,13 +1,17 @@
 import { defineStore } from "pinia";
 import { computed } from "vue";
-import {persistentRef} from "../scripts/utils";
+import { persistentRef } from "../scripts/utils";
 
 export const useRuurdAuthStore = defineStore("ruurd-auth", () => {
-    let credentials = persistentRef('ruurdCredentials', {
-        email: null as null | string,
-        password: null as null | string,
-        name: null as null | string,
-    }, true);
+    let credentials = persistentRef(
+        "ruurdCredentials",
+        {
+            email: null as null | string,
+            password: null as null | string,
+            name: null as null | string,
+        },
+        true,
+    );
 
     function logout() {
         credentials.value.email = null;

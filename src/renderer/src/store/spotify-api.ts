@@ -6,7 +6,7 @@ import { useSpotifyAuthStore } from "./spotify-auth";
 import { Item } from "../scripts/types";
 import { executeCached } from "../scripts/utils";
 import { toRaw } from "vue";
-import {baseDb} from "../scripts/database";
+import { baseDb } from "../scripts/database";
 
 export const useSpotifyApiStore = defineStore("spotify-api", () => {
     const library = useLibraryStore();

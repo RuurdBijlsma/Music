@@ -1,4 +1,4 @@
-import { contextBridge, ipcRenderer } from "electron";
+import {contextBridge, ipcRenderer} from "electron";
 
 // Custom APIs for renderer
 const api = {

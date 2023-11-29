@@ -18,7 +18,7 @@
 import { storeToRefs } from "pinia";
 import ItemMenu from "../item/ItemMenu.vue";
 import { onMounted, onUnmounted } from "vue";
-import {useDialogStore} from "../../store/UI/dialogStore";
+import { useDialogStore } from "../../store/UI/dialogStore";
 
 const dialog = useDialogStore();
 const { contextMenu } = storeToRefs(dialog);

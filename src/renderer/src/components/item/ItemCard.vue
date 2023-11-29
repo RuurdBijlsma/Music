@@ -38,7 +38,12 @@ import { computed } from "vue";
 import ItemPlayButton from "./ItemPlayButton.vue";
 import { randomLiked, randomNotFound } from "../../scripts/imageSources";
 import { useUIStore } from "../../store/UI/UIStore";
-import {albumString, itemDescription, itemImage, itemUrl} from "../../scripts/item-utils";
+import {
+    albumString,
+    itemDescription,
+    itemImage,
+    itemUrl,
+} from "../../scripts/item-utils";
 import { useDialogStore } from "../../store/UI/dialogStore";
 
 const dialog = useDialogStore();

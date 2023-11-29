@@ -16,9 +16,9 @@
             <v-menu>
                 <template v-slot:activator="{ props }">
                     <v-btn
-                        v-bind="props"
                         v-if="showSort"
                         :icon="activeIcon"
+                        v-bind="props"
                         variant="text"
                     />
                 </template>
@@ -34,13 +34,13 @@
                             <div class="ml-3 sort-buttons">
                                 <v-btn
                                     v-for="option in sortOption.options"
-                                    size="35"
-                                    variant="text"
-                                    :icon="option.icon"
                                     :active="
                                         library.activeSort === option.index &&
                                         library.reverseSort === option.reverse
                                     "
+                                    :icon="option.icon"
+                                    size="35"
+                                    variant="text"
                                     @click="
                                         library.sortLiked(
                                             option.index,
@@ -135,8 +135,8 @@ import type { Item, ItemCollection } from "../scripts/types";
 import { usePlatformStore } from "../store/electron";
 import { useLibraryStore } from "../store/library";
 import { useRoute } from "vue-router";
-import {radioId} from "../scripts/item-utils";
-import {baseDb} from "../scripts/database";
+import { radioId } from "../scripts/item-utils";
+import { baseDb } from "../scripts/database";
 import LikeButton from "./item/LikeButton.vue";
 
 const sortOptions = ref([
