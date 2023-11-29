@@ -88,7 +88,6 @@
 
 <script lang="ts" setup>
 // todo
-// use correct sort for liked on startup
 // simple player en simple yt player samenvoegen
 // possibly replace color thief with something without vulnerabilities
 
