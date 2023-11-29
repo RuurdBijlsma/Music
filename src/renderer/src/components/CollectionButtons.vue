@@ -18,7 +18,7 @@
                     <v-btn
                         v-bind="props"
                         v-if="showSort"
-                        icon="mdi-sort"
+                        :icon="activeIcon"
                         variant="text"
                     />
                 </template>
@@ -217,6 +217,18 @@ const props = defineProps({
         default: false,
     },
 });
+
+const activeIcon = computed(
+    () =>
+        sortOptions.value
+            .map((s) => s.options)
+            .flat()
+            .find(
+                (o) =>
+                    o.index === library.activeSort &&
+                    o.reverse === library.reverseSort,
+            )?.icon ?? "mdi-sort",
+);
 const platform = usePlatformStore();
 const player = usePlayerStore();
 const route = useRoute();

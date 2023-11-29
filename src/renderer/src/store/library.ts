@@ -241,7 +241,7 @@ export const useLibraryStore = defineStore("library", () => {
             return true;
         }
         isRefreshing.value["track"] = true;
-        tracks.value = await db.getAllFromIndex("tracks", "newToOld");
+        tracks.value = await getSortedTracksFromDB()
         base.events.emit("refreshedTrack");
         isRefreshing.value["track"] = false;
         return tracks.value.length > 0;
