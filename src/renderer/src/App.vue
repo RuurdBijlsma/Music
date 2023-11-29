@@ -88,7 +88,6 @@
 
 <script lang="ts" setup>
 // todo
-// simple player en simple yt player samenvoegen
 // possibly replace color thief with something without vulnerabilities
 
 import TopMenu from "./components/TopMenu.vue";
