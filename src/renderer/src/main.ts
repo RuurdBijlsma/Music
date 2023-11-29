@@ -17,7 +17,3 @@ app.mount("#app");
 if (localStorage.getItem("lastRoute") !== null) {
     router.replace(localStorage.lastRoute).then();
 }
-
-window.events.on("log", (...args: any[]) =>
-    console.info("[NODE_LOG]", ...args),
-);

@@ -41,7 +41,7 @@ function createStore(
     return store;
 }
 
-export const baseDb = openDB("base", 10, {
+export const baseDb = openDB("base", 11, {
     upgrade(db, _, __, transaction) {
         createStore(db, transaction, "spotify");
         createStore(db, transaction, "cache");
@@ -77,6 +77,11 @@ export const baseDb = openDB("base", 10, {
             {
                 name: "artist",
                 keyPath: "artistString",
+                unique: false,
+            },
+            {
+                name: "duration",
+                keyPath: "track.duration_ms",
                 unique: false,
             },
             {
@@ -116,6 +121,54 @@ export const useBaseStore = defineStore("base", () => {
     watch(autoBackup, () => {
         localStorage.autoBackup = autoBackup.value;
         if (autoBackup.value) checkAutoBackup().then();
+    });
+
+    const updateState = ref({
+        checkingForUpdate: false,
+        latest: true,
+        downloaded: false,
+        error: "",
+        progress: {
+            percent: 0,
+            total: 1,
+            transferred: 0,
+        },
+        updateVersion: "",
+        releaseNotes: "",
+    });
+
+    window.events.on("log", (...args: any[]) => {
+        console.info("[NODE_LOG]", ...args);
+        if (args[0] !== "[auto updater]" || args.length !== 3) return;
+        console.log("AUTO UPDATER LOG DETECTED");
+        let [, type, data] = args;
+        console.log({ type, data });
+        switch (type) {
+            case "error":
+                updateState.value.error = data.message;
+                break;
+            case "checking-for-update":
+                updateState.value.checkingForUpdate = true;
+                break;
+            case "update-available":
+                updateState.value.checkingForUpdate = false;
+                updateState.value.latest = false;
+                updateState.value.updateVersion = data.version;
+                updateState.value.releaseNotes = data.releaseNotes;
+                break;
+            case "update-not-available":
+                updateState.value.checkingForUpdate = false;
+                updateState.value.latest = true;
+                break;
+            case "download-progress":
+                updateState.value.progress.percent = data.percent;
+                updateState.value.progress.total = data.total;
+                updateState.value.progress.transferred = data.transferred;
+                break;
+            case "update-downloaded":
+                updateState.value.downloaded = true;
+                break;
+        }
     });
 
     baseDb.then(async () => {
@@ -560,5 +613,6 @@ export const useBaseStore = defineStore("base", () => {
         notifications,
         addNotification,
         offlineMode,
+        updateState
     };
 });

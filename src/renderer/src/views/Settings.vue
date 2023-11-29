@@ -180,9 +180,34 @@
             {{ updateResult }}
         </v-sheet>
 
-        <div class="version-string mt-10">
-            <span class="mr-2">Ruurd Music</span
-            ><span class="bold-version">v{{ appVersion }}</span>
+        <div class="update">
+            <div class="version-string mt-10">
+                <span class="mr-2">Ruurd Music</span
+                ><span class="bold-version">v{{ appVersion }}</span>
+            </div>
+            <div v-if="!updateState.latest" class="not-latest">
+                <v-divider class="mt-3 mb-1"></v-divider>
+                <div class="update-info" v-if="!updateState.downloaded">
+                    Downloading update
+                    <v-progress-circular
+                        class="ml-2"
+                        :size="20"
+                        :width="1"
+                        :model-value="updateState.progress.percent"
+                        :indeterminate="updateState.progress.percent === 0"
+                    />
+                </div>
+                <div class="update-info" v-else>Update downloaded</div>
+                <div>
+                    <h3>
+                        Release notes for
+                        <span class="bold-version"
+                            >v{{ updateState.updateVersion }}</span
+                        >
+                    </h3>
+                    <div v-html="updateState.releaseNotes"></div>
+                </div>
+            </div>
         </div>
     </div>
 </template>
@@ -195,6 +220,7 @@ import Authentication from "../components/Authentication.vue";
 import { computed, ref } from "vue";
 import { useRuurdAuthStore } from "../store/ruurd-auth";
 import { useUIStore } from "../store/UIStore";
+import { storeToRefs } from "pinia";
 
 const player = usePlayerStore();
 const platform = usePlatformStore();
@@ -202,6 +228,7 @@ const base = useBaseStore();
 const ruurdAuth = useRuurdAuthStore();
 const ui = useUIStore();
 const appVersion = ref("");
+const { updateState } = storeToRefs(base);
 window.api.getAppVersion().then((r) => (appVersion.value = r));
 
 const updateLoading = ref(false);
@@ -277,7 +304,7 @@ function setOfflineMode(v: boolean) {
 
 <style lang="less" scoped>
 .settings {
-    padding: 30px;
+    padding: 30px 30px 60px;
 }
 
 h2,
@@ -309,6 +336,12 @@ h5 {
     flex-grow: 1;
 }
 
+.update {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
 .version-string {
     display: flex;
     justify-content: center;
@@ -319,5 +352,27 @@ h5 {
 
 .bold-version {
     font-weight: 500;
+}
+
+.not-latest {
+    width: 100%;
+}
+
+.update-text {
+    font-size: 12px;
+    opacity: 0.5;
+    font-weight: lighter;
+}
+
+.update-info {
+    width: 100%;
+    justify-content: center;
+    font-size: 12px;
+    opacity: 0.5;
+    font-weight: lighter;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: 40px;
 }
 </style>

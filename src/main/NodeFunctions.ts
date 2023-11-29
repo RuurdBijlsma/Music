@@ -274,24 +274,20 @@ export default class NodeFunctions {
     }
 
     downloadFile(url: string, destinationFile: string) {
-        return new Promise<void>(
-            (resolve, reject) => {
-                const file = badFs.createWriteStream(destinationFile);
-                https
-                    .get(url, (response) => {
-                        response.pipe(file);
-                        file.on("finish", () => {
-                            file.close(() =>
-                                resolve(),
-                            );
-                        });
-                    })
-                    .on("error", (err) => {
-                        fs.unlink(destinationFile);
-                        reject(err);
+        return new Promise<void>((resolve, reject) => {
+            const file = badFs.createWriteStream(destinationFile);
+            https
+                .get(url, (response) => {
+                    response.pipe(file);
+                    file.on("finish", () => {
+                        file.close(() => resolve());
                     });
-            },
-        );
+                })
+                .on("error", (err) => {
+                    fs.unlink(destinationFile);
+                    reject(err);
+                });
+        });
     }
 
     async getVolumeStats(trackFile: string) {
@@ -390,21 +386,23 @@ export default class NodeFunctions {
             1000 * 60 * 60,
         );
         autoUpdater.checkForUpdatesAndNotify().then();
-        autoUpdater.on("error", (e) => this.webLog("[auto updater] error:", e));
+        autoUpdater.on("error", (e) =>
+            this.webLog("[auto updater]", "error", e),
+        );
         autoUpdater.on("checking-for-update", () =>
-            this.webLog("[auto updater] checking for update:"),
+            this.webLog("[auto updater]", "checking-for-update",true),
         );
         autoUpdater.on("update-available", (e) =>
-            this.webLog("[auto updater] update-available:", e),
+            this.webLog("[auto updater]", "update-available", e),
         );
         autoUpdater.on("update-not-available", (e) =>
-            this.webLog("[auto updater] update-not-available:", e),
+            this.webLog("[auto updater]", "update-not-available", e),
         );
         autoUpdater.on("download-progress", (e) =>
-            this.webLog("[auto updater] download-progress:", e),
+            this.webLog("[auto updater]", "download-progress", e),
         );
         autoUpdater.on("update-downloaded", (e) =>
-            this.webLog("[auto updater] update-downloaded:", e),
+            this.webLog("[auto updater]", "update-downloaded", e),
         );
     }
 

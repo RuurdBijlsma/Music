@@ -15,7 +15,7 @@
                 @click="library.loadLikedTracks"
             />
         </p>
-        <collection-buttons :collection="collection" show-filter />
+        <collection-buttons :collection="collection" show-sort />
         <track-list-virtual
             v-if="collection !== null"
             :collection="collection"

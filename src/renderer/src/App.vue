@@ -89,10 +89,8 @@
 <script lang="ts" setup>
 // todo
 // iets met de filter knop op /library/tracks doen
-// playlist create en delete?
 // simple player en simple yt player samenvoegen
 // possibly replace color thief with something without vulnerabilities
-// clear cache button in settings
 
 import TopMenu from "./components/TopMenu.vue";
 import MusicPlayer from "./components/MusicPlayer.vue";

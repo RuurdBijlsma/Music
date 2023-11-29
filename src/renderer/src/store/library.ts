@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { computed, ref, toRaw } from "vue";
+import { computed, ref, toRaw, watch } from "vue";
 import { baseDb, useBaseStore } from "./base";
 import { usePlatformStore } from "./electron";
 import type { IDBPDatabase } from "idb";
@@ -286,18 +286,25 @@ export const useLibraryStore = defineStore("library", () => {
         }
         await spotifyAuth.awaitAuth();
         isRefreshing.value["track"] = true;
+        let tracksRef = tracks;
+        let liveUpdates = true;
+        if (activeSort.value !== "newToOld" || reverseSort.value) {
+            // sort is not viable to use live updates
+            tracksRef = ref(await db.getAllFromIndex("tracks", "newToOld"));
+            liveUpdates = false;
+        }
 
         // function to add track at the correct spot, sorted by date
         const addTrack = (track: LikedTrack) => {
-            let spliceIndex = tracks.value.findIndex(
+            let spliceIndex = tracksRef.value.findIndex(
                 (localTrack) =>
                     localTrack.added_at_reverse > track.added_at_reverse,
             );
-            tracks.value.splice(spliceIndex, 0, track);
+            tracksRef.value.splice(spliceIndex, 0, track);
             db.add("tracks", track);
         };
 
-        let localTrackIds = new Set(tracks.value.map((t) => t.id));
+        let localTrackIds = new Set(tracksRef.value.map((t) => t.id));
         let apiTrackIds = new Set<string>();
         let apiTracks: { [key: string]: SpotifyApi.SavedTrackObject } = {};
 
@@ -323,8 +330,8 @@ export const useLibraryStore = defineStore("library", () => {
             (x) => !apiTrackIds.has(x) && !x.startsWith("yt-"),
         );
         for (let id of removedFromLocal) {
-            tracks.value.splice(
-                tracks.value.findIndex((t) => t.id === id),
+            tracksRef.value.splice(
+                tracksRef.value.findIndex((t) => t.id === id),
                 1,
             );
             db.delete("tracks", id).then();
@@ -333,7 +340,7 @@ export const useLibraryStore = defineStore("library", () => {
         // fix ordering of tracks
         let changedTracks: LikedTrack[] = [];
         let missingAlbumTracks: LikedTrack[] = [];
-        for (let localTrack of tracks.value) {
+        for (let localTrack of tracksRef.value) {
             // skip over youtube tracks when determining reordering during update
             if (
                 localTrack.id.startsWith("yt-") ||
@@ -374,6 +381,7 @@ export const useLibraryStore = defineStore("library", () => {
                 console.log("Put fixed tracks in DB!");
             }
         }
+        // if sort is not default, make sure tracks.value is set to correct value
         if (changedTracks.length > 0) {
             console.warn(
                 "Tracks arent in order, updating order",
@@ -383,7 +391,11 @@ export const useLibraryStore = defineStore("library", () => {
             for (let likedTrack of changedTracks)
                 tx.store.put(toRaw(likedTrack));
             await tx.done;
-            tracks.value = await db.getAllFromIndex("tracks", "newToOld");
+            tracks.value = await getSortedTracksFromDB();
+        } else if (!liveUpdates) {
+            // if updates were not live, put them in tracks.value now
+            // (or the changes from the refresh won't be shown in the UI until the page is reloaded)
+            tracks.value = await getSortedTracksFromDB();
         }
 
         localStorage.lastTracksLoad = Date.now();
@@ -689,7 +701,40 @@ export const useLibraryStore = defineStore("library", () => {
         return true;
     }
 
+    const activeSort = ref(
+        localStorage.getItem("activeSort") === null
+            ? "newToOld"
+            : localStorage.activeSort,
+    );
+    watch(activeSort, () => {
+        localStorage.activeSort = activeSort.value;
+    });
+
+    const reverseSort = ref(
+        localStorage.getItem("reverseSort") === null
+            ? false
+            : localStorage.reverseSort === "true",
+    );
+    watch(reverseSort, () => {
+        localStorage.reverseSort = reverseSort.value;
+    });
+
+    async function getSortedTracksFromDB() {
+        let sortedTracks = await db.getAllFromIndex("tracks", activeSort.value);
+        if (reverseSort.value) sortedTracks.reverse();
+        return sortedTracks;
+    }
+
+    async function sortLiked(index: string, reverse = false) {
+        activeSort.value = index;
+        reverseSort.value = reverse;
+        tracks.value = await getSortedTracksFromDB();
+    }
+
     return {
+        activeSort,
+        reverseSort,
+        sortLiked,
         createPlaylistFromDialog,
         addToPlaylist,
         removeFromPlaylist,

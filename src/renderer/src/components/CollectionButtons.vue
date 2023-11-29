@@ -12,7 +12,47 @@
                 variant="text"
                 @click="player.shuffleCollection(collection)"
             />
-            <v-btn v-if="showFilter" icon="mdi-filter-outline" variant="text" />
+
+            <v-menu>
+                <template v-slot:activator="{ props }">
+                    <v-btn
+                        v-bind="props"
+                        v-if="showSort"
+                        icon="mdi-sort"
+                        variant="text"
+                    />
+                </template>
+                <v-list>
+                    <v-list-subheader>Sort tracks</v-list-subheader>
+                    <v-list-item v-for="sortOption in sortOptions">
+                        <div class="sort-list-item">
+                            <div>
+                                <v-list-item-title
+                                    >{{ sortOption.name }}
+                                </v-list-item-title>
+                            </div>
+                            <div class="ml-3 sort-buttons">
+                                <v-btn
+                                    v-for="option in sortOption.options"
+                                    size="35"
+                                    variant="text"
+                                    :icon="option.icon"
+                                    :active="
+                                        library.activeSort === option.index &&
+                                        library.reverseSort === option.reverse
+                                    "
+                                    @click="
+                                        library.sortLiked(
+                                            option.index,
+                                            option.reverse,
+                                        )
+                                    "
+                                ></v-btn>
+                            </div>
+                        </div>
+                    </v-list-item>
+                </v-list>
+            </v-menu>
             <like-button
                 v-if="likeItem"
                 :item="likeItem"
@@ -90,13 +130,76 @@
 <script lang="ts" setup>
 import { usePlayerStore } from "../store/player/player";
 import type { PropType } from "vue";
-import { computed, toRaw, watch } from "vue";
+import { computed, ref, toRaw, watch } from "vue";
 import type { Item, ItemCollection } from "../scripts/types";
 import LikeButton from "./LikeButton.vue";
 import { baseDb, useBaseStore } from "../store/base";
 import { usePlatformStore } from "../store/electron";
 import { useLibraryStore } from "../store/library";
 import { useRoute } from "vue-router";
+
+const sortOptions = ref([
+    {
+        name: "Date added",
+        options: [
+            {
+                index: "newToOld",
+                icon: "mdi-sort-clock-ascending-outline",
+                reverse: false,
+            },
+            {
+                index: "oldToNew",
+                icon: "mdi-sort-clock-descending-outline",
+                reverse: false,
+            },
+        ],
+    },
+    {
+        name: "Title",
+        options: [
+            {
+                index: "title",
+                icon: "mdi-sort-alphabetical-ascending",
+                reverse: false,
+            },
+            {
+                index: "title",
+                icon: "mdi-sort-alphabetical-descending",
+                reverse: true,
+            },
+        ],
+    },
+    {
+        name: "Artist",
+        options: [
+            {
+                index: "artist",
+                icon: "mdi-sort-alphabetical-ascending",
+                reverse: false,
+            },
+            {
+                index: "artist",
+                icon: "mdi-sort-alphabetical-descending",
+                reverse: true,
+            },
+        ],
+    },
+    {
+        name: "Duration",
+        options: [
+            {
+                index: "duration",
+                icon: "mdi-sort-ascending",
+                reverse: false,
+            },
+            {
+                index: "duration",
+                icon: "mdi-sort-descending",
+                reverse: true,
+            },
+        ],
+    },
+]);
 
 const base = useBaseStore();
 const library = useLibraryStore();
@@ -109,7 +212,7 @@ const props = defineProps({
         type: Object as PropType<Item | null>,
         default: () => null,
     },
-    showFilter: {
+    showSort: {
         type: Boolean,
         default: false,
     },
@@ -205,5 +308,17 @@ function downloadTracks() {
 
 .cancel-button:hover {
     opacity: 1;
+}
+
+.sort-list-item {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    justify-content: space-between;
+}
+
+.sort-buttons {
+    display: flex;
+    gap: 10px;
 }
 </style>
