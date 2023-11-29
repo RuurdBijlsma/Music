@@ -15,7 +15,7 @@
 import { ref, watch } from "vue";
 import { useSpotifyApiStore } from "../../store/spotify-api";
 import { useRoute } from "vue-router";
-import ItemCard from "../../components/ItemCard.vue";
+import ItemCard from "../../components/item/ItemCard.vue";
 
 const category = ref(null as null | SpotifyApi.CategoryObject);
 const playlists = ref(null as null | SpotifyApi.PlaylistObjectFull[]);

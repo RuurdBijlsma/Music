@@ -10,7 +10,7 @@
 
 <script lang="ts" setup>
 import { useLibraryStore } from "../../store/library";
-import ItemCard from "../../components/ItemCard.vue";
+import ItemCard from "../../components/item/ItemCard.vue";
 
 const library = useLibraryStore();
 </script>

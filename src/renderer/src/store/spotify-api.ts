@@ -1,11 +1,12 @@
 import { defineStore } from "pinia";
-import { baseDb, useBaseStore } from "./base";
+import { useBaseStore } from "./base";
 import SpotifyWebApi from "spotify-web-api-js";
 import { useLibraryStore } from "./library";
 import { useSpotifyAuthStore } from "./spotify-auth";
 import { Item } from "../scripts/types";
 import { executeCached } from "../scripts/utils";
 import { toRaw } from "vue";
+import {baseDb} from "../scripts/database";
 
 export const useSpotifyApiStore = defineStore("spotify-api", () => {
     const library = useLibraryStore();

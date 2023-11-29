@@ -119,11 +119,11 @@ import { useRoute } from "vue-router";
 import { computed, Ref, ref, watch } from "vue";
 import { useSearchStore } from "../store/search";
 import { ItemCollection, SearchResult } from "../scripts/types";
-import TrackListExpander from "../components/TrackListExpander.vue";
+import TrackListExpander from "../components/track-list/TrackListExpander.vue";
 import HorizontalScroller from "../components/HorizontalScroller.vue";
-import ItemCard from "../components/ItemCard.vue";
-import HighlightCard from "../components/HighlightCard.vue";
-import TrackList from "../components/TrackList.vue";
+import ItemCard from "../components/item/ItemCard.vue";
+import HighlightCard from "../components/item/HighlightCard.vue";
+import TrackList from "../components/track-list/TrackList.vue";
 
 const route = useRoute();
 const search = useSearchStore();

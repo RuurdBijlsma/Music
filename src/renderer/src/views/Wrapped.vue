@@ -40,14 +40,14 @@
             <v-list-item
                 v-for="({ artist, minutes }, i) of artistsTop"
                 @click.right="
-                    base.setContextMenuItem($event as MouseEvent, artist)
+                    dialog.setContextMenuItem($event as MouseEvent, artist)
                 "
                 rounded
-                :to="base.itemUrl(artist)"
+                :to="itemUrl(artist)"
             >
                 <v-list-item-title class="item-stat">
                     <p class="item-rank">{{ i + 1 }}</p>
-                    <v-avatar size="36px" :image="base.itemImage(artist)" />
+                    <v-avatar size="36px" :image="itemImage(artist)" />
                     <p class="flex-grow-1">{{ artist.name }}</p>
                     <p class="minutes-stat">
                         <span class="font-weight-bold">{{
@@ -178,14 +178,16 @@ import LineChart from "../components/LineChart.vue";
 import { computed, ref } from "vue";
 import { useStatsStore } from "../store/player/playStats";
 import { ChartData, ItemCollection, TrackStat } from "../scripts/types";
-import { useBaseStore } from "../store/base";
-import { useUIStore } from "../store/UIStore";
+import { useUIStore } from "../store/UI/UIStore";
 import { useSpotifyApiStore } from "../store/spotify-api";
-import TrackListItem from "../components/TrackListItem.vue";
+import TrackListItem from "../components/track-list/TrackListItem.vue";
 import { usePlayerStore } from "../store/player/player";
+import {useDialogStore} from "../store/UI/dialogStore";
+import {itemImage, itemUrl} from "../scripts/item-utils";
+import {caps} from "../scripts/utils";
 
 const stats = useStatsStore();
-const base = useBaseStore();
+const dialog = useDialogStore();
 const ui = useUIStore();
 const spotify = useSpotifyApiStore();
 const player = usePlayerStore();
@@ -245,7 +247,7 @@ async function generate() {
         if (skipKeys.includes(key)) continue;
         let data: { [key: string]: { sum: number; minutes: number } } =
             statistics[key];
-        let name = base.caps(key).replaceAll("_", " ");
+        let name = caps(key).replaceAll("_", " ");
         charts.value.push({
             labels: Object.keys(data).map((k) => new Date(k)),
             values: Object.values(data).map((v) => v.sum / v.minutes),

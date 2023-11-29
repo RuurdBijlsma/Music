@@ -65,7 +65,7 @@
                         v-if="
                             collection.context && collection.type === 'artist'
                         "
-                        :to="`/radio?id=${base.radioId()}&seed_artists=${
+                        :to="`/radio?id=${radioId()}&seed_artists=${
                             collection.context.id
                         }`"
                         icon="mdi-radio-tower"
@@ -132,11 +132,12 @@ import { usePlayerStore } from "../store/player/player";
 import type { PropType } from "vue";
 import { computed, ref, toRaw, watch } from "vue";
 import type { Item, ItemCollection } from "../scripts/types";
-import LikeButton from "./LikeButton.vue";
-import { baseDb, useBaseStore } from "../store/base";
 import { usePlatformStore } from "../store/electron";
 import { useLibraryStore } from "../store/library";
 import { useRoute } from "vue-router";
+import {radioId} from "../scripts/item-utils";
+import {baseDb} from "../scripts/database";
+import LikeButton from "./item/LikeButton.vue";
 
 const sortOptions = ref([
     {
@@ -201,7 +202,6 @@ const sortOptions = ref([
     },
 ]);
 
-const base = useBaseStore();
 const library = useLibraryStore();
 const props = defineProps({
     collection: {

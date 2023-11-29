@@ -4,7 +4,7 @@
             <div class="mb-8 album-info">
                 <glow-image
                     :height="250"
-                    :src="base.itemImage(album)"
+                    :src="itemImage(album)"
                     :width="250"
                     class="mb-4"
                     rounding="5px"
@@ -14,7 +14,7 @@
                 <h2 class="artist-names">
                     <template v-for="(artist, i) in album.artists">
                         <router-link
-                            :to="base.itemUrl(artist)"
+                            :to="itemUrl(artist)"
                             class="user-url"
                         >
                             {{ artist.name }}
@@ -28,7 +28,7 @@
                         tracks.length === 1 ? "" : "s"
                     }}
                     •
-                    {{ base.approximateDuration(totalDurationMs) }}
+                    {{ approximateDuration(totalDurationMs) }}
                 </p>
                 <collection-buttons
                     :collection="collection"
@@ -43,24 +43,24 @@
 <script lang="ts" setup>
 import { computed, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { useBaseStore } from "../../store/base";
 import GlowImage from "../../components/GlowImage.vue";
-import TrackList from "../../components/TrackList.vue";
+import TrackList from "../../components/track-list/TrackList.vue";
 import CollectionButtons from "../../components/CollectionButtons.vue";
 import { usePlayerStore } from "../../store/player/player";
 import { useSpotifyApiStore } from "../../store/spotify-api";
 import Spacer from "../../components/Spacer.vue";
+import {itemCollection, itemImage, itemUrl} from "../../scripts/item-utils";
+import {approximateDuration} from "../../scripts/utils";
 
 const route = useRoute();
 const router = useRouter();
-const base = useBaseStore();
 const spotify = useSpotifyApiStore();
 const player = usePlayerStore();
 const album = ref(null as null | SpotifyApi.AlbumObjectFull);
 let loadedId = route.params.id as string;
 const collection = computed(() => {
     if (album.value === null) return null;
-    return base.itemCollection(album.value);
+    return itemCollection(album.value);
 });
 
 const loadTrackId = computed(() => route.query.play);

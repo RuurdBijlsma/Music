@@ -20,7 +20,7 @@
             <div class="category-grid">
                 <router-link
                     v-for="category in categories"
-                    :to="base.itemUrl(category)"
+                    :to="itemUrl(category)"
                     class="category"
                     no-style
                 >
@@ -43,7 +43,7 @@
             <div class="genre-grid">
                 <v-chip
                     v-for="genre in genres"
-                    :to="`/radio?id=${base.radioId()}&seed_genres=${genre
+                    :to="`/radio?id=${radioId()}&seed_genres=${genre
                         .replace(/ /gi, '-')
                         .toLowerCase()}`"
                     class="genre"
@@ -58,10 +58,9 @@
 import { useSpotifyApiStore } from "../../store/spotify-api";
 import { ref } from "vue";
 import { executeCached } from "../../scripts/utils";
-import { useBaseStore } from "../../store/base";
-import { useUIStore } from "../../store/UIStore";
+import { useUIStore } from "../../store/UI/UIStore";
+import {itemUrl, radioId} from "../../scripts/item-utils";
 
-const base = useBaseStore();
 const ui = useUIStore();
 const spotify = useSpotifyApiStore();
 const genres = ref(null as null | string[]);

@@ -73,7 +73,7 @@
             <v-window-item value="ruurd-account">
                 <div v-if="ruurdAuth.isLoggedIn" class="logged-in">
                     <v-avatar :color="ui.themeColor">
-                        {{ ruurdAuth.credentials.name[0] }}
+                        {{ ruurdAuth.credentials.name?.[0] }}
                     </v-avatar>
                     <v-card-text>
                         <h3>{{ ruurdAuth.credentials.name }}</h3>
@@ -138,11 +138,13 @@
 import { ref } from "vue";
 import { useLibraryStore } from "../store/library";
 import { useSpotifyAuthStore } from "../store/spotify-auth";
-import { useBaseStore } from "../store/base";
 import { useRuurdAuthStore } from "../store/ruurd-auth";
-import { useUIStore } from "../store/UIStore";
+import { useUIStore } from "../store/UI/UIStore";
+import { useDialogStore } from "../store/UI/dialogStore";
+import { useBackupStore } from "../store/backupStore";
 
-const base = useBaseStore();
+const dialog = useDialogStore();
+const backup = useBackupStore();
 const ui = useUIStore();
 const library = useLibraryStore();
 const spotifyAuth = useSpotifyAuthStore();
@@ -173,16 +175,16 @@ async function ruurdLogin(e: SubmitEvent) {
         );
 
         if (!userResponse.ok) {
-            base.addSnack("Login failed: " + userResponse.statusText);
+            dialog.addSnack("Login failed: " + userResponse.statusText);
             return;
         }
         let user = await userResponse.json();
         ruurdAuth.credentials.email = email.toString();
         ruurdAuth.credentials.password = password.toString();
         ruurdAuth.credentials.name = user.name;
-        base.importFromServer();
+        backup.importFromServer().then();
     } catch (e: any) {
-        base.addSnack("Login failed: " + e.message);
+        dialog.addSnack("Login failed: " + e.message);
     }
     loginLoading.value = false;
 }

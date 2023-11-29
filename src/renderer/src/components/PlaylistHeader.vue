@@ -2,7 +2,7 @@
     <div v-if="playlist" class="mb-8 playlist-info">
         <glow-image
             :height="250"
-            :src="base.itemImage(playlist)"
+            :src="itemImage(playlist)"
             :width="250"
             class="mb-4"
             rounding="5px"
@@ -13,12 +13,12 @@
             Created by
             <router-link
                 :style="{ color: ui.themeColor }"
-                :to="base.itemUrl(playlist.owner)"
+                :to="itemUrl(playlist.owner)"
                 class="user-url"
                 >{{ playlist.owner.display_name }}
             </router-link>
             • {{ tracks.length }} Track{{ tracks.length === 1 ? "" : "s" }} •
-            {{ base.approximateDuration(totalDurationMs) }} •
+            {{ approximateDuration(totalDurationMs) }} •
             {{ followerString }}
         </p>
         <collection-buttons :collection="collection" :like-item="playlist" />
@@ -29,12 +29,13 @@
 <script lang="ts" setup>
 import type { ComputedRef, PropType } from "vue";
 import { computed } from "vue";
-import { useBaseStore } from "../store/base";
 import type { ItemCollection } from "../scripts/types";
 import GlowImage from "../components/GlowImage.vue";
 import CollectionButtons from "./CollectionButtons.vue";
 import Spacer from "./Spacer.vue";
-import { useUIStore } from "../store/UIStore";
+import { useUIStore } from "../store/UI/UIStore";
+import {approximateDuration} from "../scripts/utils";
+import {itemImage, itemUrl} from "../scripts/item-utils";
 
 const props = defineProps({
     collection: {
@@ -42,7 +43,6 @@ const props = defineProps({
         required: true,
     },
 });
-const base = useBaseStore();
 const ui = useUIStore();
 
 const followerString = computed(() => {

@@ -7,11 +7,11 @@
             <glow-image
                 :effect-scale="1.3"
                 :height="250"
-                :src="base.itemImage(artist)"
+                :src="itemImage(artist)"
                 :width="250"
                 class="mb-4"
                 rounding="125px"
-                @click.right="base.setContextMenuItem($event, artist)"
+                @click.right="dialog.setContextMenuItem($event, artist)"
             />
             <spacer />
             <h1>{{ artist.name }}</h1>
@@ -51,18 +51,20 @@
 <script lang="ts" setup>
 import { computed, ref, watch } from "vue";
 import { useRoute } from "vue-router";
-import { baseDb, useBaseStore } from "../../store/base";
 import GlowImage from "../../components/GlowImage.vue";
-import ItemCard from "../../components/ItemCard.vue";
-import HighlightCard from "../../components/HighlightCard.vue";
+import ItemCard from "../../components/item/ItemCard.vue";
+import HighlightCard from "../../components/item/HighlightCard.vue";
 import HorizontalScroller from "../../components/HorizontalScroller.vue";
-import TrackList from "../../components/TrackList.vue";
+import TrackList from "../../components/track-list/TrackList.vue";
 import CollectionButtons from "../../components/CollectionButtons.vue";
 import { useSpotifyApiStore } from "../../store/spotify-api";
 import Spacer from "../../components/Spacer.vue";
+import {baseDb} from "../../scripts/database";
+import {itemCollection, itemImage} from "../../scripts/item-utils";
+import {useDialogStore} from "../../store/UI/dialogStore";
 
 const route = useRoute();
-const base = useBaseStore();
+const dialog = useDialogStore();
 const spotify = useSpotifyApiStore();
 
 const artist = ref(null as null | SpotifyApi.ArtistObjectFull);
@@ -72,7 +74,7 @@ const topTracks = ref(null as null | SpotifyApi.TrackObjectFull[]);
 
 const collection = computed(() => {
     if (artist.value === null) return null;
-    return base.itemCollection(artist.value, topTracks.value);
+    return itemCollection(artist.value, topTracks.value);
 });
 
 let loadedId = route.params.id as string;

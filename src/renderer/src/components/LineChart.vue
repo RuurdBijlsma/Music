@@ -29,7 +29,7 @@ import {
     Tooltip,
 } from "chart.js";
 import { useTheme } from "vuetify";
-import { useUIStore } from "../store/UIStore";
+import { useUIStore } from "../store/UI/UIStore";
 import "chartjs-adapter-date-fns";
 import { format } from "date-fns";
 import type { ChartData } from "../scripts/types";

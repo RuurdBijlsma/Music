@@ -1,26 +1,13 @@
 import { defineStore } from "pinia";
-import { computed, ref, toRaw, watch } from "vue";
+import { computed } from "vue";
+import {persistentRef} from "../scripts/utils";
 
 export const useRuurdAuthStore = defineStore("ruurd-auth", () => {
-    const credentials = ref(
-        localStorage.getItem("ruurdCredentials") === null
-            ? {
-                  email: null as null | string,
-                  password: null as null | string,
-                  name: null as null | string,
-              }
-            : JSON.parse(localStorage.ruurdCredentials),
-    );
-
-    watch(
-        credentials,
-        () => {
-            localStorage.ruurdCredentials = JSON.stringify(
-                toRaw(credentials.value),
-            );
-        },
-        { deep: true },
-    );
+    let credentials = persistentRef('ruurdCredentials', {
+        email: null as null | string,
+        password: null as null | string,
+        name: null as null | string,
+    }, true);
 
     function logout() {
         credentials.value.email = null;

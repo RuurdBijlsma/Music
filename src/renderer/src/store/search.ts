@@ -1,5 +1,4 @@
 import { defineStore } from "pinia";
-import { baseDb, useBaseStore } from "./base";
 import { useLibraryStore } from "./library";
 import type { IDBPDatabase } from "idb";
 import { usePlatformStore } from "./electron";
@@ -14,22 +13,20 @@ import type {
 } from "../scripts/types";
 import { Ref, ref, watch } from "vue";
 import { usePlayerStore } from "./player/player";
-import { executeCached, hmsToSeconds } from "../scripts/utils";
+import {encodeUrlName, executeCached, hmsToSeconds, persistentRef} from "../scripts/utils";
 import YouTubeSearchAPI from "youtube-search-api";
+import {baseDb} from "../scripts/database";
+import {useDialogStore} from "./UI/dialogStore";
 
 export const useSearchStore = defineStore("search", () => {
     const platform = usePlatformStore();
     const library = useLibraryStore();
     const spotify = useSpotifyApiStore();
     const router = useRouter();
-    const base = useBaseStore();
+    const dialog = useDialogStore();
     const player = usePlayerStore();
 
-    let recentSearches: Ref<string[]> = ref(
-        localStorage.getItem("recentSearch") === null
-            ? []
-            : JSON.parse(localStorage.recentSearch),
-    );
+    let recentSearches = persistentRef<string[]>('recentSearch', []);
 
     let db: IDBPDatabase;
     baseDb.then((r) => (db = r));
@@ -49,14 +46,14 @@ export const useSearchStore = defineStore("search", () => {
             if (type === "track") {
                 let track = await spotify.getTrack(id);
                 await router.push(
-                    `/album/${base.encodeUrlName(track.album.name)}/${
+                    `/album/${encodeUrlName(track.album.name)}/${
                         track.album.id
                     }?play=${id}`,
                 );
             } else {
                 await router.push(`/${type}/from-url/${id}`);
             }
-            base.addSnack("Navigated to Spotify™ link");
+            dialog.addSnack("Navigated to Spotify™ link");
             searchValue.value = "";
         }
 
@@ -64,7 +61,7 @@ export const useSearchStore = defineStore("search", () => {
             /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/,
         );
         if (match !== null && !!match[1] && match[1].length === 11) {
-            base.addSnack("Locating YouTube™ track... Please wait.");
+            dialog.addSnack("Locating YouTube™ track... Please wait.");
             //https://youtu.be/PeAMGlDBB7c
             let id = match[1];
             searchValue.value = "";

@@ -3,7 +3,7 @@
         <p class="tracks-info">
             {{ tracks.length.toLocaleString() }}
             Track{{ tracks.length === 1 ? "" : "s" }} •
-            {{ base.approximateDuration(totalDurationMs) }}
+            {{ approximateDuration(totalDurationMs) }}
             <v-btn
                 v-if="!base.offlineMode"
                 :loading="library.isRefreshing.track"
@@ -30,11 +30,12 @@
 import { useLibraryStore } from "../../store/library";
 import { useBaseStore } from "../../store/base";
 import { computed } from "vue";
-import TrackListVirtual from "../../components/TrackListVirtual.vue";
+import TrackListVirtual from "../../components/track-list/TrackListVirtual.vue";
 import { storeToRefs } from "pinia";
 import type { ItemCollection } from "../../scripts/types";
 import CollectionButtons from "../../components/CollectionButtons.vue";
-import { useUIStore } from "../../store/UIStore";
+import { useUIStore } from "../../store/UI/UIStore";
+import { approximateDuration } from "../../scripts/utils";
 
 const library = useLibraryStore();
 const { tracks } = storeToRefs(library);
@@ -62,11 +63,10 @@ const collection = computed(() => {
 setTimeout(() => {
     // if last track reload is 24 or more hours ago then reload tracks
     if (
-        localStorage.getItem("lastTracksLoad") === null ||
-        Date.now() - 1000 * 60 * 60 * 24 > +localStorage.lastTracksLoad
-    ) {
+        library.lastTracksLoad === -1 ||
+        Date.now() - 1000 * 60 * 60 * 24 > library.lastTracksLoad
+    )
         library.loadLikedTracks();
-    }
 }, 500);
 
 const totalDurationMs = computed(() => {

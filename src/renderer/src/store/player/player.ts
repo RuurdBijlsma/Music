@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
 import { usePlatformStore } from "../electron";
 import { computed, ref, toRaw, watch } from "vue";
-import { baseDb, useBaseStore } from "../base";
+import {  useBaseStore } from "../base";
 import type { IDBPDatabase } from "idb";
 import { useTheme } from "vuetify";
 import type {
@@ -10,12 +10,13 @@ import type {
     TrackData,
     TrackMetadata,
 } from "../../scripts/types";
-import { shuffleArray } from "../../scripts/utils";
+import {persistentRef, shuffleArray} from "../../scripts/utils";
 import { useLibraryStore } from "../library";
 import { randomNotFound } from "../../scripts/imageSources";
 import { useTrackLoaderStore } from "./trackLoader";
 import { useStatsStore } from "./playStats";
-import { useUIStore } from "../UIStore";
+import { useUIStore } from "../UI/UIStore";
+import {baseDb} from "../../scripts/database";
 
 export const usePlayerStore = defineStore("player", () => {
     const base = useBaseStore();
@@ -53,47 +54,21 @@ export const usePlayerStore = defineStore("player", () => {
     const duration = ref(0);
     const currentTime = ref(0);
     const loadProgress = ref(NaN);
-    const track = ref(
-        (localStorage.getItem("trackInMemory") === null
-            ? null
-            : JSON.parse(
-                  localStorage.trackInMemory,
-              )) as null | SpotifyApi.TrackObjectFull,
-    );
+    const track = persistentRef<null|SpotifyApi.TrackObjectFull>('trackInMemory',null);
     const trackId = ref("");
-    const repeat = ref(
-        localStorage.getItem("repeat") === null
-            ? true
-            : localStorage.repeat === "true",
-    );
-    const shuffle = ref(
-        localStorage.getItem("shuffle") === null
-            ? false
-            : localStorage.shuffle === "true",
-    );
-    const volume = ref(
-        localStorage.getItem("volume") === null ? 1 : +localStorage.volume,
-    );
+    const repeat = persistentRef('repeat',true);
+    const shuffle = persistentRef('shuffle',false);
+    const volume = persistentRef('volume',1);
     const volumeNormalizer = ref(0.7);
-    const normalizeVolume = ref(
-        localStorage.getItem("normalizeVolume") === null
-            ? false
-            : localStorage.normalizeVolume === "true",
-    );
+    const normalizeVolume = persistentRef('normalizeVolume',false);
     const realVolume = computed(() => {
         // when bottom music player is enabled, volume cant be changed so always use full volume
         let vol = ui.windowWidth <= 930 ? 1 : volume.value;
         return normalizeVolume.value ? vol * volumeNormalizer.value : vol;
     });
-
-    watch(
-        normalizeVolume,
-        () => (localStorage.normalizeVolume = normalizeVolume.value),
-    );
     watch(realVolume, () => {
         playerElement.volume = realVolume.value;
         backupPlayer.volume = realVolume.value;
-        localStorage.volume = volume.value;
     });
     playerElement.volume = realVolume.value;
     backupPlayer.volume = realVolume.value;
@@ -261,7 +236,6 @@ export const usePlayerStore = defineStore("player", () => {
         setTimeout(() => {
             if (isActive(_collection, _track)) {
                 localStorage.hasTrackInMemory = "true";
-                localStorage.trackInMemory = JSON.stringify(_track);
             }
         }, 100);
     }
@@ -294,7 +268,6 @@ export const usePlayerStore = defineStore("player", () => {
         localStorage.hasTrackInMemory = "false";
         db.delete("cache", "nowPlaying").then(() => {
             localStorage.removeItem("hasTrackInMemory");
-            localStorage.removeItem("trackInMemory");
         });
 
         ui.themeColorDark = "#FFFFFF";
@@ -600,12 +573,10 @@ export const usePlayerStore = defineStore("player", () => {
 
     function toggleShuffle() {
         shuffle.value = !shuffle.value;
-        localStorage.shuffle = shuffle.value;
     }
 
     function toggleRepeat() {
         repeat.value = !repeat.value;
-        localStorage.repeat = repeat.value;
     }
 
     async function playCollection(collection: ItemCollection) {

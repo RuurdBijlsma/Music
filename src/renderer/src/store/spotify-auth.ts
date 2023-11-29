@@ -1,14 +1,14 @@
 import { defineStore } from "pinia";
-import { baseDb, useBaseStore } from "./base";
-import type { IDBPDatabase } from "idb";
-import type { Ref } from "vue";
-import { computed, ref, toRaw, watch } from "vue";
+import { useBaseStore } from "./base";
+import { computed } from "vue";
 import { usePlatformStore } from "./electron";
 import { useLibraryStore } from "./library";
 import { useSpotifyApiStore } from "./spotify-api";
 import { useRouter } from "vue-router";
 import { usePlayerStore } from "./player/player";
 import { randomUser } from "../scripts/imageSources";
+import { baseDb } from "../scripts/database";
+import { persistentRef } from "../scripts/utils";
 
 export interface AuthToken {
     code: null | string;
@@ -25,34 +25,15 @@ export const useSpotifyAuthStore = defineStore("spotify-auth", () => {
     const router = useRouter();
     const player = usePlayerStore();
 
-    let db: IDBPDatabase;
-    baseDb.then((r) => {
-        db = r;
-        loadValues().then(() => {});
-    });
-
-    // IndexedDB persistent storage
-    async function loadValues() {
-        if (localStorage.getItem("secret") !== null) {
-            secret.value = localStorage.secret;
-        }
-        if (localStorage.getItem("clientId") !== null) {
-            clientId.value = localStorage.clientId;
-        }
-        if (localStorage.getItem("tokens") !== null) {
-            tokens.value = JSON.parse(localStorage.tokens);
-            checkAuth().then();
-        }
-    }
-
-    const secret = ref("");
-    const clientId = ref("");
-    let tokens: Ref<AuthToken> = ref({
+    const secret = persistentRef("secret", "");
+    const clientId = persistentRef("clientId", "");
+    let tokens = persistentRef<AuthToken>("tokens", {
         code: null,
         access: null,
         refresh: null,
         expiryDate: null,
-    });
+    },true);
+    if (tokens.value.access !== null) checkAuth().then();
     const hasCredentials = computed(
         () => secret.value.length === 32 && clientId.value.length === 32,
     );
@@ -63,13 +44,6 @@ export const useSpotifyAuthStore = defineStore("spotify-auth", () => {
             tokens.value.refresh !== null &&
             tokens.value.expiryDate !== null,
     );
-
-    watch(secret, async () => {
-        localStorage.secret = secret.value;
-    });
-    watch(clientId, async () => {
-        localStorage.clientId = clientId.value;
-    });
 
     // Spotify API Stuff
     const requestedScopes =
@@ -124,8 +98,8 @@ export const useSpotifyAuthStore = defineStore("spotify-auth", () => {
     let tokenTimeout: number;
 
     async function logout() {
-        await baseDb;
-        player.unload();
+        const db = await baseDb;
+        player.unload().then();
 
         tokens.value = {
             code: null,
@@ -141,8 +115,6 @@ export const useSpotifyAuthStore = defineStore("spotify-auth", () => {
             followers: 0,
             avatar: randomUser(),
         };
-        localStorage.userInfo = JSON.stringify(toRaw(library.userInfo));
-        localStorage.tokens = JSON.stringify(toRaw(tokens.value));
         await db.delete("spotify", "library");
         await db.delete("spotify", "view");
         await db.clear("cache");
@@ -169,7 +141,6 @@ export const useSpotifyAuthStore = defineStore("spotify-auth", () => {
                 msUntilExpire - 1000 * 60 * 5,
             );
 
-            localStorage.tokens = JSON.stringify(toRaw(tokens.value));
             await library.initialize();
         } else {
             console.warn("Auth has expired, getting new token");
@@ -192,6 +163,5 @@ export const useSpotifyAuthStore = defineStore("spotify-auth", () => {
         login,
         logout,
         awaitAuth,
-        loadValues,
     };
 });

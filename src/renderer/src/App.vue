@@ -20,7 +20,7 @@
             <div class="fake-top-menu" />
             <left-navigation />
             <bottom-music-player
-                v-if="ui.windowWidth <= 930 && base.dbLoaded"
+                v-if="ui.windowWidth <= 930 && dbLoaded"
                 :style="{
                     transform:
                         player.track === null
@@ -32,7 +32,7 @@
             />
             <music-player
                 v-else
-                v-if="base.dbLoaded"
+                v-if="dbLoaded"
                 :style="{
                     transform:
                         player.track === null
@@ -43,7 +43,7 @@
                 class="music-player"
             />
             <div
-                v-if="base.dbLoaded"
+                v-if="dbLoaded"
                 :style="{
                     width:
                         ui.windowWidth <= 930
@@ -60,60 +60,37 @@
                         <component :is="Component" />
                     </transition>
                 </router-view>
-                <div class="notifications">
-                    <template v-for="notification in base.notifications">
-                        <notification v-if="notification.show" :notification="notification"/>
-                    </template>
-                </div>
             </div>
         </div>
-        <source-dialog />
-        <edit-info-dialog />
-        <item-context-menu />
-        <create-playlist-dialog/>
-        <v-snackbar
-            v-for="snack in base.snackbars"
-            v-model="snack.open"
-            :timeout="snack.timeout"
-        >
-            {{ snack.text }}
-            <template v-slot:actions>
-                <v-btn variant="text" @click="snack.open = false">
-                    Dismiss
-                </v-btn>
-            </template>
-        </v-snackbar>
+        <dialogs />
     </v-app>
 </template>
 
 <script lang="ts" setup>
 // todo
+// check if tokens needs deep watch for persistent ref
 // possibly replace color thief with something without vulnerabilities
 
-import TopMenu from "./components/TopMenu.vue";
-import MusicPlayer from "./components/MusicPlayer.vue";
-import SearchSuggestions from "./components/SearchSuggestions.vue";
-import { useBaseStore } from "./store/base";
+import TopMenu from "./components/main-ui/TopMenu.vue";
+import MusicPlayer from "./components/player/MusicPlayer.vue";
+import SearchSuggestions from "./components/search/SearchSuggestions.vue";
 import { usePlayerStore } from "./store/player/player";
 import { computed, ref, watch } from "vue";
-import ItemContextMenu from "./components/ItemContextMenu.vue";
-import SourceDialog from "./components/SourceDialog.vue";
-import LeftNavigation from "./components/LeftNavigation.vue";
-import BottomMusicPlayer from "./components/BottomMusicPlayer.vue";
+import LeftNavigation from "./components/main-ui/LeftNavigation.vue";
+import BottomMusicPlayer from "./components/player/BottomMusicPlayer.vue";
 //@ts-ignore
 import coverImage from "../assets/cover.jpg?asset";
-import EditInfoDialog from "./components/EditInfoDialog.vue";
-import { useUIStore } from "./store/UIStore";
-import Notification from "./components/Notification.vue";
-import CreatePlaylistDialog from "./components/CreatePlaylistDialog.vue";
+import { useUIStore } from "./store/UI/UIStore";
+import { dbLoaded } from "./scripts/database";
+import { itemImage } from "./scripts/item-utils";
+import Dialogs from "./components/dialogs/Dialogs.vue";
 
-const base = useBaseStore();
 const ui = useUIStore();
 const player = usePlayerStore();
 const initialBg = coverImage;
 const blurBgSrc = computed(() => {
     if (player.track === null) return initialBg;
-    return base.itemImage(player.track);
+    return itemImage(player.track);
 });
 
 const transitionBgSrc = ref(blurBgSrc.value);
@@ -263,16 +240,6 @@ body {
         left: 70px;
         bottom: 0;
     }
-}
-
-.notifications {
-    position: fixed;
-    right: 10px;
-    bottom: 10px;
-    width: calc(100% - 90px);
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
 }
 
 h1,

@@ -2,7 +2,7 @@ import { defineStore } from "pinia";
 import { useLibraryStore } from "./library";
 import { Ref, ref, toRaw } from "vue";
 import fileNamify from "filenamify";
-import { baseDb, useBaseStore } from "./base";
+import { useBaseStore } from "./base";
 import type { IDBPDatabase } from "idb";
 import { usePlayerStore } from "./player/player";
 import type { DownloadState, YouTubeTrack } from "../scripts/types";
@@ -10,10 +10,13 @@ import { executeCached } from "../scripts/utils";
 import { useSpotifyAuthStore } from "./spotify-auth";
 import { useTrackLoaderStore } from "./player/trackLoader";
 import { useSearchStore } from "./search";
+import {baseDb} from "../scripts/database";
+import {useDialogStore} from "./UI/dialogStore";
 
 export const usePlatformStore = defineStore("platform", () => {
     const library = useLibraryStore();
     const base = useBaseStore();
+    const dialog = useDialogStore();
     const player = usePlayerStore();
     const spotifyAuth = useSpotifyAuthStore();
     const search = useSearchStore();
@@ -337,7 +340,7 @@ export const usePlatformStore = defineStore("platform", () => {
                     }
                 } catch (e: any) {
                     console.warn(e);
-                    base.addSnack(`Couldn't download. ${e.message}`, 100000);
+                    dialog.addSnack(`Couldn't download. ${e.message}`, 100000);
                     state.value.loading = false;
                     return;
                 }

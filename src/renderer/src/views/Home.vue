@@ -72,8 +72,8 @@
 <script lang="ts" setup>
 import { useLibraryStore } from "../store/library";
 import { computed } from "vue";
-import HighlightCard from "../components/HighlightCard.vue";
-import ItemCard from "../components/ItemCard.vue";
+import HighlightCard from "../components/item/HighlightCard.vue";
+import ItemCard from "../components/item/ItemCard.vue";
 import HorizontalScroller from "../components/HorizontalScroller.vue";
 
 const library = useLibraryStore();

@@ -52,14 +52,14 @@
 </template>
 
 <script lang="ts" setup>
-import TrackListVirtual from "./TrackListVirtual.vue";
-import TrackList from "./TrackList.vue";
+import TrackListVirtual from "./track-list/TrackListVirtual.vue";
+import TrackList from "./track-list/TrackList.vue";
 import { usePlayerStore } from "../store/player/player";
 import { storeToRefs } from "pinia";
 import { useRoute } from "vue-router";
 import { ref } from "vue";
 import { useTheme } from "vuetify";
-import { useUIStore } from "../store/UIStore";
+import { useUIStore } from "../store/UI/UIStore";
 
 const player = usePlayerStore();
 const ui = useUIStore();

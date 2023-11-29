@@ -1,4 +1,5 @@
-import { baseDb } from "../store/base";
+import { Ref, ref, toRaw, watch } from "vue";
+import {baseDb} from "./database";
 
 export function hexToRgb(hex: string) {
     if (hex.length === 4) {
@@ -119,5 +120,81 @@ export async function executeCached<T>(
         cacheKey,
     ).then();
 
+    return result;
+}
+
+export function caps(str: string) {
+    return str[0].toUpperCase() + str.slice(1);
+}
+
+export function encodeUrlName(name: string) {
+    if (name.trim() === "") return "_";
+    let toEncode = name.toLowerCase().replace(/ /gi, "-").slice(0, 36);
+    let encoded: string;
+    try {
+        encoded = encodeURIComponent(toEncode);
+    } catch (e) {
+        encoded = toEncode.replace(/[^a-z0-9]/gi, "");
+        console.warn(`Couldn't uri encode ${toEncode}, changed to ${encoded}`);
+    }
+    return encoded;
+}
+
+export function approximateDuration(millis: number) {
+    if (millis > 7200000) return Math.round(millis / 3600000) + " hours";
+    let minutes = Math.round(millis / 60000);
+    return minutes + " minute" + (minutes === 1 ? "" : "s");
+}
+
+export function msToReadable(millis: number) {
+    if (isNaN(millis) || millis === undefined) return "0:00";
+
+    let seconds = Math.round(millis / 1000);
+    let h = Math.floor(seconds / 3600);
+    let m = Math.floor((seconds % 3600) / 60);
+    let s = seconds % 60;
+    let hString = h.toString();
+    let mString = m.toString();
+    let sString = s.toString();
+    if (hString !== "0") {
+        mString = mString.padStart(2, "0");
+        sString = sString.padStart(2, "0");
+    }
+    sString = sString.padStart(2, "0");
+
+    if (hString === "0") return `${mString}:${sString}`;
+    else return `${hString}:${mString}:${sString}`;
+}
+
+export function persistentRef<T>(
+    storeKey: string,
+    startValue: T,
+    deep = false,
+) {
+    let valueType = typeof startValue;
+    let fromString = (v) => v;
+    let toString = (v) => v;
+    if (valueType === "boolean") {
+        fromString = (v) => v === "true";
+        toString = (v) => v.toString();
+    } else if (valueType === "number") {
+        fromString = (v) => +v;
+        toString = (v) => v.toString();
+    } else if (valueType !== "string") {
+        fromString = (v) => JSON.parse(v);
+        toString = (v) => JSON.stringify(toRaw(v));
+    }
+    let result: Ref<T> = ref(
+        localStorage.getItem(storeKey) === null
+            ? startValue
+            : fromString(localStorage[storeKey]),
+    );
+    watch(
+        result,
+        () => {
+            localStorage[storeKey] = toString(result.value);
+        },
+        { deep },
+    );
     return result;
 }

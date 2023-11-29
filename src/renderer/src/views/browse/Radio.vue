@@ -13,7 +13,7 @@
 
             <p class="radio-stats">
                 {{ tracks.length }} Track{{ tracks.length === 1 ? "" : "s" }} •
-                {{ base.approximateDuration(totalDurationMs) }}
+                {{ approximateDuration(totalDurationMs) }}
             </p>
             <collection-buttons :collection="collection" />
         </div>
@@ -28,15 +28,14 @@
 
 <script lang="ts" setup>
 import { computed, ref, watch } from "vue";
-import { useBaseStore } from "../../store/base";
 import { useRoute } from "vue-router";
 import { Item, ItemCollection } from "../../scripts/types";
-import TrackList from "../../components/TrackList.vue";
+import TrackList from "../../components/track-list/TrackList.vue";
 import { useSpotifyApiStore } from "../../store/spotify-api";
 import CollectionButtons from "../../components/CollectionButtons.vue";
 import ArtistsSpan from "../../components/ArtistsSpan.vue";
+import {approximateDuration} from "../../scripts/utils";
 
-const base = useBaseStore();
 const route = useRoute();
 const spotify = useSpotifyApiStore();
 

@@ -23,7 +23,7 @@
                 mandatory
             >
                 <v-chip v-for="opt in ui.themeOptions" class="theme-chip"
-                    >{{ base.caps(opt) }}
+                    >{{ caps(opt) }}
                 </v-chip>
             </v-chip-group>
         </div>
@@ -145,7 +145,7 @@
 
         <v-switch
             v-if="ruurdAuth.isLoggedIn"
-            v-model="base.autoBackup"
+            v-model="backup.autoBackup"
             :color="ui.themeColor"
             hide-details
             label="Daily automatic backup to server"
@@ -219,16 +219,23 @@ import { usePlayerStore } from "../store/player/player";
 import Authentication from "../components/Authentication.vue";
 import { computed, ref } from "vue";
 import { useRuurdAuthStore } from "../store/ruurd-auth";
-import { useUIStore } from "../store/UIStore";
+import { useUIStore } from "../store/UI/UIStore";
 import { storeToRefs } from "pinia";
+import {useDialogStore} from "../store/UI/dialogStore";
+import {useBackupStore} from "../store/backupStore";
+import {useUpdateStore} from "../store/UI/update";
+import {caps} from "../scripts/utils";
 
 const player = usePlayerStore();
 const platform = usePlatformStore();
 const base = useBaseStore();
+const update = useUpdateStore()
+const dialog = useDialogStore();
+const backup = useBackupStore()
 const ruurdAuth = useRuurdAuthStore();
 const ui = useUIStore();
 const appVersion = ref("");
-const { updateState } = storeToRefs(base);
+const { updateState } = storeToRefs(update);
 window.api.getAppVersion().then((r) => (appVersion.value = r));
 
 const updateLoading = ref(false);
@@ -251,10 +258,10 @@ async function exportToServer() {
     exportResult.value = "none";
     exportLoading.value = true;
     try {
-        let result = await base.exportToServer();
+        let result = await backup.exportToServer();
         exportResult.value = result ? "success" : "failed";
     } catch (e: any) {
-        base.addSnack("Backup to server failed: ", e.message);
+        dialog.addSnack("Backup to server failed: ", e.message);
     }
     exportLoading.value = false;
 }
@@ -262,9 +269,9 @@ async function exportToServer() {
 async function importFromServer() {
     importLoading.value = true;
     try {
-        await base.importFromServer();
+        await backup.importFromServer();
     } catch (e: any) {
-        base.addSnack("Restore from server failed: ", e.message);
+        dialog.addSnack("Restore from server failed: ", e.message);
     }
     importLoading.value = false;
 }
@@ -272,20 +279,20 @@ async function importFromServer() {
 async function exportToFile() {
     exportFileLoading.value = true;
     try {
-        await base.exportToFile();
+        await backup.exportToFile();
     } catch (e: any) {
-        base.addSnack("Backup to file failed: ", e.message);
+        dialog.addSnack("Backup to file failed: ", e.message);
     }
     exportFileLoading.value = false;
 }
 
 async function importFromFile() {
     importFileLoading.value = true;
-    let result = await base.importFromFile();
+    let result = await backup.importFromFile();
     if (result) {
-        base.addSnack("Restored backup from file");
+        dialog.addSnack("Restored backup from file");
     } else {
-        base.addSnack("Restore from file failed");
+        dialog.addSnack("Restore from file failed");
     }
     importFileLoading.value = false;
 }

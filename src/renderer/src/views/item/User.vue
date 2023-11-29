@@ -29,7 +29,7 @@ import { useLibraryStore } from "../../store/library";
 import { computed, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import GlowImage from "../../components/GlowImage.vue";
-import ItemCard from "../../components/ItemCard.vue";
+import ItemCard from "../../components/item/ItemCard.vue";
 import { useSpotifyApiStore } from "../../store/spotify-api";
 import { randomUser } from "../../scripts/imageSources";
 

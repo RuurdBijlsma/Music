@@ -20,16 +20,15 @@
 import { useLibraryStore } from "../../store/library";
 import { computed, ref, watch } from "vue";
 import { useRoute } from "vue-router";
-import { useBaseStore } from "../../store/base";
-import TrackListVirtual from "../../components/TrackListVirtual.vue";
-import TrackList from "../../components/TrackList.vue";
+import TrackListVirtual from "../../components/track-list/TrackListVirtual.vue";
+import TrackList from "../../components/track-list/TrackList.vue";
 import PlaylistHeader from "../../components/PlaylistHeader.vue";
 import { useSpotifyApiStore } from "../../store/spotify-api";
 import { storeToRefs } from "pinia";
-import { useUIStore } from "../../store/UIStore";
+import { useUIStore } from "../../store/UI/UIStore";
+import {itemCollection} from "../../scripts/item-utils";
 
 const route = useRoute();
-const base = useBaseStore();
 const ui = useUIStore();
 const library = useLibraryStore();
 const spotify = useSpotifyApiStore();
@@ -41,7 +40,7 @@ const collection = computed(() => {
     let tracks = playlist.value.tracks.items
         .filter((t) => t.track !== null)
         .map((t) => t.track as SpotifyApi.TrackObjectFull);
-    return base.itemCollection(playlist.value, tracks);
+    return itemCollection(playlist.value, tracks);
 });
 
 async function refresh() {

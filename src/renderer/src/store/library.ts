@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
-import { computed, ref, toRaw, watch } from "vue";
-import { baseDb, useBaseStore } from "./base";
+import { computed, ref, toRaw } from "vue";
+import { useBaseStore } from "./base";
 import { usePlatformStore } from "./electron";
 import type { IDBPDatabase } from "idb";
 import type {
@@ -10,15 +10,17 @@ import type {
     LikedTrack,
     SpotifyTrack,
 } from "../scripts/types";
-import { TrackData, YouTubeSearchResult } from "../scripts/types";
 import { usePlayerStore } from "./player/player";
 import { useSpotifyApiStore } from "./spotify-api";
 import { useSpotifyAuthStore } from "./spotify-auth";
 import { randomUser } from "../scripts/imageSources";
 import { useSearchStore } from "./search";
 import { useTrackLoaderStore } from "./player/trackLoader";
-import { executeCached } from "../scripts/utils";
+import { executeCached, persistentRef } from "../scripts/utils";
 import { useRouter } from "vue-router";
+import { baseDb } from "../scripts/database";
+import { itemUrl } from "../scripts/item-utils";
+import { useDialogStore } from "./UI/dialogStore";
 
 export const useLibraryStore = defineStore("library", () => {
     const platform = usePlatformStore();
@@ -29,6 +31,8 @@ export const useLibraryStore = defineStore("library", () => {
     const spotify = useSpotifyApiStore();
     const spotifyAuth = useSpotifyAuthStore();
     const trackLoader = useTrackLoaderStore();
+    const dialog = useDialogStore();
+
     let valuesLoaded = ref(false);
     let db: IDBPDatabase;
     baseDb.then((r) => {
@@ -40,7 +44,7 @@ export const useLibraryStore = defineStore("library", () => {
     });
 
     // Spotify UI variables
-    const userInfo = ref({
+    const userInfo = persistentRef("userInfo", {
         id: "",
         name: "",
         mail: "",
@@ -59,33 +63,6 @@ export const useLibraryStore = defineStore("library", () => {
     const viewedPlaylistRefreshRequired = ref(false);
     let likedDbChecked = false;
     const likedListKey = ref(0);
-
-    const playlistDialog = ref({
-        show: false,
-        title: "",
-        description: "",
-        isPublic: true,
-        isCollaborative: false,
-        startTrack: null as SpotifyApi.TrackObjectFull | null,
-    });
-
-    const editDialog = ref({
-        show: false,
-        loading: false,
-        trackData: null as null | TrackData,
-        likedTrack: null as null | LikedTrack,
-        title: "",
-        artists: [""],
-        durationRange: [0, 1],
-    });
-
-    const sourceDialog = ref({
-        show: false,
-        items: [] as YouTubeSearchResult[],
-        loading: false,
-        spotifyTrack: null as SpotifyApi.TrackObjectFull | null,
-        trackData: null as TrackData | null,
-    });
 
     const userPlaylists = computed(() =>
         saved.value.playlist.filter(
@@ -110,6 +87,7 @@ export const useLibraryStore = defineStore("library", () => {
     });
     const offlineCollections = ref(new Set<string>([]));
     const recentPlays = ref([] as ItemCollection[]);
+    const lastTracksLoad = persistentRef<number>("lastTracksLoad", -1);
 
     // IndexedDB persistent storage
     async function loadValues() {
@@ -126,9 +104,6 @@ export const useLibraryStore = defineStore("library", () => {
             offlineCollections.value = new Set(dbOfflineCollections);
         if (dbSaved) saved.value = dbSaved;
         if (dbView) view.value = dbView;
-
-        if (localStorage.getItem("userInfo") !== null)
-            userInfo.value = JSON.parse(localStorage.userInfo);
     }
 
     async function initialize() {
@@ -173,7 +148,6 @@ export const useLibraryStore = defineStore("library", () => {
             followers: me.followers?.total ?? 0,
             avatar: me.images?.[0]?.url ?? "",
         };
-        localStorage.userInfo = JSON.stringify(toRaw(userInfo.value));
     }
 
     async function refreshUserData(type: "playlist" | "artist" | "album") {
@@ -241,7 +215,7 @@ export const useLibraryStore = defineStore("library", () => {
             return true;
         }
         isRefreshing.value["track"] = true;
-        tracks.value = await getSortedTracksFromDB()
+        tracks.value = await getSortedTracksFromDB();
         base.events.emit("refreshedTrack");
         isRefreshing.value["track"] = false;
         return tracks.value.length > 0;
@@ -398,7 +372,7 @@ export const useLibraryStore = defineStore("library", () => {
             tracks.value = await getSortedTracksFromDB();
         }
 
-        localStorage.lastTracksLoad = Date.now();
+        lastTracksLoad.value = Date.now();
         base.events.emit("refreshedTrack");
         isRefreshing.value["track"] = false;
     }
@@ -543,9 +517,9 @@ export const useLibraryStore = defineStore("library", () => {
 
     async function chooseSource(track: SpotifyApi.TrackObjectFull) {
         if (player.playing) player.pause().then();
-        sourceDialog.value.show = true;
-        sourceDialog.value.loading = true;
-        sourceDialog.value.spotifyTrack = track;
+        dialog.source.show = true;
+        dialog.source.loading = true;
+        dialog.source.spotifyTrack = track;
 
         const { query } = platform.trackToNames(track);
         let [options, trackData] = await Promise.all([
@@ -553,13 +527,13 @@ export const useLibraryStore = defineStore("library", () => {
             trackLoader.getFullTrackData(track),
         ]);
 
-        sourceDialog.value.loading = false;
-        sourceDialog.value.items = options;
-        sourceDialog.value.trackData = trackData;
+        dialog.source.loading = false;
+        dialog.source.items = options;
+        dialog.source.trackData = trackData;
     }
 
     async function activateSource(ytId: string) {
-        let trackData = sourceDialog.value.trackData;
+        let trackData = dialog.source.trackData;
         if (trackData === null) return;
         const trackId = trackData.track.id;
         const { outPath, query } = platform.trackToNames(trackData.track);
@@ -585,7 +559,7 @@ export const useLibraryStore = defineStore("library", () => {
             );
         }
 
-        sourceDialog.value.show = false;
+        dialog.source.show = false;
         trackLoader.changeSourceTracks.set(trackData.track.id, query + ytId);
         if (
             player.track !== null &&
@@ -632,19 +606,19 @@ export const useLibraryStore = defineStore("library", () => {
                 "You can only edit tracks in your liked tracks",
             );
         player.pause().then();
-        editDialog.value.likedTrack = likedTrack;
-        editDialog.value.durationRange = [
+        dialog.edit.likedTrack = likedTrack;
+        dialog.edit.durationRange = [
             likedInfo.startTime ?? 0,
             likedInfo.endTime ?? likedTrack.track.duration_ms / 1000,
         ];
-        editDialog.value.title = likedTrack.track.name;
-        editDialog.value.artists = likedTrack.track.artists.map((a) => a.name);
-        editDialog.value.show = true;
-        editDialog.value.loading = true;
-        editDialog.value.trackData = await trackLoader.getFullTrackData(
+        dialog.edit.title = likedTrack.track.name;
+        dialog.edit.artists = likedTrack.track.artists.map((a) => a.name);
+        dialog.edit.show = true;
+        dialog.edit.loading = true;
+        dialog.edit.trackData = await trackLoader.getFullTrackData(
             likedTrack.track,
         );
-        editDialog.value.loading = false;
+        dialog.edit.loading = false;
     }
 
     async function applyEditChanges(
@@ -683,41 +657,26 @@ export const useLibraryStore = defineStore("library", () => {
     }
 
     async function createPlaylistFromDialog() {
-        if (playlistDialog.value.startTrack === null) return false;
+        if (dialog.playlist.startTrack === null) return false;
 
         let playlist = await spotify.api.createPlaylist(userInfo.value.id, {
-            name: playlistDialog.value.title,
-            description: playlistDialog.value.description,
-            collaborative: playlistDialog.value.isCollaborative,
-            public: playlistDialog.value.isPublic,
+            name: dialog.playlist.title,
+            description: dialog.playlist.description,
+            collaborative: dialog.playlist.isCollaborative,
+            public: dialog.playlist.isPublic,
         });
-        await addToPlaylist(playlist.id, playlistDialog.value.startTrack);
+        await addToPlaylist(playlist.id, dialog.playlist.startTrack);
         spotify
             .getPlaylist(playlist.id)
             .then((p) => saved.value.playlist.unshift(p));
 
-        playlistDialog.value.show = false;
-        await router.push(base.itemUrl(playlist));
+        dialog.playlist.show = false;
+        await router.push(itemUrl(playlist));
         return true;
     }
 
-    const activeSort = ref(
-        localStorage.getItem("activeSort") === null
-            ? "newToOld"
-            : localStorage.activeSort,
-    );
-    watch(activeSort, () => {
-        localStorage.activeSort = activeSort.value;
-    });
-
-    const reverseSort = ref(
-        localStorage.getItem("reverseSort") === null
-            ? false
-            : localStorage.reverseSort === "true",
-    );
-    watch(reverseSort, () => {
-        localStorage.reverseSort = reverseSort.value;
-    });
+    const activeSort = persistentRef("activeSort", "newToOld");
+    const reverseSort = persistentRef("reverseSort", false);
 
     async function getSortedTracksFromDB() {
         let sortedTracks = await db.getAllFromIndex("tracks", activeSort.value);
@@ -758,12 +717,10 @@ export const useLibraryStore = defineStore("library", () => {
         offlineCollections,
         recentPlays,
         valuesLoaded,
-        editDialog,
         likedDbChecked,
         likedListKey,
         editTrack,
-        sourceDialog,
         applyEditChanges,
-        playlistDialog,
+        lastTracksLoad,
     };
 });

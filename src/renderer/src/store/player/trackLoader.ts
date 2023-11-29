@@ -7,13 +7,14 @@ import {
     TrackMetadata,
 } from "../../scripts/types";
 import { usePlatformStore } from "../electron";
-import { baseDb, useBaseStore } from "../base";
 import { useLibraryStore } from "../library";
+import {baseDb} from "../../scripts/database";
+import {useDialogStore} from "../UI/dialogStore";
 
 export const useTrackLoaderStore = defineStore("trackLoader", () => {
     const platform = usePlatformStore();
     const library = useLibraryStore();
-    const base = useBaseStore();
+    const dialog = useDialogStore();
     const changeSourceTracks = new Map<string, string>();
 
     function isLoadedTrackData(trackData: TrackData) {
@@ -105,7 +106,7 @@ export const useTrackLoaderStore = defineStore("trackLoader", () => {
                 // get track bars and set to metadata en do sendData
                 let bars = await calculateTrackBars(trackData);
                 if (bars === undefined) {
-                    base.addSnack("Oops, can't calculate trackbars");
+                    dialog.addSnack("Oops, can't calculate trackbars");
                 } else {
                     trackData.metadata.trackBars = makeMetaTrackBars(bars);
                 }

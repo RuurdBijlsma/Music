@@ -18,7 +18,7 @@
                 v-model="option.active"
                 :color="ui.themeColor"
                 :inset="true"
-                :label="base.caps(option.name)"
+                :label="caps(option.name)"
                 hide-details
             />
             <p class="description">{{ option.description }}</p>
@@ -65,14 +65,16 @@
 <script lang="ts" setup>
 import { useSpotifyApiStore } from "../../store/spotify-api";
 import { Ref, ref } from "vue";
-import { useBaseStore } from "../../store/base";
 import { useRouter } from "vue-router";
-import { useUIStore } from "../../store/UIStore";
+import { useUIStore } from "../../store/UI/UIStore";
+import {radioId} from "../../scripts/item-utils";
+import {useDialogStore} from "../../store/UI/dialogStore";
+import {caps} from "../../scripts/utils";
 
 const spotify = useSpotifyApiStore();
-const base = useBaseStore();
 const ui = useUIStore();
 const router = useRouter();
+const dialog = useDialogStore();
 
 const options: Ref<any> = ref([
     {
@@ -208,9 +210,9 @@ refresh();
 
 async function generate() {
     if (seedGenres.value.length > 5)
-        return base.addSnack("You can't select more than 5 genres");
+        return dialog.addSnack("You can't select more than 5 genres");
     if (seedGenres.value.length === 0)
-        return base.addSnack("You have to select at least 1 genre");
+        return dialog.addSnack("You have to select at least 1 genre");
 
     let radio = {} as any;
     if (seedGenres.value.length > 0)
@@ -222,9 +224,9 @@ async function generate() {
         radio["target_" + option.name] = option.value;
 
     if (Object.keys(radio).length === 0)
-        return base.addSnack("Select some options before generating radio");
+        return dialog.addSnack("Select some options before generating radio");
 
-    radio.id = base.radioId();
+    radio.id = radioId();
 
     await router.push({
         path: "/radio",

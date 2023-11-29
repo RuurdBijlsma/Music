@@ -8,8 +8,9 @@ import {
 } from "../../scripts/types";
 import { toRaw } from "vue";
 import { usePlayerStore } from "./player";
-import { baseDb, useBaseStore } from "../base";
+import { useBaseStore } from "../base";
 import { useSpotifyApiStore } from "../spotify-api";
+import {baseDb} from "../../scripts/database";
 
 export const useStatsStore = defineStore("playerStats", () => {
     const player = usePlayerStore();
