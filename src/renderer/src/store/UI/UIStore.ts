@@ -69,7 +69,6 @@ export const useUIStore = defineStore("UI", () => {
             });
         }
         let { themeString, msToSwitch } = getThemeFromLocalStorage();
-        console.log("Applied from LS", themeString, msToSwitch);
         theme.global.name.value = themeString;
         if (msToSwitch !== -1) {
             clearTimeout(scheduleTimeout);

@@ -68,11 +68,7 @@
 
 <script lang="ts" setup>
 // todo
-// check if tokens needs deep watch for persistent ref
-// possibly replace color thief with something without vulnerabilities
-// theme light/dark broke
 // show individual artist stats graph
-// recent searches is broken
 
 import TopMenu from "./components/main-ui/TopMenu.vue";
 import MusicPlayer from "./components/player/MusicPlayer.vue";

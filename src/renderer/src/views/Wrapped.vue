@@ -35,28 +35,49 @@
         <v-list class="stat-list">
             <div class="item-stat pa-4">
                 <p class="minutes-stat">Artist</p>
-                <p class="minutes-stat">Listened minutes</p>
+                <p class="minutes-stat align-right">Listened minutes</p>
             </div>
-            <v-list-item
-                v-for="({ artist, minutes }, i) of artistsTop"
-                :to="itemUrl(artist)"
-                rounded
-                @click.right="
-                    dialog.setContextMenuItem($event as MouseEvent, artist)
-                "
+            <template
+                v-for="({ artist, listenMinutes, history }, i) of artistsTop"
             >
-                <v-list-item-title class="item-stat">
-                    <p class="item-rank">{{ i + 1 }}</p>
-                    <v-avatar :image="itemImage(artist)" size="36px" />
-                    <p class="flex-grow-1">{{ artist.name }}</p>
-                    <p class="minutes-stat">
-                        <span class="font-weight-bold">{{
-                            minutes.toLocaleString()
-                        }}</span>
-                        mins
-                    </p>
-                </v-list-item-title>
-            </v-list-item>
+                <v-list-item
+                    rounded
+                    @click.right="
+                        dialog.setContextMenuItem($event as MouseEvent, artist)
+                    "
+                >
+                    <v-list-item-title class="item-stat">
+                        <p class="item-rank">{{ i + 1 }}</p>
+                        <v-avatar
+                            :image="
+                                itemImage(artist as SpotifyApi.ArtistObjectFull)
+                            "
+                            size="36px"
+                        />
+                        <router-link
+                            no-style
+                            :to="itemUrl(artist)"
+                            class="flex-grow-1"
+                            >{{ artist.name }}
+                        </router-link>
+                        <p class="minutes-stat align-right">
+                            <span class="font-weight-bold">{{
+                                listenMinutes.toLocaleString()
+                            }}</span>
+                            mins
+                        </p>
+                        <v-btn
+                            @click="toggleChart(artist.id)"
+                            icon="mdi-chart-line-variant"
+                            density="compact"
+                            variant="text"
+                        />
+                    </v-list-item-title>
+                </v-list-item>
+                <div v-if="expandedArtists.has(artist.id)">
+                    <line-chart :chart-data="artistChart(`Minutes listened to ${artist.name}`, history)"/>
+                </div>
+            </template>
         </v-list>
 
         <v-divider class="mt-5 mb-5" />
@@ -177,7 +198,12 @@
 import LineChart from "../components/LineChart.vue";
 import { computed, ref } from "vue";
 import { useStatsStore } from "../store/player/playStats";
-import { ChartData, ItemCollection, TrackStat } from "../scripts/types";
+import {
+    ArtistStat,
+    ChartData,
+    ItemCollection,
+    TrackStat,
+} from "../scripts/types";
 import { useUIStore } from "../store/UI/UIStore";
 import { useSpotifyApiStore } from "../store/spotify-api";
 import TrackListItem from "../components/track-list/TrackListItem.vue";
@@ -204,11 +230,27 @@ const shownCharts = ref([2, 9, 11]);
 const trackLimit = ref(10);
 const artistLimit = ref(5);
 
-const artistsTop = ref(
-    [] as { artist: SpotifyApi.ArtistObjectFull; minutes: number }[],
-);
+const artistsTop = ref([] as ArtistStat[]);
 const tracksTop = ref([] as TrackStat[]);
 const tracksSkip = ref([] as TrackStat[]);
+const expandedArtists = ref(new Set<string>());
+
+function toggleChart(artistId: string) {
+    if (expandedArtists.value.has(artistId)) {
+        expandedArtists.value.delete(artistId);
+    } else {
+        expandedArtists.value.add(artistId);
+    }
+}
+
+function artistChart(label:string, history: { [key: string]: number }) {
+    return {
+        labels: Object.keys(history).map((k) => new Date(k)),
+        values: Object.values(history),
+        yAxis: "Minutes",
+        dataLabel: label,
+    };
+}
 
 async function generate() {
     let { topArtists, topTracks, skipTracks, statistics } =
@@ -221,10 +263,10 @@ async function generate() {
                 : spotify.getArtist(a.id, true),
         ),
     );
-    artistsTop.value = artists.map((artist, i) => ({
-        artist,
-        minutes: topArtists[i].listenMinutes,
-    }));
+    artistsTop.value = artists.map((artist, i) => {
+        topArtists[i].artist = artist;
+        return topArtists[i];
+    });
     tracksTop.value = topTracks;
     tracksSkip.value = skipTracks;
 
@@ -344,6 +386,7 @@ h1 {
     opacity: 0.7;
     text-transform: uppercase;
     font-size: 13px;
+    width: 130px;
 }
 
 .track-list-item {
@@ -363,5 +406,9 @@ h1 {
 
 .track-list-item-parent.odd-item {
     background-color: rgba(var(--v-theme-on-background), 0.06);
+}
+
+.align-right {
+    text-align: right;
 }
 </style>
