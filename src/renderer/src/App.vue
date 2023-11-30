@@ -68,7 +68,7 @@
 
 <script lang="ts" setup>
 // TODO
-// For artist listen stats, add empty datapoint at today's day if there's no data there
+// For artist listen stats, add 0 minutes datapoint for every day there isn't a data point available
 
 import TopMenu from "./components/main-ui/TopMenu.vue";
 import MusicPlayer from "./components/player/MusicPlayer.vue";
