@@ -213,20 +213,28 @@ export default class NodeFunctions {
         let ext = os.platform() === "win32" ? ".exe" : "";
 
         this.ffmpegPath = path.join(Directories.files, "ffmpeg" + ext);
-        let ffprobePath = path.join(Directories.files, "ffprobe" + ext);
-        if (
-            (await this.checkFileExists(this.ffmpegPath)) &&
-            (await this.checkFileExists(ffprobePath))
-        ) {
-        } else {
-            await (
-                await ffBinaries
-            ).downloadBinaries({
-                components: ["ffmpeg", "ffprobe"],
-                destination: Directories.files,
-                tempDirectory: Directories.temp,
-                version: os.platform() === "win32" ? "latest" : "4.0",
-            });
+        if (!await this.checkFileExists(this.ffmpegPath)) {
+            if (os.platform() !== "win32") {
+                child_process.exec("ffmpeg", (error, stdout, stderr) => {
+                    console.log({ stdout, stderr });
+                    if (
+                        !stdout.startsWith("ffmpeg version") &&
+                        !stderr.startsWith("ffmpeg version")
+                    ) {
+                        this.win.webContents.send("ffmpegPath");
+                    }else{
+                        this.ffmpegPath = 'ffmpeg';
+                    }
+                });
+            } else {
+                await (
+                    await ffBinaries
+                ).downloadBinaries({
+                    components: ["ffmpeg"],
+                    destination: Directories.files,
+                    tempDirectory: Directories.temp,
+                });
+            }
         }
     }
 

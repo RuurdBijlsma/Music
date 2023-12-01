@@ -30,6 +30,10 @@ export const usePlatformStore = defineStore("platform", () => {
         directories.value = d;
     });
 
+    window.events.on("ffmpegPath", () => {
+        alert("Please install ffmpeg in PATH and restart the application");
+    });
+
     window.events.on("toggleFavorite", async () => {
         if (player.track !== null) {
             let added = await library.toggleLike(player.track);

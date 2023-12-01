@@ -91,6 +91,7 @@ const events = {
     },
 };
 ipcRenderer.on("toggleFavorite", () => events.emit("toggleFavorite"));
+ipcRenderer.on("ffmpegPath", () => events.emit("ffmpegPath"));
 ipcRenderer.on("play", () => events.emit("play"));
 ipcRenderer.on("pause", () => events.emit("pause"));
 ipcRenderer.on("skip", (_, n: number) => events.emit("skip", n));
