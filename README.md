@@ -22,6 +22,11 @@ Music player built with Electron, Vue 3, and Vuetify.
 
 3. On startup of the application fill in your api keys and log in.
 
+### Extra installation steps, only for Linux
+
+1. When using Arch, install `libxcrypt-compat`
+2. Make sure `ffmpeg` is in your PATH
+
 ### Liked tracks
 
 ![Liked tracks](/.gh/liked-tracks.png?raw=true "Homepage")
