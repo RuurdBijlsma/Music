@@ -213,17 +213,17 @@ export default class NodeFunctions {
         let ext = os.platform() === "win32" ? ".exe" : "";
 
         this.ffmpegPath = path.join(Directories.files, "ffmpeg" + ext);
-        if (!await this.checkFileExists(this.ffmpegPath)) {
+        if (!(await this.checkFileExists(this.ffmpegPath))) {
             if (os.platform() !== "win32") {
-                child_process.exec("ffmpeg", (error, stdout, stderr) => {
+                child_process.exec("ffmpeg", (_, stdout, stderr) => {
                     console.log({ stdout, stderr });
                     if (
                         !stdout.startsWith("ffmpeg version") &&
                         !stderr.startsWith("ffmpeg version")
                     ) {
                         this.win.webContents.send("ffmpegPath");
-                    }else{
-                        this.ffmpegPath = 'ffmpeg';
+                    } else {
+                        this.ffmpegPath = "ffmpeg";
                     }
                 });
             } else {
