@@ -18,9 +18,9 @@ Music player built with Electron, Vue 3, and Vuetify.
 
 2. Create a Spotify api project with one of the redirect urls being: http://localhost:38900
 
-   - Explanation: https://developer.spotify.com/documentation/web-api
+    - Explanation: https://developer.spotify.com/documentation/web-api
 
-4. On startup of the application fill in your api keys and log in. 
+3. On startup of the application fill in your api keys and log in.
 
 ### Liked tracks
 

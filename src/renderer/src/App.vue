@@ -69,6 +69,7 @@
 <script lang="ts" setup>
 // TODO
 // For artist listen stats, add 0 minutes datapoint for every day there isn't a data point available
+// use homemade ffbinaries package
 
 import TopMenu from "./components/main-ui/TopMenu.vue";
 import MusicPlayer from "./components/player/MusicPlayer.vue";
