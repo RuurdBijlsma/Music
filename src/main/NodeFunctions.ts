@@ -22,7 +22,8 @@ import lightNextIcon from "../../resources/media-icon/light-nexticon.png?asset";
 import replaceSpecialCharacters from "replace-special-characters";
 import { autoUpdater } from "electron-updater";
 import * as https from "https";
-const ffBinaries = import("ff-binaries-2")
+
+const ffBinaries = import("ff-binaries-2");
 const YTDlpWrap = require("yt-dlp-wrap").default;
 export default class NodeFunctions {
     private readonly win: BrowserWindow;
@@ -47,7 +48,8 @@ export default class NodeFunctions {
 
     constructor(win: BrowserWindow) {
         this.win = win;
-        this.ytdlpPath = path.join(Directories.files, "ytdlp.exe");
+        let ext = os.platform() === "win32" ? ".exe" : "";
+        this.ytdlpPath = path.join(Directories.files, "ytdlp" + ext);
         this.ytdlp = new YTDlpWrap();
         this.ffmpegPath = "";
         this.darkIcons = null;
@@ -217,10 +219,13 @@ export default class NodeFunctions {
             (await this.checkFileExists(ffprobePath))
         ) {
         } else {
-            await (await ffBinaries).downloadBinaries({
+            await (
+                await ffBinaries
+            ).downloadBinaries({
                 components: ["ffmpeg", "ffprobe"],
                 destination: Directories.files,
                 tempDirectory: Directories.temp,
+                version: os.platform() === "win32" ? "latest" : "4.0",
             });
         }
     }
