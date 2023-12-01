@@ -19,11 +19,10 @@ import lightPlayIcon from "../../resources/media-icon/light-playicon.png?asset";
 import lightPauseIcon from "../../resources/media-icon/light-pauseicon.png?asset";
 import lightPrevIcon from "../../resources/media-icon/light-previcon.png?asset";
 import lightNextIcon from "../../resources/media-icon/light-nexticon.png?asset";
-import ffBinaries from "ffbinaries";
 import replaceSpecialCharacters from "replace-special-characters";
 import { autoUpdater } from "electron-updater";
 import * as https from "https";
-
+const ffBinaries = import("ff-binaries-2")
 const YTDlpWrap = require("yt-dlp-wrap").default;
 export default class NodeFunctions {
     private readonly win: BrowserWindow;
@@ -44,7 +43,7 @@ export default class NodeFunctions {
         prevIcon: any;
     } | null;
     private thumbButtons = { dark: false, playing: false, show: false };
-    private waitBinaries: Promise<void>;
+    private readonly waitBinaries: Promise<void>;
 
     constructor(win: BrowserWindow) {
         this.win = win;
@@ -201,19 +200,6 @@ export default class NodeFunctions {
         return result.join(" ");
     }
 
-    async getFfmpegBinaries() {
-        return new Promise<void>((resolve) => {
-            ffBinaries.downloadBinaries(
-                ["ffmpeg", "ffprobe"],
-                {
-                    quiet: false,
-                    destination: Directories.files,
-                },
-                () => resolve(),
-            );
-        });
-    }
-
     async getBinaries() {
         if (await this.checkFileExists(this.ytdlpPath)) {
             this.ytdlp.setBinaryPath(this.ytdlpPath);
@@ -231,7 +217,11 @@ export default class NodeFunctions {
             (await this.checkFileExists(ffprobePath))
         ) {
         } else {
-            await this.getFfmpegBinaries();
+            await (await ffBinaries).downloadBinaries({
+                components: ["ffmpeg", "ffprobe"],
+                destination: Directories.files,
+                tempDirectory: Directories.temp,
+            });
         }
     }
 
@@ -284,7 +274,7 @@ export default class NodeFunctions {
                     });
                 })
                 .on("error", (err) => {
-                    fs.unlink(destinationFile);
+                    fs.unlink(destinationFile).then();
                     reject(err);
                 });
         });
