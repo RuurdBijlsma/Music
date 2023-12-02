@@ -38,7 +38,7 @@
         "electron-updater": "^6.1.4",
         "events": "^3.3.0",
         "express": "^4.18.2",
-        "ff-binaries-2": "git://github.com/ruurdbijlsma/ffbinaries-node.git#6e38e25b140ec4f6cd5c0f856d415defc48887e2",
+        "ff-binaries-2": "git://github.com/ruurdbijlsma/ffbinaries-node.git#687488e5dcb07f740fb8c7e478e0a688662fbda3",
         "filenamify": "^6.0.0",
         "iconv-lite": "^0.6.3",
         "idb": "^7.1.1",
