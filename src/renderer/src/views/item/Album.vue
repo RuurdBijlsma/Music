@@ -10,7 +10,7 @@
                     rounding="5px"
                 />
                 <spacer />
-                <h1>{{ album.name }}</h1>
+                <h1 :title="album.name" class="album-name">{{ album.name }}</h1>
                 <h2 class="artist-names">
                     <template v-for="(artist, i) in album.artists">
                         <router-link :to="itemUrl(artist)" class="user-url">
@@ -112,11 +112,18 @@ const totalDurationMs = computed(() =>
     align-items: center;
     padding: 20px;
     font-weight: 300;
-    height: 485px;
+    height: 490px;
 }
 
-.album-info > h1 {
+.album-name {
     font-weight: 400;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2; /* number of lines to show */
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    font-size: 29px;
+    overflow-y: hidden;
 }
 
 .user-url {

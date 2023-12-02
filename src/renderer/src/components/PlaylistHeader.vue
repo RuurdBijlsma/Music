@@ -8,7 +8,7 @@
             rounding="5px"
         />
         <spacer />
-        <h1>{{ playlist.name }}</h1>
+        <h1 class="playlist-name" :title="playlist.name">{{ playlist.name }}</h1>
         <p class="playlist-stats">
             Created by
             <router-link
@@ -80,11 +80,18 @@ const totalDurationMs: ComputedRef<number> = computed(() => {
     align-items: center;
     padding: 20px;
     font-weight: 300;
-    height: 485px;
+    height: 490px;
 }
 
-.playlist-info > h1 {
+.playlist-name {
     font-weight: 400;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2; /* number of lines to show */
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    font-size: 29px;
+    overflow-y: hidden;
 }
 
 .user-url {

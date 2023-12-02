@@ -14,7 +14,7 @@
                 @click.right="dialog.setContextMenuItem($event, artist)"
             />
             <spacer />
-            <h1>{{ artist.name }}</h1>
+            <h1 :title="artist.name" class="artist-name">{{ artist.name }}</h1>
             <p>{{ followerString }}</p>
             <p class="genres">{{ artist.genres.join(" / ") }}</p>
             <collection-buttons :collection="collection" :like-item="artist" />
@@ -147,8 +147,19 @@ const followerString = computed(() => {
     flex-direction: column;
     align-items: center;
     font-weight: 300;
-    height: 485px;
+    height: 490px;
     padding: 20px;
+}
+
+.artist-name {
+    font-weight: 400;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2; /* number of lines to show */
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    font-size: 29px;
+    overflow-y: hidden;
 }
 
 .genres {
@@ -156,10 +167,6 @@ const followerString = computed(() => {
     opacity: 0.7;
     text-align: center;
     font-size: 12px;
-}
-
-.artist-info > h1 {
-    font-weight: 400;
 }
 
 .user-url {
