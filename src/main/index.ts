@@ -14,6 +14,7 @@ function createWindow(): void {
         minWidth: 521,
         minHeight: 640,
         autoHideMenuBar: true,
+        frame: false,
         show: false,
         titleBarStyle: "hidden",
         webPreferences: {
