@@ -221,8 +221,6 @@ export const useStatsStore = defineStore("playerStats", () => {
         return result;
     }
 
-    generateWrapStats().then();
-
     async function generateWrapStats(trackLimit = 10, artistLimit = 5) {
         // TOP LISTENED STUFF
         let topArtists = await getTopFromIndex<ArtistStat>(
