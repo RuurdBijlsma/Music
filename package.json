@@ -1,6 +1,6 @@
 {
     "name": "ruurd-music",
-    "version": "6.8.1",
+    "version": "6.8.3",
     "description": "A streaming music player",
     "main": "./out/main/index.js",
     "keywords": [
