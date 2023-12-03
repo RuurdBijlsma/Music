@@ -1,6 +1,7 @@
 import electron from "electron";
 import fs from "fs";
 import path from "path";
+import os from "os";
 
 type PathType =
     | "temp"
@@ -26,7 +27,11 @@ class Directories {
     public music: string;
 
     constructor() {
-        this.temp = this.initializeDir("temp", "ruurd-music");
+        if (os.platform() === "linux") {
+            this.temp = this.initializeDir("appData", "ruurd-music-files");
+        } else {
+            this.temp = this.initializeDir("temp", "ruurd-music");
+        }
         this.files = this.initializeDir("appData", "ruurd-music-files");
         this.music = this.getDir("music", "");
     }
