@@ -28,7 +28,7 @@ class Directories {
 
     constructor() {
         if (os.platform() === "linux") {
-            this.temp = this.initializeDir("appData", "ruurd-music-files");
+            this.temp = this.initializeDir("appData", "ruurd-music-temp");
         } else {
             this.temp = this.initializeDir("temp", "ruurd-music");
         }
