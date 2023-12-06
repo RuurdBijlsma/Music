@@ -23,8 +23,8 @@ import replaceSpecialCharacters from "replace-special-characters";
 import { autoUpdater } from "electron-updater";
 import * as https from "https";
 import log from "electron-log/main";
+import ffBinaries from "ffbinaries";
 
-const ffBinaries = import("ff-binaries-2");
 const YTDlpWrap = require("yt-dlp-wrap").default;
 export default class NodeFunctions {
     private readonly win: BrowserWindow;
@@ -55,7 +55,6 @@ export default class NodeFunctions {
         this.ffmpegPath = "";
         this.darkIcons = null;
         this.lightIcons = null;
-
 
         this.waitBinaries = this.getBinaries();
         this.initializePlatform().then();
@@ -204,6 +203,19 @@ export default class NodeFunctions {
         return result.join(" ");
     }
 
+    async getFfmpegBinary() {
+        return new Promise<void>((resolve) => {
+            ffBinaries.downloadBinaries(
+                ["ffmpeg"],
+                {
+                    quiet: false,
+                    destination: Directories.files,
+                },
+                () => resolve(),
+            );
+        });
+    }
+
     async getBinaries() {
         if (await this.checkFileExists(this.ytdlpPath)) {
             this.ytdlp.setBinaryPath(this.ytdlpPath);
@@ -229,13 +241,7 @@ export default class NodeFunctions {
                     }
                 });
             } else {
-                await (
-                    await ffBinaries
-                ).downloadBinaries({
-                    components: ["ffmpeg"],
-                    destination: Directories.files,
-                    tempDirectory: Directories.temp,
-                });
+                await this.getFfmpegBinary();
             }
         }
     }
