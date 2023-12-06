@@ -21,6 +21,7 @@ import { useRouter } from "vue-router";
 import { baseDb } from "../scripts/database";
 import { itemUrl } from "../scripts/item-utils";
 import { useDialogStore } from "./UI/dialogStore";
+import log from 'electron-log/renderer';
 
 export const useLibraryStore = defineStore("library", () => {
     const platform = usePlatformStore();
@@ -322,9 +323,6 @@ export const useLibraryStore = defineStore("library", () => {
             )
                 continue;
             if (localTrack.track.album === null) {
-                console.log(
-                    "Liked track album not present, getting from spotify api",
-                );
                 missingAlbumTracks.push(localTrack);
             }
             let apiTrack = apiTracks[localTrack.id];
@@ -338,7 +336,6 @@ export const useLibraryStore = defineStore("library", () => {
             let fixedTracks: SpotifyTrack[] = [];
             for (let i = 0; i < missingAlbumTracks.length; i += 10) {
                 let ids = missingAlbumTracks.slice(i, i + 10).map((t) => t.id);
-                console.log("GET SLICE", ids);
                 let newTracks = await spotify.api
                     .getTracks(ids)
                     .then((i) => i.tracks);
@@ -349,18 +346,12 @@ export const useLibraryStore = defineStore("library", () => {
                 for (let i = 0; i < fixedTracks.length; i++) {
                     missingAlbumTracks[i].track = fixedTracks[i];
                     tx.store.put(toRaw(missingAlbumTracks[i]));
-                    console.log("Fixed", missingAlbumTracks[i].track.id);
                 }
                 await tx.done;
-                console.log("Put fixed tracks in DB!");
             }
         }
         // if sort is not default, make sure tracks.value is set to correct value
         if (changedTracks.length > 0) {
-            console.warn(
-                "Tracks arent in order, updating order",
-                changedTracks.map((t) => t.title),
-            );
             const tx = db.transaction("tracks", "readwrite");
             for (let likedTrack of changedTracks)
                 tx.store.put(toRaw(likedTrack));
@@ -553,10 +544,6 @@ export const useLibraryStore = defineStore("library", () => {
             delete likedInfo.startTime;
             delete likedInfo.endTime;
             await db.put("tracks", toRaw(likedInfo));
-            console.warn(
-                "Removing end & start time from likedInfo because the source file changed.",
-                likedInfo,
-            );
         }
 
         dialog.source.show = false;
@@ -602,7 +589,7 @@ export const useLibraryStore = defineStore("library", () => {
     async function editTrack(likedTrack: LikedTrack) {
         let likedInfo = tracks.value.find((t) => t.id === likedTrack.id);
         if (!likedInfo)
-            return console.warn(
+            return log.warn(
                 "You can only edit tracks in your liked tracks",
             );
         player.pause().then();

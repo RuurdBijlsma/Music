@@ -17,6 +17,7 @@ import { useTrackLoaderStore } from "./trackLoader";
 import { useStatsStore } from "./playStats";
 import { useUIStore } from "../UI/UIStore";
 import { baseDb } from "../../scripts/database";
+import log from 'electron-log/renderer';
 
 export const usePlayerStore = defineStore("player", () => {
     const base = useBaseStore();
@@ -156,7 +157,7 @@ export const usePlayerStore = defineStore("player", () => {
         autoplay = true,
     ) {
         const _trackId = _track.id;
-        console.log(_trackId);
+        log.info(_trackId);
         // if track is already playing, exit
         if (isActive(_collection, _track)) return;
 
@@ -504,7 +505,7 @@ export const usePlayerStore = defineStore("player", () => {
         try {
             navigator.mediaSession.setActionHandler("stop", () => pause());
         } catch (error) {
-            console.warn(
+            log.warn(
                 'Warning! The "stop" media session action is not supported.',
             );
         }
@@ -515,7 +516,7 @@ export const usePlayerStore = defineStore("player", () => {
                     playerElement.currentTime = event.seekTime;
             });
         } catch (error) {
-            console.warn(
+            log.warn(
                 'Warning! The "seekto" media session action is not supported.',
             );
         }

@@ -7,6 +7,7 @@ import { useRuurdAuthStore } from "./ruurd-auth";
 import { useSpotifyAuthStore } from "./spotify-auth";
 import { persistentRef } from "../scripts/utils";
 import { watch } from "vue";
+import log from 'electron-log/renderer';
 
 export const useBackupStore = defineStore("backup", () => {
     const base = useBaseStore();
@@ -31,10 +32,6 @@ export const useBackupStore = defineStore("backup", () => {
         let difference = now - lastBackup;
         if (difference < 1000 * 60 * 60 * 24) return;
 
-        console.info(
-            "Doing an auto backup! last one was at ",
-            new Date(lastBackup),
-        );
         await exportToServer();
         localStorage.lastAutoBackup = now;
     }
@@ -66,14 +63,14 @@ export const useBackupStore = defineStore("backup", () => {
                 result.filePaths[0],
             );
             if (fileContents === null) {
-                console.warn("File contents empty", result.filePath);
+                log.warn("File contents empty", result.filePath);
                 return false;
             }
             let data = JSON.parse(fileContents);
             await importData(data as DataExport);
             return true;
         } catch (e: any) {
-            console.error(e);
+            log.error(e);
             return false;
         }
     }
@@ -155,7 +152,7 @@ export const useBackupStore = defineStore("backup", () => {
             object: { [key: string]: any },
         ) => {
             if (!object)
-                return console.warn(
+                return log.warn(
                     "[import error]",
                     storeName,
                     "value is not defined",
@@ -177,7 +174,7 @@ export const useBackupStore = defineStore("backup", () => {
         await putStoreObject("statistics", idb.statistics);
         const putStoreArray = (storeName: string, array: any[]) => {
             if (!array)
-                return console.warn(
+                return log.warn(
                     "[import error]",
                     storeName,
                     "value is not defined",

@@ -22,6 +22,7 @@ import lightNextIcon from "../../resources/media-icon/light-nexticon.png?asset";
 import replaceSpecialCharacters from "replace-special-characters";
 import { autoUpdater } from "electron-updater";
 import * as https from "https";
+import log from "electron-log/main";
 
 const ffBinaries = import("ff-binaries-2");
 const YTDlpWrap = require("yt-dlp-wrap").default;
@@ -54,6 +55,7 @@ export default class NodeFunctions {
         this.ffmpegPath = "";
         this.darkIcons = null;
         this.lightIcons = null;
+
 
         this.waitBinaries = this.getBinaries();
         this.initializePlatform().then();
@@ -144,7 +146,7 @@ export default class NodeFunctions {
                         progress,
                     });
                 })
-                .on("ytDlpEvent", (a: string, b: string) => console.log(a, b))
+                .on("ytDlpEvent", (a: string, b: string) => log.info(a, b))
                 .on("error", (error: Error) => reject(error))
                 .on("close", () =>
                     resolve(
@@ -216,7 +218,7 @@ export default class NodeFunctions {
         if (!(await this.checkFileExists(this.ffmpegPath))) {
             if (os.platform() !== "win32") {
                 child_process.exec("ffmpeg", (_, stdout, stderr) => {
-                    console.log({ stdout, stderr });
+                    log.info({ stdout, stderr });
                     if (
                         !stdout.startsWith("ffmpeg version") &&
                         !stderr.startsWith("ffmpeg version")
@@ -256,7 +258,7 @@ export default class NodeFunctions {
                 .filter((l: string) => l.length > 0)
                 .map((l: string) => JSON.parse(l));
         } catch (e: any) {
-            console.error("YTDL PARSE ERROR", e, stdout);
+            log.error("YTDL PARSE ERROR", e, stdout);
         }
     }
 
@@ -346,7 +348,7 @@ export default class NodeFunctions {
         let regResult = globalShortcut.register(likeShortcut, async () => {
             this.win.webContents.send("toggleFavorite");
         });
-        if (!regResult) console.warn("Failed to register global shortcut ❌");
+        if (!regResult) log.warn("Failed to register global shortcut ❌");
 
         const getIcons = (theme: "dark" | "light" = "dark") => {
             let playIcon = {
@@ -552,7 +554,7 @@ export default class NodeFunctions {
                     try {
                         results.push(JSON.parse(line));
                     } catch (e) {
-                        console.warn("[win] YTDLP Search parse error", e);
+                        log.warn("[win] YTDLP Search parse error", e);
                     }
                 });
                 proc.on("close", () => {
@@ -568,7 +570,7 @@ export default class NodeFunctions {
                             .map(JSON.parse),
                     );
                 } catch (e) {
-                    console.warn("[linux] YTDLP Search parse error", e);
+                    log.warn("[linux] YTDLP Search parse error", e);
                 }
             }
         });
@@ -579,7 +581,7 @@ export default class NodeFunctions {
             await fs.writeFile(filePath, contents);
             return true;
         } catch (err) {
-            console.error(err);
+            log.error(err);
             return false;
         }
     }

@@ -1,5 +1,6 @@
 import { Ref, ref, toRaw, watch } from "vue";
 import { baseDb } from "./database";
+import log from 'electron-log/renderer';
 
 export function hexToRgb(hex: string) {
     if (hex.length === 4) {
@@ -7,7 +8,7 @@ export function hexToRgb(hex: string) {
     }
 
     if (hex.length !== 7 || hex[0] !== "#") {
-        console.warn("Got invalid hex format", hex, "returning rgb(0,0,0)");
+        log.warn("Got invalid hex format", hex, "returning rgb(0,0,0)");
         return [0, 0, 0]; // Invalid hex format
     }
 
@@ -16,7 +17,7 @@ export function hexToRgb(hex: string) {
     const b = parseInt(hex.slice(5, 7), 16);
 
     if (isNaN(r) || isNaN(g) || isNaN(b)) {
-        console.warn("Got invalid hex format", hex, "returning rgb(0,0,0)");
+        log.warn("Got invalid hex format", hex, "returning rgb(0,0,0)");
         return [0, 0, 0]; // Invalid hex format
     }
 
@@ -135,7 +136,6 @@ export function encodeUrlName(name: string) {
         encoded = encodeURIComponent(toEncode);
     } catch (e) {
         encoded = toEncode.replace(/[^a-z0-9]/gi, "");
-        console.warn(`Couldn't uri encode ${toEncode}, changed to ${encoded}`);
     }
     return encoded;
 }

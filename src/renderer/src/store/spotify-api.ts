@@ -7,6 +7,7 @@ import { Item } from "../scripts/types";
 import { executeCached } from "../scripts/utils";
 import { toRaw } from "vue";
 import { baseDb } from "../scripts/database";
+import log from 'electron-log/renderer';
 
 export const useSpotifyApiStore = defineStore("spotify-api", () => {
     const library = useLibraryStore();
@@ -52,7 +53,6 @@ export const useSpotifyApiStore = defineStore("spotify-api", () => {
             }
             return tracks;
         }
-        console.warn("Didn't upgrade item to full, type not supported", item);
         return [];
     }
 
@@ -108,7 +108,7 @@ export const useSpotifyApiStore = defineStore("spotify-api", () => {
                 break;
 
             let nextUrl = pageObject(result).next;
-            if (nextUrl === undefined) console.warn("next url is undefined");
+            if (nextUrl === undefined) log.warn("next url is undefined");
 
             getData = () => api.getGeneric(nextUrl) as Promise<T[]>;
         }

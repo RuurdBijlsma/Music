@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
+import log from 'electron-log/renderer';
 
 export const useUpdateStore = defineStore("update", () => {
     const updateState = ref({
@@ -17,11 +18,9 @@ export const useUpdateStore = defineStore("update", () => {
     });
 
     window.events.on("log", (...args: any[]) => {
-        console.info("[NODE_LOG]", ...args);
         if (args[0] !== "[auto updater]" || args.length !== 3) return;
-        console.log("AUTO UPDATER LOG DETECTED");
         let [, type, data] = args;
-        console.log({ type, data });
+        log.info({ type, data });
         switch (type) {
             case "error":
                 updateState.value.error = data.message;

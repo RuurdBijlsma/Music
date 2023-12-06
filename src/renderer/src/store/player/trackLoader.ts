@@ -10,6 +10,7 @@ import { usePlatformStore } from "../electron";
 import { useLibraryStore } from "../library";
 import { baseDb } from "../../scripts/database";
 import { useDialogStore } from "../UI/dialogStore";
+import log from 'electron-log/renderer';
 
 export const useTrackLoaderStore = defineStore("trackLoader", () => {
     const platform = usePlatformStore();
@@ -41,7 +42,6 @@ export const useTrackLoaderStore = defineStore("trackLoader", () => {
             trackPath = `${platform.directories?.temp}/${changeSourceTracks.get(
                 track.id,
             )}.mp3`;
-            console.warn("Using temp track path", trackPath);
         }
         let fileSize = await platform.fileSize(trackPath);
         let fileExists = fileSize !== -1;
@@ -88,14 +88,13 @@ export const useTrackLoaderStore = defineStore("trackLoader", () => {
         }
 
         if (trackData.path === undefined) {
-            console.warn("why is path undefined", trackData);
             throw new Error("Track path is undefined");
         }
 
         // Track Bars
         async function trackBars() {
             if (fileSize > 300000000) {
-                console.warn(
+                log.warn(
                     "File is too big to generate track bars",
                     fileSize,
                 );

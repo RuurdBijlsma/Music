@@ -9,6 +9,7 @@ import { usePlayerStore } from "./player/player";
 import { randomUser } from "../scripts/image-sources";
 import { baseDb } from "../scripts/database";
 import { persistentRef } from "../scripts/utils";
+import log from 'electron-log/renderer';
 
 export interface AuthToken {
     code: null | string;
@@ -72,7 +73,7 @@ export const useSpotifyAuthStore = defineStore("spotify-auth", () => {
                 expiryDate: +new Date() + parsed.expires_in * 1000,
             } as AuthToken;
         } catch (e: any) {
-            console.log("Error", e.message, "result = ", result);
+            log.info("Error", e.message, "result = ", result);
         }
         return {} as AuthToken;
     }
@@ -84,7 +85,7 @@ export const useSpotifyAuthStore = defineStore("spotify-auth", () => {
 
     async function loginByRefreshToken() {
         if (tokens.value.refresh === null || tokens.value.refresh === "") {
-            console.warn(
+            log.warn(
                 "Couldn't get new token, refresh token isn't set",
                 tokens,
             );
@@ -147,7 +148,7 @@ export const useSpotifyAuthStore = defineStore("spotify-auth", () => {
 
             await library.initialize();
         } else {
-            console.warn("Auth has expired, getting new token");
+            log.warn("Auth has expired, getting new token");
             //auth is expired
             await loginByRefreshToken();
         }

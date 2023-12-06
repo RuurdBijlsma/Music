@@ -12,6 +12,7 @@ import { useTrackLoaderStore } from "./player/trackLoader";
 import { useSearchStore } from "./search";
 import { baseDb } from "../scripts/database";
 import { useDialogStore } from "./UI/dialogStore";
+import log from 'electron-log/renderer';
 
 export const usePlatformStore = defineStore("platform", () => {
     const library = useLibraryStore();
@@ -329,7 +330,7 @@ export const usePlatformStore = defineStore("platform", () => {
                 state.value.downloaded = i;
                 let batch = tracks.slice(i, i + batchSize);
                 try {
-                    // console.log(batch[0]);
+                    // log.info(batch[0]);
                     let tracks = await Promise.all(
                         batch.map((track) =>
                             trackLoader.getFullTrackData(
@@ -343,7 +344,7 @@ export const usePlatformStore = defineStore("platform", () => {
                         return;
                     }
                 } catch (e: any) {
-                    console.warn(e);
+                    log.warn(e);
                     dialog.addSnack(`Couldn't download. ${e.message}`, 100000);
                     state.value.loading = false;
                     return;

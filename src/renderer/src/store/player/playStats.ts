@@ -238,7 +238,6 @@ export const useStatsStore = defineStore("playerStats", () => {
             "listenMinutes",
             trackLimit,
         );
-        console.log({ topArtists, topCollections, topTracks });
         // MOST SKIPPED STUFF
         let skipArtists = await getTopFromIndex<ArtistStat>(
             "artistStats",
@@ -257,7 +256,6 @@ export const useStatsStore = defineStore("playerStats", () => {
             }))
             .sort((a, b) => b.skipPercentage - a.skipPercentage)
             .slice(0, trackLimit);
-        console.log({ skipArtists, skipTracks });
 
         const db = await baseDb;
         let statValues = await db.getAll("statistics");
@@ -266,7 +264,6 @@ export const useStatsStore = defineStore("playerStats", () => {
             (acc, key, i) => ({ ...acc, [key.toString()]: statValues[i] }),
             {},
         ) as Statistics;
-        console.log(statistics);
         return {
             topArtists,
             topCollections,

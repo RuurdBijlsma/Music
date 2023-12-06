@@ -1,6 +1,7 @@
 import { BrowserWindow, shell } from "electron";
 import express from "express";
 import http, { Server } from "http";
+import log from "electron-log/main";
 
 interface AuthToken {
     code: null | string;
@@ -44,7 +45,7 @@ export default class SpotifyAuth {
         try {
             let parsed = JSON.parse(result);
             if (parsed.error) {
-                console.warn("Get auth by code error", parsed);
+                log.warn("Get auth by code error", parsed);
                 return {} as AuthToken;
             }
             return {
@@ -54,7 +55,7 @@ export default class SpotifyAuth {
                 expiryDate: +new Date() + parsed.expires_in * 1000,
             };
         } catch (e: any) {
-            console.log("Error", e.message, "t = ", result);
+            log.info("Error", e.message, "t = ", result);
         }
         return {} as AuthToken;
     }
@@ -67,7 +68,7 @@ export default class SpotifyAuth {
     }): Promise<AuthToken> {
         return new Promise(async (resolve) => {
             if (!spotifyAuth.hasCredentials) {
-                console.warn("Can't log in, keys are not set");
+                log.warn("Can't log in, keys are not set");
                 return;
             }
             const port = 38900;

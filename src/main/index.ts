@@ -3,6 +3,10 @@ import { join } from "path";
 import { electronApp, is, optimizer } from "@electron-toolkit/utils";
 import icon from "../../resources/app-icon/dark-500.png?asset";
 import { handleIpc } from "./ipcFunctions";
+import log from "electron-log/main";
+
+log.initialize({ preload: true });
+log.errorHandler.startCatching({ showDialog: true });
 
 function createWindow(): void {
     // Create the browser window.
