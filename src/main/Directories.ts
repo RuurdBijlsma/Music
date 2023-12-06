@@ -37,7 +37,6 @@ class Directories {
 
         this.storeFile = path.join(this.files, "store.json");
         this.music = this.getDir("music", "");
-        console.log(`THIS.MUSIC=${this.music}`);
         if (fs.existsSync(this.storeFile)) {
             let store = JSON.parse(fs.readFileSync(this.storeFile).toString());
             if (fs.existsSync(store.music)) this.music = store.music;
