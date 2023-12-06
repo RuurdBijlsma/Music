@@ -54,17 +54,17 @@ export function randomNotFound() {
         notfound5,
         notfound6,
         notfound7,
-    ][(date.getDate() % 7) + 1];
+    ][date.getDate() % 7];
 }
 
 export function randomLiked() {
     return [liked1, liked2, liked3, liked4, liked5, liked6, liked7][
-        (date.getDate() % 7) + 1
+        date.getDate() % 7
     ];
 }
 
 export function randomUser() {
     return [user1, user2, user3, user4, user5, user6, user7][
-        (date.getDate() % 7) + 1
+        date.getDate() % 7
     ];
 }
