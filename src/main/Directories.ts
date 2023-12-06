@@ -25,6 +25,7 @@ class Directories {
     public temp: string;
     public files: string;
     public music: string;
+    private readonly storeFile: string;
 
     constructor() {
         if (os.platform() === "linux") {
@@ -33,7 +34,19 @@ class Directories {
             this.temp = this.initializeDir("temp", "ruurd-music");
         }
         this.files = this.initializeDir("appData", "ruurd-music-files");
+
+        this.storeFile = path.join(this.files, "store.json");
         this.music = this.getDir("music", "");
+        console.log(`THIS.MUSIC=${this.music}`);
+        if (fs.existsSync(this.storeFile)) {
+            let store = JSON.parse(fs.readFileSync(this.storeFile));
+            if (fs.existsSync(store.music)) this.music = store.music;
+        }
+    }
+
+    changeMusicFolder(folder: string) {
+        this.music = folder;
+        fs.writeFileSync(this.storeFile, JSON.stringify({ music: folder }));
     }
 
     initializeDir(base: PathType, dir: string) {

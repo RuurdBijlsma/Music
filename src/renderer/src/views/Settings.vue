@@ -156,6 +156,17 @@
 
         <v-divider class="mt-3 mb-3" />
         <h3 class="mb-3">Audio settings</h3>
+        <div class="music-folder mb-5">
+            <v-btn
+                prepend-icon="mdi-folder-music-outline"
+                variant="tonal"
+                :color="ui.themeColor"
+                @click="platform.changeMusicFolder"
+                >
+                Change music folder
+            </v-btn>
+            <div class="folder">{{ platform.directories?.music }}</div>
+        </div>
         <p>
             Attempt to make loud tracks quieter to match closer with quiet
             tracks.
@@ -322,6 +333,16 @@ h3,
 h4,
 h5 {
     font-weight: 500;
+}
+
+.music-folder {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.folder {
+    opacity: 0.7;
 }
 
 .update-result {

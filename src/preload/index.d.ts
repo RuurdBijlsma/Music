@@ -40,6 +40,7 @@ declare global {
                 secret: string,
             }) => Promise<AuthToken>,
             resetSpotifyLogin: () => Promise<any>,
+            setMusicFolder: (folder: string) => Promise<void>,
         };
         events: EventEmitter,
     }

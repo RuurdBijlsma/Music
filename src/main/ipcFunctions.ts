@@ -72,6 +72,9 @@ export function handleIpc(ipcMain: Electron.IpcMain, win: BrowserWindow) {
         nf.downloadFile(url, file),
     );
     ipcMain.handle("getAppVersion", (_) => nf.getAppVersion());
+    ipcMain.handle("setMusicFolder", (_, folder: string) =>
+        nf.setMusicFolder(folder),
+    );
 
     ipcMain.handle(
         "firstLogin",

@@ -49,6 +49,8 @@ const api = {
         ipcRenderer.invoke("saveStringToFile", file, contents),
     getFileContents: (file: string) =>
         ipcRenderer.invoke("getFileContents", file),
+    setMusicFolder: (folder: string) =>
+        ipcRenderer.invoke("setMusicFolder", folder),
 
     firstLogin: (spotifyAuth: {
         hasCredentials: boolean;

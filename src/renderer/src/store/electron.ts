@@ -12,7 +12,7 @@ import { useTrackLoaderStore } from "./player/trackLoader";
 import { useSearchStore } from "./search";
 import { baseDb } from "../scripts/database";
 import { useDialogStore } from "./UI/dialogStore";
-import log from 'electron-log/renderer';
+import log from "electron-log/renderer";
 
 export const usePlatformStore = defineStore("platform", () => {
     const library = useLibraryStore();
@@ -64,6 +64,19 @@ export const usePlatformStore = defineStore("platform", () => {
             );
             setPlatformPlaying(player.playing);
         });
+
+    async function changeMusicFolder() {
+        if (directories.value === null) {
+            dialog.addSnack("Error! Couldn't load current music folder.");
+            return;
+        }
+        let result = await window.api.getOutputDirectory();
+        if (result.canceled) return;
+        let outputPath = result.filePaths[0];
+        directories.value.music = outputPath;
+        await window.api.setMusicFolder(outputPath);
+        log.info("changed it to", outputPath);
+    }
 
     function setPlatformPlaying(playing: boolean) {
         window.api.setPlatformPlaying(
@@ -398,5 +411,6 @@ export const usePlatformStore = defineStore("platform", () => {
         directories,
         fileSize,
         downloadFile,
+        changeMusicFolder,
     };
 });
