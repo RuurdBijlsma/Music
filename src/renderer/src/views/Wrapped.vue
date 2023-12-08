@@ -194,7 +194,7 @@
             :max="500"
             :min="0"
             hide-details
-            label="Shown track limit"
+            label="Shown artist limit"
             type="number"
             @change="generate"
         />
