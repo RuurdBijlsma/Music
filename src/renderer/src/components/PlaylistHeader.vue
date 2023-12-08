@@ -8,7 +8,9 @@
             rounding="5px"
         />
         <spacer />
-        <h1 class="playlist-name" :title="playlist.name">{{ playlist.name }}</h1>
+        <h1 :title="playlist.name" class="playlist-name">
+            {{ playlist.name }}
+        </h1>
         <p class="playlist-stats">
             Created by
             <router-link

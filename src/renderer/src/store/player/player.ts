@@ -17,7 +17,7 @@ import { useTrackLoaderStore } from "./trackLoader";
 import { useStatsStore } from "./playStats";
 import { useUIStore } from "../UI/UIStore";
 import { baseDb } from "../../scripts/database";
-import log from 'electron-log/renderer';
+import log from "electron-log/renderer";
 
 export const usePlayerStore = defineStore("player", () => {
     const base = useBaseStore();

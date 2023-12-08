@@ -596,7 +596,7 @@ export default class NodeFunctions {
         return app.getVersion();
     }
 
-    setMusicFolder(folder:string){
+    setMusicFolder(folder: string) {
         Directories.changeMusicFolder(folder);
     }
 }

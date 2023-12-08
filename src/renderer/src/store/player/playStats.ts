@@ -225,7 +225,7 @@ export const useStatsStore = defineStore("playerStats", () => {
         historyMinutes: { [key: string]: T },
         emptyVal: T,
     ) {
-        console.log("Augmenting", historyMinutes)
+        console.log("Augmenting", historyMinutes);
         let dates = Object.keys(historyMinutes).map((k) => +new Date(k));
         let firstDate = Math.min(...dates);
         const day = 1000 * 60 * 60 * 24;
@@ -290,5 +290,10 @@ export const useStatsStore = defineStore("playerStats", () => {
         };
     }
 
-    return { collectSkipStat, collectTrackStat, generateWrapStats, augmentHistoryMinutes };
+    return {
+        collectSkipStat,
+        collectTrackStat,
+        generateWrapStats,
+        augmentHistoryMinutes,
+    };
 });

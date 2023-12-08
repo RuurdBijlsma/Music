@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
-import log from 'electron-log/renderer';
+import log from "electron-log/renderer";
 
 export const useUpdateStore = defineStore("update", () => {
     const updateState = ref({

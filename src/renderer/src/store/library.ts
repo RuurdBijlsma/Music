@@ -21,7 +21,7 @@ import { useRouter } from "vue-router";
 import { baseDb } from "../scripts/database";
 import { itemUrl } from "../scripts/item-utils";
 import { useDialogStore } from "./UI/dialogStore";
-import log from 'electron-log/renderer';
+import log from "electron-log/renderer";
 
 export const useLibraryStore = defineStore("library", () => {
     const platform = usePlatformStore();
@@ -589,9 +589,7 @@ export const useLibraryStore = defineStore("library", () => {
     async function editTrack(likedTrack: LikedTrack) {
         let likedInfo = tracks.value.find((t) => t.id === likedTrack.id);
         if (!likedInfo)
-            return log.warn(
-                "You can only edit tracks in your liked tracks",
-            );
+            return log.warn("You can only edit tracks in your liked tracks");
         player.pause().then();
         dialog.edit.likedTrack = likedTrack;
         dialog.edit.durationRange = [

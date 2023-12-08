@@ -10,7 +10,7 @@ import { usePlatformStore } from "../electron";
 import { useLibraryStore } from "../library";
 import { baseDb } from "../../scripts/database";
 import { useDialogStore } from "../UI/dialogStore";
-import log from 'electron-log/renderer';
+import log from "electron-log/renderer";
 
 export const useTrackLoaderStore = defineStore("trackLoader", () => {
     const platform = usePlatformStore();
@@ -94,10 +94,7 @@ export const useTrackLoaderStore = defineStore("trackLoader", () => {
         // Track Bars
         async function trackBars() {
             if (fileSize > 300000000) {
-                log.warn(
-                    "File is too big to generate track bars",
-                    fileSize,
-                );
+                log.warn("File is too big to generate track bars", fileSize);
                 let bars = getEmptyMetaTrackBars();
                 bars.empty = false;
                 trackData.metadata.trackBars = bars;

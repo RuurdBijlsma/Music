@@ -7,7 +7,7 @@ import { Item } from "../scripts/types";
 import { executeCached } from "../scripts/utils";
 import { toRaw } from "vue";
 import { baseDb } from "../scripts/database";
-import log from 'electron-log/renderer';
+import log from "electron-log/renderer";
 
 export const useSpotifyApiStore = defineStore("spotify-api", () => {
     const library = useLibraryStore();

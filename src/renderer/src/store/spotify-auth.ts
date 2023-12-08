@@ -9,7 +9,7 @@ import { usePlayerStore } from "./player/player";
 import { randomUser } from "../scripts/image-sources";
 import { baseDb } from "../scripts/database";
 import { persistentRef } from "../scripts/utils";
-import log from 'electron-log/renderer';
+import log from "electron-log/renderer";
 
 export interface AuthToken {
     code: null | string;
@@ -85,10 +85,7 @@ export const useSpotifyAuthStore = defineStore("spotify-auth", () => {
 
     async function loginByRefreshToken() {
         if (tokens.value.refresh === null || tokens.value.refresh === "") {
-            log.warn(
-                "Couldn't get new token, refresh token isn't set",
-                tokens,
-            );
+            log.warn("Couldn't get new token, refresh token isn't set", tokens);
             return;
         }
         let { access, expiryDate } = await getAuthByRefreshToken(

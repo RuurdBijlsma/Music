@@ -7,7 +7,7 @@ import { useRuurdAuthStore } from "./ruurd-auth";
 import { useSpotifyAuthStore } from "./spotify-auth";
 import { persistentRef } from "../scripts/utils";
 import { watch } from "vue";
-import log from 'electron-log/renderer';
+import log from "electron-log/renderer";
 
 export const useBackupStore = defineStore("backup", () => {
     const base = useBaseStore();

@@ -1,6 +1,6 @@
 import { Ref, ref, toRaw, watch } from "vue";
 import { baseDb } from "./database";
-import log from 'electron-log/renderer';
+import log from "electron-log/renderer";
 
 export function hexToRgb(hex: string) {
     if (hex.length === 4) {

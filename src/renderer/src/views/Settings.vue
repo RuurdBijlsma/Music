@@ -158,11 +158,11 @@
         <h3 class="mb-3">Audio settings</h3>
         <div class="music-folder mb-5">
             <v-btn
+                :color="ui.themeColor"
                 prepend-icon="mdi-folder-music-outline"
                 variant="tonal"
-                :color="ui.themeColor"
                 @click="platform.changeMusicFolder"
-                >
+            >
                 Change music folder
             </v-btn>
             <div class="folder">{{ platform.directories?.music }}</div>
