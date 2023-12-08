@@ -221,6 +221,21 @@ export const useStatsStore = defineStore("playerStats", () => {
         return result;
     }
 
+    function augmentHistoryMinutes<T>(
+        historyMinutes: { [key: string]: T },
+        emptyVal: T,
+    ) {
+        console.log("Augmenting", historyMinutes)
+        let dates = Object.keys(historyMinutes).map((k) => +new Date(k));
+        let firstDate = Math.min(...dates);
+        const day = 1000 * 60 * 60 * 24;
+        for (let date = firstDate + day; date < +new Date(); date += day) {
+            let dateKey = new Date(date).toISOString().substring(0, 10);
+            if (!historyMinutes.hasOwnProperty(dateKey))
+                historyMinutes[dateKey] = emptyVal;
+        }
+    }
+
     async function generateWrapStats(trackLimit = 10, artistLimit = 5) {
         // TOP LISTENED STUFF
         let topArtists = await getTopFromIndex<ArtistStat>(
@@ -264,6 +279,7 @@ export const useStatsStore = defineStore("playerStats", () => {
             (acc, key, i) => ({ ...acc, [key.toString()]: statValues[i] }),
             {},
         ) as Statistics;
+        augmentHistoryMinutes(statistics.historyMinutes, 0);
         return {
             topArtists,
             topCollections,
@@ -274,5 +290,5 @@ export const useStatsStore = defineStore("playerStats", () => {
         };
     }
 
-    return { collectSkipStat, collectTrackStat, generateWrapStats };
+    return { collectSkipStat, collectTrackStat, generateWrapStats, augmentHistoryMinutes };
 });

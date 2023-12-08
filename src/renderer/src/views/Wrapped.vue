@@ -251,9 +251,12 @@ function toggleChart(artistId: string) {
 }
 
 function artistChart(label: string, history: { [key: string]: number }) {
+    let statHistory = Object.entries(history)
+        .map(x => [new Date(x[0]), x[1]])
+        .sort((a,b) => a[0] > b[0] ? 1 : -1) as [Date, number][]
     return {
-        labels: Object.keys(history).map((k) => new Date(k)),
-        values: Object.values(history),
+        labels: statHistory.map(k => k[0]),
+        values: statHistory.map(k => k[1]),
         yAxis: "Minutes",
         dataLabel: label,
     };
@@ -272,6 +275,7 @@ async function generate() {
     );
     artistsTop.value = artists.map((artist, i) => {
         topArtists[i].artist = artist;
+        stats.augmentHistoryMinutes(topArtists[i].history, 0)
         return topArtists[i];
     });
     tracksTop.value = topTracks;
@@ -283,9 +287,12 @@ async function generate() {
         listenMinutes: statistics.listenMinutes,
     };
 
+    let statHistory = Object.entries(statistics.historyMinutes)
+        .map(x => [new Date(x[0]), x[1]])
+        .sort((a,b) => a[0] > b[0] ? 1 : -1) as [Date, number][]
     minutesChart.value = {
-        labels: Object.keys(statistics.historyMinutes).map((k) => new Date(k)),
-        values: Object.values(statistics.historyMinutes),
+        labels: statHistory.map(k => k[0]),
+        values: statHistory.map(k => k[1]),
         yAxis: "Minutes",
         dataLabel: "Minutes listened",
     };
