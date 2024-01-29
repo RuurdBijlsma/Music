@@ -67,6 +67,9 @@
 </template>
 
 <script lang="ts" setup>
+// TODO
+// Change most skipped tracks to most skipped liked tracks and only show liked tracks there
+
 import TopMenu from "./components/main-ui/TopMenu.vue";
 import MusicPlayer from "./components/player/MusicPlayer.vue";
 import SearchSuggestions from "./components/search/SearchSuggestions.vue";
