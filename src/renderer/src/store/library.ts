@@ -8,7 +8,7 @@ import type {
     ItemCollection,
     ItemType,
     LikedTrack,
-    SpotifyTrack,
+    SpotifyTrack
 } from "../scripts/types";
 import { usePlayerStore } from "./player/player";
 import { useSpotifyApiStore } from "./spotify-api";
@@ -51,13 +51,13 @@ export const useLibraryStore = defineStore("library", () => {
         mail: "",
         country: "",
         followers: 0,
-        avatar: randomUser(),
+        avatar: randomUser()
     });
 
     const saved = ref({
         playlist: [] as SpotifyApi.PlaylistObjectFull[],
         artist: [] as SpotifyApi.ArtistObjectFull[],
-        album: [] as SpotifyApi.AlbumObjectFull[],
+        album: [] as SpotifyApi.AlbumObjectFull[]
     });
     const tracks = ref([] as LikedTrack[]);
     const viewedPlaylist = ref(null as SpotifyApi.PlaylistObjectFull | null);
@@ -67,24 +67,24 @@ export const useLibraryStore = defineStore("library", () => {
 
     const userPlaylists = computed(() =>
         saved.value.playlist.filter(
-            (p) => p.owner.id === userInfo.value.id || p.collaborative,
-        ),
+            (p) => p.owner.id === userInfo.value.id || p.collaborative
+        )
     );
     const isRefreshing = ref({
         playlist: false,
         album: false,
         artist: false,
-        track: false,
+        track: false
     });
     const view = ref({
         homePage: {
             featured: {
                 title: "" as string | undefined,
-                playlists: [] as SpotifyApi.PlaylistObjectSimplified[],
+                playlists: [] as SpotifyApi.PlaylistObjectSimplified[]
             },
             newReleases: [] as any[],
-            personalized: [] as any[],
-        },
+            personalized: [] as any[]
+        }
     });
     const offlineCollections = ref(new Set<string>([]));
     const recentPlays = ref([] as ItemCollection[]);
@@ -97,7 +97,7 @@ export const useLibraryStore = defineStore("library", () => {
                 db.get("spotify", "saved"),
                 db.get("spotify", "view"),
                 db.get("spotify", "offlineCollections"),
-                db.get("spotify", "recentPlays"),
+                db.get("spotify", "recentPlays")
             ]);
 
         if (dbRecentPlays) recentPlays.value = dbRecentPlays;
@@ -117,7 +117,8 @@ export const useLibraryStore = defineStore("library", () => {
             likedDbChecked = true;
             base.events.emit("likedDbCheck");
             if (!tracksCached) {
-                loadLikedTracks().then(() => {});
+                loadLikedTracks().then(() => {
+                });
             }
         });
 
@@ -139,7 +140,7 @@ export const useLibraryStore = defineStore("library", () => {
         let me = await executeCached(
             spotify.getMe,
             "spotify-me",
-            1000 * 60 * 60 * 24 * 31,
+            1000 * 60 * 60 * 24 * 31
         );
         userInfo.value = {
             id: me.id,
@@ -147,7 +148,7 @@ export const useLibraryStore = defineStore("library", () => {
             mail: me.email,
             country: me.country,
             followers: me.followers?.total ?? 0,
-            avatar: me.images?.[0]?.url ?? "",
+            avatar: me.images?.[0]?.url ?? ""
         };
     }
 
@@ -175,7 +176,7 @@ export const useLibraryStore = defineStore("library", () => {
             case "playlist":
                 retrieval = () =>
                     spotify.getUserPlaylists(userInfo.value.id, {
-                        limit: 50,
+                        limit: 50
                     });
                 break;
             case "album":
@@ -223,7 +224,7 @@ export const useLibraryStore = defineStore("library", () => {
     }
 
     function enhancePlaylistObject(
-        item: SpotifyApi.PlaylistTrackObject | SpotifyApi.SavedTrackObject,
+        item: SpotifyApi.PlaylistTrackObject | SpotifyApi.SavedTrackObject
     ) {
         let track = item.track as SpotifyApi.TrackObjectFull;
         let artistString = track.artists
@@ -246,8 +247,8 @@ export const useLibraryStore = defineStore("library", () => {
             added_at_reverse,
             original: {
                 name: track.name,
-                artists: track.artists.map((a) => a.name),
-            },
+                artists: track.artists.map((a) => a.name)
+            }
         } as LikedTrack;
     }
 
@@ -273,7 +274,7 @@ export const useLibraryStore = defineStore("library", () => {
         const addTrack = (track: LikedTrack) => {
             let spliceIndex = tracksRef.value.findIndex(
                 (localTrack) =>
-                    localTrack.added_at_reverse > track.added_at_reverse,
+                    localTrack.added_at_reverse > track.added_at_reverse
             );
             tracksRef.value.splice(spliceIndex, 0, track);
             db.add("tracks", track);
@@ -284,7 +285,7 @@ export const useLibraryStore = defineStore("library", () => {
         let apiTracks: { [key: string]: SpotifyApi.SavedTrackObject } = {};
 
         for await (let batch of await spotify.retrieveArray<SpotifyApi.UsersSavedTracksResponse>(
-            () => spotify.api.getMySavedTracks({ limit: 50 }),
+            () => spotify.api.getMySavedTracks({ limit: 50 })
         )) {
             for (let spotifyItem of batch.items) {
                 let spotifyTrack: SpotifyTrack = spotifyItem.track;
@@ -302,12 +303,12 @@ export const useLibraryStore = defineStore("library", () => {
         // if they are spotify tracks, they must have been removed from liked tracks
         // so removed them from the local tracks list
         let removedFromLocal = [...localTrackIds].filter(
-            (x) => !apiTrackIds.has(x) && !x.startsWith("yt-"),
+            (x) => !apiTrackIds.has(x) && !x.startsWith("yt-")
         );
         for (let id of removedFromLocal) {
             tracksRef.value.splice(
                 tracksRef.value.findIndex((t) => t.id === id),
-                1,
+                1
             );
             db.delete("tracks", id).then();
         }
@@ -376,7 +377,7 @@ export const useLibraryStore = defineStore("library", () => {
         let featured = await spotify.getFeaturedPlaylists({ limit: 50 });
         view.value.homePage.featured = {
             title: featured.message,
-            playlists: featured.playlists.items,
+            playlists: featured.playlists.items
         };
 
         //Personalized playlists
@@ -387,14 +388,14 @@ export const useLibraryStore = defineStore("library", () => {
         const discoverNames = [
             "Discover Weekly",
             "Release Radar",
-            ...[...Array(10)].map((_, i) => "Daily Mix " + (i + 1)),
+            ...[...Array(10)].map((_, i) => "Daily Mix " + (i + 1))
         ];
 
         personalized = toRaw(saved.value).playlist.filter(
             (playlist) =>
                 discoverNames.findIndex((name) =>
-                    playlist.name.includes(name),
-                ) !== -1 && playlist.owner.display_name === "Spotify",
+                    playlist.name.includes(name)
+                ) !== -1 && playlist.owner.display_name === "Spotify"
         );
         personalized.sort((a, b) => {
             let aI = discoverNames.findIndex((name) => a.name.includes(name));
@@ -446,14 +447,14 @@ export const useLibraryStore = defineStore("library", () => {
                 db.delete("tracks", id).then();
                 tracks.value.splice(
                     tracks.value.findIndex((t) => t.track.id === id),
-                    1,
+                    1
                 );
                 return false;
             } else {
                 let date = new Date().toISOString();
                 let playlistObject = enhancePlaylistObject({
                     track: toRaw(item) as SpotifyApi.TrackObjectFull,
-                    added_at: date,
+                    added_at: date
                 } as SpotifyApi.PlaylistTrackObject);
 
                 // Spotify
@@ -468,7 +469,7 @@ export const useLibraryStore = defineStore("library", () => {
                 await spotify.api.unfollowPlaylist(id);
                 saved.value.playlist.splice(
                     saved.value.playlist.findIndex((t) => t.id === id),
-                    1,
+                    1
                 );
                 return false;
             } else {
@@ -481,7 +482,7 @@ export const useLibraryStore = defineStore("library", () => {
                 await spotify.api.removeFromMySavedAlbums([id]);
                 saved.value.album.splice(
                     saved.value.album.findIndex((t) => t.id === id),
-                    1,
+                    1
                 );
                 return false;
             } else {
@@ -494,7 +495,7 @@ export const useLibraryStore = defineStore("library", () => {
                 await spotify.api.unfollowArtists([id]);
                 saved.value.artist.splice(
                     saved.value.artist.findIndex((t) => t.id === id),
-                    1,
+                    1
                 );
                 return false;
             } else {
@@ -515,7 +516,7 @@ export const useLibraryStore = defineStore("library", () => {
         const { query } = platform.trackToNames(track);
         let [options, trackData] = await Promise.all([
             search.searchYouTubeRaw(query, 10),
-            trackLoader.getFullTrackData(track),
+            trackLoader.getFullTrackData(track)
         ]);
 
         dialog.source.loading = false;
@@ -563,13 +564,13 @@ export const useLibraryStore = defineStore("library", () => {
 
     async function addToPlaylist(
         playlistId: string,
-        track: SpotifyApi.TrackObjectFull,
+        track: SpotifyApi.TrackObjectFull
     ) {
         await baseDb;
         await spotify.api.addTracksToPlaylist(playlistId, [track.uri]);
         if (viewedPlaylist.value === null) return;
         let trackInPlaylist = viewedPlaylist.value.tracks.items.find(
-            (t) => t.track.id === track.id,
+            (t) => t.track.id === track.id
         );
         if (trackInPlaylist === undefined)
             viewedPlaylistRefreshRequired.value = true;
@@ -580,7 +581,7 @@ export const useLibraryStore = defineStore("library", () => {
         await spotify.api.removeTracksFromPlaylist(playlistId, [trackUri]);
         if (viewedPlaylist.value === null) return;
         let trackIndex = viewedPlaylist.value.tracks.items.findIndex(
-            (t) => t.track.uri === trackUri,
+            (t) => t.track.uri === trackUri
         );
         if (trackIndex === -1) return;
         viewedPlaylist.value.tracks.items.splice(trackIndex, 1);
@@ -594,14 +595,14 @@ export const useLibraryStore = defineStore("library", () => {
         dialog.edit.likedTrack = likedTrack;
         dialog.edit.durationRange = [
             likedInfo.startTime ?? 0,
-            likedInfo.endTime ?? likedTrack.track.duration_ms / 1000,
+            likedInfo.endTime ?? likedTrack.track.duration_ms / 1000
         ];
         dialog.edit.title = likedTrack.track.name;
         dialog.edit.artists = likedTrack.track.artists.map((a) => a.name);
         dialog.edit.show = true;
         dialog.edit.loading = true;
         dialog.edit.trackData = await trackLoader.getFullTrackData(
-            likedTrack.track,
+            likedTrack.track
         );
         dialog.edit.loading = false;
     }
@@ -610,7 +611,7 @@ export const useLibraryStore = defineStore("library", () => {
         likedTrack: LikedTrack,
         name: string,
         artists: string[],
-        durationRange: number[],
+        durationRange: number[]
     ) {
         likedTrack.track.name = name;
         likedTrack.title = name;
@@ -648,7 +649,7 @@ export const useLibraryStore = defineStore("library", () => {
             name: dialog.playlist.title,
             description: dialog.playlist.description,
             collaborative: dialog.playlist.isCollaborative,
-            public: dialog.playlist.isPublic,
+            public: dialog.playlist.isPublic
         });
         await addToPlaylist(playlist.id, dialog.playlist.startTrack);
         spotify
@@ -713,6 +714,6 @@ export const useLibraryStore = defineStore("library", () => {
         likedListKey,
         editTrack,
         applyEditChanges,
-        lastTracksLoad,
+        lastTracksLoad
     };
 });

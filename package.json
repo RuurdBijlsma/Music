@@ -1,6 +1,6 @@
 {
     "name": "ruurd-music",
-    "version": "6.10.0",
+    "version": "6.10.1",
     "description": "A streaming music player",
     "main": "./out/main/index.js",
     "keywords": [
@@ -33,7 +33,7 @@
         "@electron-toolkit/utils": "^2.0.1",
         "chart.js": "^4.4.0",
         "chartjs-adapter-date-fns": "^3.0.0",
-        "colorthief": "^2.4.0",
+        "colorthief": "^2.2.0",
         "date-fns": "^2.30.0",
         "electron-log": "^5.0.1",
         "electron-updater": "^6.1.4",
@@ -45,7 +45,7 @@
         "idb": "^7.1.1",
         "pinia": "^2.1.7",
         "replace-special-characters": "^1.2.7",
-        "spotify-web-api-js": "^1.5.2",
+        "spotify-web-api-js": "github:RuurdBijlsma/spotify-web-api-js",
         "vite-plugin-vuetify": "^1.0.2",
         "vue-chartjs": "^5.2.0",
         "vue-router": "^4.2.5",
@@ -66,6 +66,6 @@
         "typescript": "^5.2.2",
         "vite": "^4.5.0",
         "vue": "^3.3.7",
-        "vue-tsc": "^1.8.19"
+        "vue-tsc": "^2.1.6"
     }
 }
