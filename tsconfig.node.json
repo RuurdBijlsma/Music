@@ -6,6 +6,7 @@
         "src/preload/*",
     ],
     "compilerOptions": {
+        "lib": ["es2021"],
         "composite": true,
         "types": [
             "electron-vite/node"

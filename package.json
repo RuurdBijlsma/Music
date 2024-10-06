@@ -1,6 +1,6 @@
 {
     "name": "ruurd-music",
-    "version": "6.10.1",
+    "version": "6.10.2",
     "description": "A streaming music player",
     "main": "./out/main/index.js",
     "keywords": [
@@ -33,7 +33,7 @@
         "@electron-toolkit/utils": "^2.0.1",
         "chart.js": "^4.4.0",
         "chartjs-adapter-date-fns": "^3.0.0",
-        "colorthief": "^2.2.0",
+        "colorthief": "^2.4.0",
         "date-fns": "^2.30.0",
         "electron-log": "^5.0.1",
         "electron-updater": "^6.1.4",
