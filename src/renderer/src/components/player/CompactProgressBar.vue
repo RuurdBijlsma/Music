@@ -4,14 +4,14 @@
             <div
                 :style="{
                     backgroundColor: ui.themeColor,
-                    width: fillPercent + '%',
+                    width: fillPercent + '%'
                 }"
                 class="progress-filled"
             ></div>
             <div
                 :style="{
                     left: `calc(${fillPercent}% - 5px)`,
-                    backgroundColor: ui.themeColor,
+                    backgroundColor: ui.themeColor
                 }"
                 class="progress-thumb"
             ></div>
@@ -20,48 +20,46 @@
 </template>
 
 <script lang="ts" setup>
-import { usePlayerStore } from "../../store/player/player";
-import { computed, onMounted, onUnmounted } from "vue";
-import { useUIStore } from "../../store/UI/UIStore";
+import { usePlayerStore } from '../../store/player/player'
+import { computed, onMounted, onUnmounted } from 'vue'
+import { useUIStore } from '../../store/UI/UIStore'
 
-const player = usePlayerStore();
-const ui = useUIStore();
-let seekDown = false;
+const player = usePlayerStore()
+const ui = useUIStore()
+let seekDown = false
 
-const fillPercent = computed(
-    () => Math.round((10000 * player.currentTime) / player.duration) / 100,
-);
+const fillPercent = computed(() => Math.round((10000 * player.currentTime) / player.duration) / 100)
 
 function seek(e: MouseEvent) {
-    let grab = document.querySelector(".grab-area") as HTMLElement | null;
-    if (grab === null) return;
-    let bounds = grab.getBoundingClientRect();
-    let x = e.pageX - bounds.left;
-    let percent = x / bounds.width;
-    player.seekTo(player.duration * percent);
+    const grab = document.querySelector('.grab-area') as HTMLElement | null
+    if (grab === null) return
+    const bounds = grab.getBoundingClientRect()
+    const x = e.pageX - bounds.left
+    const percent = x / bounds.width
+    player.seekTo(player.duration * percent)
 }
 
 function onMove(e: MouseEvent) {
-    if (seekDown) seek(e);
+    if (seekDown) seek(e)
 }
 
 function onDown(e: MouseEvent) {
-    seekDown = true;
-    seek(e);
+    seekDown = true
+    seek(e)
 }
 
 function onUp() {
-    seekDown = false;
+    seekDown = false
 }
 
 onMounted(() => {
-    document.addEventListener("mousemove", onMove, false);
-    document.addEventListener("mouseup", onUp, false);
-    let grab = document.querySelector(".grab-area") as HTMLElement | null;
-    if (grab === null) return;
-    grab.addEventListener("mousedown", onDown, false);
-});
-onUnmounted(() => {});
+    document.addEventListener('mousemove', onMove, false)
+    document.addEventListener('mouseup', onUp, false)
+    const grab = document.querySelector('.grab-area') as HTMLElement | null
+    if (grab === null) return
+    grab.addEventListener('mousedown', onDown, false)
+})
+onUnmounted(() => {})
 </script>
 
 <style lang="less" scoped>

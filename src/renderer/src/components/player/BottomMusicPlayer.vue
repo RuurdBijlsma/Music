@@ -11,9 +11,7 @@
             <div class="music-info-text">
                 <h2 class="music-title">{{ player.track.name }}</h2>
                 <h3 class="music-artist">
-                    <artists-span
-                        :artists="player.track.artists"
-                    ></artists-span>
+                    <artists-span :artists="player.track.artists"></artists-span>
                 </h3>
             </div>
             <div class="music-progress">
@@ -32,11 +30,7 @@
             <div class="music-controls">
                 <v-btn
                     :color="player.shuffle ? ui.themeColor : 'default'"
-                    :variant="
-                        ui.themeTooSimilarToFg && player.shuffle
-                            ? 'tonal'
-                            : 'text'
-                    "
+                    :variant="ui.themeTooSimilarToFg && player.shuffle ? 'tonal' : 'text'"
                     icon
                     size="20"
                     @click="player.toggleShuffle"
@@ -56,9 +50,7 @@
                         :model-value="player.loadProgress"
                         size="25"
                     ></v-progress-circular>
-                    <v-icon v-else-if="player.playing" size="30"
-                        >mdi-pause
-                    </v-icon>
+                    <v-icon v-else-if="player.playing" size="30">mdi-pause </v-icon>
                     <v-icon v-else size="30">mdi-play</v-icon>
                 </v-btn>
                 <v-btn
@@ -69,11 +61,7 @@
                 ></v-btn>
                 <v-btn
                     :color="player.repeat ? ui.themeColor : 'default'"
-                    :variant="
-                        ui.themeTooSimilarToFg && player.repeat
-                            ? 'tonal'
-                            : 'text'
-                    "
+                    :variant="ui.themeTooSimilarToFg && player.repeat ? 'tonal' : 'text'"
                     icon
                     size="20"
                     @click="player.toggleRepeat"
@@ -85,13 +73,8 @@
                 <like-button :item="player.track" variant="fill" />
                 <queue-button />
                 <v-menu>
-                    <template v-slot:activator="{ props }">
-                        <v-btn
-                            class="track-options ml-2"
-                            rounded
-                            v-bind="props"
-                            variant="text"
-                        >
+                    <template #activator="{ props }">
+                        <v-btn class="track-options ml-2" rounded v-bind="props" variant="text">
                             <v-icon>mdi-dots-horizontal</v-icon>
                         </v-btn>
                     </template>
@@ -103,21 +86,21 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from "vue";
-import GlowImage from "../GlowImage.vue";
-import { usePlayerStore } from "../../store/player/player";
-import ArtistsSpan from "../ArtistsSpan.vue";
-import LikeButton from "../item/LikeButton.vue";
-import QueueButton from "../QueueButton.vue";
-import ItemMenu from "../item/ItemMenu.vue";
-import CompactProgressBar from "./CompactProgressBar.vue";
-import { useUIStore } from "../../store/UI/UIStore";
-import { itemImage } from "../../scripts/item-utils";
-import { msToReadable } from "../../scripts/utils";
+import { ref } from 'vue'
+import GlowImage from '../GlowImage.vue'
+import { usePlayerStore } from '../../store/player/player'
+import ArtistsSpan from '../ArtistsSpan.vue'
+import LikeButton from '../item/LikeButton.vue'
+import QueueButton from '../QueueButton.vue'
+import ItemMenu from '../item/ItemMenu.vue'
+import CompactProgressBar from './CompactProgressBar.vue'
+import { useUIStore } from '../../store/UI/UIStore'
+import { itemImage } from '../../scripts/item-utils'
+import { msToReadable } from '../../scripts/utils'
 
-const player = usePlayerStore();
-const ui = useUIStore();
-const musicContainer = ref(null);
+const player = usePlayerStore()
+const ui = useUIStore()
+const musicContainer = ref(null)
 </script>
 
 <style lang="less" scoped>

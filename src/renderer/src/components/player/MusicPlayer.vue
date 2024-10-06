@@ -12,9 +12,7 @@
             <div class="music-info-text">
                 <h2 class="music-title">{{ player.track.name }}</h2>
                 <h3 class="music-artist">
-                    <artists-span
-                        :artists="player.track.artists"
-                    ></artists-span>
+                    <artists-span :artists="player.track.artists"></artists-span>
                 </h3>
             </div>
             <div class="music-progress">
@@ -31,11 +29,7 @@
             <div class="music-controls">
                 <v-btn
                     :color="player.shuffle ? ui.themeColor : 'default'"
-                    :variant="
-                        ui.themeTooSimilarToFg && player.shuffle
-                            ? 'tonal'
-                            : 'text'
-                    "
+                    :variant="ui.themeTooSimilarToFg && player.shuffle ? 'tonal' : 'text'"
                     icon
                     size="35"
                     @click="player.toggleShuffle"
@@ -64,11 +58,7 @@
                 ></v-btn>
                 <v-btn
                     :color="player.repeat ? ui.themeColor : 'default'"
-                    :variant="
-                        ui.themeTooSimilarToFg && player.repeat
-                            ? 'tonal'
-                            : 'text'
-                    "
+                    :variant="ui.themeTooSimilarToFg && player.repeat ? 'tonal' : 'text'"
                     icon
                     size="35"
                     @click="player.toggleRepeat"
@@ -90,8 +80,8 @@
                         player.volume < 0.2
                             ? 'mdi-volume-low'
                             : player.volume < 0.7
-                            ? 'mdi-volume-medium'
-                            : 'mdi-volume-high'
+                              ? 'mdi-volume-medium'
+                              : 'mdi-volume-high'
                     "
                     density="compact"
                     hide-details
@@ -102,13 +92,8 @@
                 ></v-slider>
             </div>
             <v-menu>
-                <template v-slot:activator="{ props }">
-                    <v-btn
-                        class="track-options ml-2"
-                        rounded
-                        v-bind="props"
-                        variant="text"
-                    >
+                <template #activator="{ props }">
+                    <v-btn class="track-options ml-2" rounded v-bind="props" variant="text">
                         <v-icon>mdi-dots-horizontal</v-icon>
                     </v-btn>
                 </template>
@@ -119,58 +104,58 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onMounted, onUnmounted, ref, watch } from "vue";
-import GlowImage from "../GlowImage.vue";
-import { usePlayerStore } from "../../store/player/player";
-import ArtistsSpan from "../ArtistsSpan.vue";
-import LikeButton from "../item/LikeButton.vue";
-import QueueButton from "../QueueButton.vue";
-import ItemMenu from "../item/ItemMenu.vue";
-import Spacer from "../Spacer.vue";
-import PlayButton from "./PlayButton.vue";
-import { useUIStore } from "../../store/UI/UIStore";
-import { msToReadable } from "../../scripts/utils";
-import { itemImage } from "../../scripts/item-utils";
-import ProgressBar from "./ProgressBar.vue";
-import { storeToRefs } from "pinia";
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
+import GlowImage from '../GlowImage.vue'
+import { usePlayerStore } from '../../store/player/player'
+import ArtistsSpan from '../ArtistsSpan.vue'
+import LikeButton from '../item/LikeButton.vue'
+import QueueButton from '../QueueButton.vue'
+import ItemMenu from '../item/ItemMenu.vue'
+import Spacer from '../Spacer.vue'
+import PlayButton from './PlayButton.vue'
+import { useUIStore } from '../../store/UI/UIStore'
+import { msToReadable } from '../../scripts/utils'
+import { itemImage } from '../../scripts/item-utils'
+import ProgressBar from './ProgressBar.vue'
+import { storeToRefs } from 'pinia'
 
-const player = usePlayerStore();
-const ui = useUIStore();
+const player = usePlayerStore()
+const ui = useUIStore()
 
-const { windowWidth } = storeToRefs(ui);
-const elWidth = ref(0);
-const musicContainer = ref(null);
+const { windowWidth } = storeToRefs(ui)
+const elWidth = ref(0)
+const musicContainer = ref(null)
 
-let volumeBeforeMute = 1;
-const lowWindow = computed(() => ui.windowHeight < 820);
+let volumeBeforeMute = 1
+const lowWindow = computed(() => ui.windowHeight < 820)
 
 function handleScroll(e: WheelEvent) {
-    let newVolume = player.volume - e.deltaY / 3000;
-    player.volume = Math.max(0, Math.min(1, newVolume));
+    const newVolume = player.volume - e.deltaY / 3000
+    player.volume = Math.max(0, Math.min(1, newVolume))
 }
 
 function toggleMute() {
     if (player.volume > 0) {
-        volumeBeforeMute = player.volume;
-        player.volume = 0;
+        volumeBeforeMute = player.volume
+        player.volume = 0
     } else {
-        player.volume = volumeBeforeMute;
+        player.volume = volumeBeforeMute
     }
 }
 
 function checkElWidth() {
-    let el = musicContainer.value as HTMLElement | null;
-    if (el === null) return;
-    elWidth.value = el.getBoundingClientRect().width;
+    const el = musicContainer.value as HTMLElement | null
+    if (el === null) return
+    elWidth.value = el.getBoundingClientRect().width
 }
 
-let interval = 0;
-watch(windowWidth, () => checkElWidth());
-checkElWidth();
+let interval = 0
+watch(windowWidth, () => checkElWidth())
+checkElWidth()
 onMounted(() => {
-    interval = window.setInterval(() => checkElWidth(), 100);
-});
-onUnmounted(() => clearInterval(interval));
+    interval = window.setInterval(() => checkElWidth(), 100)
+})
+onUnmounted(() => clearInterval(interval))
 </script>
 
 <style lang="less" scoped>

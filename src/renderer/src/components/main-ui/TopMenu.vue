@@ -1,11 +1,7 @@
 <template>
     <div class="menu">
         <div class="logo">
-            <v-img
-                :src="ui.isDark ? iconUrlDark : iconUrlLight"
-                height="30"
-                width="30"
-            ></v-img>
+            <v-img :src="ui.isDark ? iconUrlDark : iconUrlLight" height="30" width="30"></v-img>
             <div>Ruurd Music</div>
         </div>
         <spacer />
@@ -43,18 +39,18 @@
 </template>
 
 <script lang="ts" setup>
-import Spacer from "../Spacer.vue";
-import SearchBar from "../search/SearchBar.vue";
-import UserMenu from "./UserMenu.vue";
-import { usePlatformStore } from "../../store/electron";
+import Spacer from '../Spacer.vue'
+import SearchBar from '../search/SearchBar.vue'
+import UserMenu from './UserMenu.vue'
+import { usePlatformStore } from '../../store/electron'
 //@ts-ignore
-import iconUrlDark from "../../../assets/app-icon/dark-500.png?asset";
+import iconUrlDark from '../../../assets/app-icon/dark-500.png?asset'
 //@ts-ignore
-import iconUrlLight from "../../../assets/app-icon/light-500.png?asset";
-import { useUIStore } from "../../store/UI/UIStore";
+import iconUrlLight from '../../../assets/app-icon/light-500.png?asset'
+import { useUIStore } from '../../store/UI/UIStore'
 
-const ui = useUIStore();
-const platform = usePlatformStore();
+const ui = useUIStore()
+const platform = usePlatformStore()
 </script>
 
 <style lang="less" scoped>

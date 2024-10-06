@@ -3,15 +3,15 @@
 </template>
 
 <script lang="ts" setup>
-import type { PropType } from "vue";
-import SimplePlayer from "./SimplePlayer.vue";
+import type { PropType } from 'vue'
+import SimplePlayer from './SimplePlayer.vue'
 
 defineProps({
     track: {
         type: Object as PropType<SpotifyApi.TrackObjectFull>,
-        required: true,
-    },
-});
+        required: true
+    }
+})
 </script>
 
 <style lang="less" scoped>

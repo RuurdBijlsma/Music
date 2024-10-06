@@ -8,9 +8,7 @@
             <p>{{ notification.description }}</p>
         </div>
         <div class="notification-buttons">
-            <v-btn variant="plain" @click="notification.show = false"
-                >Dismiss
-            </v-btn>
+            <v-btn variant="plain" @click="notification.show = false">Dismiss </v-btn>
             <v-btn variant="tonal" @click="doAction()">
                 {{ notification.viewText }}
             </v-btn>
@@ -19,22 +17,22 @@
 </template>
 
 <script lang="ts" setup>
-import { useUIStore } from "../../store/UI/UIStore";
-import { PropType } from "vue";
-import { Notification } from "../../scripts/types";
+import { useUIStore } from '../../store/UI/UIStore'
+import { PropType } from 'vue'
+import { Notification } from '../../scripts/types'
 
 const props = defineProps({
     notification: {
         type: Object as PropType<Notification>,
-        required: true,
-    },
-});
+        required: true
+    }
+})
 
-const ui = useUIStore();
+const ui = useUIStore()
 
 function doAction() {
-    props.notification.action();
-    props.notification.show = false;
+    props.notification.action()
+    props.notification.show = false
 }
 </script>
 

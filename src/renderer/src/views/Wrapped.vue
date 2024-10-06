@@ -37,27 +37,18 @@
                 <p class="minutes-stat">Artist</p>
                 <p class="minutes-stat align-right">Listened minutes</p>
             </div>
-            <template
-                v-for="({ artist, listenMinutes, history }, i) of artistsTop"
-            >
+            <template v-for="({ artist, listenMinutes, history }, i) of artistsTop">
                 <v-list-item
                     rounded
-                    @click.right="
-                        dialog.setContextMenuItem($event as MouseEvent, artist)
-                    "
+                    @click.right="dialog.setContextMenuItem($event as MouseEvent, artist)"
                 >
                     <v-list-item-title class="item-stat">
                         <p class="item-rank">{{ i + 1 }}</p>
                         <v-avatar
-                            :image="
-                                itemImage(artist as SpotifyApi.ArtistObjectFull)
-                            "
+                            :image="itemImage(artist as SpotifyApi.ArtistObjectFull)"
                             size="36px"
                         />
-                        <router-link
-                            :to="itemUrl(artist)"
-                            class="flex-grow-1"
-                            no-style
+                        <router-link :to="itemUrl(artist)" class="flex-grow-1" no-style
                             >{{ artist.name }}
                         </router-link>
                         <p class="minutes-stat align-right">
@@ -76,12 +67,7 @@
                 </v-list-item>
                 <div v-if="expandedArtists.has(artist.id)">
                     <line-chart
-                        :chart-data="
-                            artistChart(
-                                `Minutes listened to ${artist.name}`,
-                                history,
-                            )
-                        "
+                        :chart-data="artistChart(`Minutes listened to ${artist.name}`, history)"
                     />
                 </div>
             </template>
@@ -102,7 +88,7 @@
                 v-for="({ track, listenMinutes }, i) of tracksTop"
                 :class="{
                     'odd-item': !isActive(track.id) && i % 2 === 0,
-                    active: isActive(track.id),
+                    active: isActive(track.id)
                 }"
                 class="item-stat track-list-item-parent"
             >
@@ -158,7 +144,7 @@
                 v-for="({ track, skipPercentage }, i) of tracksSkip"
                 :class="{
                     'odd-item': !isActiveSkip(track.id) && i % 2 === 0,
-                    active: isActiveSkip(track.id),
+                    active: isActiveSkip(track.id)
                 }"
                 class="item-stat track-list-item-parent"
             >
@@ -202,150 +188,146 @@
 </template>
 
 <script lang="ts" setup>
-import LineChart from "../components/LineChart.vue";
-import { computed, ref } from "vue";
-import { useStatsStore } from "../store/player/playStats";
-import {
-    ArtistStat,
-    ChartData,
-    ItemCollection,
-    TrackStat,
-} from "../scripts/types";
-import { useUIStore } from "../store/UI/UIStore";
-import { useSpotifyApiStore } from "../store/spotify-api";
-import TrackListItem from "../components/track-list/TrackListItem.vue";
-import { usePlayerStore } from "../store/player/player";
-import { useDialogStore } from "../store/UI/dialogStore";
-import { itemImage, itemUrl } from "../scripts/item-utils";
-import { caps } from "../scripts/utils";
+import LineChart from '../components/LineChart.vue'
+import { computed, ref } from 'vue'
+import { useStatsStore } from '../store/player/playStats'
+import { ArtistStat, ChartData, ItemCollection, TrackStat } from '../scripts/types'
+import { useUIStore } from '../store/UI/UIStore'
+import { useSpotifyApiStore } from '../store/spotify-api'
+import TrackListItem from '../components/track-list/TrackListItem.vue'
+import { usePlayerStore } from '../store/player/player'
+import { useDialogStore } from '../store/UI/dialogStore'
+import { itemImage, itemUrl } from '../scripts/item-utils'
+import { caps } from '../scripts/utils'
 
-const stats = useStatsStore();
-const dialog = useDialogStore();
-const ui = useUIStore();
-const spotify = useSpotifyApiStore();
-const player = usePlayerStore();
+const stats = useStatsStore()
+const dialog = useDialogStore()
+const ui = useUIStore()
+const spotify = useSpotifyApiStore()
+const player = usePlayerStore()
 
 const constStats = ref({
     skips: 0,
     listenCount: 0,
-    listenMinutes: 0,
-});
-const minutesChart = ref(null as ChartData | null);
-const charts = ref([] as ChartData[]);
-const shownCharts = ref([2, 9, 11]);
+    listenMinutes: 0
+})
+const minutesChart = ref(null as ChartData | null)
+const charts = ref([] as ChartData[])
+const shownCharts = ref([2, 9, 11])
 
-const trackLimit = ref(10);
-const artistLimit = ref(5);
+const trackLimit = ref(10)
+const artistLimit = ref(5)
 
-const artistsTop = ref([] as ArtistStat[]);
-const tracksTop = ref([] as TrackStat[]);
-const tracksSkip = ref([] as TrackStat[]);
-const expandedArtists = ref(new Set<string>());
+const artistsTop = ref([] as ArtistStat[])
+const tracksTop = ref([] as TrackStat[])
+const tracksSkip = ref([] as TrackStat[])
+const expandedArtists = ref(new Set<string>())
 
 function toggleChart(artistId: string) {
     if (expandedArtists.value.has(artistId)) {
-        expandedArtists.value.delete(artistId);
+        expandedArtists.value.delete(artistId)
     } else {
-        expandedArtists.value.add(artistId);
+        expandedArtists.value.add(artistId)
     }
 }
 
 function artistChart(label: string, history: { [key: string]: number }) {
-    let statHistory = Object.entries(history)
+    const statHistory = Object.entries(history)
         .map((x) => [new Date(x[0]), x[1]])
-        .sort((a, b) => (a[0] > b[0] ? 1 : -1)) as [Date, number][];
+        .sort((a, b) => (a[0] > b[0] ? 1 : -1)) as [Date, number][]
     return {
         labels: statHistory.map((k) => k[0]),
         values: statHistory.map((k) => k[1]),
-        yAxis: "Minutes",
-        dataLabel: label,
-    };
+        yAxis: 'Minutes',
+        dataLabel: label
+    }
 }
 
 async function generate() {
-    let { topArtists, topTracks, skipTracks, statistics } =
-        await stats.generateWrapStats(trackLimit.value, artistLimit.value);
+    const { topArtists, topTracks, skipTracks, statistics } = await stats.generateWrapStats(
+        trackLimit.value,
+        artistLimit.value
+    )
 
-    let artists = await Promise.all(
+    const artists = await Promise.all(
         topArtists.map((a) =>
-            a.id.startsWith("yt-")
+            a.id.startsWith('yt-')
                 ? (a.artist as SpotifyApi.ArtistObjectFull)
-                : spotify.getArtist(a.id, true),
-        ),
-    );
+                : spotify.getArtist(a.id, true)
+        )
+    )
     artistsTop.value = artists.map((artist, i) => {
-        topArtists[i].artist = artist;
-        stats.augmentHistoryMinutes(topArtists[i].history, 0);
-        return topArtists[i];
-    });
-    tracksTop.value = topTracks;
-    tracksSkip.value = skipTracks;
+        topArtists[i].artist = artist
+        stats.augmentHistoryMinutes(topArtists[i].history, 0)
+        return topArtists[i]
+    })
+    tracksTop.value = topTracks
+    tracksSkip.value = skipTracks
 
     constStats.value = {
         skips: statistics.skips,
         listenCount: statistics.listenCount,
-        listenMinutes: statistics.listenMinutes,
-    };
+        listenMinutes: statistics.listenMinutes
+    }
 
-    let statHistory = Object.entries(statistics.historyMinutes)
+    const statHistory = Object.entries(statistics.historyMinutes)
         .map((x) => [new Date(x[0]), x[1]])
-        .sort((a, b) => (a[0] > b[0] ? 1 : -1)) as [Date, number][];
+        .sort((a, b) => (a[0] > b[0] ? 1 : -1)) as [Date, number][]
     minutesChart.value = {
         labels: statHistory.map((k) => k[0]),
         values: statHistory.map((k) => k[1]),
-        yAxis: "Minutes",
-        dataLabel: "Minutes listened",
-    };
+        yAxis: 'Minutes',
+        dataLabel: 'Minutes listened'
+    }
 
-    let skipKeys = ["historyMinutes", "listenMinutes", "listenCount", "skips"];
-    charts.value = [];
-    for (let key in statistics) {
-        if (skipKeys.includes(key)) continue;
-        let data: { [key: string]: { sum: number; minutes: number } } =
-            statistics[key];
-        let name = caps(key).replaceAll("_", " ");
+    const skipKeys = ['historyMinutes', 'listenMinutes', 'listenCount', 'skips']
+    charts.value = []
+    for (const key in statistics) {
+        if (skipKeys.includes(key)) continue
+        const data: { [key: string]: { sum: number; minutes: number } } = statistics[key]
+        const name = caps(key).replaceAll('_', ' ')
         charts.value.push({
             labels: Object.keys(data).map((k) => new Date(k)),
             values: Object.values(data).map((v) => v.sum / v.minutes),
             yAxis: name,
-            dataLabel: `${name}`,
-        });
+            dataLabel: `${name}`
+        })
     }
 }
 
 async function init() {
-    let lsKey = "wrapped" + new Date().getFullYear();
-    localStorage[lsKey] = "true";
-    await generate();
+    const lsKey = 'wrapped' + new Date().getFullYear()
+    localStorage[lsKey] = 'true'
+    await generate()
 }
 
 const collection = computed(() => {
     return {
-        id: "wrapped",
+        id: 'wrapped',
         tracks: tracksTop.value.map((t) => t.track) ?? [],
-        type: "wrapped",
-        name: "Top tracks from wrapped",
-        buttonText: "Wrapped",
-        to: "/wrapped",
-    } as ItemCollection;
-});
+        type: 'wrapped',
+        name: 'Top tracks from wrapped',
+        buttonText: 'Wrapped',
+        to: '/wrapped'
+    } as ItemCollection
+})
 
 const skipCollection = computed(() => {
     return {
-        id: "wrapped-skip",
+        id: 'wrapped-skip',
         tracks: tracksSkip.value.map((t) => t.track) ?? [],
-        type: "wrapped",
-        name: "Most skipped tracks from wrapped",
-        buttonText: "Wrapped",
-        to: "/wrapped",
-    } as ItemCollection;
-});
+        type: 'wrapped',
+        name: 'Most skipped tracks from wrapped',
+        buttonText: 'Wrapped',
+        to: '/wrapped'
+    } as ItemCollection
+})
 const isActive = (id: string) =>
-    player.trackId === id && (player.collection?.id ?? "") === "wrapped";
+    player.trackId === id && (player.collection?.id ?? '') === 'wrapped'
 const isActiveSkip = (id: string) =>
-    player.trackId === id && (player.collection?.id ?? "") === "wrapped-skip";
+    player.trackId === id && (player.collection?.id ?? '') === 'wrapped-skip'
 
-init();
+init()
 </script>
 
 <style lang="less" scoped>

@@ -5,7 +5,7 @@
             v-for="(item, index) in realTracks"
             :class="{
                 'odd-item': !isActive(item.id) && index % 2 === 0,
-                active: isActive(item.id),
+                active: isActive(item.id)
             }"
             :collection="collection"
             :index="index"
@@ -17,40 +17,39 @@
 </template>
 
 <script lang="ts" setup>
-import type { PropType } from "vue";
-import { computed } from "vue";
-import TrackListItem from "./TrackListItem.vue";
-import { usePlayerStore } from "../../store/player/player";
-import type { ItemCollection } from "../../scripts/types";
+import type { PropType } from 'vue'
+import { computed } from 'vue'
+import TrackListItem from './TrackListItem.vue'
+import { usePlayerStore } from '../../store/player/player'
+import type { ItemCollection } from '../../scripts/types'
 
-const player = usePlayerStore();
+const player = usePlayerStore()
 
 const props = defineProps({
     collection: {
         type: Object as PropType<ItemCollection | null>,
-        required: true,
+        required: true
     },
     tracks: {
         type: Object as PropType<SpotifyApi.TrackObjectFull[] | null>,
-        default: () => null,
+        default: () => null
     },
     noImages: {
         type: Boolean,
-        default: () => false,
+        default: () => false
     },
     paddingTop: {
         type: String,
-        default: () => "60px",
-    },
-});
+        default: () => '60px'
+    }
+})
 const isActive = (id: string) =>
-    player.trackId === id &&
-    (player.collection?.id ?? "") === props.collection?.id;
+    player.trackId === id && (player.collection?.id ?? '') === props.collection?.id
 
 const realTracks = computed(() => {
-    if (props.tracks !== null) return props.tracks;
-    return props.collection?.tracks ?? [];
-});
+    if (props.tracks !== null) return props.tracks
+    return props.collection?.tracks ?? []
+})
 </script>
 
 <style lang="less" scoped>

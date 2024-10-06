@@ -2,7 +2,7 @@
     <div class="playlist">
         <p class="tracks-info">
             {{ tracks.length.toLocaleString() }}
-            Track{{ tracks.length === 1 ? "" : "s" }} •
+            Track{{ tracks.length === 1 ? '' : 's' }} •
             {{ approximateDuration(totalDurationMs) }}
             <v-btn
                 v-if="!base.offlineMode"
@@ -27,52 +27,49 @@
 </template>
 
 <script lang="ts" setup>
-import { useLibraryStore } from "../../store/library";
-import { useBaseStore } from "../../store/base";
-import { computed } from "vue";
-import TrackListVirtual from "../../components/track-list/TrackListVirtual.vue";
-import { storeToRefs } from "pinia";
-import type { ItemCollection } from "../../scripts/types";
-import CollectionButtons from "../../components/CollectionButtons.vue";
-import { useUIStore } from "../../store/UI/UIStore";
-import { approximateDuration } from "../../scripts/utils";
+import { useLibraryStore } from '../../store/library'
+import { useBaseStore } from '../../store/base'
+import { computed } from 'vue'
+import TrackListVirtual from '../../components/track-list/TrackListVirtual.vue'
+import { storeToRefs } from 'pinia'
+import type { ItemCollection } from '../../scripts/types'
+import CollectionButtons from '../../components/CollectionButtons.vue'
+import { useUIStore } from '../../store/UI/UIStore'
+import { approximateDuration } from '../../scripts/utils'
 
-const library = useLibraryStore();
-const { tracks } = storeToRefs(library);
-const base = useBaseStore();
-const ui = useUIStore();
+const library = useLibraryStore()
+const { tracks } = storeToRefs(library)
+const base = useBaseStore()
+const ui = useUIStore()
 
 const subtractFromHeight = computed(() => {
-    return ui.windowWidth <= 930 ? 358 : 188;
-});
+    return ui.windowWidth <= 930 ? 358 : 188
+})
 
 const collection = computed(() => {
     if (tracks.value === null || tracks.value === undefined) {
-        return null;
+        return null
     }
     return {
         tracks: tracks.value.map((t) => t.track),
-        type: "liked",
-        id: "liked",
-        name: "Liked tracks",
-        buttonText: "Library",
-        to: "/library",
-    } as ItemCollection;
-});
+        type: 'liked',
+        id: 'liked',
+        name: 'Liked tracks',
+        buttonText: 'Library',
+        to: '/library'
+    } as ItemCollection
+})
 
 setTimeout(() => {
     // if last track reload is 24 or more hours ago then reload tracks
-    if (
-        library.lastTracksLoad === -1 ||
-        Date.now() - 1000 * 60 * 60 * 24 > library.lastTracksLoad
-    )
-        library.loadLikedTracks();
-}, 500);
+    if (library.lastTracksLoad === -1 || Date.now() - 1000 * 60 * 60 * 24 > library.lastTracksLoad)
+        library.loadLikedTracks()
+}, 500)
 
 const totalDurationMs = computed(() => {
-    if (tracks.value === null || tracks.value === undefined) return 0;
-    return tracks.value.reduce((a, b) => a + b.track.duration_ms, 0);
-});
+    if (tracks.value === null || tracks.value === undefined) return 0
+    return tracks.value.reduce((a, b) => a + b.track.duration_ms, 0)
+})
 </script>
 
 <style lang="less" scoped>

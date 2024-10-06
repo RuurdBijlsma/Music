@@ -1,28 +1,12 @@
 <template>
     <div class="library">
         <div class="nav-buttons mt-2 mb-2">
-            <v-btn
-                :active="tab === 'tracks'"
-                variant="text"
-                @click="tab = 'tracks'"
-                >Tracks
-            </v-btn>
-            <v-btn
-                :active="tab === 'albums'"
-                variant="text"
-                @click="tab = 'albums'"
-                >Albums
-            </v-btn>
-            <v-btn
-                :active="tab === 'artists'"
-                variant="text"
-                @click="tab = 'artists'"
+            <v-btn :active="tab === 'tracks'" variant="text" @click="tab = 'tracks'">Tracks </v-btn>
+            <v-btn :active="tab === 'albums'" variant="text" @click="tab = 'albums'">Albums </v-btn>
+            <v-btn :active="tab === 'artists'" variant="text" @click="tab = 'artists'"
                 >Artists
             </v-btn>
-            <v-btn
-                :active="tab === 'playlists'"
-                variant="text"
-                @click="tab = 'playlists'"
+            <v-btn :active="tab === 'playlists'" variant="text" @click="tab = 'playlists'"
                 >Playlists
             </v-btn>
         </div>
@@ -44,26 +28,26 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, watch } from "vue";
-import Tracks from "./library/Tracks.vue";
-import Artists from "./library/Artists.vue";
-import Albums from "./library/Albums.vue";
-import { useRoute } from "vue-router";
-import Playlists from "./library/Playlists.vue";
+import { ref, watch } from 'vue'
+import Tracks from './library/Tracks.vue'
+import Artists from './library/Artists.vue'
+import Albums from './library/Albums.vue'
+import { useRoute } from 'vue-router'
+import Playlists from './library/Playlists.vue'
 
-const tab = ref("tracks");
-const route = useRoute();
+const tab = ref('tracks')
+const route = useRoute()
 watch(route, () => {
-    checkRoute();
-});
+    checkRoute()
+})
 
 function checkRoute() {
-    if (route.path.startsWith("/library/")) {
-        tab.value = route.path.slice(9);
+    if (route.path.startsWith('/library/')) {
+        tab.value = route.path.slice(9)
     }
 }
 
-checkRoute();
+checkRoute()
 </script>
 
 <style lang="less" scoped>

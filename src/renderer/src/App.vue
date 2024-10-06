@@ -2,7 +2,7 @@
     <v-app :class="{ dark: ui.isDark }" class="root">
         <div
             :style="{
-                backgroundImage: `linear-gradient(rgb(var(--v-theme-background), 0.5), rgb(var(--v-theme-background))), url('${blurBgSrc}')`,
+                backgroundImage: `linear-gradient(rgb(var(--v-theme-background), 0.5), rgb(var(--v-theme-background))), url('${blurBgSrc}')`
             }"
             class="blurry-bg"
         ></div>
@@ -10,7 +10,7 @@
             :style="{
                 transitionDuration,
                 opacity: transitionBgOpacity,
-                backgroundImage: `linear-gradient(rgb(var(--v-theme-background), 0.5), rgb(var(--v-theme-background))), url('${transitionBgSrc}')`,
+                backgroundImage: `linear-gradient(rgb(var(--v-theme-background), 0.5), rgb(var(--v-theme-background))), url('${transitionBgSrc}')`
             }"
             class="blurry-bg-transition"
         ></div>
@@ -22,11 +22,8 @@
             <bottom-music-player
                 v-if="ui.windowWidth <= 930 && dbLoaded"
                 :style="{
-                    transform:
-                        player.track === null
-                            ? 'translateX(-100%)'
-                            : 'translateX(0%)',
-                    transitionDuration: musicPlayerTransitionDuration,
+                    transform: player.track === null ? 'translateX(-100%)' : 'translateX(0%)',
+                    transitionDuration: musicPlayerTransitionDuration
                 }"
                 class="music-player"
             />
@@ -34,11 +31,8 @@
                 v-else
                 v-if="dbLoaded"
                 :style="{
-                    transform:
-                        player.track === null
-                            ? 'translateX(-100%)'
-                            : 'translateX(0%)',
-                    transitionDuration: musicPlayerTransitionDuration,
+                    transform: player.track === null ? 'translateX(-100%)' : 'translateX(0%)',
+                    transitionDuration: musicPlayerTransitionDuration
                 }"
                 class="music-player"
             />
@@ -49,9 +43,9 @@
                         ui.windowWidth <= 930
                             ? 'calc(100% - 70px)'
                             : player.track === null
-                            ? 'calc(100% - 90px)'
-                            : '50%',
-                    transitionDuration: musicPlayerTransitionDuration,
+                              ? 'calc(100% - 90px)'
+                              : '50%',
+                    transitionDuration: musicPlayerTransitionDuration
                 }"
                 class="router-view"
             >
@@ -70,53 +64,53 @@
 // TODO
 // Change most skipped tracks to most skipped liked tracks and only show liked tracks there
 
-import TopMenu from "./components/main-ui/TopMenu.vue";
-import MusicPlayer from "./components/player/MusicPlayer.vue";
-import SearchSuggestions from "./components/search/SearchSuggestions.vue";
-import { usePlayerStore } from "./store/player/player";
-import { computed, ref, watch } from "vue";
-import LeftNavigation from "./components/main-ui/LeftNavigation.vue";
-import BottomMusicPlayer from "./components/player/BottomMusicPlayer.vue";
+import TopMenu from './components/main-ui/TopMenu.vue'
+import MusicPlayer from './components/player/MusicPlayer.vue'
+import SearchSuggestions from './components/search/SearchSuggestions.vue'
+import { usePlayerStore } from './store/player/player'
+import { computed, ref, watch } from 'vue'
+import LeftNavigation from './components/main-ui/LeftNavigation.vue'
+import BottomMusicPlayer from './components/player/BottomMusicPlayer.vue'
 //@ts-ignore
-import coverImage from "../assets/cover.jpg?asset";
-import { useUIStore } from "./store/UI/UIStore";
-import { dbLoaded } from "./scripts/database";
-import { itemImage } from "./scripts/item-utils";
-import Dialogs from "./components/dialogs/Dialogs.vue";
+import coverImage from '../assets/cover.jpg?asset'
+import { useUIStore } from './store/UI/UIStore'
+import { dbLoaded } from './scripts/database'
+import { itemImage } from './scripts/item-utils'
+import Dialogs from './components/dialogs/Dialogs.vue'
 
-const ui = useUIStore();
-const player = usePlayerStore();
-const initialBg = coverImage;
+const ui = useUIStore()
+const player = usePlayerStore()
+const initialBg = coverImage
 const blurBgSrc = computed(() => {
-    if (player.track === null) return initialBg;
-    return itemImage(player.track);
-});
+    if (player.track === null) return initialBg
+    return itemImage(player.track)
+})
 
-const transitionBgSrc = ref(blurBgSrc.value);
-const transitionDuration = ref("0s");
-const transitionBgOpacity = ref("1");
-const timeoutId = ref(-1);
-const musicPlayerTransitionDuration = ref("0s");
+const transitionBgSrc = ref(blurBgSrc.value)
+const transitionDuration = ref('0s')
+const transitionBgOpacity = ref('1')
+const timeoutId = ref(-1)
+const musicPlayerTransitionDuration = ref('0s')
 setTimeout(() => {
-    musicPlayerTransitionDuration.value = "0.5s";
-    transitionDuration.value = "3s";
-}, 1500);
+    musicPlayerTransitionDuration.value = '0.5s'
+    transitionDuration.value = '3s'
+}, 1500)
 
 // Fade transition when switching blurry bg
 watch(blurBgSrc, () => {
-    clearTimeout(timeoutId.value);
-    transitionBgOpacity.value = "0";
+    clearTimeout(timeoutId.value)
+    transitionBgOpacity.value = '0'
     //@ts-ignore
     timeoutId.value = setTimeout(() => {
-        transitionBgSrc.value = blurBgSrc.value;
-        transitionDuration.value = "0s";
-        transitionBgOpacity.value = "1";
+        transitionBgSrc.value = blurBgSrc.value
+        transitionDuration.value = '0s'
+        transitionBgOpacity.value = '1'
         //@ts-ignore
         timeoutId.value = setTimeout(() => {
-            transitionDuration.value = "3s";
-        }, 50);
-    }, 3000);
-});
+            transitionDuration.value = '3s'
+        }, 50)
+    }, 3000)
+})
 </script>
 
 <style lang="less">
@@ -168,7 +162,7 @@ body {
     width: 100%;
     height: 100%;
     font-family:
-        "Segoe UI",
+        'Segoe UI',
         Helvetica Neue,
         Helvetica,
         Arial,

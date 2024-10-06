@@ -5,10 +5,7 @@
         no-style
         @click.right="dialog.setContextMenuItem($event, item)"
     >
-        <div
-            :style="{ backgroundImage: `url(${itemCardImage(item)})` }"
-            class="image"
-        >
+        <div :style="{ backgroundImage: `url(${itemCardImage(item)})` }" class="image">
             <item-play-button
                 :color="ui.themeColor"
                 :item="item"
@@ -22,79 +19,68 @@
             <p v-if="item.type === 'album'" class="description">
                 {{ albumString(actualItem) }}
             </p>
-            <p
-                v-else-if="hasItem"
-                class="description"
-                v-html="itemDescription(actualItem)"
-            ></p>
+            <p v-else-if="hasItem" class="description" v-html="itemDescription(actualItem)"></p>
         </div>
     </router-link>
 </template>
 
 <script lang="ts" setup>
-import type { Item, ItemCollection } from "../../scripts/types";
-import type { PropType } from "vue";
-import { computed } from "vue";
-import ItemPlayButton from "./ItemPlayButton.vue";
-import { randomLiked, randomNotFound } from "../../scripts/image-sources";
-import { useUIStore } from "../../store/UI/UIStore";
-import {
-    albumString,
-    itemDescription,
-    itemImage,
-    itemUrl,
-} from "../../scripts/item-utils";
-import { useDialogStore } from "../../store/UI/dialogStore";
+import type { Item, ItemCollection } from '../../scripts/types'
+import type { PropType } from 'vue'
+import { computed } from 'vue'
+import ItemPlayButton from './ItemPlayButton.vue'
+import { randomLiked, randomNotFound } from '../../scripts/image-sources'
+import { useUIStore } from '../../store/UI/UIStore'
+import { albumString, itemDescription, itemImage, itemUrl } from '../../scripts/item-utils'
+import { useDialogStore } from '../../store/UI/dialogStore'
 
-const dialog = useDialogStore();
-const ui = useUIStore();
+const dialog = useDialogStore()
+const ui = useUIStore()
 const props = defineProps({
     item: {
         type: Object as PropType<Item | ItemCollection>,
-        required: true,
+        required: true
     },
     size: {
         type: Number,
         required: false,
-        default: () => 200,
+        default: () => 200
     },
     hideName: {
         type: Boolean,
         required: false,
-        default: () => false,
-    },
-});
-const itemName = computed(() => props.item.name);
-const isCollection = computed(() => "buttonText" in props.item);
-const hasItem = computed(() => {
-    if (isCollection.value)
-        return "context" in props.item && props.item.context;
-    return true;
-});
-const actualItem = computed(() => {
-    if ("context" in props.item && props.item.context) {
-        return props.item.context;
+        default: () => false
     }
-    return props.item as Item;
-});
+})
+const itemName = computed(() => props.item.name)
+const isCollection = computed(() => 'buttonText' in props.item)
+const hasItem = computed(() => {
+    if (isCollection.value) return 'context' in props.item && props.item.context
+    return true
+})
+const actualItem = computed(() => {
+    if ('context' in props.item && props.item.context) {
+        return props.item.context
+    }
+    return props.item as Item
+})
 
 function itemCardImage(item: Item | ItemCollection) {
-    if ("buttonText" in item) {
-        if ("context" in item && item.context) return itemImage(item.context);
+    if ('buttonText' in item) {
+        if ('context' in item && item.context) return itemImage(item.context)
         switch (item.type) {
-            case "radio":
-                if ("context" in item && item.context)
-                    return itemImage(item.context);
-                if (item.tracks.length === 0) return randomNotFound();
-                return itemImage(item.tracks[0]);
-            case "liked":
-                return randomLiked();
+            case 'radio':
+                if ('context' in item && item.context) return itemImage(item.context)
+                if (item.tracks.length === 0) return randomNotFound()
+                return itemImage(item.tracks[0])
+            case 'liked':
+                return randomLiked()
             default:
-                if (item.tracks.length === 0) return randomNotFound();
-                return itemImage(item.tracks[0]);
+                if (item.tracks.length === 0) return randomNotFound()
+                return itemImage(item.tracks[0])
         }
     }
-    return itemImage(item);
+    return itemImage(item)
 }
 </script>
 

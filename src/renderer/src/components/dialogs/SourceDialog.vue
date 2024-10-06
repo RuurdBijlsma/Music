@@ -1,10 +1,5 @@
 <template>
-    <v-dialog
-        v-model="source.show"
-        :class="{ dark: ui.isDark }"
-        :scrollable="true"
-        width="auto"
-    >
+    <v-dialog v-model="source.show" :class="{ dark: ui.isDark }" :scrollable="true" width="auto">
         <div class="translucent">
             <v-card-title class="main-title pt-5 mb-3">
                 Choose a YouTube source video
@@ -13,15 +8,11 @@
             <v-card-text
                 :style="{
                     overflowY: source.loading ? 'hidden' : 'auto',
-                    alignItems: source.loading ? 'center' : 'left',
+                    alignItems: source.loading ? 'center' : 'left'
                 }"
                 class="card-content"
             >
-                <v-progress-circular
-                    v-if="source.loading"
-                    indeterminate
-                    size="100"
-                />
+                <v-progress-circular v-if="source.loading" indeterminate size="100" />
                 <template v-else>
                     <div v-for="(item, i) in source.items" class="yt-card mb-5">
                         <v-img
@@ -34,12 +25,7 @@
                             <p class="duration">
                                 {{ item.length.simpleText }}
                             </p>
-                            <p
-                                v-if="youtubeSource === item.id"
-                                class="selected"
-                            >
-                                Active
-                            </p>
+                            <p v-if="youtubeSource === item.id" class="selected">Active</p>
                         </v-img>
                         <div class="info-content">
                             <h3 class="title mb-1">{{ item.title }}</h3>
@@ -47,9 +33,7 @@
                                 <v-avatar :color="randomColor(item.id)"
                                     >{{ item.channelTitle[0] }}
                                 </v-avatar>
-                                <span class="ml-4">{{
-                                    item.channelTitle
-                                }}</span>
+                                <span class="ml-4">{{ item.channelTitle }}</span>
                             </div>
                             <spacer></spacer>
                             <div class="actions mt-4">
@@ -71,10 +55,7 @@
             </v-card-text>
             <v-divider></v-divider>
             <v-card-actions>
-                <v-btn
-                    :block="true"
-                    :color="ui.themeColor"
-                    @click="source.show = false"
+                <v-btn :block="true" :color="ui.themeColor" @click="source.show = false"
                     >Dismiss
                 </v-btn>
             </v-card-actions>
@@ -83,82 +64,59 @@
 </template>
 
 <script lang="ts" setup>
-import { useTheme } from "vuetify";
-import { useSearchStore } from "../../store/search";
-import { computed, ref, watch } from "vue";
-import { storeToRefs } from "pinia";
-import SimpleYtPlayer from "../player/SimpleYtPlayer.vue";
-import { useLibraryStore } from "../../store/library";
-import { YouTubeSearchResult } from "../../scripts/types";
-import Spacer from "../Spacer.vue";
-import { useUIStore } from "../../store/UI/UIStore";
-import { useDialogStore } from "../../store/UI/dialogStore";
+import { useTheme } from 'vuetify'
+import { useSearchStore } from '../../store/search'
+import { computed, ref, watch } from 'vue'
+import { storeToRefs } from 'pinia'
+import SimpleYtPlayer from '../player/SimpleYtPlayer.vue'
+import { useLibraryStore } from '../../store/library'
+import { YouTubeSearchResult } from '../../scripts/types'
+import Spacer from '../Spacer.vue'
+import { useUIStore } from '../../store/UI/UIStore'
+import { useDialogStore } from '../../store/UI/dialogStore'
 
-const theme = useTheme();
-const search = useSearchStore();
-const ui = useUIStore();
-const library = useLibraryStore();
-const dialog = useDialogStore();
-const { source } = storeToRefs(dialog);
+const theme = useTheme()
+const search = useSearchStore()
+const ui = useUIStore()
+const library = useLibraryStore()
+const dialog = useDialogStore()
+const { source } = storeToRefs(dialog)
 
 function activate(item: any) {
-    library.activateSource(item.id);
+    library.activateSource(item.id)
 }
 
 function getImg(item: YouTubeSearchResult) {
-    return item.thumbnail.thumbnails[item.thumbnail.thumbnails.length - 1].url;
+    return item.thumbnail.thumbnails[item.thumbnail.thumbnails.length - 1].url
 }
 
-let lastSourceTrackId = "";
-const spotifyTracks = ref([] as SpotifyApi.TrackObjectFull[]);
+let lastSourceTrackId = ''
+const spotifyTracks = ref([] as SpotifyApi.TrackObjectFull[])
 watch(
     () => source.value.items,
     () => {
-        onTracksChange();
-    },
-);
-onTracksChange();
+        onTracksChange()
+    }
+)
+onTracksChange()
 
-const youtubeSource = computed(
-    () => source.value.trackData?.metadata.youTubeSource,
-);
+const youtubeSource = computed(() => source.value.trackData?.metadata.youTubeSource)
 
 function onTracksChange() {
-    if (
-        source.value.spotifyTrack &&
-        source.value.spotifyTrack?.id !== lastSourceTrackId
-    ) {
-        lastSourceTrackId = source.value.spotifyTrack?.id;
-        spotifyTracks.value = source.value.items.map(
-            search.ytSearchResultToTrack,
-        );
+    if (source.value.spotifyTrack && source.value.spotifyTrack?.id !== lastSourceTrackId) {
+        lastSourceTrackId = source.value.spotifyTrack?.id
+        spotifyTracks.value = source.value.items.map(search.ytSearchResultToTrack)
     }
 }
 
 const randomColor = (id: string) => {
-    let random = parseInt(id.substring(2, 6), 36) / 1679616;
+    const random = parseInt(id.substring(2, 6), 36) / 1679616
     if (theme.current.value.dark) {
-        return (
-            "hsl(" +
-            360 * random +
-            "," +
-            (25 + 70 * random) +
-            "%," +
-            (25 + 10 * random) +
-            "%)"
-        );
+        return 'hsl(' + 360 * random + ',' + (25 + 70 * random) + '%,' + (25 + 10 * random) + '%)'
     } else {
-        return (
-            "hsl(" +
-            360 * random +
-            "," +
-            (25 + 70 * random) +
-            "%," +
-            (75 + 10 * random) +
-            "%)"
-        );
+        return 'hsl(' + 360 * random + ',' + (25 + 70 * random) + '%,' + (75 + 10 * random) + '%)'
     }
-};
+}
 </script>
 
 <style lang="less" scoped>

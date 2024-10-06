@@ -32,7 +32,7 @@
             {{ msToReadable(track.duration_ms) }}
         </div>
         <v-menu>
-            <template v-slot:activator="{ props }">
+            <template #activator="{ props }">
                 <v-btn
                     class="track-options ml-2"
                     density="compact"
@@ -48,39 +48,39 @@
 </template>
 
 <script lang="ts" setup>
-import type { PropType } from "vue";
-import { usePlayerStore } from "../../store/player/player";
-import ArtistsSpan from "../ArtistsSpan.vue";
-import ItemMenu from "../item/ItemMenu.vue";
-import type { ItemCollection } from "../../scripts/types";
-import Spacer from "../Spacer.vue";
-import { msToReadable } from "../../scripts/utils";
-import { itemImage } from "../../scripts/item-utils";
-import { useDialogStore } from "../../store/UI/dialogStore";
+import type { PropType } from 'vue'
+import { usePlayerStore } from '../../store/player/player'
+import ArtistsSpan from '../ArtistsSpan.vue'
+import ItemMenu from '../item/ItemMenu.vue'
+import type { ItemCollection } from '../../scripts/types'
+import Spacer from '../Spacer.vue'
+import { msToReadable } from '../../scripts/utils'
+import { itemImage } from '../../scripts/item-utils'
+import { useDialogStore } from '../../store/UI/dialogStore'
 
 const props = defineProps({
     track: {
         type: Object as PropType<SpotifyApi.TrackObjectFull>,
-        required: true,
+        required: true
     },
     index: {
         type: Number,
-        required: true,
+        required: true
     },
     collection: {
         type: Object as PropType<ItemCollection | null>,
-        required: true,
+        required: true
     },
     number: {
         type: Number,
-        required: false,
-    },
-});
-const dialog = useDialogStore();
-const player = usePlayerStore();
+        required: false
+    }
+})
+const dialog = useDialogStore()
+const player = usePlayerStore()
 
 function playItem() {
-    if (props.collection !== null) player.load(props.collection, props.track);
+    if (props.collection !== null) player.load(props.collection, props.track)
 }
 </script>
 

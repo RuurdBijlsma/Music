@@ -12,7 +12,7 @@
             </h4>
 
             <p class="radio-stats">
-                {{ tracks.length }} Track{{ tracks.length === 1 ? "" : "s" }} •
+                {{ tracks.length }} Track{{ tracks.length === 1 ? '' : 's' }} •
                 {{ approximateDuration(totalDurationMs) }}
             </p>
             <collection-buttons :collection="collection" />
@@ -27,105 +27,97 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, watch } from "vue";
-import { useRoute } from "vue-router";
-import { Item, ItemCollection } from "../../scripts/types";
-import TrackList from "../../components/track-list/TrackList.vue";
-import { useSpotifyApiStore } from "../../store/spotify-api";
-import CollectionButtons from "../../components/CollectionButtons.vue";
-import ArtistsSpan from "../../components/ArtistsSpan.vue";
-import { approximateDuration } from "../../scripts/utils";
+import { computed, ref, watch } from 'vue'
+import { useRoute } from 'vue-router'
+import { Item, ItemCollection } from '../../scripts/types'
+import TrackList from '../../components/track-list/TrackList.vue'
+import { useSpotifyApiStore } from '../../store/spotify-api'
+import CollectionButtons from '../../components/CollectionButtons.vue'
+import ArtistsSpan from '../../components/ArtistsSpan.vue'
+import { approximateDuration } from '../../scripts/utils'
 
-const route = useRoute();
-const spotify = useSpotifyApiStore();
+const route = useRoute()
+const spotify = useSpotifyApiStore()
 
-const tracks = ref([] as SpotifyApi.TrackObjectFull[]);
-const artists = ref([] as SpotifyApi.ArtistObjectFull[]);
+const tracks = ref([] as SpotifyApi.TrackObjectFull[])
+const artists = ref([] as SpotifyApi.ArtistObjectFull[])
 
-const loading = ref(false);
+const loading = ref(false)
 const radioGenres = computed(() => {
-    let info = "";
-    if (route.query.hasOwnProperty("seed_genres")) {
-        let genres = route.query["seed_genres"] as string;
+    let info = ''
+    if (route.query.hasOwnProperty('seed_genres')) {
+        const genres = route.query['seed_genres'] as string
         info = genres
-            .split(",")
+            .split(',')
             .map((a) => a.toUpperCase())
-            .join(" / ");
+            .join(' / ')
     }
-    return info;
-});
+    return info
+})
 
 async function refresh() {
-    loading.value = true;
-    artists.value = [];
-    let options: any = route.query;
-    for (let key in options) {
-        if (!options.hasOwnProperty(key)) continue;
+    loading.value = true
+    artists.value = []
+    const options: any = route.query
+    for (const key in options) {
+        if (!options.hasOwnProperty(key)) continue
         if (!isNaN(+options[key])) {
-            options[key] = +options[key];
+            options[key] = +options[key]
         }
     }
 
-    let radio = await spotify.getRadioTracks(options);
-    tracks.value = radio.tracks as SpotifyApi.TrackObjectFull[];
-    loading.value = false;
+    const radio = await spotify.getRadioTracks(options)
+    tracks.value = radio.tracks as SpotifyApi.TrackObjectFull[]
+    loading.value = false
 
-    let artistsIds = radio.seeds
-        .filter((s) => s.type.toLowerCase() === "artist")
-        .map((s) => s.id);
+    const artistsIds = radio.seeds.filter((s) => s.type.toLowerCase() === 'artist').map((s) => s.id)
     if (artistsIds.length > 0)
         spotify.getCachedArtists(artistsIds).then((r) => {
-            artists.value = r;
-        });
+            artists.value = r
+        })
 }
 
 const radioName = computed(() => {
-    let radioName = "Custom Radio";
-    if (route.query.hasOwnProperty("seed_genres")) radioName = "Genre radio";
-    if (route.query.hasOwnProperty("seed_tracks")) radioName = "Song radio";
-    if (route.query.hasOwnProperty("seed_artists")) radioName = "Artist radio";
-    return radioName;
-});
+    let radioName = 'Custom Radio'
+    if (route.query.hasOwnProperty('seed_genres')) radioName = 'Genre radio'
+    if (route.query.hasOwnProperty('seed_tracks')) radioName = 'Song radio'
+    if (route.query.hasOwnProperty('seed_artists')) radioName = 'Artist radio'
+    return radioName
+})
 
-const totalDurationMs = computed(() =>
-    tracks.value.reduce((a, b) => a + b.duration_ms, 0),
-);
+const totalDurationMs = computed(() => tracks.value.reduce((a, b) => a + b.duration_ms, 0))
 
 const collection = computed(() => {
-    let context: Item | undefined;
-    if (radioName.value === "Artist radio") {
-        context = artists.value.length === 0 ? undefined : artists.value[0];
-    } else if (radioName.value === "Song radio") {
-        context = tracks.value.length === 0 ? undefined : tracks.value[0];
+    let context: Item | undefined
+    if (radioName.value === 'Artist radio') {
+        context = artists.value.length === 0 ? undefined : artists.value[0]
+    } else if (radioName.value === 'Song radio') {
+        context = tracks.value.length === 0 ? undefined : tracks.value[0]
     }
-    let prefixName: string = "";
-    if (radioName.value === "Artist radio") {
-        prefixName =
-            artists.value.length === 0
-                ? ""
-                : '"' + artists.value[0].name + '" ';
-    } else if (radioName.value === "Song radio") {
-        prefixName =
-            tracks.value.length === 0 ? "" : '"' + tracks.value[0].name + '" ';
-    } else if (radioName.value === "Genre radio") {
-        prefixName = '"' + radioGenres.value + '" ';
+    let prefixName: string = ''
+    if (radioName.value === 'Artist radio') {
+        prefixName = artists.value.length === 0 ? '' : '"' + artists.value[0].name + '" '
+    } else if (radioName.value === 'Song radio') {
+        prefixName = tracks.value.length === 0 ? '' : '"' + tracks.value[0].name + '" '
+    } else if (radioName.value === 'Genre radio') {
+        prefixName = '"' + radioGenres.value + '" '
     }
 
     return {
-        id: "radio" + JSON.stringify(route.query),
+        id: 'radio' + JSON.stringify(route.query),
         tracks: tracks.value ?? [],
-        type: "radio",
+        type: 'radio',
         context,
         name: prefixName + radioName.value,
         buttonText: radioName.value,
-        to: route.fullPath,
-    } as ItemCollection;
-});
+        to: route.fullPath
+    } as ItemCollection
+})
 
-refresh();
+refresh()
 watch(route, () => {
-    if (route.path.startsWith("/radio")) refresh();
-});
+    if (route.path.startsWith('/radio')) refresh()
+})
 </script>
 
 <style scoped>

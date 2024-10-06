@@ -19,7 +19,7 @@
                 class="user-url"
                 >{{ playlist.owner.display_name }}
             </router-link>
-            • {{ tracks.length }} Track{{ tracks.length === 1 ? "" : "s" }} •
+            • {{ tracks.length }} Track{{ tracks.length === 1 ? '' : 's' }} •
             {{ approximateDuration(totalDurationMs) }} •
             {{ followerString }}
         </p>
@@ -29,50 +29,40 @@
 </template>
 
 <script lang="ts" setup>
-import type { ComputedRef, PropType } from "vue";
-import { computed } from "vue";
-import type { ItemCollection } from "../scripts/types";
-import GlowImage from "../components/GlowImage.vue";
-import CollectionButtons from "./CollectionButtons.vue";
-import Spacer from "./Spacer.vue";
-import { useUIStore } from "../store/UI/UIStore";
-import { approximateDuration } from "../scripts/utils";
-import { itemImage, itemUrl } from "../scripts/item-utils";
+import type { ComputedRef, PropType } from 'vue'
+import { computed } from 'vue'
+import type { ItemCollection } from '../scripts/types'
+import GlowImage from '../components/GlowImage.vue'
+import CollectionButtons from './CollectionButtons.vue'
+import Spacer from './Spacer.vue'
+import { useUIStore } from '../store/UI/UIStore'
+import { approximateDuration } from '../scripts/utils'
+import { itemImage, itemUrl } from '../scripts/item-utils'
 
 const props = defineProps({
     collection: {
         type: Object as PropType<ItemCollection | null>,
-        required: true,
-    },
-});
-const ui = useUIStore();
+        required: true
+    }
+})
+const ui = useUIStore()
 
 const followerString = computed(() => {
-    if (playlist.value === null) return "0 followers";
-    let followers = playlist.value.followers;
-    if (followers.total === 0) return "No followers";
+    if (playlist.value === null) return '0 followers'
+    const followers = playlist.value.followers
+    if (followers.total === 0) return 'No followers'
     if (followers.total > 1000000) {
-        let followerMillions = Math.round(followers.total / 1000000);
-        return (
-            followerMillions +
-            "M follower" +
-            (followerMillions === 1 ? "" : "s")
-        );
+        const followerMillions = Math.round(followers.total / 1000000)
+        return followerMillions + 'M follower' + (followerMillions === 1 ? '' : 's')
     }
-    return (
-        followers.total.toLocaleString() +
-        " follower" +
-        (followers.total === 1 ? "" : "s")
-    );
-});
-const playlist = computed(
-    () => props.collection?.context as SpotifyApi.PlaylistObjectFull | null,
-);
-const tracks = computed(() => props.collection?.tracks ?? []);
+    return followers.total.toLocaleString() + ' follower' + (followers.total === 1 ? '' : 's')
+})
+const playlist = computed(() => props.collection?.context as SpotifyApi.PlaylistObjectFull | null)
+const tracks = computed(() => props.collection?.tracks ?? [])
 const totalDurationMs: ComputedRef<number> = computed(() => {
-    if (tracks.value === null) return 0;
-    return tracks.value.reduce((a, b) => a + b.duration_ms, 0);
-});
+    if (tracks.value === null) return 0
+    return tracks.value.reduce((a, b) => a + b.duration_ms, 0)
+})
 </script>
 
 <style lang="less" scoped>

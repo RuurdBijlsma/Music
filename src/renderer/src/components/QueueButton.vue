@@ -4,20 +4,13 @@
         :close-on-content-click="false"
         transition="none"
     >
-        <template v-slot:activator="{ props }">
-            <v-btn
-                rounded
-                v-bind="props"
-                variant="text"
-                @click="delayedScrollToTrack"
-            >
+        <template #activator="{ props }">
+            <v-btn rounded v-bind="props" variant="text" @click="delayedScrollToTrack">
                 <v-icon>mdi-playlist-play</v-icon>
             </v-btn>
         </template>
         <v-card v-if="collection" class="card-bg">
-            <v-card-title class="card-title"
-                >{{ collection.name }}
-            </v-card-title>
+            <v-card-title class="card-title">{{ collection.name }} </v-card-title>
             <v-divider />
             <track-list
                 v-if="player.queue.length < 200"
@@ -43,51 +36,49 @@
                 >
                     Go to {{ collection.buttonText }}
                 </v-btn>
-                <v-btn :color="ui.themeColor" @click="scrollToTrack">
-                    Scroll to track
-                </v-btn>
+                <v-btn :color="ui.themeColor" @click="scrollToTrack"> Scroll to track </v-btn>
             </v-card-actions>
         </v-card>
     </v-menu>
 </template>
 
 <script lang="ts" setup>
-import TrackListVirtual from "./track-list/TrackListVirtual.vue";
-import TrackList from "./track-list/TrackList.vue";
-import { usePlayerStore } from "../store/player/player";
-import { storeToRefs } from "pinia";
-import { useRoute } from "vue-router";
-import { ref } from "vue";
-import { useTheme } from "vuetify";
-import { useUIStore } from "../store/UI/UIStore";
+import TrackListVirtual from './track-list/TrackListVirtual.vue'
+import TrackList from './track-list/TrackList.vue'
+import { usePlayerStore } from '../store/player/player'
+import { storeToRefs } from 'pinia'
+import { useRoute } from 'vue-router'
+import { ref } from 'vue'
+import { useTheme } from 'vuetify'
+import { useUIStore } from '../store/UI/UIStore'
 
-const player = usePlayerStore();
-const ui = useUIStore();
-const theme = useTheme();
-const route = useRoute();
-const { collection } = storeToRefs(player);
-const focusTrack = ref(null as SpotifyApi.TrackObjectFull | null);
+const player = usePlayerStore()
+const ui = useUIStore()
+const theme = useTheme()
+const route = useRoute()
+const { collection } = storeToRefs(player)
+const focusTrack = ref(null as SpotifyApi.TrackObjectFull | null)
 
-let smoothScroll = false;
+let smoothScroll = false
 
 function delayedScrollToTrack() {
-    smoothScroll = false;
+    smoothScroll = false
     setTimeout(() => {
-        scrollToTrack();
-        smoothScroll = true;
-    }, 100);
+        scrollToTrack()
+        smoothScroll = true
+    }, 100)
 }
 
 function scrollToTrack() {
-    if (player.track === null) return;
-    focusTrack.value = player.track;
-    let index = player.queue.findIndex((t) => t.id === player.trackId);
-    let container = document.querySelector(".list-container");
-    if (container === null) return;
+    if (player.track === null) return
+    focusTrack.value = player.track
+    const index = player.queue.findIndex((t) => t.id === player.trackId)
+    const container = document.querySelector('.list-container')
+    if (container === null) return
     container.scrollTo({
         top: (index - 3) * 50,
-        behavior: smoothScroll ? "smooth" : "auto",
-    });
+        behavior: smoothScroll ? 'smooth' : 'auto'
+    })
 }
 </script>
 

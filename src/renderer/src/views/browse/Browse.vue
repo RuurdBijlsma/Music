@@ -5,11 +5,7 @@
                 <v-icon class="mr-4" icon="mdi-radio-tower" size="30"></v-icon>
                 Want to create your own radio?
             </h2>
-            <v-btn
-                :color="ui.themeColor"
-                class="generate-button mt-3"
-                to="/tune"
-                variant="tonal"
+            <v-btn :color="ui.themeColor" class="generate-button mt-3" to="/tune" variant="tonal"
                 >Generate Custom Radio
             </v-btn>
         </div>
@@ -26,7 +22,7 @@
                 >
                     <div
                         :style="{
-                            backgroundImage: `url(${category.icons[0].url})`,
+                            backgroundImage: `url(${category.icons[0].url})`
                         }"
                         class="image"
                     ></div>
@@ -55,28 +51,28 @@
 </template>
 
 <script lang="ts" setup>
-import { useSpotifyApiStore } from "../../store/spotify-api";
-import { ref } from "vue";
-import { executeCached } from "../../scripts/utils";
-import { useUIStore } from "../../store/UI/UIStore";
-import { itemUrl, radioId } from "../../scripts/item-utils";
+import { useSpotifyApiStore } from '../../store/spotify-api'
+import { ref } from 'vue'
+import { executeCached } from '../../scripts/utils'
+import { useUIStore } from '../../store/UI/UIStore'
+import { itemUrl, radioId } from '../../scripts/item-utils'
 
-const ui = useUIStore();
-const spotify = useSpotifyApiStore();
-const genres = ref(null as null | string[]);
-const categories = ref(null as null | SpotifyApi.CategoryObject[]);
+const ui = useUIStore()
+const spotify = useSpotifyApiStore()
+const genres = ref(null as null | string[])
+const categories = ref(null as null | SpotifyApi.CategoryObject[])
 
 async function refresh() {
     const result = await executeCached(
         () => spotify.getBrowsePage(),
-        "browsePage",
-        1000 * 60 * 60 * 24,
-    );
-    categories.value = result.categories;
-    genres.value = result.genres;
+        'browsePage',
+        1000 * 60 * 60 * 24
+    )
+    categories.value = result.categories
+    genres.value = result.genres
 }
 
-refresh();
+refresh()
 </script>
 
 <style scoped>

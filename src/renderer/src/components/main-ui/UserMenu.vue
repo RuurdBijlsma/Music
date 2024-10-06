@@ -5,7 +5,7 @@
         :close-on-content-click="false"
         location="bottom"
     >
-        <template v-slot:activator="{ props }">
+        <template #activator="{ props }">
             <v-btn
                 class="account-button ml-2 mr-2"
                 density="compact"
@@ -31,21 +31,15 @@
                         variant="tonal"
                     />
                     <div>
-                        <v-list-item-title
-                            >{{ library.userInfo.name }}
-                        </v-list-item-title>
-                        <v-list-item-subtitle
-                            >{{ library.userInfo.mail }}
-                        </v-list-item-subtitle>
+                        <v-list-item-title>{{ library.userInfo.name }} </v-list-item-title>
+                        <v-list-item-subtitle>{{ library.userInfo.mail }} </v-list-item-subtitle>
                     </div>
                 </div>
             </v-list-item>
             <v-divider class="mt-2"></v-divider>
             <v-list-item>
                 <div class="theme-flex">
-                    <v-list-item-title class="theme-title">
-                        Theme
-                    </v-list-item-title>
+                    <v-list-item-title class="theme-title"> Theme </v-list-item-title>
 
                     <v-chip-group
                         v-model="ui.themeString"
@@ -86,40 +80,38 @@
 </template>
 
 <script lang="ts" setup>
-import { useLibraryStore } from "../../store/library";
-import { useSpotifyAuthStore } from "../../store/spotify-auth";
-import { ref, watch } from "vue";
-import { useRoute } from "vue-router";
-import { useTheme } from "vuetify";
-import { randomUser } from "../../scripts/image-sources";
-import { useUIStore } from "../../store/UI/UIStore";
-import { caps } from "../../scripts/utils";
+import { useLibraryStore } from '../../store/library'
+import { useSpotifyAuthStore } from '../../store/spotify-auth'
+import { ref, watch } from 'vue'
+import { useRoute } from 'vue-router'
+import { useTheme } from 'vuetify'
+import { randomUser } from '../../scripts/image-sources'
+import { useUIStore } from '../../store/UI/UIStore'
+import { caps } from '../../scripts/utils'
 
-const library = useLibraryStore();
-const spotifyAuth = useSpotifyAuthStore();
-const route = useRoute();
-const theme = useTheme();
-const ui = useUIStore();
+const library = useLibraryStore()
+const spotifyAuth = useSpotifyAuthStore()
+const route = useRoute()
+const theme = useTheme()
+const ui = useUIStore()
 
-const dropdownOpen = ref(false);
+const dropdownOpen = ref(false)
 
 watch(route, () => {
-    dropdownOpen.value = false;
-});
+    dropdownOpen.value = false
+})
 
-window
-    .matchMedia("(prefers-color-scheme: dark)")
-    .addEventListener("change", (e) => {
-        if (localStorage.theme === "system") {
-            if (e.matches) {
-                // dark mode
-                theme.global.name.value = "dark";
-            } else {
-                // light mode
-                theme.global.name.value = "light";
-            }
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+    if (localStorage.theme === 'system') {
+        if (e.matches) {
+            // dark mode
+            theme.global.name.value = 'dark'
+        } else {
+            // light mode
+            theme.global.name.value = 'light'
         }
-    });
+    }
+})
 </script>
 
 <style lang="less" scoped>

@@ -15,13 +15,9 @@
                 :prepend-avatar="itemImage(dialog.playlist.startTrack)"
                 class="mb-2"
             >
-                <v-list-item-title
-                    >{{ dialog.playlist.startTrack.name }}
-                </v-list-item-title>
+                <v-list-item-title>{{ dialog.playlist.startTrack.name }} </v-list-item-title>
                 <v-list-item-subtitle>
-                    <artists-span
-                        :artists="dialog.playlist.startTrack.artists"
-                    />
+                    <artists-span :artists="dialog.playlist.startTrack.artists" />
                 </v-list-item-subtitle>
             </v-list-item>
 
@@ -47,9 +43,7 @@
                     class="mt-3 mb-3"
                 >
                     <v-chip prepend-icon="mdi-earth">Public</v-chip>
-                    <v-chip prepend-icon="mdi-share-variant"
-                        >Collaborative
-                    </v-chip>
+                    <v-chip prepend-icon="mdi-share-variant">Collaborative </v-chip>
                     <v-chip prepend-icon="mdi-lock-outline">Private</v-chip>
                 </v-chip-group>
                 <v-btn
@@ -67,38 +61,38 @@
 </template>
 
 <script lang="ts" setup>
-import { useLibraryStore } from "../../store/library";
-import { useUIStore } from "../../store/UI/UIStore";
-import ArtistsSpan from "../ArtistsSpan.vue";
-import { ref, watch } from "vue";
-import { useDialogStore } from "../../store/UI/dialogStore";
-import { itemImage } from "../../scripts/item-utils";
+import { useLibraryStore } from '../../store/library'
+import { useUIStore } from '../../store/UI/UIStore'
+import ArtistsSpan from '../ArtistsSpan.vue'
+import { ref, watch } from 'vue'
+import { useDialogStore } from '../../store/UI/dialogStore'
+import { itemImage } from '../../scripts/item-utils'
 
-const library = useLibraryStore();
-const ui = useUIStore();
-const dialog = useDialogStore();
+const library = useLibraryStore()
+const ui = useUIStore()
+const dialog = useDialogStore()
 
-const chips = ref(0);
+const chips = ref(0)
 const chipOptions = [
     [true, false],
     [false, true],
-    [false, false],
-];
+    [false, false]
+]
 watch(chips, () => {
-    let [isPublic, isCollaborative] = chipOptions[chips.value];
-    dialog.playlist.isPublic = isPublic;
-    dialog.playlist.isCollaborative = isCollaborative;
-});
+    const [isPublic, isCollaborative] = chipOptions[chips.value]
+    dialog.playlist.isPublic = isPublic
+    dialog.playlist.isCollaborative = isCollaborative
+})
 
-const loading = ref(false);
+const loading = ref(false)
 
 async function createPlaylist() {
-    loading.value = true;
-    let result = await library.createPlaylistFromDialog();
+    loading.value = true
+    const result = await library.createPlaylistFromDialog()
     if (!result) {
-        dialog.addSnack("Something went wrong creating the playlist");
+        dialog.addSnack('Something went wrong creating the playlist')
     }
-    loading.value = false;
+    loading.value = false
 }
 </script>
 

@@ -8,10 +8,7 @@
         <div v-if="editDialog.loading" class="edit-loading">
             <v-progress-circular :indeterminate="true" />
         </div>
-        <div
-            v-else-if="editDialog.likedTrack && editDialog.trackData && track"
-            class="translucent"
-        >
+        <div v-else-if="editDialog.likedTrack && editDialog.trackData && track" class="translucent">
             <v-card-title>Edit Track Info</v-card-title>
             <v-divider />
             <v-card-text>
@@ -46,7 +43,7 @@
                     :step="0.1"
                     :strict="true"
                 >
-                    <template v-slot:prepend>
+                    <template #prepend>
                         <v-text-field
                             v-model="editDialog.durationRange[0]"
                             :color="ui.themeColor"
@@ -60,7 +57,7 @@
                             type="number"
                         ></v-text-field>
                     </template>
-                    <template v-slot:append>
+                    <template #append>
                         <v-text-field
                             v-model="editDialog.durationRange[1]"
                             :color="ui.themeColor"
@@ -99,56 +96,45 @@
             </v-card-item>
             <v-card-actions class="mt-1">
                 <spacer></spacer>
-                <v-btn
-                    :color="ui.themeColor"
-                    variant="tonal"
-                    @click="applyChanges"
-                >
+                <v-btn :color="ui.themeColor" variant="tonal" @click="applyChanges">
                     Apply Changes
                 </v-btn>
-                <v-btn variant="tonal" @click="editDialog.show = false">
-                    Cancel
-                </v-btn>
+                <v-btn variant="tonal" @click="editDialog.show = false"> Cancel </v-btn>
             </v-card-actions>
         </div>
     </v-dialog>
 </template>
 
 <script lang="ts" setup>
-import { useLibraryStore } from "../../store/library";
-import { computed } from "vue";
-import SimplePlayer from "../player/SimplePlayer.vue";
-import Spacer from "../Spacer.vue";
-import { useUIStore } from "../../store/UI/UIStore";
-import { useDialogStore } from "../../store/UI/dialogStore";
+import { useLibraryStore } from '../../store/library'
+import { computed } from 'vue'
+import SimplePlayer from '../player/SimplePlayer.vue'
+import Spacer from '../Spacer.vue'
+import { useUIStore } from '../../store/UI/UIStore'
+import { useDialogStore } from '../../store/UI/dialogStore'
 
-const dialog = useDialogStore();
-const ui = useUIStore();
-const library = useLibraryStore();
-const editDialog = computed(() => dialog.edit);
-const likedTrack = computed(() => dialog.edit.likedTrack);
-const track = computed(() => likedTrack.value?.track);
+const dialog = useDialogStore()
+const ui = useUIStore()
+const library = useLibraryStore()
+const editDialog = computed(() => dialog.edit)
+const likedTrack = computed(() => dialog.edit.likedTrack)
+const track = computed(() => likedTrack.value?.track)
 
 const revertPossible = computed(() => {
-    if (!likedTrack.value) return false;
+    if (!likedTrack.value) return false
     return (
         editDialog.value.title !== likedTrack.value.original.name ||
-        editDialog.value.artists.toString() !==
-            likedTrack.value.original.artists.toString() ||
+        editDialog.value.artists.toString() !== likedTrack.value.original.artists.toString() ||
         editDialog.value.durationRange[0] !== 0 ||
-        editDialog.value.durationRange[1] !==
-            likedTrack.value.track.duration_ms / 1000
-    );
-});
+        editDialog.value.durationRange[1] !== likedTrack.value.track.duration_ms / 1000
+    )
+})
 
 function revert() {
-    if (likedTrack.value === null) return;
-    editDialog.value.durationRange = [
-        0,
-        likedTrack.value.track.duration_ms / 1000,
-    ];
-    editDialog.value.artists = likedTrack.value.original.artists;
-    editDialog.value.title = likedTrack.value.original.name;
+    if (likedTrack.value === null) return
+    editDialog.value.durationRange = [0, likedTrack.value.track.duration_ms / 1000]
+    editDialog.value.artists = likedTrack.value.original.artists
+    editDialog.value.title = likedTrack.value.original.name
 }
 
 async function applyChanges() {
@@ -158,12 +144,12 @@ async function applyChanges() {
             editDialog.value.likedTrack,
             editDialog.value.title,
             editDialog.value.artists,
-            editDialog.value.durationRange,
+            editDialog.value.durationRange
         ))
     ) {
-        editDialog.value.show = false;
+        editDialog.value.show = false
     } else {
-        dialog.addSnack("Couldn't apply changes, can't find related track.");
+        dialog.addSnack("Couldn't apply changes, can't find related track.")
     }
 }
 </script>

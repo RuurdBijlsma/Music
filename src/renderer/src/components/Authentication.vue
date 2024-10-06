@@ -13,23 +13,14 @@
                             v-if="library.userInfo.avatar"
                             :src="library.userInfo.avatar"
                         ></v-img>
-                        <v-icon
-                            v-else
-                            color="green"
-                            icon="mdi-spotify"
-                            size="35"
-                        ></v-icon>
+                        <v-icon v-else color="green" icon="mdi-spotify" size="35"></v-icon>
                     </v-avatar>
                     <v-card-text>
                         <h3>{{ library.userInfo.name }}</h3>
                         <p>{{ library.userInfo.mail }}</p>
                     </v-card-text>
                     <v-card-actions>
-                        <v-btn
-                            :color="ui.themeColor"
-                            @click="spotifyAuth.logout()"
-                            >Logout
-                        </v-btn>
+                        <v-btn :color="ui.themeColor" @click="spotifyAuth.logout()">Logout </v-btn>
                     </v-card-actions>
                 </div>
                 <template v-else>
@@ -55,18 +46,13 @@
                         @click:append="showPassword = !showPassword"
                     />
                     <v-btn
-                        v-if="
-                            spotifyAuth.hasCredentials &&
-                            !spotifyAuth.isLoggedIn
-                        "
+                        v-if="spotifyAuth.hasCredentials && !spotifyAuth.isLoggedIn"
                         class="mt-4"
                         color="green"
                         variant="tonal"
                         @click="spotifyAuth.login()"
                     >
-                        <v-icon class="mr-2" color="green" size="25"
-                            >mdi-spotify
-                        </v-icon>
+                        <v-icon class="mr-2" color="green" size="25">mdi-spotify </v-icon>
                         Log in
                     </v-btn>
                 </template>
@@ -91,11 +77,7 @@
                         <p>{{ ruurdAuth.credentials.email }}</p>
                     </v-card-text>
                     <v-card-actions>
-                        <v-btn
-                            :color="ui.themeColor"
-                            @click="ruurdAuth.logout()"
-                            >Logout
-                        </v-btn>
+                        <v-btn :color="ui.themeColor" @click="ruurdAuth.logout()">Logout </v-btn>
                     </v-card-actions>
                 </div>
                 <v-form v-else @submit.prevent="ruurdLogin">
@@ -135,10 +117,7 @@
                 </v-form>
                 <div v-if="loginLoading">
                     <p class="sync-txt">Syncing data...</p>
-                    <v-progress-linear
-                        :indeterminate="true"
-                        rounded
-                    ></v-progress-linear>
+                    <v-progress-linear :indeterminate="true" rounded></v-progress-linear>
                 </div>
             </v-window-item>
         </v-window>
@@ -146,71 +125,68 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from "vue";
-import { useLibraryStore } from "../store/library";
-import { useSpotifyAuthStore } from "../store/spotify-auth";
-import { useRuurdAuthStore } from "../store/ruurd-auth";
-import { useUIStore } from "../store/UI/UIStore";
-import { useDialogStore } from "../store/UI/dialogStore";
-import { useBackupStore } from "../store/backupStore";
+import { ref } from 'vue'
+import { useLibraryStore } from '../store/library'
+import { useSpotifyAuthStore } from '../store/spotify-auth'
+import { useRuurdAuthStore } from '../store/ruurd-auth'
+import { useUIStore } from '../store/UI/UIStore'
+import { useDialogStore } from '../store/UI/dialogStore'
+import { useBackupStore } from '../store/backupStore'
 
-const dialog = useDialogStore();
-const backup = useBackupStore();
-const ui = useUIStore();
-const library = useLibraryStore();
-const spotifyAuth = useSpotifyAuthStore();
-const ruurdAuth = useRuurdAuthStore();
+const dialog = useDialogStore()
+const backup = useBackupStore()
+const ui = useUIStore()
+const library = useLibraryStore()
+const spotifyAuth = useSpotifyAuthStore()
+const ruurdAuth = useRuurdAuthStore()
 
-const tab = ref("spotify");
-const showPassword = ref(false);
-const loginLoading = ref(false);
+const tab = ref('spotify')
+const showPassword = ref(false)
+const loginLoading = ref(false)
 
-const importFileLoading = ref(false);
+const importFileLoading = ref(false)
 
 async function importFromFile() {
-    importFileLoading.value = true;
-    let result = await backup.importFromFile();
+    importFileLoading.value = true
+    const result = await backup.importFromFile()
     if (result) {
-        dialog.addSnack("Restored backup from file");
+        dialog.addSnack('Restored backup from file')
     } else {
-        dialog.addSnack("Restore from file failed");
+        dialog.addSnack('Restore from file failed')
     }
-    importFileLoading.value = false;
+    importFileLoading.value = false
 }
 
 async function ruurdLogin(e: SubmitEvent) {
-    loginLoading.value = true;
-    let form = e.currentTarget as HTMLFormElement;
-    const formData = new FormData(form);
-    const email = formData.get("email");
-    const password = formData.get("password");
+    loginLoading.value = true
+    const form = e.currentTarget as HTMLFormElement
+    const formData = new FormData(form)
+    const email = formData.get('email')
+    const password = formData.get('password')
 
-    if (email === null || password === null) return;
+    if (email === null || password === null) return
 
     const fetchOptions = {
-        method: "POST",
-        body: formData,
-    };
+        method: 'POST',
+        body: formData
+    }
 
     try {
-        let userResponse = await fetch(
-            "https://api.ruurd.dev/auth",
-            fetchOptions,
-        );
+        const userResponse = await fetch('https://api.ruurd.dev/auth', fetchOptions)
 
         if (!userResponse.ok) {
-            dialog.addSnack("Login failed: " + userResponse.statusText);
-            return;
+            dialog.addSnack('Login failed: ' + userResponse.statusText)
+            return
         }
-        let user = await userResponse.json();
-        ruurdAuth.credentials.email = email.toString();
-        ruurdAuth.credentials.password = password.toString();
-        ruurdAuth.credentials.name = user.name;
-        await backup.importFromServer();
+        const user = await userResponse.json()
+        ruurdAuth.credentials.email = email.toString()
+        ruurdAuth.credentials.password = password.toString()
+        ruurdAuth.credentials.name = user.name
+        await backup.importFromServer()
     } catch (e: any) {
-        dialog.addSnack("Login failed: " + e.message);
+        dialog.addSnack('Login failed: ' + e.message)
     }
-    loginLoading.value = false;
+    loginLoading.value = false
 }
 </script>
 

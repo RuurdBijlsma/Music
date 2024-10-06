@@ -1,73 +1,52 @@
 <template>
-    <div
-        class="highlight-featured mr-2"
-        @click.right="dialog.setContextMenuItem($event, item)"
-    >
+    <div class="highlight-featured mr-2" @click.right="dialog.setContextMenuItem($event, item)">
         <div class="card-info">
             <div class="card-text">
                 <router-link :to="itemUrl(item)" no-style>
                     <h2 class="card-title">{{ itemName }}</h2>
                 </router-link>
                 <p class="card-description mt-3">
-                    <template v-if="item.type !== 'album'"
-                        >{{ itemDescription(item) }}
-                    </template>
+                    <template v-if="item.type !== 'album'">{{ itemDescription(item) }} </template>
                     <template v-else>{{ albumString(item) }}</template>
                 </p>
             </div>
             <spacer />
             <div class="buttons mt-3">
-                <item-play-button
-                    :color="ui.themeColor"
-                    :item="item"
-                    class="mr-3"
-                />
-                <item-play-button
-                    :color="ui.themeColor"
-                    :item="item"
-                    :shuffle="true"
-                />
+                <item-play-button :color="ui.themeColor" :item="item" class="mr-3" />
+                <item-play-button :color="ui.themeColor" :item="item" :shuffle="true" />
             </div>
         </div>
         <spacer></spacer>
         <router-link :to="itemUrl(item)">
-            <div
-                :style="{ backgroundImage: `url(${itemImage(item)})` }"
-                class="card-image"
-            />
+            <div :style="{ backgroundImage: `url(${itemImage(item)})` }" class="card-image" />
         </router-link>
     </div>
 </template>
 
 <script lang="ts" setup>
-import type { PropType } from "vue";
-import { computed } from "vue";
-import type { Item } from "../../scripts/types";
-import Spacer from "../Spacer.vue";
-import ItemPlayButton from "./ItemPlayButton.vue";
-import { useUIStore } from "../../store/UI/UIStore";
-import { useDialogStore } from "../../store/UI/dialogStore";
-import {
-    albumString,
-    itemDescription,
-    itemImage,
-    itemUrl,
-} from "../../scripts/item-utils";
+import type { PropType } from 'vue'
+import { computed } from 'vue'
+import type { Item } from '../../scripts/types'
+import Spacer from '../Spacer.vue'
+import ItemPlayButton from './ItemPlayButton.vue'
+import { useUIStore } from '../../store/UI/UIStore'
+import { useDialogStore } from '../../store/UI/dialogStore'
+import { albumString, itemDescription, itemImage, itemUrl } from '../../scripts/item-utils'
 
-const dialog = useDialogStore();
-const ui = useUIStore();
+const dialog = useDialogStore()
+const ui = useUIStore()
 const props = defineProps({
     item: {
         type: Object as PropType<Item>,
-        required: true,
+        required: true
     },
     size: {
         type: Number,
         required: false,
-        default: () => 200,
-    },
-});
-const itemName = computed(() => props.item.name);
+        default: () => 200
+    }
+})
+const itemName = computed(() => props.item.name)
 </script>
 
 <style lang="less" scoped>

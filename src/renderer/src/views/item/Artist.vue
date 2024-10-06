@@ -16,7 +16,7 @@
             <spacer />
             <h1 :title="artist.name" class="artist-name">{{ artist.name }}</h1>
             <p>{{ followerString }}</p>
-            <p class="genres">{{ artist.genres.join(" / ") }}</p>
+            <p class="genres">{{ artist.genres.join(' / ') }}</p>
             <collection-buttons :collection="collection" :like-item="artist" />
         </div>
         <track-list :collection="collection" padding-top="0" />
@@ -49,88 +49,82 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, watch } from "vue";
-import { useRoute } from "vue-router";
-import GlowImage from "../../components/GlowImage.vue";
-import ItemCard from "../../components/item/ItemCard.vue";
-import HighlightCard from "../../components/item/HighlightCard.vue";
-import HorizontalScroller from "../../components/HorizontalScroller.vue";
-import TrackList from "../../components/track-list/TrackList.vue";
-import CollectionButtons from "../../components/CollectionButtons.vue";
-import { useSpotifyApiStore } from "../../store/spotify-api";
-import Spacer from "../../components/Spacer.vue";
-import { baseDb } from "../../scripts/database";
-import { itemCollection, itemImage } from "../../scripts/item-utils";
-import { useDialogStore } from "../../store/UI/dialogStore";
+import { computed, ref, watch } from 'vue'
+import { useRoute } from 'vue-router'
+import GlowImage from '../../components/GlowImage.vue'
+import ItemCard from '../../components/item/ItemCard.vue'
+import HighlightCard from '../../components/item/HighlightCard.vue'
+import HorizontalScroller from '../../components/HorizontalScroller.vue'
+import TrackList from '../../components/track-list/TrackList.vue'
+import CollectionButtons from '../../components/CollectionButtons.vue'
+import { useSpotifyApiStore } from '../../store/spotify-api'
+import Spacer from '../../components/Spacer.vue'
+import { baseDb } from '../../scripts/database'
+import { itemCollection, itemImage } from '../../scripts/item-utils'
+import { useDialogStore } from '../../store/UI/dialogStore'
 
-const route = useRoute();
-const dialog = useDialogStore();
-const spotify = useSpotifyApiStore();
+const route = useRoute()
+const dialog = useDialogStore()
+const spotify = useSpotifyApiStore()
 
-const artist = ref(null as null | SpotifyApi.ArtistObjectFull);
-const albums = ref(null as null | SpotifyApi.AlbumObjectFull[]);
-const relatedArtists = ref(null as null | SpotifyApi.ArtistObjectFull[]);
-const topTracks = ref(null as null | SpotifyApi.TrackObjectFull[]);
+const artist = ref(null as null | SpotifyApi.ArtistObjectFull)
+const albums = ref(null as null | SpotifyApi.AlbumObjectFull[])
+const relatedArtists = ref(null as null | SpotifyApi.ArtistObjectFull[])
+const topTracks = ref(null as null | SpotifyApi.TrackObjectFull[])
 
 const collection = computed(() => {
-    if (artist.value === null) return null;
-    return itemCollection(artist.value, topTracks.value);
-});
+    if (artist.value === null) return null
+    return itemCollection(artist.value, topTracks.value)
+})
 
-let loadedId = route.params.id as string;
-reloadArtist(loadedId);
+let loadedId = route.params.id as string
+reloadArtist(loadedId)
 
 watch(route, async () => {
     if (
-        route.path.startsWith("/artist") &&
-        typeof route.params.id === "string" &&
+        route.path.startsWith('/artist') &&
+        typeof route.params.id === 'string' &&
         route.params.id !== loadedId
     ) {
-        loadedId = route.params.id;
-        reloadArtist(loadedId).then();
-        let el = document.querySelector(".router-view");
-        if (el !== null) el.scrollTop = 0;
+        loadedId = route.params.id
+        reloadArtist(loadedId).then()
+        const el = document.querySelector('.router-view')
+        if (el !== null) el.scrollTop = 0
     }
-});
+})
 
 async function reloadArtist(id: string) {
-    if (id.startsWith("yt-")) {
-        return;
+    if (id.startsWith('yt-')) {
+        return
     }
-    await baseDb;
+    await baseDb
     spotify.getArtist(id).then((r) => {
-        artist.value = r;
-    });
+        artist.value = r
+    })
     spotify.getArtistAlbums(id).then((r) => {
-        albums.value = r.items as SpotifyApi.AlbumObjectFull[];
-    });
+        albums.value = r.items as SpotifyApi.AlbumObjectFull[]
+    })
     spotify.getArtistRelatedArtists(id).then((r) => {
-        relatedArtists.value = r.artists;
-    });
+        relatedArtists.value = r.artists
+    })
     spotify.getArtistTopTracks(id).then((r) => {
-        topTracks.value = r.tracks;
-    });
+        topTracks.value = r.tracks
+    })
 }
 
 const followerString = computed(() => {
-    if (artist.value === null) return "0 followers";
-    if (artist.value.followers.total === 0) return "No followers";
+    if (artist.value === null) return '0 followers'
+    if (artist.value.followers.total === 0) return 'No followers'
     if (artist.value.followers.total > 1000000) {
-        let followerMillions = Math.round(
-            artist.value.followers.total / 1000000,
-        );
-        return (
-            followerMillions +
-            "M follower" +
-            (followerMillions === 1 ? "" : "s")
-        );
+        const followerMillions = Math.round(artist.value.followers.total / 1000000)
+        return followerMillions + 'M follower' + (followerMillions === 1 ? '' : 's')
     }
     return (
         artist.value.followers.total.toLocaleString() +
-        " follower" +
-        (artist.value.followers.total === 1 ? "" : "s")
-    );
-});
+        ' follower' +
+        (artist.value.followers.total === 1 ? '' : 's')
+    )
+})
 // const totalDurationMs = computed(() => {
 //     return tracks.value.reduce((a, b) => a + b.duration_ms, 0);
 // });

@@ -22,10 +22,7 @@
                 class="chip-group"
                 mandatory
             >
-                <v-chip
-                    v-for="opt in ui.themeOptions"
-                    :value="opt"
-                    class="theme-chip"
+                <v-chip v-for="opt in ui.themeOptions" :value="opt" class="theme-chip"
                     >{{ caps(opt) }}
                 </v-chip>
             </v-chip-group>
@@ -39,9 +36,7 @@
                 hide-details
             ></v-switch>
             <template v-if="!ui.useSunSchedule">
-                <label class="mr-3" for="light-picker"
-                    >Turn on light theme</label
-                >
+                <label class="mr-3" for="light-picker">Turn on light theme</label>
                 <input
                     id="light-picker"
                     v-model="ui.lightOnTime"
@@ -80,15 +75,12 @@
             <v-progress-linear
                 v-if="downloadState.loading"
                 :color="ui.themeColor"
-                :model-value="
-                    (100 * downloadState.downloaded) / downloadState.total
-                "
+                :model-value="(100 * downloadState.downloaded) / downloadState.total"
                 class="mt-2"
                 rounded
             />
             <span v-if="downloadState.loading"
-                >Exported {{ downloadState.downloaded }} /
-                {{ downloadState.total }}</span
+                >Exported {{ downloadState.downloaded }} / {{ downloadState.total }}</span
             >
             <br />
             <v-btn
@@ -108,8 +100,8 @@
                     exportResult === 'none'
                         ? ''
                         : exportResult === 'success'
-                        ? 'mdi-check-bold'
-                        : 'mdi-alert-circle-outline'
+                          ? 'mdi-check-bold'
+                          : 'mdi-alert-circle-outline'
                 "
                 :color="ui.themeColor"
                 :loading="exportLoading"
@@ -167,10 +159,7 @@
             </v-btn>
             <div class="folder">{{ platform.directories?.music }}</div>
         </div>
-        <p>
-            Attempt to make loud tracks quieter to match closer with quiet
-            tracks.
-        </p>
+        <p>Attempt to make loud tracks quieter to match closer with quiet tracks.</p>
         <v-switch
             v-model="player.normalizeVolume"
             :color="ui.themeColor"
@@ -185,12 +174,7 @@
             @click="updateYtdlp"
             >Update YT-DLP
         </v-btn>
-        <v-sheet
-            v-if="updateResult !== ''"
-            :color="ui.themeColor"
-            class="update-result"
-            rounded
-        >
+        <v-sheet v-if="updateResult !== ''" :color="ui.themeColor" class="update-result" rounded>
             {{ updateResult }}
         </v-sheet>
 
@@ -215,9 +199,7 @@
                 <div>
                     <h3>
                         Release notes for
-                        <span class="bold-version"
-                            >v{{ updateState.updateVersion }}</span
-                        >
+                        <span class="bold-version">v{{ updateState.updateVersion }}</span>
                     </h3>
                     <div v-html="updateState.releaseNotes"></div>
                 </div>
@@ -227,99 +209,97 @@
 </template>
 
 <script lang="ts" setup>
-import { usePlatformStore } from "../store/electron";
-import { useBaseStore } from "../store/base";
-import { usePlayerStore } from "../store/player/player";
-import Authentication from "../components/Authentication.vue";
-import { computed, ref } from "vue";
-import { useRuurdAuthStore } from "../store/ruurd-auth";
-import { useUIStore } from "../store/UI/UIStore";
-import { storeToRefs } from "pinia";
-import { useDialogStore } from "../store/UI/dialogStore";
-import { useBackupStore } from "../store/backupStore";
-import { useUpdateStore } from "../store/UI/update";
-import { caps } from "../scripts/utils";
+import { usePlatformStore } from '../store/electron'
+import { useBaseStore } from '../store/base'
+import { usePlayerStore } from '../store/player/player'
+import Authentication from '../components/Authentication.vue'
+import { computed, ref } from 'vue'
+import { useRuurdAuthStore } from '../store/ruurd-auth'
+import { useUIStore } from '../store/UI/UIStore'
+import { storeToRefs } from 'pinia'
+import { useDialogStore } from '../store/UI/dialogStore'
+import { useBackupStore } from '../store/backupStore'
+import { useUpdateStore } from '../store/UI/update'
+import { caps } from '../scripts/utils'
 
-const player = usePlayerStore();
-const platform = usePlatformStore();
-const base = useBaseStore();
-const update = useUpdateStore();
-const dialog = useDialogStore();
-const backup = useBackupStore();
-const ruurdAuth = useRuurdAuthStore();
-const ui = useUIStore();
-const appVersion = ref("");
-const { updateState } = storeToRefs(update);
-window.api.getAppVersion().then((r) => (appVersion.value = r));
+const player = usePlayerStore()
+const platform = usePlatformStore()
+const base = useBaseStore()
+const update = useUpdateStore()
+const dialog = useDialogStore()
+const backup = useBackupStore()
+const ruurdAuth = useRuurdAuthStore()
+const ui = useUIStore()
+const appVersion = ref('')
+const { updateState } = storeToRefs(update)
+window.api.getAppVersion().then((r) => (appVersion.value = r))
 
-const updateLoading = ref(false);
-const updateResult = ref("");
-const downloadState = computed(
-    () => platform.downloadState.get("liked")?.value,
-);
+const updateLoading = ref(false)
+const updateResult = ref('')
+const downloadState = computed(() => platform.downloadState.get('liked')?.value)
 
-const exportLoading = ref(false);
-const importLoading = ref(false);
-const exportFileLoading = ref(false);
-const importFileLoading = ref(false);
-const exportResult = ref("none" as "none" | "failed" | "success");
+const exportLoading = ref(false)
+const importLoading = ref(false)
+const exportFileLoading = ref(false)
+const importFileLoading = ref(false)
+const exportResult = ref('none' as 'none' | 'failed' | 'success')
 
 const sunTimes = computed(() => {
-    return ` (${ui.sun.rise} - ${ui.sun.set})`;
-});
+    return ` (${ui.sun.rise} - ${ui.sun.set})`
+})
 
 async function exportToServer() {
-    exportResult.value = "none";
-    exportLoading.value = true;
+    exportResult.value = 'none'
+    exportLoading.value = true
     try {
-        let result = await backup.exportToServer();
-        exportResult.value = result ? "success" : "failed";
+        const result = await backup.exportToServer()
+        exportResult.value = result ? 'success' : 'failed'
     } catch (e: any) {
-        dialog.addSnack("Backup to server failed: ", e.message);
+        dialog.addSnack('Backup to server failed: ', e.message)
     }
-    exportLoading.value = false;
+    exportLoading.value = false
 }
 
 async function importFromServer() {
-    importLoading.value = true;
+    importLoading.value = true
     try {
-        await backup.importFromServer();
+        await backup.importFromServer()
     } catch (e: any) {
-        dialog.addSnack("Restore from server failed: ", e.message);
+        dialog.addSnack('Restore from server failed: ', e.message)
     }
-    importLoading.value = false;
+    importLoading.value = false
 }
 
 async function exportToFile() {
-    exportFileLoading.value = true;
+    exportFileLoading.value = true
     try {
-        await backup.exportToFile();
+        await backup.exportToFile()
     } catch (e: any) {
-        dialog.addSnack("Backup to file failed: ", e.message);
+        dialog.addSnack('Backup to file failed: ', e.message)
     }
-    exportFileLoading.value = false;
+    exportFileLoading.value = false
 }
 
 async function importFromFile() {
-    importFileLoading.value = true;
-    let result = await backup.importFromFile();
+    importFileLoading.value = true
+    const result = await backup.importFromFile()
     if (result) {
-        dialog.addSnack("Restored backup from file");
+        dialog.addSnack('Restored backup from file')
     } else {
-        dialog.addSnack("Restore from file failed");
+        dialog.addSnack('Restore from file failed')
     }
-    importFileLoading.value = false;
+    importFileLoading.value = false
 }
 
 async function updateYtdlp() {
-    updateLoading.value = true;
-    updateResult.value = await platform.updateYtdlp();
-    updateLoading.value = false;
+    updateLoading.value = true
+    updateResult.value = await platform.updateYtdlp()
+    updateLoading.value = false
 }
 
 function setOfflineMode(v: boolean) {
-    base.offlineMode = v;
-    location.reload();
+    base.offlineMode = v
+    location.reload()
 }
 </script>
 

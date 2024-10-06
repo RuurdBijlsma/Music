@@ -6,13 +6,13 @@
         class="virtual-scroll"
         item-height="50"
     >
-        <template v-slot:default="{ item, index }">
+        <template #default="{ item, index }">
             <slot v-if="item === null" />
             <track-list-item
                 v-else
                 :class="{
                     'odd-item': !isActive(item.id) && index % 2 === 0,
-                    active: isActive(item.id),
+                    active: isActive(item.id)
                 }"
                 :collection="collection"
                 :index="index - 1"
@@ -25,57 +25,56 @@
 </template>
 
 <script lang="ts" setup>
-import type { PropType } from "vue";
-import { computed } from "vue";
-import TrackListItem from "./TrackListItem.vue";
-import { usePlayerStore } from "../../store/player/player";
-import type { ItemCollection } from "../../scripts/types";
+import type { PropType } from 'vue'
+import { computed } from 'vue'
+import TrackListItem from './TrackListItem.vue'
+import { usePlayerStore } from '../../store/player/player'
+import type { ItemCollection } from '../../scripts/types'
 
-const player = usePlayerStore();
+const player = usePlayerStore()
 
 const props = defineProps({
     collection: {
         type: Object as PropType<ItemCollection | null>,
-        required: true,
+        required: true
     },
     tracks: {
         type: Object as PropType<SpotifyApi.TrackObjectFull[] | null>,
-        default: () => null,
+        default: () => null
     },
     subtractHeight: {
         type: Number,
-        default: () => 0,
+        default: () => 0
     },
     paddingTop: {
         type: String,
-        default: () => "60px",
+        default: () => '60px'
     },
     noImages: {
         type: Boolean,
-        default: () => false,
+        default: () => false
     },
     height: {
         type: String,
-        required: true,
+        required: true
     },
     scrollIntoView: {
         type: Object as PropType<SpotifyApi.TrackObjectFull | null>,
         required: false,
-        default: () => null,
-    },
-});
+        default: () => null
+    }
+})
 const isActive = (id: string) =>
-    player.trackId === id &&
-    (player.collection?.id ?? "") === props.collection?.id;
+    player.trackId === id && (player.collection?.id ?? '') === props.collection?.id
 
 const scrollItems = computed(() => {
-    return [null, ...realTracks.value];
-});
+    return [null, ...realTracks.value]
+})
 
 const realTracks = computed(() => {
-    if (props.tracks !== null) return props.tracks;
-    return props.collection?.tracks ?? [];
-});
+    if (props.tracks !== null) return props.tracks
+    return props.collection?.tracks ?? []
+})
 </script>
 
 <style lang="less" scoped>

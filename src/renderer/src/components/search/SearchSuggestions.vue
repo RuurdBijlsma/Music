@@ -4,7 +4,7 @@
         :style="{
             left: searchX + 'px',
             top: searchY + 'px',
-            width: width + 'px',
+            width: width + 'px'
         }"
         class="search-suggestions"
     >
@@ -53,82 +53,72 @@
 </template>
 
 <script lang="ts" setup>
-import {
-    computed,
-    onBeforeUnmount,
-    onMounted,
-    onUnmounted,
-    ref,
-    watch,
-} from "vue";
-import { storeToRefs } from "pinia";
-import { useSearchStore } from "../../store/search";
-import SearchSuggestionSection from "./SearchSuggestionSection.vue";
-import { useRoute } from "vue-router";
+import { computed, onBeforeUnmount, onMounted, onUnmounted, ref, watch } from 'vue'
+import { storeToRefs } from 'pinia'
+import { useSearchStore } from '../../store/search'
+import SearchSuggestionSection from './SearchSuggestionSection.vue'
+import { useRoute } from 'vue-router'
 
-const search = useSearchStore();
+const search = useSearchStore()
 
-const { suggestionResults, searchValue, showSuggestions } = storeToRefs(search);
+const { suggestionResults, searchValue, showSuggestions } = storeToRefs(search)
 
-const r = computed(() => suggestionResults.value);
+const r = computed(() => suggestionResults.value)
 
 const hasValidSearch = computed(() => {
-    if (r.value === null) return false;
-    if (searchValue.value === null) return false;
-    return searchValue.value.trim().length >= 3;
-});
+    if (r.value === null) return false
+    if (searchValue.value === null) return false
+    return searchValue.value.trim().length >= 3
+})
 
-document.addEventListener("mousedown", onClick, false);
-onUnmounted(() => document.removeEventListener("mousedown", onClick));
+document.addEventListener('mousedown', onClick, false)
+onUnmounted(() => document.removeEventListener('mousedown', onClick))
 
 function onClick(e: MouseEvent) {
-    let searchSuggestions = document.querySelector(
-        ".search-suggestions",
-    ) as HTMLElement;
-    let searchBox = document.querySelector(".search-field") as HTMLElement;
-    let target = e.target as HTMLElement;
-    showSuggestions.value =
-        searchSuggestions.contains(target) || searchBox.contains(target);
+    const searchSuggestions = document.querySelector('.search-suggestions') as HTMLElement
+    const searchBox = document.querySelector('.search-field') as HTMLElement
+    const target = e.target as HTMLElement
+    showSuggestions.value = searchSuggestions.contains(target) || searchBox.contains(target)
 }
 
-let lastInputTime = performance.now();
+let lastInputTime = performance.now()
 watch(searchValue, () => {
-    search.clearSuggestions();
-    lastInputTime = performance.now();
-});
+    search.clearSuggestions()
+    lastInputTime = performance.now()
+})
 
-const route = useRoute();
-watch(route, () => (showSuggestions.value = false));
+const route = useRoute()
+watch(route, () => (showSuggestions.value = false))
 
-let el = null as null | Element;
-let searchX = ref(200);
-let searchY = ref(45);
-let width = ref(500);
-let lastSearchedQuery = "";
+let el = null as null | Element
+const searchX = ref(200)
+const searchY = ref(45)
+const width = ref(500)
+let lastSearchedQuery = ''
 
 onMounted(() => {
-    el = document.querySelector(".search-field");
-    updateSearchPos();
-});
-let interval: number;
+    el = document.querySelector('.search-field')
+    updateSearchPos()
+})
+let interval: number
 interval = window.setInterval(() => {
-    updateSearchPos();
-    let now = performance.now();
+    updateSearchPos()
+    const now = performance.now()
     // als je 750 ms niks typt, start de auto search
     if (now - lastInputTime > 750 && searchValue.value !== lastSearchedQuery) {
-        lastInputTime = now;
-        search.suggestionResults = search.cachedSearch(searchValue.value).value;
-        lastSearchedQuery = searchValue.value;
+        lastInputTime = now
+        search.suggestionResults = search.cachedSearch(searchValue.value).value
+        lastSearchedQuery = searchValue.value
     }
-}, 375);
-onBeforeUnmount(() => clearInterval(interval));
+}, 375)
+onBeforeUnmount(() => clearInterval(interval))
 
 function updateSearchPos() {
-    if (el === null) return;
-    let bounds = el.getBoundingClientRect();
-    searchX.value = Math.round(bounds.left);
-    searchY.value = Math.round(bounds.bottom);
-    width.value = Math.round(bounds.width);
+    if (el === null) return
+    const bounds = el.getBoundingClientRect()
+    searchX.value = Math.round(bounds.left)
+    searchY.value = Math.round(bounds.bottom)
+    width.value = Math.round(bounds.width)
 }
 </script>
 

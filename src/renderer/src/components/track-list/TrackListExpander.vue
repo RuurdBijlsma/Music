@@ -4,7 +4,7 @@
             v-if="tracks.length > 0"
             ref="subList"
             :style="{
-                maxHeight: sublistMaxHeight + 'px',
+                maxHeight: sublistMaxHeight + 'px'
             }"
             class="sub-list"
         >
@@ -15,11 +15,7 @@
                 </div>
                 <v-divider />
             </div>
-            <track-list
-                :collection="collection"
-                :tracks="collection.tracks"
-                padding-top="0"
-            />
+            <track-list :collection="collection" :tracks="collection.tracks" padding-top="0" />
         </div>
         <template v-if="tracks.length > 3">
             <v-divider />
@@ -47,57 +43,52 @@
 </template>
 
 <script lang="ts" setup>
-import type { PropType } from "vue";
-import { computed, ref } from "vue";
-import TrackList from "./TrackList.vue";
-import type { ItemCollection } from "../../scripts/types";
+import type { PropType } from 'vue'
+import { computed, ref } from 'vue'
+import TrackList from './TrackList.vue'
+import type { ItemCollection } from '../../scripts/types'
 
-const subList = ref<HTMLElement | null>(null);
+const subList = ref<HTMLElement | null>(null)
 
 const props = defineProps({
     tracks: {
         type: Object as PropType<SpotifyApi.TrackObjectFull[]>,
-        required: true,
+        required: true
     },
     loading: {
         type: Boolean,
         required: false,
-        default: () => false,
+        default: () => false
     },
     collection: {
         type: Object as PropType<ItemCollection>,
-        required: true,
+        required: true
     },
     showAmount: {
         type: Number,
         required: false,
-        default: 4,
+        default: 4
     },
     showHeader: {
         type: Boolean,
-        default: false,
-    },
-});
+        default: false
+    }
+})
 
-const expanded = ref(false);
-const collapsedHeight = computed(
-    () => props.showAmount * 50 + (props.showHeader ? 28 : 0),
-);
-let sublistMaxHeight = ref(collapsedHeight.value);
+const expanded = ref(false)
+const collapsedHeight = computed(() => props.showAmount * 50 + (props.showHeader ? 28 : 0))
+const sublistMaxHeight = ref(collapsedHeight.value)
 
 function expand() {
-    if (subList.value === null) return;
-    sublistMaxHeight.value = Math.max(
-        subList.value.scrollHeight,
-        collapsedHeight.value,
-    );
-    expanded.value = true;
+    if (subList.value === null) return
+    sublistMaxHeight.value = Math.max(subList.value.scrollHeight, collapsedHeight.value)
+    expanded.value = true
 }
 
 function smallify() {
-    if (subList.value === null) return;
-    sublistMaxHeight.value = collapsedHeight.value;
-    expanded.value = false;
+    if (subList.value === null) return
+    sublistMaxHeight.value = collapsedHeight.value
+    expanded.value = false
 }
 </script>
 

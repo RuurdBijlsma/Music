@@ -7,65 +7,45 @@
             to="/"
             variant="text"
         ></v-btn>
-        <span
-            :class="{ active: route.path === '/' }"
-            class="button-text nav-1-text"
+        <span :class="{ active: route.path === '/' }" class="button-text nav-1-text"
             >Listen Now</span
         >
         <v-btn
-            :icon="
-                route.path === '/browse' ? 'mdi-library' : 'mdi-library-outline'
-            "
+            :icon="route.path === '/browse' ? 'mdi-library' : 'mdi-library-outline'"
             class="nav-2-btn nav-button"
             rounded
             to="/browse"
             variant="text"
         ></v-btn>
-        <span
-            :class="{ active: route.path === '/browse' }"
-            class="button-text nav-2-text"
+        <span :class="{ active: route.path === '/browse' }" class="button-text nav-2-text"
             >Browse</span
         >
         <v-btn
-            :icon="
-                route.path === '/library'
-                    ? 'mdi-music-note'
-                    : 'mdi-music-note-outline'
-            "
+            :icon="route.path === '/library' ? 'mdi-music-note' : 'mdi-music-note-outline'"
             class="nav-3-btn nav-button"
             rounded
             to="/library"
             variant="text"
         />
-        <span
-            :class="{ active: route.path === '/library' }"
-            class="button-text nav-3-text"
+        <span :class="{ active: route.path === '/library' }" class="button-text nav-3-text"
             >Library</span
         >
         <v-btn
             :icon="playlistsExpanded ? 'mdi-chevron-up' : 'mdi-playlist-play'"
             :style="{
-                transform: playlistsExpanded
-                    ? 'rotate(180deg)'
-                    : 'rotate(0deg)',
+                transform: playlistsExpanded ? 'rotate(180deg)' : 'rotate(0deg)'
             }"
             class="nav-4-btn nav-button"
             rounded
             variant="text"
             @click="playlistsExpanded = !playlistsExpanded"
         />
-        <span
-            :class="{ active: playlistsExpanded }"
-            class="button-text nav-4-text"
-            >Playlists</span
-        >
+        <span :class="{ active: playlistsExpanded }" class="button-text nav-4-text">Playlists</span>
         <div
             :style="{
                 opacity: playlistsExpanded ? '1' : '0',
-                transform: playlistsExpanded
-                    ? 'scaleY(1) translateY(0%)'
-                    : 'scaleY(.7)',
-                pointerEvents: playlistsExpanded ? 'auto' : 'none',
+                transform: playlistsExpanded ? 'scaleY(1) translateY(0%)' : 'scaleY(.7)',
+                pointerEvents: playlistsExpanded ? 'auto' : 'none'
             }"
             class="pinned-playlists"
         >
@@ -74,13 +54,8 @@
                 :text="playlist.name"
                 location="right"
             >
-                <template v-slot:activator="{ props }">
-                    <v-btn
-                        height="64"
-                        max-width="64"
-                        v-bind="props"
-                        variant="text"
-                    >
+                <template #activator="{ props }">
+                    <v-btn height="64" max-width="64" v-bind="props" variant="text">
                         <router-link :to="itemUrl(playlist)">
                             <v-avatar rounded size="50">
                                 <v-img :src="itemImage(playlist)"></v-img>
@@ -94,14 +69,14 @@
 </template>
 
 <script lang="ts" setup>
-import { useRoute } from "vue-router";
-import { ref } from "vue";
-import { useLibraryStore } from "../../store/library";
-import { itemImage, itemUrl } from "../../scripts/item-utils";
+import { useRoute } from 'vue-router'
+import { ref } from 'vue'
+import { useLibraryStore } from '../../store/library'
+import { itemImage, itemUrl } from '../../scripts/item-utils'
 
-const route = useRoute();
-const library = useLibraryStore();
-const playlistsExpanded = ref(false);
+const route = useRoute()
+const library = useLibraryStore()
+const playlistsExpanded = ref(false)
 </script>
 
 <style lang="less" scoped>

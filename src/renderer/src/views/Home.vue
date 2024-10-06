@@ -6,12 +6,7 @@
             </h1>
         </div>
         <horizontal-scroller>
-            <highlight-card
-                v-if="highlight"
-                :item="highlight"
-                :size="250"
-                class="mr-4"
-            />
+            <highlight-card v-if="highlight" :item="highlight" :size="250" class="mr-4" />
             <item-card
                 v-for="playlist in otherPlaylists"
                 :item="playlist"
@@ -37,9 +32,7 @@
 
         <template v-if="library.view.homePage.personalized.length > 0">
             <div class="home-title mt-4">
-                <h2 class="other-title mb-5">
-                    Made for {{ library.userInfo.name }}
-                </h2>
+                <h2 class="other-title mb-5">Made for {{ library.userInfo.name }}</h2>
             </div>
 
             <horizontal-scroller class="mt-1">
@@ -70,26 +63,21 @@
 </template>
 
 <script lang="ts" setup>
-import { useLibraryStore } from "../store/library";
-import { computed } from "vue";
-import HighlightCard from "../components/item/HighlightCard.vue";
-import ItemCard from "../components/item/ItemCard.vue";
-import HorizontalScroller from "../components/HorizontalScroller.vue";
+import { useLibraryStore } from '../store/library'
+import { computed } from 'vue'
+import HighlightCard from '../components/item/HighlightCard.vue'
+import ItemCard from '../components/item/ItemCard.vue'
+import HorizontalScroller from '../components/HorizontalScroller.vue'
 
-const library = useLibraryStore();
-library.refreshHomePage();
+const library = useLibraryStore()
+library.refreshHomePage()
 
 const highlight = computed(
-    () =>
-        library.view.homePage.featured
-            .playlists[0] as SpotifyApi.PlaylistObjectFull,
-);
+    () => library.view.homePage.featured.playlists[0] as SpotifyApi.PlaylistObjectFull
+)
 const otherPlaylists = computed(
-    () =>
-        library.view.homePage.featured.playlists.slice(
-            1,
-        ) as SpotifyApi.PlaylistObjectFull[],
-);
+    () => library.view.homePage.featured.playlists.slice(1) as SpotifyApi.PlaylistObjectFull[]
+)
 </script>
 
 <style lang="less" scoped>

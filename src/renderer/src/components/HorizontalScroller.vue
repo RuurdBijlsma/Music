@@ -15,7 +15,7 @@
             :style="{
                 '-webkit-mask-image': canGoLeft
                     ? 'linear-gradient(to right, transparent 0%, white 5%)'
-                    : 'none',
+                    : 'none'
             }"
             class="horizontal-scroller"
         >
@@ -35,40 +35,40 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, onUnmounted, ref } from "vue";
+import { onMounted, onUnmounted, ref } from 'vue'
 
-const canGoLeft = ref(false);
-const canGoRight = ref(false);
-const scrollContainer = ref(null);
+const canGoLeft = ref(false)
+const canGoRight = ref(false)
+const scrollContainer = ref(null)
 
 function scroll(direction: number) {
-    let el = scrollContainer.value as HTMLElement | null;
-    if (el === null) return;
+    const el = scrollContainer.value as HTMLElement | null
+    if (el === null) return
     el.scrollTo({
         left: el.scrollLeft + el.clientWidth * 0.85 * direction,
-        behavior: "smooth",
-    });
+        behavior: 'smooth'
+    })
 }
 
 function checkCanScroll() {
-    let el = scrollContainer.value as HTMLElement | null;
-    if (el === null) return;
-    canGoLeft.value = el.scrollLeft > 0;
-    canGoRight.value = el.scrollWidth - (el.scrollLeft + el.clientWidth) > 0;
+    const el = scrollContainer.value as HTMLElement | null
+    if (el === null) return
+    canGoLeft.value = el.scrollLeft > 0
+    canGoRight.value = el.scrollWidth - (el.scrollLeft + el.clientWidth) > 0
 }
 
-let el: HTMLElement | null;
+let el: HTMLElement | null
 onMounted(() => {
-    checkCanScroll();
-    el = scrollContainer.value as HTMLElement | null;
-    if (el === null) return;
-    el.addEventListener("scroll", checkCanScroll);
-    setTimeout(() => checkCanScroll(), 100);
-});
+    checkCanScroll()
+    el = scrollContainer.value as HTMLElement | null
+    if (el === null) return
+    el.addEventListener('scroll', checkCanScroll)
+    setTimeout(() => checkCanScroll(), 100)
+})
 onUnmounted(() => {
-    if (el === null) return;
-    el.removeEventListener("scroll", checkCanScroll);
-});
+    if (el === null) return
+    el.removeEventListener('scroll', checkCanScroll)
+})
 </script>
 
 <style lang="less" scoped>

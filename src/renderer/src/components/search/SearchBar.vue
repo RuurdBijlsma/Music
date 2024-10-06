@@ -16,19 +16,17 @@
 </template>
 
 <script lang="ts" setup>
-import { useRouter } from "vue-router";
-import { useSearchStore } from "../../store/search";
+import { useRouter } from 'vue-router'
+import { useSearchStore } from '../../store/search'
 
-const router = useRouter();
-const search = useSearchStore();
+const router = useRouter()
+const search = useSearchStore()
 
 function goToSearch() {
-    router.push(`/search/${search.searchValue}`);
-    let input = document.querySelector(
-        ".search-field input",
-    ) as HTMLInputElement | null;
-    if (input === null) return;
-    input.blur();
+    router.push(`/search/${search.searchValue}`)
+    const input = document.querySelector('.search-field input') as HTMLInputElement | null
+    if (input === null) return
+    input.blur()
 }
 </script>
 

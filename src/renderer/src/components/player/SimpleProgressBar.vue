@@ -8,7 +8,7 @@
                 <div
                     :style="{
                         width: `${percent}%`,
-                        backgroundColor: getColor,
+                        backgroundColor: getColor
                     }"
                     class="progress"
                 ></div>
@@ -21,65 +21,63 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onMounted, onUnmounted, ref } from "vue";
-import { useUIStore } from "../../store/UI/UIStore";
-import { msToReadable } from "../../scripts/utils";
+import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { useUIStore } from '../../store/UI/UIStore'
+import { msToReadable } from '../../scripts/utils'
 
 const props = defineProps({
     duration: {
         type: Number,
-        required: true,
+        required: true
     },
     currentTime: {
         type: Number,
-        required: true,
+        required: true
     },
     color: {
         type: String,
-        default: "default",
-    },
-});
+        default: 'default'
+    }
+})
 
 const getColor = computed(() => {
-    if (props.color === "default") {
-        return ui.isDark ? "rgba(255, 255, 255, 0.7)" : "rgba(0, 0, 0, 0.7)";
+    if (props.color === 'default') {
+        return ui.isDark ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.7)'
     }
-    return props.color;
-});
+    return props.color
+})
 
-const emit = defineEmits(["seek"]);
-const ui = useUIStore();
-const seekContainer = ref(null as null | HTMLElement);
+const emit = defineEmits(['seek'])
+const ui = useUIStore()
+const seekContainer = ref(null as null | HTMLElement)
 
-const percent = computed(
-    () => Math.round((10000 * props.currentTime) / props.duration) / 100,
-);
+const percent = computed(() => Math.round((10000 * props.currentTime) / props.duration) / 100)
 
-let seekDown = false;
+let seekDown = false
 const seek = (e: MouseEvent) => {
     if (seekDown) {
-        if (seekContainer.value === null) return;
-        let bounds = seekContainer.value.getBoundingClientRect();
-        let x = e.pageX - bounds.left;
-        let percent = x / bounds.width;
+        if (seekContainer.value === null) return
+        const bounds = seekContainer.value.getBoundingClientRect()
+        const x = e.pageX - bounds.left
+        const percent = x / bounds.width
 
-        emit("seek", percent);
+        emit('seek', percent)
     }
-};
+}
 const mouseDown = (e: MouseEvent) => {
-    seekDown = true;
-    seek(e);
-};
-const mouseMove = (e: MouseEvent) => seek(e);
-const mouseUp = () => (seekDown = false);
+    seekDown = true
+    seek(e)
+}
+const mouseMove = (e: MouseEvent) => seek(e)
+const mouseUp = () => (seekDown = false)
 onMounted(() => {
-    document.addEventListener("mousemove", mouseMove, false);
-    document.addEventListener("mouseup", mouseUp, false);
-});
+    document.addEventListener('mousemove', mouseMove, false)
+    document.addEventListener('mouseup', mouseUp, false)
+})
 onUnmounted(() => {
-    document.removeEventListener("mousemove", mouseMove);
-    document.removeEventListener("mouseup", mouseUp);
-});
+    document.removeEventListener('mousemove', mouseMove)
+    document.removeEventListener('mouseup', mouseUp)
+})
 </script>
 
 <style lang="less" scoped>

@@ -2,7 +2,7 @@
     <div
         :style="{
             width: width + 'px',
-            borderRadius: rounding,
+            borderRadius: rounding
         }"
         class="glow-image"
     >
@@ -18,7 +18,7 @@
                 filter: `blur(${
                     (width * effectScale) / 16
                 }px) saturate(150%) brightness(${effectScale})`,
-                transform: `scale(${effectScale})`,
+                transform: `scale(${effectScale})`
             }"
             class="album-art album-background"
         ></div>
@@ -28,7 +28,7 @@
                 minWidth: width + 'px',
                 height: height + 'px',
                 left: -width / 2 + 'px',
-                borderRadius: rounding,
+                borderRadius: rounding
             }"
             class="album-art album-normal"
         ></div>
@@ -36,32 +36,32 @@
 </template>
 
 <script lang="ts" setup>
-import { useTheme } from "vuetify";
+import { useTheme } from 'vuetify'
 
 defineProps({
     src: {
         type: String,
-        default: undefined,
+        default: undefined
     },
     width: {
         type: Number,
-        default: 300,
+        default: 300
     },
     height: {
         type: Number,
-        default: 300,
+        default: 300
     },
     rounding: {
         type: String,
-        default: "0",
+        default: '0'
     },
     effectScale: {
         type: Number,
         default: () => 1,
-        required: false,
-    },
-});
-const theme = useTheme();
+        required: false
+    }
+})
+const theme = useTheme()
 </script>
 
 <style lang="less" scoped>

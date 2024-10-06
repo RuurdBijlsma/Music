@@ -25,10 +25,7 @@
                 <v-icon color="green" icon="mdi-spotify" />
                 Spotify
             </h2>
-            <div
-                v-if="r.spotify.data.tracks.length > 0 || r.spotify.loading"
-                class="add-margin"
-            >
+            <div v-if="r.spotify.data.tracks.length > 0 || r.spotify.loading" class="add-margin">
                 <track-list-expander
                     :collection="spotifyCollection"
                     :loading="r.spotify.loading"
@@ -39,9 +36,7 @@
             <h4 v-else>No tracks found</h4>
 
             <h3 class="mb-3 center-title">Albums</h3>
-            <template
-                v-if="r.spotify.data.albums.length > 0 || r.spotify.loading"
-            >
+            <template v-if="r.spotify.data.albums.length > 0 || r.spotify.loading">
                 <horizontal-scroller>
                     <highlight-card
                         v-if="r.spotify.data.albums[0]"
@@ -60,9 +55,7 @@
             <h4 v-else>No albums found</h4>
 
             <h3 class="mb-3 center-title">Artists</h3>
-            <template
-                v-if="r.spotify.data.artists.length > 0 || r.spotify.loading"
-            >
+            <template v-if="r.spotify.data.artists.length > 0 || r.spotify.loading">
                 <horizontal-scroller>
                     <item-card
                         v-for="artist in r.spotify.data.artists"
@@ -75,9 +68,7 @@
             <h4 v-else>No artists found</h4>
 
             <h3 class="mb-3 center-title">Playlists</h3>
-            <template
-                v-if="r.spotify.data.playlists.length > 0 || r.spotify.loading"
-            >
+            <template v-if="r.spotify.data.playlists.length > 0 || r.spotify.loading">
                 <horizontal-scroller>
                     <item-card
                         v-for="playlist in r.spotify.data.playlists"
@@ -95,10 +86,7 @@
                 <v-icon color="red" icon="mdi-youtube" />
                 YouTube
             </h2>
-            <div
-                v-if="r.youtube.tracks.length > 0 || r.youtube.loading"
-                class="add-margin"
-            >
+            <div v-if="r.youtube.tracks.length > 0 || r.youtube.loading" class="add-margin">
                 <track-list
                     v-if="!r.youtube.loading"
                     :collection="youtubeCollection"
@@ -115,67 +103,67 @@
 </template>
 
 <script lang="ts" setup>
-import { useRoute } from "vue-router";
-import { computed, Ref, ref, watch } from "vue";
-import { useSearchStore } from "../store/search";
-import { ItemCollection, SearchResult } from "../scripts/types";
-import TrackListExpander from "../components/track-list/TrackListExpander.vue";
-import HorizontalScroller from "../components/HorizontalScroller.vue";
-import ItemCard from "../components/item/ItemCard.vue";
-import HighlightCard from "../components/item/HighlightCard.vue";
-import TrackList from "../components/track-list/TrackList.vue";
+import { useRoute } from 'vue-router'
+import { computed, Ref, ref, watch } from 'vue'
+import { useSearchStore } from '../store/search'
+import { ItemCollection, SearchResult } from '../scripts/types'
+import TrackListExpander from '../components/track-list/TrackListExpander.vue'
+import HorizontalScroller from '../components/HorizontalScroller.vue'
+import ItemCard from '../components/item/ItemCard.vue'
+import HighlightCard from '../components/item/HighlightCard.vue'
+import TrackList from '../components/track-list/TrackList.vue'
 
-const route = useRoute();
-const search = useSearchStore();
-const r: Ref<null | SearchResult> = ref(null);
+const route = useRoute()
+const search = useSearchStore()
+const r: Ref<null | SearchResult> = ref(null)
 
 const spotifyCollection = computed(
     () =>
         ({
             tracks: r.value === null ? [] : r.value.spotify.data.tracks,
-            type: "search",
-            id: "searchSpotify" + query.value,
+            type: 'search',
+            id: 'searchSpotify' + query.value,
             name: `Spotify search "${query.value}"`,
-            buttonText: "Search",
-            to: `/search/${query.value}`,
-        }) as ItemCollection,
-);
+            buttonText: 'Search',
+            to: `/search/${query.value}`
+        }) as ItemCollection
+)
 const youtubeCollection = computed(
     () =>
         ({
             tracks: r.value === null ? [] : r.value.youtube.tracks,
-            type: "search",
-            id: "searchYouTube" + query.value,
+            type: 'search',
+            id: 'searchYouTube' + query.value,
             name: `YouTube search "${query.value}"`,
-            buttonText: "Search",
-            to: `/search/${query.value}`,
-        }) as ItemCollection,
-);
+            buttonText: 'Search',
+            to: `/search/${query.value}`
+        }) as ItemCollection
+)
 const likedCollection = computed(
     () =>
         ({
             tracks: r.value === null ? [] : r.value.liked.tracks,
-            type: "search",
-            id: "searchLiked" + query.value,
+            type: 'search',
+            id: 'searchLiked' + query.value,
             name: `Filtered liked tracks for "${query.value}"`,
-            buttonText: "Search",
-            to: `/search/${query.value}`,
-        }) as ItemCollection,
-);
+            buttonText: 'Search',
+            to: `/search/${query.value}`
+        }) as ItemCollection
+)
 
 function init() {
     if (query.value === undefined || query.value === null) {
-        return;
+        return
     }
-    r.value = search.cachedSearch(query.value).value;
-    let el = document.querySelector(".router-view");
-    if (el !== null) el.scrollTop = 0;
+    r.value = search.cachedSearch(query.value).value
+    const el = document.querySelector('.router-view')
+    if (el !== null) el.scrollTop = 0
 }
 
-const query = computed(() => route.params.query?.toString());
+const query = computed(() => route.params.query?.toString())
 
-watch(route, () => init());
-init();
+watch(route, () => init())
+init()
 </script>
 
 <style lang="less" scoped>
