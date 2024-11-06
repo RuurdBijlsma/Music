@@ -97,10 +97,22 @@ export const useSpotifyApiStore = defineStore('spotify-api', () => {
     }
 
     const getPlaylist = async (id: string) => {
-        await spotifyAuth.awaitAuth()
-        const playlist = await get(api.getPlaylist, [id])
-        playlist.tracks.items = playlist.tracks.items.filter((t) => !t.is_local)
-        return playlist
+        const _getPlaylist = async () => {
+            await spotifyAuth.awaitAuth()
+            let playlist: SpotifyApi.PlaylistObjectFull | undefined
+            for await (const batch of retrieveArray(() => api.getPlaylist(id))) {
+                if (playlist === undefined) {
+                    playlist = batch as SpotifyApi.PlaylistObjectFull
+                } else if (playlist) {
+                    //@ts-ignore batch type idk, doesn't matter
+                    playlist.tracks.items.push(...batch.items)
+                }
+            }
+            if (playlist === undefined) throw Error('Oh no')
+            playlist.tracks.items = playlist.tracks.items.filter((t) => !t.is_local)
+            return playlist
+        }
+        return await executeCached(_getPlaylist, `full-playlist-${id}`, 1000 * 60 * 60 * 24)
     }
     const getAlbum = async (id: string) => await get(api.getAlbum, [id])
     const getArtist = async (id: string, useCache = false) =>
