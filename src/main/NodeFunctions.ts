@@ -124,12 +124,12 @@ export default class NodeFunctions {
             let command
             if (coverImageFile) {
                 command =
-                    `${this.ffmpegPath} -y -i "${fileInput}" -i "${coverImageFile}"` +
+                    `"${this.ffmpegPath}" -y -i "${fileInput}" -i "${coverImageFile}"` +
                     ` -map 0:0 -map 1:0 -id3v2_version 3 -metadata:s:v title="Album cover" -metadata:s:v comment="Cover (Front)" ` +
                     `${this.tagsToString(tags)} -codec copy "${fileOutput}"`
             } else {
                 command =
-                    `${this.ffmpegPath} -y -i "${fileInput}"` +
+                    `"${this.ffmpegPath}" -y -i "${fileInput}"` +
                     `${this.tagsToString(tags)} -codec copy "${fileOutput}"`
             }
             if (await this.checkFileExists(fileOutput)) await fs.unlink(fileOutput)
@@ -220,7 +220,7 @@ export default class NodeFunctions {
         await this.waitBinaries
         const outFile = path.join(Directories.temp ?? '', Math.random().toString() + '.jpg')
         return new Promise<string>((resolve, reject) => {
-            const command = `${this.ffmpegPath} -i "${imgUrl}" "${outFile}"`
+            const command = `"${this.ffmpegPath}" -i "${imgUrl}" "${outFile}"`
 
             child_process.exec(command, (error) => {
                 if (error) return reject(error)
@@ -249,7 +249,7 @@ export default class NodeFunctions {
     async getVolumeStats(trackFile: string) {
         await this.waitBinaries
         return new Promise<{ err: string; out: string }>((resolve, reject) => {
-            const command = `${this.ffmpegPath} -i "${trackFile}" -af "volumedetect" -vn -sn -dn -f null /dev/null`
+            const command = `"${this.ffmpegPath}" -i "${trackFile}" -af "volumedetect" -vn -sn -dn -f null /dev/null`
 
             child_process.exec(command, (error, stdout, stderr) => {
                 if (error) return reject(error)
@@ -447,7 +447,7 @@ export default class NodeFunctions {
     async updateYtdlp(): Promise<string> {
         await this.waitBinaries
         return new Promise<string>((resolve, reject) => {
-            const command = `${this.ytdlpPath} -U`
+            const command = `"${this.ytdlpPath}" -U`
 
             child_process.exec(command, (error, stdout) => {
                 if (error) return reject(error)
