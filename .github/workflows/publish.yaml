@@ -1,13 +1,23 @@
-name: Quality Checks
+name: Publish Releases
 
 on:
-  pull_request:
+  push:
     branches:
       - main
 
 jobs:
   publish:
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        include:
+          - os: ubuntu-latest
+            target: linux
+          - os: windows-latest
+            target: win
+          - os: macos-latest
+            target: mac
+    runs-on: ${{ matrix.os }}
 
     steps:
       - name: Checkout code
@@ -21,7 +31,7 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Publish GitHub release.
+      - name: Publish GitHub Release
         env:
-          GH_TOKEN: ${{github_token_here}}
-        run: npm run publish:linux
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npm run publish:${{ matrix.target }}
