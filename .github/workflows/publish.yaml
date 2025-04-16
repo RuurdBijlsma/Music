@@ -1,0 +1,27 @@
+name: Quality Checks
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '23'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Publish GitHub release.
+        env:
+          GH_TOKEN: ${{github_token_here}}
+        run: npm run publish:linux

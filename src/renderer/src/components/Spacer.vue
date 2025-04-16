@@ -1,9 +1,9 @@
 <template>
-    <div class="custom-spacer"></div>
+  <div class="custom-spacer"></div>
 </template>
 
 <style scoped>
 .custom-spacer {
-    flex-grow: 1;
+  flex-grow: 1;
 }
 </style>

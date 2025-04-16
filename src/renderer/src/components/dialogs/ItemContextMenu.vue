@@ -1,17 +1,17 @@
 <template>
-    <v-menu
-        :model-value="contextMenu.show"
-        :style="{
-            transform: `translate(${contextMenu.x}px, ${contextMenu.y}px)`
-        }"
-        @update:model-value="contextMenu.show = $event"
-    >
-        <item-menu
-            :key="contextMenu.x"
-            :item="contextMenu.item"
-            :show-descriptor="contextMenu.item.type === 'track'"
-        />
-    </v-menu>
+  <v-menu
+    :model-value="contextMenu.show"
+    :style="{
+      transform: `translate(${contextMenu.x}px, ${contextMenu.y}px)`
+    }"
+    @update:model-value="contextMenu.show = $event"
+  >
+    <item-menu
+      :key="contextMenu.x"
+      :item="contextMenu.item"
+      :show-descriptor="contextMenu.item.type === 'track'"
+    />
+  </v-menu>
 </template>
 
 <script lang="ts" setup>
@@ -25,10 +25,10 @@ const { contextMenu } = storeToRefs(dialog)
 
 const onBlur = () => (contextMenu.value.show = false)
 onMounted(() => {
-    window.addEventListener('blur', onBlur, false)
+  window.addEventListener('blur', onBlur, false)
 })
 onUnmounted(() => {
-    window.removeEventListener('blur', onBlur)
+  window.removeEventListener('blur', onBlur)
 })
 </script>
 

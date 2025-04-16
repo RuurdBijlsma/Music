@@ -1,12 +1,12 @@
 <template>
-    <div class="login mt-8">
-        <div class="header">
-            <h1>Welcome to Ruurd Music</h1>
-            <p v-if="!spotifyAuth.hasCredentials">Please fill in your credentials</p>
-            <p v-else-if="!spotifyAuth.isLoggedIn">Please log in to Spotify™️</p>
-        </div>
-        <authentication />
+  <div class="login mt-8">
+    <div class="header">
+      <h1>Welcome to Ruurd Music</h1>
+      <p v-if="!spotifyAuth.hasCredentials">Please fill in your credentials</p>
+      <p v-else-if="!spotifyAuth.isLoggedIn">Please log in to Spotify™️</p>
     </div>
+    <authentication />
+  </div>
 </template>
 
 <script lang="ts" setup>
@@ -20,18 +20,18 @@ const router = useRouter()
 const spotifyAuth = useSpotifyAuthStore()
 const { isLoggedIn } = storeToRefs(spotifyAuth)
 watch(isLoggedIn, () => {
-    if (isLoggedIn.value) router.push('/')
+  if (isLoggedIn.value) router.push('/')
 })
 </script>
 
 <style lang="less" scoped>
 .login {
-    padding: 30px;
+  padding: 30px;
 }
 
 .header {
-    text-align: center;
-    margin-top: 40px;
-    margin-bottom: 60px;
+  text-align: center;
+  margin-top: 40px;
+  margin-bottom: 60px;
 }
 </style>

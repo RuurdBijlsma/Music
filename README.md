@@ -29,34 +29,34 @@ Music player built with Electron, Vue 3, and Vuetify.
 
 ### Liked tracks
 
-![Liked tracks](/.gh/liked-tracks.png?raw=true 'Homepage')
+![Liked tracks](/.github/screenshots/liked-tracks.png?raw=true 'Homepage')
 
 ### Light and dark theme support
 
-![Homepage](/.gh/light-theme.png?raw=true 'Home page')
+![Homepage](/.github/screenshots/light-theme.png?raw=true 'Home page')
 
 ### Playlist page
 
-![Playlist tracks](/.gh/playlist.png?raw=true 'Playlist')
+![Playlist tracks](/.github/screenshots/playlist.png?raw=true 'Playlist')
 
 ### Search
 
 #### Suggestions
 
-![Search suggestions](/.gh/search.png?raw=true 'Search suggestions')
+![Search suggestions](/.github/screenshots/search.png?raw=true 'Search suggestions')
 
 #### Search includes liked tracks, Spotify tracks, playlists, albums, artists and YouTube tracks.
 
-![Search](/.gh/search-2.png?raw=true 'Search page')
+![Search](/.github/screenshots/search-2.png?raw=true 'Search page')
 
 ### Artist page
 
-![Artist page](/.gh/artist.png?raw=true 'Artist page')
+![Artist page](/.github/screenshots/artist.png?raw=true 'Artist page')
 
 ### Browse page
 
-![Browse tracks](/.gh/browse.png?raw=true 'Browse')
+![Browse tracks](/.github/screenshots/browse.png?raw=true 'Browse')
 
 ### Custom radio generator
 
-![Custom radio generator](/.gh/radio-gen.png?raw=true 'Custom radio generator')
+![Custom radio generator](/.github/screenshots/radio-gen.png?raw=true 'Custom radio generator')

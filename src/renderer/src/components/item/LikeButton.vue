@@ -1,15 +1,15 @@
 <template>
-    <v-btn
-        v-if="!base.offlineMode"
-        :color="color"
-        :icon="iconButton"
-        :loading="likedLoading"
-        rounded
-        variant="text"
-        @click="toggleLike()"
-    >
-        <v-icon>{{ fill ? 'mdi-heart' : 'mdi-heart-outline' }}</v-icon>
-    </v-btn>
+  <v-btn
+    v-if="!base.offlineMode"
+    :color="color"
+    :icon="iconButton"
+    :loading="likedLoading"
+    rounded
+    variant="text"
+    @click="toggleLike()"
+  >
+    <v-icon>{{ fill ? 'mdi-heart' : 'mdi-heart-outline' }}</v-icon>
+  </v-btn>
 </template>
 
 <script lang="ts" setup>
@@ -25,34 +25,34 @@ const ui = useUIStore()
 const library = useLibraryStore()
 
 const props = defineProps({
-    item: {
-        type: Object as PropType<Item>,
-        required: true
-    },
-    variant: {
-        type: String as PropType<'color' | 'fill' | 'no-theme'>,
-        default: 'color'
-    },
-    iconButton: {
-        type: Boolean,
-        default: false
-    }
+  item: {
+    type: Object as PropType<Item>,
+    required: true
+  },
+  variant: {
+    type: String as PropType<'color' | 'fill' | 'no-theme'>,
+    default: 'color'
+  },
+  iconButton: {
+    type: Boolean,
+    default: false
+  }
 })
 
 const isLiked = computed(() => library.checkLiked(props.item.type, props.item.id))
 const color = computed(() =>
-    props.variant !== 'no-theme' && (props.variant === 'fill' || isLiked.value)
-        ? ui.themeColor
-        : 'default'
+  props.variant !== 'no-theme' && (props.variant === 'fill' || isLiked.value)
+    ? ui.themeColor
+    : 'default'
 )
 const fill = computed(() => isLiked.value && (props.variant !== 'color' || ui.themeTooSimilarToFg))
 
 const likedLoading = ref(false)
 
 async function toggleLike() {
-    likedLoading.value = true
-    await library.toggleLike(props.item)
-    likedLoading.value = false
+  likedLoading.value = true
+  await library.toggleLike(props.item)
+  likedLoading.value = false
 }
 </script>
 

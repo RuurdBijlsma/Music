@@ -46,15 +46,15 @@ import notfound6 from '../../assets/notfound/6.png?asset'
 const date = new Date()
 
 export function randomNotFound() {
-    return [notfound1, notfound2, notfound3, notfound4, notfound5, notfound6, notfound7][
-        date.getDate() % 7
-    ]
+  return [notfound1, notfound2, notfound3, notfound4, notfound5, notfound6, notfound7][
+    date.getDate() % 7
+  ]
 }
 
 export function randomLiked() {
-    return [liked1, liked2, liked3, liked4, liked5, liked6, liked7][date.getDate() % 7]
+  return [liked1, liked2, liked3, liked4, liked5, liked6, liked7][date.getDate() % 7]
 }
 
 export function randomUser() {
-    return [user1, user2, user3, user4, user5, user6, user7][date.getDate() % 7]
+  return [user1, user2, user3, user4, user5, user6, user7][date.getDate() % 7]
 }
