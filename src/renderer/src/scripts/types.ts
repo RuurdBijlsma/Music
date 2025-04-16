@@ -255,10 +255,6 @@ export interface DataExport {
             recentPlays: ItemCollection[]
             view: {
                 homePage: {
-                    featured: {
-                        title: string | undefined
-                        playlists: SpotifyApi.PlaylistObjectSimplified[]
-                    }
                     newReleases: any[]
                     personalized: any[]
                 }

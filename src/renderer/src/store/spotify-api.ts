@@ -208,8 +208,6 @@ export const useSpotifyApiStore = defineStore('spotify-api', () => {
     const getTrackFeatures = async (trackId: string) =>
         await get(api.getAudioFeaturesForTrack, [trackId], true)
 
-    const getFeaturedPlaylists = async (options?: Object) =>
-        await get(api.getFeaturedPlaylists, [options])
     const getMySavedAlbums = async (options?: Object) => await get(api.getMySavedAlbums, [options])
     const getFollowedArtists = async (options?: Object) =>
         await get(api.getFollowedArtists, [options])
@@ -242,6 +240,5 @@ export const useSpotifyApiStore = defineStore('spotify-api', () => {
         getRadioTracks,
         getCachedArtists,
         getTrackFeatures,
-        getFeaturedPlaylists
     }
 })

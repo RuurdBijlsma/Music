@@ -1,21 +1,5 @@
 <template>
     <div class="home">
-        <div class="home-title">
-            <h1 class="featured-title mb-1">
-                {{ library.view.homePage.featured.title }}
-            </h1>
-        </div>
-        <horizontal-scroller>
-            <highlight-card v-if="highlight" :item="highlight" :size="250" class="mr-4" />
-            <item-card
-                v-for="playlist in otherPlaylists"
-                :item="playlist"
-                :size="250"
-                class="mr-4"
-                hide-name
-            />
-        </horizontal-scroller>
-
         <template v-if="library.recentPlays.length > 0">
             <div class="home-title mt-4">
                 <h2 class="other-title mb-5">Recently Played</h2>
@@ -71,13 +55,6 @@ import HorizontalScroller from '../components/HorizontalScroller.vue'
 
 const library = useLibraryStore()
 library.refreshHomePage()
-
-const highlight = computed(
-    () => library.view.homePage.featured.playlists[0] as SpotifyApi.PlaylistObjectFull
-)
-const otherPlaylists = computed(
-    () => library.view.homePage.featured.playlists.slice(1) as SpotifyApi.PlaylistObjectFull[]
-)
 </script>
 
 <style lang="less" scoped>
@@ -98,13 +75,6 @@ const otherPlaylists = computed(
     border-radius: 10px;
     padding: 10px;
     margin-bottom: 10px;
-}
-
-.featured-title {
-    margin-bottom: 0 !important;
-    font-size: 23px;
-    font-weight: 500;
-    opacity: 0.8;
 }
 
 .other-title {

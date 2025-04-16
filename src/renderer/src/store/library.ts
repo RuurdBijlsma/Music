@@ -70,10 +70,6 @@ export const useLibraryStore = defineStore('library', () => {
     })
     const view = ref({
         homePage: {
-            featured: {
-                title: '' as string | undefined,
-                playlists: [] as SpotifyApi.PlaylistObjectSimplified[]
-            },
             newReleases: [] as any[],
             personalized: [] as any[]
         }
@@ -349,13 +345,6 @@ export const useLibraryStore = defineStore('library', () => {
     async function refreshHomePage() {
         await baseDb
         await spotifyAuth.awaitAuth()
-
-        //Featured playlists
-        const featured = await spotify.getFeaturedPlaylists({ limit: 50 })
-        view.value.homePage.featured = {
-            title: featured.message,
-            playlists: featured.playlists.items
-        }
 
         //Personalized playlists
         let personalized
